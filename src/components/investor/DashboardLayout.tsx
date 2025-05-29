@@ -9,10 +9,12 @@ import {
   Home,
   TrendingUp,
   Shield,
-  Filter
+  Filter,
+  ArrowLeft
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { useNavigate } from 'react-router-dom';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -20,6 +22,7 @@ interface DashboardLayoutProps {
 
 const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const [activeTab, setActiveTab] = useState('dashboard');
+  const navigate = useNavigate();
 
   const navigationItems = [
     { id: 'dashboard', label: 'Dashboard', icon: Home },
@@ -35,6 +38,16 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
       {/* Sidebar */}
       <div className="w-64 bg-gradient-to-b from-[#0A0F0F] to-[#1A1F2E] border-r border-[#D4AF37]/30 hidden lg:block">
         <div className="p-6">
+          {/* Back to Home Button */}
+          <Button 
+            onClick={() => navigate('/')}
+            variant="outline"
+            className="w-full mb-6 border-[#D4AF37] text-[#D4AF37] hover:bg-[#D4AF37] hover:text-[#0A0F0F] transition-all duration-300"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Home
+          </Button>
+
           {/* Logo Area */}
           <div className="mb-8">
             <h2 className="text-2xl font-bold text-[#D4AF37] mb-2">M&A Portal</h2>
