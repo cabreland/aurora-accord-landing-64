@@ -13,15 +13,6 @@ const Footer = () => {
       </div>
 
       <div className="max-w-6xl mx-auto px-6 relative z-10">
-        {/* Logo Section */}
-        <div className="mb-8">
-          <img 
-            src="/lovable-uploads/a70012ca-4619-4635-9f2c-e23113854a06.png" 
-            alt="Exclusive Business Brokers" 
-            className="w-24 h-24 mx-auto mb-4 filter brightness-0 invert opacity-80"
-          />
-        </div>
-
         <div className="space-y-6">
           <p className="text-[#F4E4BC] text-lg font-medium">
             M&A Automation Strategy & Implementation Proposal

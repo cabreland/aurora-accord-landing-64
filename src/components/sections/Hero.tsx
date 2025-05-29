@@ -42,16 +42,8 @@ const Hero = ({ onScrollToPhases }: HeroProps) => {
       </div>
       
       <div className="relative z-10 text-center max-w-5xl mx-auto px-6">
-        {/* Logo with Holographic Effect */}
+        {/* Header Badge */}
         <div className="mb-8">
-          <div className="relative inline-block">
-            <img 
-              src="/lovable-uploads/a70012ca-4619-4635-9f2c-e23113854a06.png" 
-              alt="Exclusive Business Brokers" 
-              className="w-40 h-40 mx-auto mb-6 filter brightness-0 invert drop-shadow-2xl"
-            />
-            <div className="absolute inset-0 w-40 h-40 mx-auto border-2 border-[#D4AF37] rounded-full opacity-30 animate-ping"></div>
-          </div>
           <Badge className="bg-gradient-to-r from-[#D4AF37] to-[#F4E4BC] text-[#0A0F0F] border-[#D4AF37] mb-6 text-sm font-bold px-6 py-3 shadow-lg shadow-[#D4AF37]/30">
             Built from Jack's SOP Notes
           </Badge>
