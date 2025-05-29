@@ -192,7 +192,9 @@ const PhaseBreakdown = () => {
     <section id="phases" className="py-24 bg-gradient-to-b from-[#0A0F0F] to-[#1A1F2E] relative overflow-hidden">
       {/* Background Circuit Animation */}
       <div className="absolute inset-0 opacity-10">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M0 0h100v100H0z" fill="none"/%3E%3Cpath d="M20 20h60v60H20z" fill="none" stroke="%23D4AF37" stroke-width="0.5" opacity="0.3"/%3E%3Ccircle cx="20" cy="20" r="2" fill="%23D4AF37" opacity="0.5"/%3E%3Ccircle cx="80" cy="20" r="2" fill="%23D4AF37" opacity="0.5"/%3E%3Ccircle cx="20" cy="80" r="2" fill="%23D4AF37" opacity="0.5"/%3E%3Ccircle cx="80" cy="80" r="2" fill="%23D4AF37" opacity="0.5"/%3E%3C/svg%3E')]"></div>
+        <div className="absolute inset-0" style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0h100v100H0z' fill='none'/%3E%3Cpath d='M20 20h60v60H20z' fill='none' stroke='%23D4AF37' stroke-width='0.5' opacity='0.3'/%3E%3Ccircle cx='20' cy='20' r='2' fill='%23D4AF37' opacity='0.5'/%3E%3Ccircle cx='80' cy='20' r='2' fill='%23D4AF37' opacity='0.5'/%3E%3Ccircle cx='20' cy='80' r='2' fill='%23D4AF37' opacity='0.5'/%3E%3Ccircle cx='80' cy='80' r='2' fill='%23D4AF37' opacity='0.5'/%3E%3C/svg%3E")`
+        }}></div>
       </div>
 
       <div className="max-w-7xl mx-auto px-6 relative z-10">
