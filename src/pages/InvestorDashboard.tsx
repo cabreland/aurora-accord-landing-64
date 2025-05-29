@@ -1,9 +1,7 @@
-
 import React, { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import DashboardLayout from '@/components/investor/DashboardLayout';
-import DealsOverview from '@/components/investor/DealsOverview';
 import DealFilters from '@/components/investor/DealFilters';
 import DealCard from '@/components/investor/DealCard';
 import DealMetrics from '@/components/investor/DealMetrics';
