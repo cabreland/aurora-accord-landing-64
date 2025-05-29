@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { 
   BarChart3, 
@@ -41,8 +40,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
           {/* Back to Home Button */}
           <Button 
             onClick={() => navigate('/')}
-            variant="outline"
-            className="w-full mb-6 border-[#D4AF37] text-[#D4AF37] hover:bg-[#D4AF37] hover:text-[#0A0F0F] transition-all duration-300"
+            className="w-full mb-6 bg-[#2A2F3A] border border-[#D4AF37] text-[#D4AF37] hover:bg-[#D4AF37] hover:text-[#0A0F0F] transition-all duration-300"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Home
