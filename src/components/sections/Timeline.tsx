@@ -1,6 +1,5 @@
-
 import React from 'react';
-import { Gear, Rocket, TrendingUp, CheckCircle2 } from 'lucide-react';
+import { Settings, Rocket, TrendingUp, CheckCircle2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 
 const Timeline = () => {
@@ -8,7 +7,7 @@ const Timeline = () => {
     { 
       week: "Week 1", 
       title: "Kickoff & Prioritization", 
-      icon: Gear,
+      icon: Settings,
       description: "Discuss priorities, set up Instantly → GHL integration, configure sentiment tagging",
       color: "text-[#D4AF37]",
       bgColor: "bg-[#D4AF37]/10",
