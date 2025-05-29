@@ -6,7 +6,7 @@ import { AlertTriangle, Clock, Filter, CheckCircle } from 'lucide-react';
 
 const ExecutiveSummary = () => {
   return (
-    <section className="py-24 bg-gradient-to-b from-[#0A0F0F] to-[#1A1F2E] relative overflow-hidden">
+    <section id="executive-summary" className="py-24 bg-gradient-to-b from-[#0A0F0F] to-[#1A1F2E] relative overflow-hidden">
       {/* Background Tech Pattern */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute top-0 left-0 w-full h-full" style={{

@@ -13,14 +13,14 @@ import InvestmentCTA from '@/components/sections/InvestmentCTA';
 import Footer from '@/components/sections/Footer';
 
 const Index = () => {
-  const scrollToPhases = () => {
-    document.getElementById('phases')?.scrollIntoView({ behavior: 'smooth' });
+  const scrollToExecutiveSummary = () => {
+    document.getElementById('executive-summary')?.scrollIntoView({ behavior: 'smooth' });
   };
 
   return (
     <div className="min-h-screen bg-[#1C2526] text-white">
       <Navigation />
-      <Hero onScrollToPhases={scrollToPhases} />
+      <Hero onScrollToPhases={scrollToExecutiveSummary} />
       <ExecutiveSummary />
       <ProblemsAndSolutions />
       <FrameworkOverview />
