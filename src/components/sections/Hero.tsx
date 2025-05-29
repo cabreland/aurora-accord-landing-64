@@ -2,6 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Link } from 'react-router-dom';
 
 interface HeroProps {
   onScrollToPhases: () => void;
@@ -85,12 +86,14 @@ const Hero = ({ onScrollToPhases }: HeroProps) => {
             <span className="relative z-10">Jump to Plan</span>
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
           </Button>
-          <Button 
-            variant="outline" 
-            className="border-2 border-[#D4AF37] text-[#D4AF37] hover:bg-[#D4AF37] hover:text-[#0A0F0F] px-12 py-6 text-xl transition-all duration-300 bg-[#0A0F0F]/80 backdrop-blur-sm shadow-lg shadow-[#D4AF37]/20"
-          >
-            Executive Summary
-          </Button>
+          <Link to="/investor-portal">
+            <Button 
+              variant="outline" 
+              className="border-2 border-[#F28C38] text-[#F28C38] hover:bg-[#F28C38] hover:text-[#0A0F0F] px-12 py-6 text-xl transition-all duration-300 bg-[#0A0F0F]/80 backdrop-blur-sm shadow-lg shadow-[#F28C38]/20"
+            >
+              Investor Portal
+            </Button>
+          </Link>
         </div>
       </div>
 
