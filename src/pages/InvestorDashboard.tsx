@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -5,8 +6,9 @@ import DashboardLayout from '@/components/investor/DashboardLayout';
 import DealFilters from '@/components/investor/DealFilters';
 import DealCard from '@/components/investor/DealCard';
 import DealMetrics from '@/components/investor/DealMetrics';
+import DealDetailView from '@/components/investor/DealDetailView';
 
-// Mock data for demo
+// Enhanced mock data with more deals
 const mockDeals = [
   {
     id: 1,
@@ -63,12 +65,41 @@ const mockDeals = [
     fitScore: 78,
     lastUpdated: "3 days ago",
     description: "Point-of-sale and inventory management for retail chains"
+  },
+  {
+    id: 5,
+    companyName: "DataSecure Analytics",
+    industry: "Cybersecurity",
+    revenue: "$9.8M",
+    ebitda: "$2.7M",
+    stage: "NDA Signed",
+    progress: 60,
+    priority: "High",
+    location: "Seattle, WA",
+    fitScore: 89,
+    lastUpdated: "1 day ago",
+    description: "Enterprise data protection and analytics platform"
+  },
+  {
+    id: 6,
+    companyName: "LogiChain Solutions",
+    industry: "Logistics",
+    revenue: "$18.2M",
+    ebitda: "$5.1M",
+    stage: "Discovery Call",
+    progress: 30,
+    priority: "Medium",
+    location: "Chicago, IL",
+    fitScore: 82,
+    lastUpdated: "2 days ago",
+    description: "Supply chain optimization software for manufacturing"
   }
 ];
 
 const InvestorDashboard = () => {
   const [filteredDeals, setFilteredDeals] = useState(mockDeals);
   const [selectedDeal, setSelectedDeal] = useState<number | null>(null);
+  const [viewMode, setViewMode] = useState<'dashboard' | 'detail'>('dashboard');
 
   const handleFilterChange = (filters: any) => {
     let filtered = mockDeals;
@@ -94,6 +125,28 @@ const InvestorDashboard = () => {
     
     setFilteredDeals(filtered);
   };
+
+  const handleDealClick = (dealId: number) => {
+    setSelectedDeal(dealId);
+    setViewMode('detail');
+  };
+
+  const handleBackToDashboard = () => {
+    setViewMode('dashboard');
+    setSelectedDeal(null);
+  };
+
+  const selectedDealData = mockDeals.find(deal => deal.id === selectedDeal);
+
+  if (viewMode === 'detail' && selectedDealData) {
+    return (
+      <div className="min-h-screen bg-[#1C2526]">
+        <DashboardLayout>
+          <DealDetailView deal={selectedDealData} onBack={handleBackToDashboard} />
+        </DashboardLayout>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#1C2526]">
@@ -130,7 +183,7 @@ const InvestorDashboard = () => {
               <DealCard
                 key={deal.id}
                 deal={deal}
-                onClick={() => setSelectedDeal(deal.id)}
+                onClick={() => handleDealClick(deal.id)}
                 isSelected={selectedDeal === deal.id}
               />
             ))}

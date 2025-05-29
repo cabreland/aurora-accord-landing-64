@@ -80,20 +80,6 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
             })}
           </nav>
         </div>
-
-        {/* Bottom Section */}
-        <div className="absolute bottom-6 left-6 right-6">
-          <div className="bg-[#2A2F3A]/60 rounded-xl p-4 border border-[#D4AF37]/20">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[#F4E4BC] text-sm font-medium">Deal Alerts</span>
-              <Bell className="w-4 h-4 text-[#F28C38]" />
-            </div>
-            <p className="text-[#F4E4BC]/60 text-xs mb-3">3 new deals match your criteria</p>
-            <Button className="w-full bg-[#F28C38] hover:bg-[#F28C38]/80 text-[#0A0F0F] font-bold text-sm py-2">
-              View Alerts
-            </Button>
-          </div>
-        </div>
       </div>
 
       {/* Main Content */}

@@ -137,7 +137,7 @@ const DealCard = ({ deal, onClick, isSelected }: DealCardProps) => {
           className="flex-1 bg-[#D4AF37] hover:bg-[#F4E4BC] text-[#0A0F0F] font-bold transition-all duration-300 group-hover:shadow-lg group-hover:shadow-[#D4AF37]/30"
           onClick={(e) => {
             e.stopPropagation();
-            // Handle view details
+            onClick();
           }}
         >
           <Eye className="w-4 h-4 mr-2" />
