@@ -14,16 +14,203 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      deal_assignments: {
+        Row: {
+          assigned_by: string
+          can_download: boolean
+          can_upload: boolean
+          can_view: boolean
+          created_at: string
+          deal_id: string
+          id: string
+          role: Database["public"]["Enums"]["user_role"]
+          user_id: string
+        }
+        Insert: {
+          assigned_by: string
+          can_download?: boolean
+          can_upload?: boolean
+          can_view?: boolean
+          created_at?: string
+          deal_id: string
+          id?: string
+          role?: Database["public"]["Enums"]["user_role"]
+          user_id: string
+        }
+        Update: {
+          assigned_by?: string
+          can_download?: boolean
+          can_upload?: boolean
+          can_view?: boolean
+          created_at?: string
+          deal_id?: string
+          id?: string
+          role?: Database["public"]["Enums"]["user_role"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deal_assignments_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      deals: {
+        Row: {
+          company_name: string
+          created_at: string
+          created_by: string
+          description: string | null
+          ebitda: string | null
+          id: string
+          industry: string | null
+          location: string | null
+          revenue: string | null
+          status: Database["public"]["Enums"]["deal_status"]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          company_name: string
+          created_at?: string
+          created_by: string
+          description?: string | null
+          ebitda?: string | null
+          id?: string
+          industry?: string | null
+          location?: string | null
+          revenue?: string | null
+          status?: Database["public"]["Enums"]["deal_status"]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          company_name?: string
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          ebitda?: string | null
+          id?: string
+          industry?: string | null
+          location?: string | null
+          revenue?: string | null
+          status?: Database["public"]["Enums"]["deal_status"]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      documents: {
+        Row: {
+          created_at: string
+          deal_id: string
+          file_path: string
+          file_size: number | null
+          file_type: string | null
+          id: string
+          name: string
+          tag: Database["public"]["Enums"]["document_tag"]
+          updated_at: string
+          uploaded_by: string
+          version: number
+        }
+        Insert: {
+          created_at?: string
+          deal_id: string
+          file_path: string
+          file_size?: number | null
+          file_type?: string | null
+          id?: string
+          name: string
+          tag?: Database["public"]["Enums"]["document_tag"]
+          updated_at?: string
+          uploaded_by: string
+          version?: number
+        }
+        Update: {
+          created_at?: string
+          deal_id?: string
+          file_path?: string
+          file_size?: number | null
+          file_type?: string | null
+          id?: string
+          name?: string
+          tag?: Database["public"]["Enums"]["document_tag"]
+          updated_at?: string
+          uploaded_by?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "documents_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          email: string
+          first_name: string | null
+          id: string
+          last_name: string | null
+          role: Database["public"]["Enums"]["user_role"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          first_name?: string | null
+          id?: string
+          last_name?: string | null
+          role?: Database["public"]["Enums"]["user_role"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          first_name?: string | null
+          id?: string
+          last_name?: string | null
+          role?: Database["public"]["Enums"]["user_role"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_user_role: {
+        Args: { user_uuid: string }
+        Returns: Database["public"]["Enums"]["user_role"]
+      }
+      user_has_deal_access: {
+        Args: { user_uuid: string; deal_uuid: string }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      deal_status: "active" | "archived" | "draft"
+      document_tag:
+        | "cim"
+        | "nda"
+        | "financials"
+        | "buyer_notes"
+        | "legal"
+        | "due_diligence"
+        | "other"
+      user_role: "admin" | "editor" | "viewer"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +337,18 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      deal_status: ["active", "archived", "draft"],
+      document_tag: [
+        "cim",
+        "nda",
+        "financials",
+        "buyer_notes",
+        "legal",
+        "due_diligence",
+        "other",
+      ],
+      user_role: ["admin", "editor", "viewer"],
+    },
   },
 } as const

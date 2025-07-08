@@ -2,11 +2,15 @@
 import React, { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import DashboardLayout from '@/components/investor/DashboardLayout';
 import DealFilters from '@/components/investor/DealFilters';
 import DealCard from '@/components/investor/DealCard';
 import DealMetrics from '@/components/investor/DealMetrics';
 import DealDetailView from '@/components/investor/DealDetailView';
+import DealsList from '@/components/deals/DealsList';
+import DocumentUpload from '@/components/documents/DocumentUpload';
+import { useAuth } from '@/hooks/useAuth';
 
 // Enhanced mock data with more deals
 const mockDeals = [
@@ -97,6 +101,7 @@ const mockDeals = [
 ];
 
 const InvestorDashboard = () => {
+  const { user, signOut } = useAuth();
   const [filteredDeals, setFilteredDeals] = useState(mockDeals);
   const [selectedDeal, setSelectedDeal] = useState<number | null>(null);
   const [viewMode, setViewMode] = useState<'dashboard' | 'detail'>('dashboard');
@@ -157,49 +162,108 @@ const InvestorDashboard = () => {
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
               <div>
                 <h1 className="text-4xl font-bold text-[#FAFAFA] mb-4">
-                  Investor Portal
+                  Data Room Portal
                 </h1>
                 <p className="text-xl text-[#F4E4BC] max-w-2xl">
-                  Real-time access to curated M&A opportunities with comprehensive deal analytics
+                  Comprehensive deal and document management platform
+                </p>
+                <p className="text-sm text-[#F4E4BC]/70 mt-2">
+                  Welcome back, {user?.email}
                 </p>
               </div>
-              <div className="mt-6 lg:mt-0">
+              <div className="mt-6 lg:mt-0 flex items-center gap-4">
                 <Badge className="bg-gradient-to-r from-[#D4AF37] to-[#F4E4BC] text-[#0A0F0F] font-bold px-6 py-3 text-base">
-                  Live Deals Dashboard
+                  Live Portal
                 </Badge>
+                <Button
+                  onClick={signOut}
+                  variant="outline"
+                  className="border-[#D4AF37]/30 text-[#F4E4BC] hover:bg-[#D4AF37]/10"
+                >
+                  Sign Out
+                </Button>
               </div>
             </div>
           </div>
 
-          {/* Metrics Overview */}
-          <DealMetrics deals={mockDeals} />
-
-          {/* Filters */}
-          <DealFilters onFilterChange={handleFilterChange} />
-
-          {/* Deals Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-            {filteredDeals.map((deal) => (
-              <DealCard
-                key={deal.id}
-                deal={deal}
-                onClick={() => handleDealClick(deal.id)}
-                isSelected={selectedDeal === deal.id}
-              />
-            ))}
-          </div>
-
-          {filteredDeals.length === 0 && (
-            <div className="text-center py-12">
-              <div className="text-[#F4E4BC] text-xl mb-4">No deals match your current filters</div>
-              <Button 
-                onClick={() => setFilteredDeals(mockDeals)}
-                className="bg-[#D4AF37] hover:bg-[#F4E4BC] text-[#0A0F0F] font-bold"
+          {/* Main Content Tabs */}
+          <Tabs defaultValue="overview" className="w-full">
+            <TabsList className="grid w-full grid-cols-4 bg-[#0A0F0F] border border-[#D4AF37]/30">
+              <TabsTrigger 
+                value="overview"
+                className="text-[#F4E4BC] data-[state=active]:bg-[#D4AF37] data-[state=active]:text-[#0A0F0F]"
               >
-                Reset Filters
-              </Button>
-            </div>
-          )}
+                Overview
+              </TabsTrigger>
+              <TabsTrigger 
+                value="deals"
+                className="text-[#F4E4BC] data-[state=active]:bg-[#D4AF37] data-[state=active]:text-[#0A0F0F]"
+              >
+                Deals Management
+              </TabsTrigger>
+              <TabsTrigger 
+                value="documents"
+                className="text-[#F4E4BC] data-[state=active]:bg-[#D4AF37] data-[state=active]:text-[#0A0F0F]"
+              >
+                Documents
+              </TabsTrigger>
+              <TabsTrigger 
+                value="users"
+                className="text-[#F4E4BC] data-[state=active]:bg-[#D4AF37] data-[state=active]:text-[#0A0F0F]"
+              >
+                User Management
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="overview" className="mt-6">
+              {/* Metrics Overview */}
+              <DealMetrics deals={mockDeals} />
+
+              {/* Filters */}
+              <div className="mt-8">
+                <DealFilters onFilterChange={handleFilterChange} />
+              </div>
+
+              {/* Deals Grid */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 mt-8">
+                {filteredDeals.map((deal) => (
+                  <DealCard
+                    key={deal.id}
+                    deal={deal}
+                    onClick={() => handleDealClick(deal.id)}
+                    isSelected={selectedDeal === deal.id}
+                  />
+                ))}
+              </div>
+
+              {filteredDeals.length === 0 && (
+                <div className="text-center py-12">
+                  <div className="text-[#F4E4BC] text-xl mb-4">No deals match your current filters</div>
+                  <Button 
+                    onClick={() => setFilteredDeals(mockDeals)}
+                    className="bg-[#D4AF37] hover:bg-[#F4E4BC] text-[#0A0F0F] font-bold"
+                  >
+                    Reset Filters
+                  </Button>
+                </div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="deals" className="mt-6">
+              <DealsList />
+            </TabsContent>
+
+            <TabsContent value="documents" className="mt-6">
+              <DocumentUpload dealId="example-deal-id" onUploadComplete={() => {}} />
+            </TabsContent>
+
+            <TabsContent value="users" className="mt-6">
+              <div className="text-center py-12">
+                <h3 className="text-xl font-semibold text-[#FAFAFA] mb-2">User Management</h3>
+                <p className="text-[#F4E4BC]">Coming soon - Add, edit, and manage user access to deals.</p>
+              </div>
+            </TabsContent>
+          </Tabs>
         </div>
       </DashboardLayout>
     </div>
