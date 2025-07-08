@@ -3,17 +3,25 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import OverviewTab from './OverviewTab';
 import DealsList from '@/components/deals/DealsList';
 import DocumentUpload from '@/components/documents/DocumentUpload';
-import { useDealsFilter } from '@/hooks/useDealsFilter';
+import { MockDeal } from '@/data/mockDeals';
 
-const PortalTabs = () => {
-  const {
-    filteredDeals,
-    selectedDeal,
-    allDeals,
-    handleFilterChange,
-    handleDealClick,
-    resetFilters
-  } = useDealsFilter();
+interface PortalTabsProps {
+  filteredDeals: MockDeal[];
+  selectedDeal: number | null;
+  allDeals: MockDeal[];
+  onFilterChange: (filters: any) => void;
+  onDealClick: (dealId: number) => void;
+  onResetFilters: () => void;
+}
+
+const PortalTabs = ({
+  filteredDeals,
+  selectedDeal,
+  allDeals,
+  onFilterChange,
+  onDealClick,
+  onResetFilters
+}: PortalTabsProps) => {
 
   return (
     <Tabs defaultValue="overview" className="w-full">
@@ -49,9 +57,9 @@ const PortalTabs = () => {
           allDeals={allDeals}
           filteredDeals={filteredDeals}
           selectedDeal={selectedDeal}
-          onFilterChange={handleFilterChange}
-          onDealClick={handleDealClick}
-          onResetFilters={resetFilters}
+          onFilterChange={onFilterChange}
+          onDealClick={onDealClick}
+          onResetFilters={onResetFilters}
         />
       </TabsContent>
 

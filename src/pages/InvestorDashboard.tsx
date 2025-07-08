@@ -8,9 +8,15 @@ import { useDealsFilter } from '@/hooks/useDealsFilter';
 
 const InvestorDashboard = () => {
   const {
+    filteredDeals,
+    selectedDeal,
     selectedDealData,
     viewMode,
-    handleBackToDashboard
+    allDeals,
+    handleFilterChange,
+    handleDealClick,
+    handleBackToDashboard,
+    resetFilters
   } = useDealsFilter();
 
   if (viewMode === 'detail' && selectedDealData) {
@@ -28,7 +34,14 @@ const InvestorDashboard = () => {
       <DashboardLayout>
         <div className="space-y-8">
           <PortalHeader />
-          <PortalTabs />
+          <PortalTabs
+            filteredDeals={filteredDeals}
+            selectedDeal={selectedDeal}
+            allDeals={allDeals}
+            onFilterChange={handleFilterChange}
+            onDealClick={handleDealClick}
+            onResetFilters={resetFilters}
+          />
         </div>
       </DashboardLayout>
     </div>
