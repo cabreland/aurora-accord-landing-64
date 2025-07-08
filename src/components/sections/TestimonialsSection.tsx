@@ -26,9 +26,17 @@ const TestimonialsSection = () => {
             <CardContent className="p-8">
               <div className="flex items-start space-x-6">
                 <div className="relative">
-                  <div className="w-32 h-24 bg-gradient-to-br from-[#2A2F3A] to-[#1A1F2E] rounded-lg flex items-center justify-center border border-[#D4AF37]/30">
-                    <Play className="w-8 h-8 text-[#D4AF37]" />
-                  </div>
+                  <iframe 
+                    width="192" 
+                    height="108" 
+                    src="https://www.youtube.com/embed/Wua-TMQlqIs" 
+                    title="Seller Testimonial | Bishoi Khella - Founder of TruWood" 
+                    frameBorder="0" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                    referrerPolicy="strict-origin-when-cross-origin" 
+                    allowFullScreen
+                    className="rounded-lg border border-[#D4AF37]/30"
+                  ></iframe>
                 </div>
                 <div className="flex-1">
                   <div className="mb-4">
@@ -66,9 +74,17 @@ const TestimonialsSection = () => {
             <CardContent className="p-8">
               <div className="flex items-start space-x-6">
                 <div className="relative">
-                  <div className="w-32 h-24 bg-gradient-to-br from-[#2A2F3A] to-[#1A1F2E] rounded-lg flex items-center justify-center border border-[#D4AF37]/30">
-                    <Play className="w-8 h-8 text-[#D4AF37]" />
-                  </div>
+                  <iframe 
+                    width="192" 
+                    height="108" 
+                    src="https://www.youtube.com/embed/INv_n2uE0T0" 
+                    title="Seller Testimonial | Brad Walker - Founder of StretchCoach" 
+                    frameBorder="0" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                    referrerPolicy="strict-origin-when-cross-origin" 
+                    allowFullScreen
+                    className="rounded-lg border border-[#D4AF37]/30"
+                  ></iframe>
                 </div>
                 <div className="flex-1">
                   <div className="mb-4">
