@@ -25,10 +25,10 @@ const TestimonialsSection = () => {
           <Card className="bg-[#2A2F3A]/80 border-[#D4AF37]/30 hover:border-[#D4AF37] transition-all duration-300 backdrop-blur-sm shadow-xl">
             <CardContent className="p-8">
               <div className="flex items-start space-x-6">
-                <div className="relative">
+                <div className="relative flex-shrink-0">
                   <iframe 
-                    width="192" 
-                    height="108" 
+                    width="400" 
+                    height="225" 
                     src="https://www.youtube.com/embed/Wua-TMQlqIs" 
                     title="Seller Testimonial | Bishoi Khella - Founder of TruWood" 
                     frameBorder="0" 
@@ -73,10 +73,10 @@ const TestimonialsSection = () => {
           <Card className="bg-[#2A2F3A]/80 border-[#D4AF37]/30 hover:border-[#D4AF37] transition-all duration-300 backdrop-blur-sm shadow-xl">
             <CardContent className="p-8">
               <div className="flex items-start space-x-6">
-                <div className="relative">
+                <div className="relative flex-shrink-0">
                   <iframe 
-                    width="192" 
-                    height="108" 
+                    width="400" 
+                    height="225" 
                     src="https://www.youtube.com/embed/INv_n2uE0T0" 
                     title="Seller Testimonial | Brad Walker - Founder of StretchCoach" 
                     frameBorder="0" 
