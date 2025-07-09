@@ -28,7 +28,7 @@ const UserManagement = () => {
     if (isAdmin()) {
       fetchUsers();
     }
-  }, []);
+  }, [isAdmin]);
 
   const fetchUsers = async () => {
     try {
