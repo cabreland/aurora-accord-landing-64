@@ -5,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuthHandlers } from '@/hooks/useAuthHandlers';
+import { useOnboardingStatus } from '@/hooks/useOnboardingStatus';
 import { GoogleAuthButton } from '@/components/auth/GoogleAuthButton';
 import { SignInForm } from '@/components/auth/SignInForm';
 import { SignUpForm } from '@/components/auth/SignUpForm';
@@ -12,23 +13,45 @@ import { SignUpForm } from '@/components/auth/SignUpForm';
 const Auth = () => {
   const navigate = useNavigate();
   const { loading, handleGoogleSignIn, handleSignIn, handleSignUp } = useAuthHandlers();
+  const { onboardingCompleted, loading: onboardingLoading } = useOnboardingStatus();
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (session?.user) {
-        navigate('/investor-portal');
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (session?.user && !onboardingLoading) {
+        // Check onboarding status after authentication
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('onboarding_completed')
+          .eq('user_id', session.user.id)
+          .single();
+        
+        if (profile?.onboarding_completed) {
+          navigate('/investor-portal');
+        } else {
+          navigate('/onboarding');
+        }
       }
     });
 
     // Check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) {
-        navigate('/investor-portal');
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (session?.user && !onboardingLoading) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('onboarding_completed')
+          .eq('user_id', session.user.id)
+          .single();
+        
+        if (profile?.onboarding_completed) {
+          navigate('/investor-portal');
+        } else {
+          navigate('/onboarding');
+        }
       }
     });
 
     return () => subscription.unsubscribe();
-  }, [navigate]);
+  }, [navigate, onboardingLoading]);
 
   return (
     <div className="min-h-screen bg-[#1C2526] flex items-center justify-center p-4">

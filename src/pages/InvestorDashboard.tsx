@@ -1,14 +1,24 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/components/investor/DashboardLayout';
 import DealDetailView from '@/components/investor/DealDetailView';
 import PortalHeader from '@/components/investor/PortalHeader';
 import PortalTabs from '@/components/investor/PortalTabs';
 import UserManagement from '@/components/admin/UserManagement';
 import { useDealsFilter } from '@/hooks/useDealsFilter';
+import { useOnboardingStatus } from '@/hooks/useOnboardingStatus';
 
 const InvestorDashboard = () => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('dashboard');
+  const { onboardingCompleted, loading: onboardingLoading } = useOnboardingStatus();
+
+  useEffect(() => {
+    if (!onboardingLoading && onboardingCompleted === false) {
+      navigate('/onboarding');
+    }
+  }, [onboardingCompleted, onboardingLoading, navigate]);
   const {
     filteredDeals,
     selectedDeal,

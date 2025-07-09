@@ -10,6 +10,7 @@ import InvestorDashboard from "./pages/InvestorDashboard";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import UserManagement from "./pages/UserManagement";
+import Onboarding from "./pages/Onboarding";
 
 const queryClient = new QueryClient();
 
@@ -54,6 +55,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <UserManagement />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/onboarding" 
+              element={
+                <ProtectedRoute>
+                  <Onboarding />
                 </ProtectedRoute>
               } 
             />

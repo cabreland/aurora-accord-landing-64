@@ -153,6 +153,120 @@ export type Database = {
           },
         ]
       }
+      onboarding_responses: {
+        Row: {
+          acquisition_goal:
+            | Database["public"]["Enums"]["acquisition_goal"]
+            | null
+          annual_profit: string | null
+          annual_revenue: string | null
+          asking_price_max: number | null
+          asking_price_min: number | null
+          business_type: Database["public"]["Enums"]["business_type"] | null
+          company_name: string | null
+          completed_at: string | null
+          created_at: string
+          full_name: string | null
+          id: string
+          ideal_business_types:
+            | Database["public"]["Enums"]["business_type"][]
+            | null
+          industries_of_interest: string[] | null
+          linkedin_url: string | null
+          owns_business: boolean | null
+          phone_number: string | null
+          preferred_tech_stacks: string[] | null
+          profit_multiple_max: number | null
+          profit_multiple_min: number | null
+          referral_other_details: string | null
+          referral_source: Database["public"]["Enums"]["referral_source"] | null
+          ttm_profit_max: number | null
+          ttm_profit_min: number | null
+          ttm_revenue_max: number | null
+          ttm_revenue_min: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          acquisition_goal?:
+            | Database["public"]["Enums"]["acquisition_goal"]
+            | null
+          annual_profit?: string | null
+          annual_revenue?: string | null
+          asking_price_max?: number | null
+          asking_price_min?: number | null
+          business_type?: Database["public"]["Enums"]["business_type"] | null
+          company_name?: string | null
+          completed_at?: string | null
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          ideal_business_types?:
+            | Database["public"]["Enums"]["business_type"][]
+            | null
+          industries_of_interest?: string[] | null
+          linkedin_url?: string | null
+          owns_business?: boolean | null
+          phone_number?: string | null
+          preferred_tech_stacks?: string[] | null
+          profit_multiple_max?: number | null
+          profit_multiple_min?: number | null
+          referral_other_details?: string | null
+          referral_source?:
+            | Database["public"]["Enums"]["referral_source"]
+            | null
+          ttm_profit_max?: number | null
+          ttm_profit_min?: number | null
+          ttm_revenue_max?: number | null
+          ttm_revenue_min?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          acquisition_goal?:
+            | Database["public"]["Enums"]["acquisition_goal"]
+            | null
+          annual_profit?: string | null
+          annual_revenue?: string | null
+          asking_price_max?: number | null
+          asking_price_min?: number | null
+          business_type?: Database["public"]["Enums"]["business_type"] | null
+          company_name?: string | null
+          completed_at?: string | null
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          ideal_business_types?:
+            | Database["public"]["Enums"]["business_type"][]
+            | null
+          industries_of_interest?: string[] | null
+          linkedin_url?: string | null
+          owns_business?: boolean | null
+          phone_number?: string | null
+          preferred_tech_stacks?: string[] | null
+          profit_multiple_max?: number | null
+          profit_multiple_min?: number | null
+          referral_other_details?: string | null
+          referral_source?:
+            | Database["public"]["Enums"]["referral_source"]
+            | null
+          ttm_profit_max?: number | null
+          ttm_profit_min?: number | null
+          ttm_revenue_max?: number | null
+          ttm_revenue_min?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "onboarding_responses_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
@@ -160,6 +274,7 @@ export type Database = {
           first_name: string | null
           id: string
           last_name: string | null
+          onboarding_completed: boolean | null
           role: Database["public"]["Enums"]["user_role"]
           updated_at: string
           user_id: string
@@ -170,6 +285,7 @@ export type Database = {
           first_name?: string | null
           id?: string
           last_name?: string | null
+          onboarding_completed?: boolean | null
           role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string
           user_id: string
@@ -180,6 +296,7 @@ export type Database = {
           first_name?: string | null
           id?: string
           last_name?: string | null
+          onboarding_completed?: boolean | null
           role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string
           user_id?: string
@@ -235,6 +352,11 @@ export type Database = {
       }
     }
     Enums: {
+      acquisition_goal:
+        | "buy_businesses"
+        | "minority_partner"
+        | "explore_options"
+      business_type: "saas" | "ecom" | "agency" | "other"
       deal_status: "active" | "archived" | "draft"
       document_tag:
         | "cim"
@@ -244,6 +366,7 @@ export type Database = {
         | "legal"
         | "due_diligence"
         | "other"
+      referral_source: "referral" | "social_media" | "search" | "other"
       user_role: "admin" | "editor" | "viewer"
     }
     CompositeTypes: {
@@ -372,6 +495,12 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      acquisition_goal: [
+        "buy_businesses",
+        "minority_partner",
+        "explore_options",
+      ],
+      business_type: ["saas", "ecom", "agency", "other"],
       deal_status: ["active", "archived", "draft"],
       document_tag: [
         "cim",
@@ -382,6 +511,7 @@ export const Constants = {
         "due_diligence",
         "other",
       ],
+      referral_source: ["referral", "social_media", "search", "other"],
       user_role: ["admin", "editor", "viewer"],
     },
   },
