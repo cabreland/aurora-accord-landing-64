@@ -50,12 +50,28 @@ export const validateFile = (file: File): { isValid: boolean; error?: string } =
     };
   }
 
-  // Sanitize filename - remove path traversal attempts
-  const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
-  if (sanitizedName !== file.name) {
+  // Check for dangerous filename patterns
+  const dangerousPatterns = [
+    /\.\./,  // Path traversal
+    /[<>:"|?*]/,  // Invalid Windows chars
+    /^\./,  // Hidden files starting with dot
+    /^(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])$/i,  // Windows reserved names
+    /\.(exe|bat|cmd|scr|pif|com|vbs|js|jar|app|dmg)$/i  // Executable extensions
+  ];
+  
+  const hasInvalidChars = dangerousPatterns.some(pattern => pattern.test(file.name));
+  if (hasInvalidChars) {
     return {
       isValid: false,
-      error: `Invalid characters in filename. Please rename the file using only letters, numbers, dots, and hyphens.`
+      error: `Filename contains invalid or potentially dangerous characters. Please rename the file.`
+    };
+  }
+
+  // Check filename length
+  if (file.name.length > 255) {
+    return {
+      isValid: false,
+      error: `Filename is too long. Maximum 255 characters allowed.`
     };
   }
 

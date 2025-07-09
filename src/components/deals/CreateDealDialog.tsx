@@ -9,44 +9,55 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Plus } from 'lucide-react';
 
-interface CreateDealDialogProps {
-  onDealCreated: () => void;
+interface Deal {
+  id: string;
+  title: string;
+  company_name: string;
+  description: string | null;
+  industry: string | null;
+  location: string | null;
+  revenue: string | null;
+  ebitda: string | null;
+  status: 'draft' | 'active' | 'archived';
+  created_at: string;
+  updated_at: string;
+  created_by: string;
 }
 
-const CreateDealDialog = ({ onDealCreated }: CreateDealDialogProps) => {
-  const [open, setOpen] = useState(false);
+interface CreateDealDialogProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSuccess: () => void;
+  editDeal?: Deal | null;
+}
+
+const CreateDealDialog = ({ isOpen, onClose, onSuccess, editDeal }: CreateDealDialogProps) => {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    company_name: '',
-    industry: '',
-    revenue: '',
-    ebitda: '',
-    location: '',
-    status: 'draft' as const
+    title: editDeal?.title || '',
+    description: editDeal?.description || '',
+    company_name: editDeal?.company_name || '',
+    industry: editDeal?.industry || '',
+    revenue: editDeal?.revenue || '',
+    ebitda: editDeal?.ebitda || '',
+    location: editDeal?.location || '',
+    status: editDeal?.status || 'draft' as const
   });
-  const { toast } = useToast();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('User not authenticated');
-
-      const { error } = await supabase
-        .from('deals')
-        .insert([{ ...formData, created_by: user.id }]);
-
-      if (error) throw error;
-
-      toast({
-        title: "Deal created successfully",
-        description: "The deal has been added to your portfolio.",
+  // Update form data when editDeal changes
+  React.useEffect(() => {
+    if (editDeal) {
+      setFormData({
+        title: editDeal.title,
+        description: editDeal.description || '',
+        company_name: editDeal.company_name,
+        industry: editDeal.industry || '',
+        revenue: editDeal.revenue || '',
+        ebitda: editDeal.ebitda || '',
+        location: editDeal.location || '',
+        status: editDeal.status
       });
-
+    } else {
       setFormData({
         title: '',
         description: '',
@@ -57,9 +68,47 @@ const CreateDealDialog = ({ onDealCreated }: CreateDealDialogProps) => {
         location: '',
         status: 'draft'
       });
-      
-      setOpen(false);
-      onDealCreated();
+    }
+  }, [editDeal]);
+  const { toast } = useToast();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
+
+      if (editDeal) {
+        // Update existing deal
+        const { error } = await supabase
+          .from('deals')
+          .update({ ...formData, updated_at: new Date().toISOString() })
+          .eq('id', editDeal.id);
+
+        if (error) throw error;
+
+        toast({
+          title: "Deal updated successfully",
+          description: "The deal has been updated.",
+        });
+      } else {
+        // Create new deal
+        const { error } = await supabase
+          .from('deals')
+          .insert([{ ...formData, created_by: user.id }]);
+
+        if (error) throw error;
+
+        toast({
+          title: "Deal created successfully",
+          description: "The deal has been added to your portfolio.",
+        });
+      }
+
+      onClose();
+      onSuccess();
     } catch (error: any) {
       toast({
         title: "Error creating deal",
@@ -76,18 +125,14 @@ const CreateDealDialog = ({ onDealCreated }: CreateDealDialogProps) => {
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button className="bg-[#D4AF37] hover:bg-[#F4E4BC] text-[#0A0F0F] font-bold">
-          <Plus className="w-4 h-4 mr-2" />
-          Create Deal
-        </Button>
-      </DialogTrigger>
+    <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="bg-[#0A0F0F] border-[#D4AF37]/30 text-[#FAFAFA] max-w-2xl">
         <DialogHeader>
-          <DialogTitle className="text-[#D4AF37]">Create New Deal</DialogTitle>
+          <DialogTitle className="text-[#D4AF37]">
+            {editDeal ? 'Edit Deal' : 'Create New Deal'}
+          </DialogTitle>
           <DialogDescription className="text-[#F4E4BC]">
-            Add a new investment opportunity to your portfolio.
+            {editDeal ? 'Update the deal information.' : 'Add a new investment opportunity to your portfolio.'}
           </DialogDescription>
         </DialogHeader>
         
@@ -188,7 +233,7 @@ const CreateDealDialog = ({ onDealCreated }: CreateDealDialogProps) => {
             <Button
               type="button"
               variant="outline"
-              onClick={() => setOpen(false)}
+              onClick={onClose}
               className="border-[#D4AF37]/30 text-[#F4E4BC] hover:bg-[#D4AF37]/10"
             >
               Cancel
@@ -198,7 +243,7 @@ const CreateDealDialog = ({ onDealCreated }: CreateDealDialogProps) => {
               disabled={loading}
               className="bg-[#D4AF37] hover:bg-[#F4E4BC] text-[#0A0F0F] font-bold"
             >
-              {loading ? 'Creating...' : 'Create Deal'}
+              {loading ? (editDeal ? 'Updating...' : 'Creating...') : (editDeal ? 'Update Deal' : 'Create Deal')}
             </Button>
           </DialogFooter>
         </form>

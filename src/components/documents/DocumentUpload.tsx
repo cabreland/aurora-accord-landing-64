@@ -115,10 +115,28 @@ const DocumentUpload = ({ dealId, onUploadComplete }: DocumentUploadProps) => {
         const fileExt = uploadFile.file.name.split('.').pop();
         const fileName = `${dealId}/${Date.now()}-${uploadFile.file.name}`;
         
-        // Upload to Supabase Storage
+        // Call validation edge function first
+        const formData = new FormData();
+        formData.append('file', uploadFile.file);
+        formData.append('dealId', dealId);
+        formData.append('fileName', uploadFile.file.name);
+
+        const { data: validationResult, error: validationError } = await supabase.functions
+          .invoke('validate-file', {
+            body: formData
+          });
+
+        if (validationError || !validationResult?.success) {
+          throw new Error(validationResult?.error || 'File validation failed');
+        }
+
+        // Upload to Supabase Storage with sanitized name
+        const sanitizedFileName = validationResult.sanitizedName || uploadFile.file.name;
+        const finalFileName = `${dealId}/${Date.now()}-${sanitizedFileName}`;
+        
         const { data: storageData, error: storageError } = await supabase.storage
           .from('deal-documents')
-          .upload(fileName, uploadFile.file);
+          .upload(finalFileName, uploadFile.file);
 
         if (storageError) throw storageError;
 
@@ -132,7 +150,7 @@ const DocumentUpload = ({ dealId, onUploadComplete }: DocumentUploadProps) => {
           .insert({
             deal_id: dealId,
             name: uploadFile.file.name,
-            file_path: fileName,
+            file_path: finalFileName,
             file_size: uploadFile.file.size,
             file_type: uploadFile.file.type,
             tag: uploadFile.tag as any,

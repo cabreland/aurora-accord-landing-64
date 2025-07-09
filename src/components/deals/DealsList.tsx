@@ -107,7 +107,7 @@ const DealsList = () => {
           <h1 className="text-3xl font-bold text-[#FAFAFA]">Deals Management</h1>
           <p className="text-[#F4E4BC] mt-2">Create and manage your investment opportunities</p>
         </div>
-        <CreateDealDialog onDealCreated={fetchDeals} />
+        {/* Create Deal button will be handled elsewhere */}
       </div>
 
       <div className="grid gap-6">
@@ -117,7 +117,7 @@ const DealsList = () => {
               <Building2 className="w-16 h-16 text-[#D4AF37] mx-auto mb-4" />
               <h3 className="text-xl font-semibold text-[#FAFAFA] mb-2">No deals yet</h3>
               <p className="text-[#F4E4BC] mb-6">Get started by creating your first investment opportunity.</p>
-              <CreateDealDialog onDealCreated={fetchDeals} />
+              {/* Create Deal button will be handled elsewhere */}
             </CardContent>
           </Card>
         ) : (
