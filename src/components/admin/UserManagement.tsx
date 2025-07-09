@@ -10,7 +10,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { UserPlus, Edit, Trash2, Shield, Users } from 'lucide-react';
+import { UserPlus, Edit, Trash2, Shield, Users, Mail } from 'lucide-react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 
 interface UserProfile {
   id: string;
@@ -30,6 +31,8 @@ const UserManagement = () => {
   const [loading, setLoading] = useState(true);
   const [editUser, setEditUser] = useState<UserProfile | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isAddUserOpen, setIsAddUserOpen] = useState(false);
+  const [inviteEmail, setInviteEmail] = useState('');
 
   useEffect(() => {
     if (isAdmin()) {
@@ -86,6 +89,69 @@ const UserManagement = () => {
       fetchUsers();
     } catch (error) {
       console.error('Error updating user role:', error);
+    }
+  };
+
+  const handleInviteUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!inviteEmail.trim()) return;
+
+    try {
+      const { data, error } = await supabase.auth.admin.inviteUserByEmail(inviteEmail, {
+        data: { invited_by_admin: true }
+      });
+
+      if (error) {
+        toast({
+          title: 'Error',
+          description: 'Failed to invite user. Make sure you have admin privileges.',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      toast({
+        title: 'Success',
+        description: 'User invitation sent successfully',
+      });
+
+      setIsAddUserOpen(false);
+      setInviteEmail('');
+      fetchUsers();
+    } catch (error) {
+      console.error('Error inviting user:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to send invitation',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleDeleteUser = async (userId: string, userEmail: string) => {
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .delete()
+        .eq('id', userId);
+
+      if (error) {
+        toast({
+          title: 'Error',
+          description: 'Failed to delete user',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      toast({
+        title: 'Success',
+        description: `User ${userEmail} deleted successfully`,
+      });
+
+      fetchUsers();
+    } catch (error) {
+      console.error('Error deleting user:', error);
     }
   };
 
@@ -191,6 +257,44 @@ const UserManagement = () => {
                 Manage user roles and permissions
               </p>
             </div>
+            <Dialog open={isAddUserOpen} onOpenChange={setIsAddUserOpen}>
+              <DialogTrigger asChild>
+                <Button>
+                  <UserPlus className="w-4 h-4 mr-2" />
+                  Add User
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Invite New User</DialogTitle>
+                </DialogHeader>
+                <form onSubmit={handleInviteUser} className="space-y-4">
+                  <div>
+                    <Label htmlFor="inviteEmail">Email Address</Label>
+                    <Input
+                      id="inviteEmail"
+                      type="email"
+                      placeholder="user@example.com"
+                      value={inviteEmail}
+                      onChange={(e) => setInviteEmail(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="flex justify-end gap-2">
+                    <Button type="button" variant="outline" onClick={() => {
+                      setIsAddUserOpen(false);
+                      setInviteEmail('');
+                    }}>
+                      Cancel
+                    </Button>
+                    <Button type="submit">
+                      <Mail className="w-4 h-4 mr-2" />
+                      Send Invitation
+                    </Button>
+                  </div>
+                </form>
+              </DialogContent>
+            </Dialog>
           </div>
         </CardHeader>
         <CardContent>
@@ -297,6 +401,32 @@ const UserManagement = () => {
                           <SelectItem value="viewer">Investor</SelectItem>
                         </SelectContent>
                       </Select>
+                      
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="outline" size="sm">
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Delete User</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Are you sure you want to delete {user.first_name} {user.last_name} ({user.email})? 
+                              This action cannot be undone.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => handleDeleteUser(user.id, user.email)}
+                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            >
+                              Delete User
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     </div>
                   </TableCell>
                 </TableRow>

@@ -3,6 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import OverviewTab from './OverviewTab';
 import DealsList from '@/components/deals/DealsList';
 import DocumentUpload from '@/components/documents/DocumentUpload';
+import UserManagement from '@/components/admin/UserManagement';
 import { MockDeal } from '@/data/mockDeals';
 
 interface PortalTabsProps {
@@ -72,10 +73,7 @@ const PortalTabs = ({
       </TabsContent>
 
       <TabsContent value="users" className="mt-6">
-        <div className="text-center py-12">
-          <h3 className="text-xl font-semibold text-[#FAFAFA] mb-2">User Management</h3>
-          <p className="text-[#F4E4BC]">Coming soon - Add, edit, and manage user access to deals.</p>
-        </div>
+        <UserManagement />
       </TabsContent>
     </Tabs>
   );
