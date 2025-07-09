@@ -179,22 +179,35 @@ const OnboardingQuestionnaire = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-emerald-50 flex flex-col relative overflow-hidden">
+      {/* Floating background elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-20 left-10 w-32 h-32 bg-purple-200/30 rounded-full animate-float"></div>
+        <div className="absolute top-40 right-20 w-20 h-20 bg-blue-200/30 rounded-full animate-bounce-slow"></div>
+        <div className="absolute bottom-40 left-20 w-24 h-24 bg-emerald-200/30 rounded-full animate-float" style={{ animationDelay: '2s' }}></div>
+        <div className="absolute bottom-20 right-10 w-16 h-16 bg-yellow-200/30 rounded-full animate-bounce-slow" style={{ animationDelay: '1s' }}></div>
+      </div>
+
       {/* Header */}
-      <div className="flex justify-between items-center p-6">
-        <div className="flex items-center space-x-2">
-          <div className="w-8 h-8 bg-blue-600 rounded flex items-center justify-center">
-            <span className="text-white font-bold text-sm">E</span>
+      <div className="flex justify-between items-center p-6 glass relative z-10">
+        <div className="flex items-center space-x-3">
+          <div className="w-10 h-10 gradient-primary rounded-xl flex items-center justify-center shadow-lg">
+            <span className="text-white font-bold text-lg">E</span>
           </div>
-          <span className="text-xl font-semibold text-gray-900">EBB Data Room</span>
+          <div>
+            <span className="text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+              EBB Data Room
+            </span>
+            <p className="text-sm text-gray-600">Investment Onboarding</p>
+          </div>
         </div>
-        <Button variant="ghost" className="text-gray-600">
+        <Button variant="ghost" className="text-gray-600 hover:bg-white/50">
           Exit
         </Button>
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex items-center justify-center px-6">
+      <div className="flex-1 flex items-center justify-center px-6 relative z-10">
         <div className="w-full max-w-4xl">
           <CurrentStepComponent 
             data={data} 
@@ -207,9 +220,9 @@ const OnboardingQuestionnaire = () => {
               variant="ghost"
               onClick={handleBack}
               disabled={currentStep === 0}
-              className="text-gray-600"
+              className="text-gray-600 hover:bg-white/50 transition-all duration-200"
             >
-              Back
+              ← Back
             </Button>
             
             <div className="flex gap-3">
@@ -217,7 +230,7 @@ const OnboardingQuestionnaire = () => {
                 <Button
                   variant="ghost"
                   onClick={() => setCurrentStep(prev => prev + 1)}
-                  className="text-gray-500"
+                  className="text-gray-500 hover:bg-white/50 transition-all duration-200"
                 >
                   Skip
                 </Button>
@@ -226,9 +239,16 @@ const OnboardingQuestionnaire = () => {
               <Button
                 onClick={handleNext}
                 disabled={loading}
-                className="bg-gray-800 hover:bg-gray-900 text-white px-8 py-2 rounded-lg"
+                className="gradient-primary hover:shadow-lg text-white px-8 py-3 rounded-xl transition-all duration-200 transform hover:scale-105"
               >
-                {loading ? 'Saving...' : currentStep === steps.length - 1 ? 'Complete' : 'Next →'}
+                {loading ? (
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    Saving...
+                  </div>
+                ) : (
+                  currentStep === steps.length - 1 ? '🎉 Complete' : 'Next →'
+                )}
               </Button>
             </div>
           </div>
@@ -236,9 +256,9 @@ const OnboardingQuestionnaire = () => {
       </div>
 
       {/* Bottom Progress Bar */}
-      <div className="h-2 bg-gray-100">
+      <div className="h-3 bg-white/30 relative z-10">
         <div 
-          className="h-full bg-blue-600 transition-all duration-300 ease-out"
+          className="h-full gradient-rainbow transition-all duration-500 ease-out rounded-r-full"
           style={{ width: `${progress}%` }}
         />
       </div>

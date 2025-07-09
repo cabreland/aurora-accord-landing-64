@@ -16,8 +16,8 @@ const formatCurrency = (value: number) => {
   return `$${value.toLocaleString()}`;
 };
 
-// Simple histogram component
-const Histogram = ({ height = 80, className = "" }: { height?: number; className?: string }) => {
+// Enhanced histogram component with gradient
+const Histogram = ({ height = 120, className = "" }: { height?: number; className?: string }) => {
   const bars = [
     8, 12, 18, 25, 35, 45, 55, 48, 42, 38, 32, 28, 24, 20, 16, 12, 8, 6, 4, 3, 2, 1, 1, 0, 0, 0, 1, 2, 3, 5
   ];
@@ -27,7 +27,7 @@ const Histogram = ({ height = 80, className = "" }: { height?: number; className
       {bars.map((bar, index) => (
         <div
           key={index}
-          className="bg-blue-500 min-w-[2px]"
+          className="bg-gradient-to-t from-purple-500 via-blue-500 to-emerald-400 min-w-[3px] rounded-t-sm shadow-sm"
           style={{ height: `${(bar / Math.max(...bars)) * 100}%` }}
         />
       ))}
@@ -52,35 +52,42 @@ const SliderSection = ({
   onChange: (value: [number, number]) => void;
   format?: (value: number) => string;
 }) => (
-  <div className="space-y-6">
+  <div className="space-y-8">
     <div className="text-center">
-      <h1 className="text-4xl font-bold text-gray-900 mb-8">
+      <div className="inline-flex items-center justify-center w-20 h-20 gradient-warm rounded-full mb-6 animate-bounce-slow">
+        <span className="text-3xl">📊</span>
+      </div>
+      <h1 className="text-4xl font-bold bg-gradient-to-r from-emerald-600 via-blue-600 to-purple-600 bg-clip-text text-transparent mb-4">
         {title}
       </h1>
     </div>
     
-    <div className="max-w-2xl mx-auto">
-      <Histogram className="mb-8" />
-      
-      <div className="px-8">
-        <Slider
-          value={value}
-          onValueChange={onChange}
-          max={max}
-          min={min}
-          step={step}
-          className="w-full mb-4"
-        />
+    <div className="max-w-3xl mx-auto">
+      <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-white/20">
+        <Histogram className="mb-8" height={120} />
         
-        <div className="flex justify-between items-center">
-          <div className="text-center">
-            <span className="text-sm text-gray-500">Min</span>
-            <div className="text-lg font-semibold">{format(value[0])}</div>
-          </div>
-          <span className="text-gray-300">—</span>
-          <div className="text-center">
-            <span className="text-sm text-gray-500">Max</span>
-            <div className="text-lg font-semibold">{format(value[1])}</div>
+        <div className="px-8">
+          <Slider
+            value={value}
+            onValueChange={onChange}
+            max={max}
+            min={min}
+            step={step}
+            className="w-full mb-6"
+          />
+          
+          <div className="flex justify-between items-center">
+            <div className="text-center bg-gradient-to-br from-purple-100 to-blue-100 rounded-xl p-4 min-w-[120px]">
+              <span className="text-sm text-purple-600 font-medium">Min</span>
+              <div className="text-xl font-bold text-purple-700">{format(value[0])}</div>
+            </div>
+            <div className="flex items-center mx-4">
+              <div className="w-8 h-0.5 bg-gradient-to-r from-purple-400 to-blue-400"></div>
+            </div>
+            <div className="text-center bg-gradient-to-br from-blue-100 to-emerald-100 rounded-xl p-4 min-w-[120px]">
+              <span className="text-sm text-blue-600 font-medium">Max</span>
+              <div className="text-xl font-bold text-blue-700">{format(value[1])}</div>
+            </div>
           </div>
         </div>
       </div>

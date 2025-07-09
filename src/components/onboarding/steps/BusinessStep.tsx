@@ -20,7 +20,10 @@ export const BusinessStep = ({ data, updateData }: BusinessStepProps) => {
   return (
     <div className="max-w-2xl mx-auto">
       <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold text-gray-900 mb-4">
+        <div className="inline-flex items-center justify-center w-20 h-20 gradient-secondary rounded-full mb-6 animate-bounce-slow">
+          <span className="text-3xl">🏢</span>
+        </div>
+        <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 via-emerald-600 to-purple-600 bg-clip-text text-transparent mb-4">
           Do you currently own or operate a business?
         </h1>
       </div>
@@ -30,36 +33,50 @@ export const BusinessStep = ({ data, updateData }: BusinessStepProps) => {
           <Button
             variant={data.ownsBusiness === true ? "default" : "outline"}
             onClick={() => updateData({ ownsBusiness: true })}
-            className="h-14 px-8 text-lg"
+            className={`h-16 px-12 text-lg rounded-xl transition-all duration-200 transform hover:scale-105 ${
+              data.ownsBusiness === true 
+                ? 'gradient-primary text-white shadow-lg' 
+                : 'border-2 border-purple-200 hover:border-purple-400 bg-white/80'
+            }`}
           >
-            Yes
+            ✅ Yes
           </Button>
           <Button
             variant={data.ownsBusiness === false ? "default" : "outline"}
             onClick={() => updateData({ ownsBusiness: false })}
-            className="h-14 px-8 text-lg"
+            className={`h-16 px-12 text-lg rounded-xl transition-all duration-200 transform hover:scale-105 ${
+              data.ownsBusiness === false 
+                ? 'gradient-primary text-white shadow-lg' 
+                : 'border-2 border-purple-200 hover:border-purple-400 bg-white/80'
+            }`}
           >
-            No
+            ❌ No
           </Button>
         </div>
         
         {data.ownsBusiness && (
           <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-300">
             <div className="text-center">
-              <h2 className="text-2xl font-semibold text-gray-900 mb-6">
+              <h2 className="text-2xl font-semibold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mb-6">
                 What type of business is it?
               </h2>
             </div>
             
             <div className="grid grid-cols-2 gap-4">
-              {businessTypeOptions.map((type) => {
+              {businessTypeOptions.map((type, index) => {
                 const IconComponent = type.icon;
+                const colors = ['purple', 'blue', 'emerald', 'yellow'];
+                const color = colors[index % colors.length];
                 return (
                   <Button
                     key={type.value}
                     variant={data.businessType === type.value ? "default" : "outline"}
                     onClick={() => updateData({ businessType: type.value })}
-                    className="h-20 flex flex-col items-center gap-2 text-lg"
+                    className={`h-24 flex flex-col items-center gap-3 text-lg rounded-xl transition-all duration-200 transform hover:scale-105 ${
+                      data.businessType === type.value 
+                        ? `gradient-${color === 'yellow' ? 'warm' : 'primary'} text-white shadow-lg` 
+                        : `border-2 border-${color}-200 hover:border-${color}-400 bg-white/80`
+                    }`}
                   >
                     <IconComponent className="w-6 h-6" />
                     {type.label}
@@ -69,19 +86,23 @@ export const BusinessStep = ({ data, updateData }: BusinessStepProps) => {
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Input
-                value={data.annualRevenue}
-                onChange={(e) => updateData({ annualRevenue: e.target.value })}
-                placeholder="Approximate annual revenue"
-                className="h-14 text-lg border-gray-200 focus:border-blue-500 focus:ring-blue-500"
-              />
+              <div className="relative group">
+                <Input
+                  value={data.annualRevenue}
+                  onChange={(e) => updateData({ annualRevenue: e.target.value })}
+                  placeholder="💰 Approximate annual revenue"
+                  className="h-16 text-lg border-2 border-emerald-100 focus:border-emerald-400 focus:ring-emerald-400/20 rounded-xl bg-white/80 backdrop-blur-sm transition-all duration-200"
+                />
+              </div>
               
-              <Input
-                value={data.annualProfit}
-                onChange={(e) => updateData({ annualProfit: e.target.value })}
-                placeholder="Approximate annual profit"
-                className="h-14 text-lg border-gray-200 focus:border-blue-500 focus:ring-blue-500"
-              />
+              <div className="relative group">
+                <Input
+                  value={data.annualProfit}
+                  onChange={(e) => updateData({ annualProfit: e.target.value })}
+                  placeholder="📈 Approximate annual profit"
+                  className="h-16 text-lg border-2 border-blue-100 focus:border-blue-400 focus:ring-blue-400/20 rounded-xl bg-white/80 backdrop-blur-sm transition-all duration-200"
+                />
+              </div>
             </div>
           </div>
         )}
