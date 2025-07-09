@@ -19,16 +19,18 @@ interface UserProfile {
 }
 
 const UserManagement = () => {
-  const { isAdmin } = useUserProfile();
+  const { isAdmin, loading: profileLoading } = useUserProfile();
   const { toast } = useToast();
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (isAdmin()) {
+    if (!profileLoading && isAdmin()) {
       fetchUsers();
+    } else if (!profileLoading && !isAdmin()) {
+      setLoading(false);
     }
-  }, [isAdmin]);
+  }, [profileLoading, isAdmin]);
 
   const fetchUsers = async () => {
     try {
