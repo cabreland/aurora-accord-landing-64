@@ -1,8 +1,7 @@
 import React from 'react';
-import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Server, ShoppingBag, Users, MoreHorizontal } from 'lucide-react';
 import type { OnboardingData } from '../OnboardingQuestionnaire';
 
 interface BusinessStepProps {
@@ -10,76 +9,81 @@ interface BusinessStepProps {
   updateData: (data: Partial<OnboardingData>) => void;
 }
 
+const businessTypeOptions = [
+  { value: 'saas', label: 'SaaS', icon: Server },
+  { value: 'ecom', label: 'E-commerce', icon: ShoppingBag },
+  { value: 'agency', label: 'Agency', icon: Users },
+  { value: 'other', label: 'Other', icon: MoreHorizontal },
+];
+
 export const BusinessStep = ({ data, updateData }: BusinessStepProps) => {
   return (
-    <div className="space-y-6">
-      <div className="text-center space-y-2">
-        <h2 className="text-xl font-semibold text-foreground">About Your Business</h2>
-        <p className="text-muted-foreground">
-          Tell us about your current business experience and operations.
-        </p>
+    <div className="max-w-2xl mx-auto">
+      <div className="text-center mb-12">
+        <h1 className="text-4xl font-bold text-gray-900 mb-4">
+          Do you currently own or operate a business?
+        </h1>
       </div>
       
-      <div className="space-y-6">
-        <div className="space-y-3">
-          <Label>Do you currently own or operate a business?</Label>
-          <RadioGroup
-            value={data.ownsBusiness?.toString() || ''}
-            onValueChange={(value) => updateData({ ownsBusiness: value === 'true' })}
+      <div className="space-y-8">
+        <div className="flex gap-4 justify-center">
+          <Button
+            variant={data.ownsBusiness === true ? "default" : "outline"}
+            onClick={() => updateData({ ownsBusiness: true })}
+            className="h-14 px-8 text-lg"
           >
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="true" id="owns-yes" />
-              <Label htmlFor="owns-yes">Yes</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="false" id="owns-no" />
-              <Label htmlFor="owns-no">No</Label>
-            </div>
-          </RadioGroup>
+            Yes
+          </Button>
+          <Button
+            variant={data.ownsBusiness === false ? "default" : "outline"}
+            onClick={() => updateData({ ownsBusiness: false })}
+            className="h-14 px-8 text-lg"
+          >
+            No
+          </Button>
         </div>
         
         {data.ownsBusiness && (
-          <>
-            <div className="space-y-2">
-              <Label>What type of business is it?</Label>
-              <Select
-                value={data.businessType}
-                onValueChange={(value) => updateData({ businessType: value })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select business type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="saas">SaaS</SelectItem>
-                  <SelectItem value="ecom">E-commerce</SelectItem>
-                  <SelectItem value="agency">Agency</SelectItem>
-                  <SelectItem value="other">Other</SelectItem>
-                </SelectContent>
-              </Select>
+          <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-300">
+            <div className="text-center">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-6">
+                What type of business is it?
+              </h2>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="annualRevenue">Approximate Annual Revenue</Label>
-                <Input
-                  id="annualRevenue"
-                  value={data.annualRevenue}
-                  onChange={(e) => updateData({ annualRevenue: e.target.value })}
-                  placeholder="$500,000"
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="annualProfit">Approximate Annual Profit</Label>
-                <Input
-                  id="annualProfit"
-                  value={data.annualProfit}
-                  onChange={(e) => updateData({ annualProfit: e.target.value })}
-                  placeholder="$100,000"
-                />
-              </div>
+            <div className="grid grid-cols-2 gap-4">
+              {businessTypeOptions.map((type) => {
+                const IconComponent = type.icon;
+                return (
+                  <Button
+                    key={type.value}
+                    variant={data.businessType === type.value ? "default" : "outline"}
+                    onClick={() => updateData({ businessType: type.value })}
+                    className="h-20 flex flex-col items-center gap-2 text-lg"
+                  >
+                    <IconComponent className="w-6 h-6" />
+                    {type.label}
+                  </Button>
+                );
+              })}
             </div>
-          </>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Input
+                value={data.annualRevenue}
+                onChange={(e) => updateData({ annualRevenue: e.target.value })}
+                placeholder="Approximate annual revenue"
+                className="h-14 text-lg border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+              />
+              
+              <Input
+                value={data.annualProfit}
+                onChange={(e) => updateData({ annualProfit: e.target.value })}
+                placeholder="Approximate annual profit"
+                className="h-14 text-lg border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+              />
+            </div>
+          </div>
         )}
       </div>
     </div>

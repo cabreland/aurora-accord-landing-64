@@ -179,56 +179,68 @@ const OnboardingQuestionnaire = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <div className="w-full max-w-2xl">
-        <Card className="bg-card border-border">
-          <CardHeader className="text-center space-y-4">
-            <CardTitle className="text-2xl font-bold text-foreground">
-              Welcome to EBB Data Room
-            </CardTitle>
-            <div className="space-y-2">
-              <p className="text-muted-foreground">
-                Step {currentStep + 1} of {steps.length}: {currentStepData.title}
-              </p>
-              <Progress value={progress} className="w-full" />
-            </div>
-          </CardHeader>
+    <div className="min-h-screen bg-white flex flex-col">
+      {/* Header */}
+      <div className="flex justify-between items-center p-6">
+        <div className="flex items-center space-x-2">
+          <div className="w-8 h-8 bg-blue-600 rounded flex items-center justify-center">
+            <span className="text-white font-bold text-sm">E</span>
+          </div>
+          <span className="text-xl font-semibold text-gray-900">EBB Data Room</span>
+        </div>
+        <Button variant="ghost" className="text-gray-600">
+          Exit
+        </Button>
+      </div>
+
+      {/* Main Content */}
+      <div className="flex-1 flex items-center justify-center px-6">
+        <div className="w-full max-w-4xl">
+          <CurrentStepComponent 
+            data={data} 
+            updateData={updateData}
+          />
           
-          <CardContent className="space-y-6">
-            <CurrentStepComponent 
-              data={data} 
-              updateData={updateData}
-            />
+          {/* Navigation */}
+          <div className="flex justify-between items-center mt-12">
+            <Button
+              variant="ghost"
+              onClick={handleBack}
+              disabled={currentStep === 0}
+              className="text-gray-600"
+            >
+              Back
+            </Button>
             
-            <div className="flex justify-between pt-6">
-              <Button
-                variant="outline"
-                onClick={handleBack}
-                disabled={currentStep === 0}
-              >
-                Back
-              </Button>
-              
-              <div className="flex gap-2">
-                {currentStep < steps.length - 1 && (
-                  <Button
-                    variant="ghost"
-                    onClick={() => setCurrentStep(prev => prev + 1)}
-                  >
-                    Skip
-                  </Button>
-                )}
-                
+            <div className="flex gap-3">
+              {currentStep < steps.length - 1 && (
                 <Button
-                  onClick={handleNext}
-                  disabled={loading}
+                  variant="ghost"
+                  onClick={() => setCurrentStep(prev => prev + 1)}
+                  className="text-gray-500"
                 >
-                  {loading ? 'Saving...' : currentStep === steps.length - 1 ? 'Complete' : 'Next'}
+                  Skip
                 </Button>
-              </div>
+              )}
+              
+              <Button
+                onClick={handleNext}
+                disabled={loading}
+                className="bg-gray-800 hover:bg-gray-900 text-white px-8 py-2 rounded-lg"
+              >
+                {loading ? 'Saving...' : currentStep === steps.length - 1 ? 'Complete' : 'Next →'}
+              </Button>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom Progress Bar */}
+      <div className="h-2 bg-gray-100">
+        <div 
+          className="h-full bg-blue-600 transition-all duration-300 ease-out"
+          style={{ width: `${progress}%` }}
+        />
       </div>
     </div>
   );

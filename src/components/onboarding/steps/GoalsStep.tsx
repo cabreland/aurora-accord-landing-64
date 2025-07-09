@@ -1,11 +1,8 @@
 import React from 'react';
-import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { X } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Server, ShoppingBag, Users, MoreHorizontal, X } from 'lucide-react';
 import type { OnboardingData } from '../OnboardingQuestionnaire';
 
 interface GoalsStepProps {
@@ -14,10 +11,10 @@ interface GoalsStepProps {
 }
 
 const businessTypes = [
-  { value: 'saas', label: 'SaaS' },
-  { value: 'agency', label: 'Agency' },
-  { value: 'ecom', label: 'E-commerce' },
-  { value: 'other', label: 'Other' },
+  { value: 'saas', label: 'SaaS', icon: Server },
+  { value: 'agency', label: 'Agency', icon: Users },
+  { value: 'ecom', label: 'E-commerce', icon: ShoppingBag },
+  { value: 'other', label: 'Other', icon: MoreHorizontal },
 ];
 
 const commonIndustries = [
@@ -28,10 +25,10 @@ const commonIndustries = [
 export const GoalsStep = ({ data, updateData }: GoalsStepProps) => {
   const [newIndustry, setNewIndustry] = React.useState('');
 
-  const handleBusinessTypeToggle = (value: string, checked: boolean) => {
-    const updated = checked
-      ? [...data.idealBusinessTypes, value]
-      : data.idealBusinessTypes.filter(type => type !== value);
+  const handleBusinessTypeToggle = (value: string) => {
+    const updated = data.idealBusinessTypes.includes(value)
+      ? data.idealBusinessTypes.filter(type => type !== value)
+      : [...data.idealBusinessTypes, value];
     updateData({ idealBusinessTypes: updated });
   };
 
@@ -54,92 +51,101 @@ export const GoalsStep = ({ data, updateData }: GoalsStepProps) => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="text-center space-y-2">
-        <h2 className="text-xl font-semibold text-foreground">Acquisition Goals</h2>
-        <p className="text-muted-foreground">
-          Help us understand what you're looking to achieve.
-        </p>
+    <div className="max-w-3xl mx-auto">
+      <div className="text-center mb-12">
+        <h1 className="text-4xl font-bold text-gray-900 mb-4">
+          What are you looking to do?
+        </h1>
       </div>
       
-      <div className="space-y-6">
-        <div className="space-y-3">
-          <Label>What are you looking to do?</Label>
-          <RadioGroup
-            value={data.acquisitionGoal}
-            onValueChange={(value) => updateData({ acquisitionGoal: value })}
+      <div className="space-y-12">
+        <div className="flex flex-col gap-4">
+          <Button
+            variant={data.acquisitionGoal === 'buy_businesses' ? "default" : "outline"}
+            onClick={() => updateData({ acquisitionGoal: 'buy_businesses' })}
+            className="h-16 text-lg justify-start px-8"
           >
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="buy_businesses" id="buy-businesses" />
-              <Label htmlFor="buy-businesses">Buy businesses</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="minority_partner" id="minority-partner" />
-              <Label htmlFor="minority-partner">Invest as a minority partner</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="explore_options" id="explore-options" />
-              <Label htmlFor="explore-options">Explore options</Label>
-            </div>
-          </RadioGroup>
+            Buy businesses
+          </Button>
+          <Button
+            variant={data.acquisitionGoal === 'minority_partner' ? "default" : "outline"}
+            onClick={() => updateData({ acquisitionGoal: 'minority_partner' })}
+            className="h-16 text-lg justify-start px-8"
+          >
+            Invest as a minority partner
+          </Button>
+          <Button
+            variant={data.acquisitionGoal === 'explore_options' ? "default" : "outline"}
+            onClick={() => updateData({ acquisitionGoal: 'explore_options' })}
+            className="h-16 text-lg justify-start px-8"
+          >
+            Explore options
+          </Button>
         </div>
         
-        <div className="space-y-3">
-          <Label>What is your ideal business type? (Select all that apply)</Label>
-          <div className="grid grid-cols-2 gap-3">
-            {businessTypes.map((type) => (
-              <div key={type.value} className="flex items-center space-x-2">
-                <Checkbox
-                  id={`type-${type.value}`}
-                  checked={data.idealBusinessTypes.includes(type.value)}
-                  onCheckedChange={(checked) => handleBusinessTypeToggle(type.value, checked as boolean)}
-                />
-                <Label htmlFor={`type-${type.value}`}>{type.label}</Label>
-              </div>
-            ))}
+        <div>
+          <h2 className="text-2xl font-semibold text-gray-900 mb-6 text-center">
+            Which startup types interest you?
+          </h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {businessTypes.map((type) => {
+              const IconComponent = type.icon;
+              const isSelected = data.idealBusinessTypes.includes(type.value);
+              return (
+                <Button
+                  key={type.value}
+                  variant={isSelected ? "default" : "outline"}
+                  onClick={() => handleBusinessTypeToggle(type.value)}
+                  className="h-24 flex flex-col items-center gap-2"
+                >
+                  <IconComponent className="w-6 h-6" />
+                  <span className="text-sm">{type.label}</span>
+                </Button>
+              );
+            })}
           </div>
         </div>
         
-        <div className="space-y-3">
-          <Label>Industries of Interest</Label>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mb-3">
+        <div>
+          <h2 className="text-2xl font-semibold text-gray-900 mb-6 text-center">
+            Industries of interest
+          </h2>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
             {commonIndustries.map((industry) => (
-              <div
+              <Button
                 key={industry}
-                className={`p-2 rounded-md border cursor-pointer transition-colors ${
-                  data.industriesOfInterest.includes(industry)
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-background hover:bg-accent'
-                }`}
+                variant={data.industriesOfInterest.includes(industry) ? "default" : "outline"}
                 onClick={() => handleIndustryToggle(industry)}
+                className="h-12 text-sm"
               >
-                <span className="text-sm">{industry}</span>
-              </div>
+                {industry}
+              </Button>
             ))}
           </div>
           
-          <div className="flex gap-2">
+          <div className="flex gap-2 mb-4">
             <Input
               value={newIndustry}
               onChange={(e) => setNewIndustry(e.target.value)}
               placeholder="Add custom industry"
               onKeyDown={(e) => e.key === 'Enter' && addCustomIndustry()}
+              className="h-12"
             />
-            <Button type="button" onClick={addCustomIndustry} variant="outline">
+            <Button type="button" onClick={addCustomIndustry} variant="outline" className="h-12">
               Add
             </Button>
           </div>
           
           {data.industriesOfInterest.length > 0 && (
-            <div className="flex flex-wrap gap-2 mt-3">
+            <div className="flex flex-wrap gap-2">
               {data.industriesOfInterest.map((industry) => (
-                <Badge key={industry} variant="secondary" className="flex items-center gap-1">
+                <Badge key={industry} variant="secondary" className="flex items-center gap-1 py-1 px-3">
                   {industry}
                   <Button
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="h-auto p-0.5"
+                    className="h-auto p-0.5 hover:bg-transparent"
                     onClick={() => removeIndustry(industry)}
                   >
                     <X className="h-3 w-3" />
