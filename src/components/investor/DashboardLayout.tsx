@@ -9,26 +9,40 @@ import {
   TrendingUp,
   Shield,
   Filter,
-  ArrowLeft
+  ArrowLeft,
+  Users
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useNavigate } from 'react-router-dom';
+import { useUserProfile } from '@/hooks/useUserProfile';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
+  activeTab?: string;
+  onTabChange?: (tab: string) => void;
 }
 
-const DashboardLayout = ({ children }: DashboardLayoutProps) => {
-  const [activeTab, setActiveTab] = useState('dashboard');
+const DashboardLayout = ({ children, activeTab = 'dashboard', onTabChange }: DashboardLayoutProps) => {
+  const [internalActiveTab, setInternalActiveTab] = useState(activeTab);
   const navigate = useNavigate();
+  const { getDisplayName, getRoleDisplayName, loading, canManageUsers } = useUserProfile();
+
+  const currentActiveTab = onTabChange ? activeTab : internalActiveTab;
+  
+  const handleTabChange = (tab: string) => {
+    if (onTabChange) {
+      onTabChange(tab);
+    } else {
+      setInternalActiveTab(tab);
+    }
+  };
 
   const navigationItems = [
     { id: 'dashboard', label: 'Dashboard', icon: Home },
-    { id: 'deals', label: 'Active Deals', icon: BarChart3 },
+    { id: 'deals', label: 'Deals', icon: BarChart3 },
     { id: 'documents', label: 'Documents', icon: FileText },
-    { id: 'analytics', label: 'Analytics', icon: TrendingUp },
-    { id: 'compliance', label: 'Compliance', icon: Shield },
+    ...(canManageUsers() ? [{ id: 'users', label: 'Users', icon: Users }] : []),
     { id: 'settings', label: 'Settings', icon: Settings },
   ];
 
@@ -58,9 +72,13 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
               <div className="w-10 h-10 bg-gradient-to-r from-[#D4AF37] to-[#F4E4BC] rounded-full flex items-center justify-center">
                 <User className="w-5 h-5 text-[#0A0F0F]" />
               </div>
-              <div>
-                <div className="text-[#FAFAFA] font-medium">John Investor</div>
-                <div className="text-[#F4E4BC]/60 text-sm">Premium Access</div>
+               <div>
+                <div className="text-[#FAFAFA] font-medium">
+                  {loading ? 'Loading...' : getDisplayName()}
+                </div>
+                <div className="text-[#F4E4BC]/60 text-sm">
+                  {loading ? 'Loading...' : getRoleDisplayName()}
+                </div>
               </div>
             </div>
           </div>
@@ -69,12 +87,12 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
           <nav className="space-y-2">
             {navigationItems.map((item) => {
               const Icon = item.icon;
-              const isActive = activeTab === item.id;
+              const isActive = currentActiveTab === item.id;
               
               return (
                 <button
                   key={item.id}
-                  onClick={() => setActiveTab(item.id)}
+                  onClick={() => handleTabChange(item.id)}
                   className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-300 group ${
                     isActive 
                       ? 'bg-gradient-to-r from-[#D4AF37]/20 to-[#F4E4BC]/10 text-[#D4AF37] border border-[#D4AF37]/30' 
