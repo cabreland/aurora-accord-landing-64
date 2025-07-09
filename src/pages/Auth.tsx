@@ -7,6 +7,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { PasswordStrength } from '@/components/ui/password-strength';
+import { validatePassword, sanitizeInput, sanitizeEmail, checkRateLimit, logSecurityEvent, getSafeErrorMessage } from '@/lib/security';
 
 const Auth = () => {
   const [loading, setLoading] = useState(false);
@@ -38,18 +40,41 @@ const Auth = () => {
     e.preventDefault();
     setLoading(true);
 
+    // Rate limiting check
+    const rateLimitKey = `signin_${sanitizeEmail(email)}`;
+    if (!checkRateLimit(rateLimitKey, 5, 15 * 60 * 1000)) {
+      toast({
+        title: "Too many attempts",
+        description: "Please wait 15 minutes before trying again.",
+        variant: "destructive",
+      });
+      setLoading(false);
+      return;
+    }
+
+    const cleanEmail = sanitizeEmail(email);
+    
     const { error } = await supabase.auth.signInWithPassword({
-      email,
+      email: cleanEmail,
       password,
     });
 
     if (error) {
+      logSecurityEvent('signin_failed', {
+        email: cleanEmail,
+        error: error.message
+      });
+      
       toast({
         title: "Sign in failed",
-        description: error.message,
+        description: getSafeErrorMessage(error),
         variant: "destructive",
       });
     } else {
+      logSecurityEvent('signin_success', {
+        email: cleanEmail
+      });
+      
       toast({
         title: "Welcome back!",
         description: "You have successfully signed in.",
@@ -63,27 +88,65 @@ const Auth = () => {
     e.preventDefault();
     setLoading(true);
 
+    // Validate password strength
+    const passwordValidation = validatePassword(password);
+    if (!passwordValidation.isValid) {
+      toast({
+        title: "Password too weak",
+        description: passwordValidation.errors.join('\n'),
+        variant: "destructive",
+      });
+      setLoading(false);
+      return;
+    }
+
+    // Sanitize inputs
+    const cleanEmail = sanitizeEmail(email);
+    const cleanFirstName = sanitizeInput(firstName, 50);
+    const cleanLastName = sanitizeInput(lastName, 50);
+
+    // Rate limiting check
+    const rateLimitKey = `signup_${cleanEmail}`;
+    if (!checkRateLimit(rateLimitKey, 3, 60 * 60 * 1000)) {
+      toast({
+        title: "Too many attempts",
+        description: "Please wait 1 hour before trying again.",
+        variant: "destructive",
+      });
+      setLoading(false);
+      return;
+    }
+
     const redirectUrl = `${window.location.origin}/investor-portal`;
 
     const { error } = await supabase.auth.signUp({
-      email,
+      email: cleanEmail,
       password,
       options: {
         emailRedirectTo: redirectUrl,
         data: {
-          first_name: firstName,
-          last_name: lastName,
+          first_name: cleanFirstName,
+          last_name: cleanLastName,
         }
       }
     });
 
     if (error) {
+      logSecurityEvent('signup_failed', {
+        email: cleanEmail,
+        error: error.message
+      });
+      
       toast({
         title: "Sign up failed",
-        description: error.message,
+        description: getSafeErrorMessage(error),
         variant: "destructive",
       });
     } else {
+      logSecurityEvent('signup_success', {
+        email: cleanEmail
+      });
+      
       toast({
         title: "Account created!",
         description: "Please check your email to verify your account.",
@@ -202,6 +265,10 @@ const Auth = () => {
                     required
                     className="bg-[#1A1F2E] border-[#D4AF37]/30 text-[#FAFAFA] focus:border-[#D4AF37]"
                   />
+                  <PasswordStrength password={password} className="mt-2" />
+                  <div className="text-xs text-[#F4E4BC]/70 mt-1">
+                    Password must contain at least 8 characters with uppercase, lowercase, numbers, and special characters.
+                  </div>
                 </div>
                 <Button
                   type="submit"

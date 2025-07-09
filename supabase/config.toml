@@ -1,1 +1,4 @@
 project_id = "gbjmklhvrmecawaacqeb"
+
+[functions.validate-file]
+verify_jwt = true

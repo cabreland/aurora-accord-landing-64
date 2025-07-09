@@ -7,7 +7,8 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Upload, File, X, CheckCircle, AlertCircle } from 'lucide-react';
+import { Upload, File, X, CheckCircle, AlertCircle, Shield } from 'lucide-react';
+import { validateFile, logSecurityEvent, getSafeErrorMessage } from '@/lib/security';
 
 interface DocumentUploadProps {
   dealId: string;
@@ -38,16 +39,42 @@ const DocumentUpload = ({ dealId, onUploadComplete }: DocumentUploadProps) => {
   const { toast } = useToast();
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
-    const newFiles: UploadFile[] = acceptedFiles.map(file => ({
-      file,
-      progress: 0,
-      status: 'pending',
-      tag: 'other',
-      id: Math.random().toString(36).substr(2, 9)
-    }));
-    
-    setUploadFiles(prev => [...prev, ...newFiles]);
-  }, []);
+    const validFiles: UploadFile[] = [];
+    const invalidFiles: string[] = [];
+
+    acceptedFiles.forEach(file => {
+      const validation = validateFile(file);
+      if (validation.isValid) {
+        validFiles.push({
+          file,
+          progress: 0,
+          status: 'pending',
+          tag: 'other',
+          id: Math.random().toString(36).substr(2, 9)
+        });
+      } else {
+        invalidFiles.push(`${file.name}: ${validation.error}`);
+        logSecurityEvent('file_validation_failed', {
+          filename: file.name,
+          size: file.size,
+          type: file.type,
+          error: validation.error
+        });
+      }
+    });
+
+    if (invalidFiles.length > 0) {
+      toast({
+        title: "File validation failed",
+        description: invalidFiles.join('\n'),
+        variant: "destructive",
+      });
+    }
+
+    if (validFiles.length > 0) {
+      setUploadFiles(prev => [...prev, ...validFiles]);
+    }
+  }, [toast]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -125,9 +152,16 @@ const DocumentUpload = ({ dealId, onUploadComplete }: DocumentUploadProps) => {
           f.id === uploadFile.id ? { ...f, status: 'error' } : f
         ));
         
+        // Log security event for failed uploads
+        logSecurityEvent('document_upload_failed', {
+          filename: uploadFile.file.name,
+          dealId,
+          error: error.message
+        });
+        
         toast({
           title: "Upload failed",
-          description: `Failed to upload ${uploadFile.file.name}: ${error.message}`,
+          description: `Failed to upload ${uploadFile.file.name}: ${getSafeErrorMessage(error)}`,
           variant: "destructive",
         });
       }
@@ -172,11 +206,11 @@ const DocumentUpload = ({ dealId, onUploadComplete }: DocumentUploadProps) => {
       <Card className="bg-[#0A0F0F] border-[#D4AF37]/30">
         <CardHeader>
           <CardTitle className="text-[#FAFAFA] flex items-center gap-2">
-            <Upload className="w-5 h-5 text-[#D4AF37]" />
-            Document Upload
+            <Shield className="w-5 h-5 text-[#D4AF37]" />
+            Secure Document Upload
           </CardTitle>
           <CardDescription className="text-[#F4E4BC]">
-            Upload PDFs, Word docs, Excel files, PowerPoint, images, and other documents
+            Upload verified documents (max 50MB per file). Files are automatically scanned for security.
           </CardDescription>
         </CardHeader>
         <CardContent>
