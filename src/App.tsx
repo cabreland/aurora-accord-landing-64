@@ -8,6 +8,7 @@ import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import Index from "./pages/Index";
 import InvestorDashboard from "./pages/InvestorDashboard";
 import Auth from "./pages/Auth";
+import Demo from "./pages/Demo";
 import NotFound from "./pages/NotFound";
 import UserManagement from "./pages/UserManagement";
 import Onboarding from "./pages/Onboarding";
@@ -42,6 +43,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/demo" element={<Demo />} />
             <Route 
               path="/investor-portal" 
               element={

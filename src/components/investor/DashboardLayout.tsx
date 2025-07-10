@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { 
   BarChart3, 
@@ -14,7 +15,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useUserProfile } from '@/hooks/useUserProfile';
 
 interface DashboardLayoutProps {
@@ -26,8 +27,10 @@ interface DashboardLayoutProps {
 const DashboardLayout = ({ children, activeTab = 'dashboard', onTabChange }: DashboardLayoutProps) => {
   const [internalActiveTab, setInternalActiveTab] = useState(activeTab);
   const navigate = useNavigate();
+  const location = useLocation();
   const { getDisplayName, getRoleDisplayName, loading, canManageUsers } = useUserProfile();
 
+  const isDemo = location.pathname === '/demo';
   const currentActiveTab = onTabChange ? activeTab : internalActiveTab;
   
   const handleTabChange = (tab: string) => {
@@ -42,7 +45,7 @@ const DashboardLayout = ({ children, activeTab = 'dashboard', onTabChange }: Das
     { id: 'dashboard', label: 'Dashboard', icon: Home },
     { id: 'deals', label: 'Deals', icon: BarChart3 },
     { id: 'documents', label: 'Documents', icon: FileText },
-    ...(canManageUsers() ? [{ id: 'users', label: 'Users', icon: Users }] : []),
+    ...((!isDemo && canManageUsers()) ? [{ id: 'users', label: 'Users', icon: Users }] : []),
     { id: 'settings', label: 'Settings', icon: Settings },
   ];
 
@@ -62,7 +65,9 @@ const DashboardLayout = ({ children, activeTab = 'dashboard', onTabChange }: Das
 
           {/* Logo Area */}
           <div className="mb-8">
-            <h2 className="text-2xl font-bold text-[#D4AF37] mb-2">M&A Portal</h2>
+            <h2 className="text-2xl font-bold text-[#D4AF37] mb-2">
+              {isDemo ? 'M&A Portal (Demo)' : 'M&A Portal'}
+            </h2>
             <p className="text-sm text-[#F4E4BC]/60">Exclusive Business Brokers</p>
           </div>
 
@@ -74,10 +79,10 @@ const DashboardLayout = ({ children, activeTab = 'dashboard', onTabChange }: Das
               </div>
                <div>
                 <div className="text-[#FAFAFA] font-medium">
-                  {loading ? 'Loading...' : getDisplayName()}
+                  {isDemo ? 'Demo User' : (loading ? 'Loading...' : getDisplayName())}
                 </div>
                 <div className="text-[#F4E4BC]/60 text-sm">
-                  {loading ? 'Loading...' : getRoleDisplayName()}
+                  {isDemo ? 'Demo Viewer' : (loading ? 'Loading...' : getRoleDisplayName())}
                 </div>
               </div>
             </div>
@@ -101,7 +106,7 @@ const DashboardLayout = ({ children, activeTab = 'dashboard', onTabChange }: Das
                 >
                   <Icon className={`w-5 h-5 transition-colors ${isActive ? 'text-[#D4AF37]' : 'group-hover:text-[#D4AF37]'}`} />
                   <span className="font-medium">{item.label}</span>
-                  {item.id === 'deals' && (
+                  {item.id === 'deals' && !isDemo && (
                     <Badge className="ml-auto bg-[#F28C38] text-[#0A0F0F] text-xs">4</Badge>
                   )}
                 </button>

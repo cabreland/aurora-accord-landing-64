@@ -25,11 +25,21 @@ const Index = () => {
           <p className="text-xl text-[#F4E4BC] mb-8 max-w-2xl mx-auto">
             Secure portal for investors to access deal documents and manage investment opportunities
           </p>
-          <Link to="/auth">
-            <Button className="bg-[#D4AF37] hover:bg-[#F4E4BC] text-[#0A0F0F] font-bold px-8 py-3 text-lg">
-              Enter Data Room
-            </Button>
-          </Link>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link to="/auth">
+              <Button className="bg-[#D4AF37] hover:bg-[#F4E4BC] text-[#0A0F0F] font-bold px-8 py-3 text-lg">
+                Enter Data Room
+              </Button>
+            </Link>
+            <Link to="/demo">
+              <Button 
+                variant="outline" 
+                className="border-[#D4AF37] text-[#D4AF37] hover:bg-[#D4AF37] hover:text-[#0A0F0F] font-bold px-8 py-3 text-lg"
+              >
+                View Demo
+              </Button>
+            </Link>
+          </div>
         </div>
       </div>
       
