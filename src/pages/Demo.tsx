@@ -6,12 +6,34 @@ import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Lock } from 'lucide-react';
 import DashboardLayout from '@/components/investor/DashboardLayout';
 import OverviewTab from '@/components/investor/OverviewTab';
+import DealDetailView from '@/components/investor/DealDetailView';
 import { mockDeals } from '@/data/mockDeals';
+import { useDealsFilter } from '@/hooks/useDealsFilter';
 
 const Demo = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
+  const {
+    filteredDeals,
+    selectedDeal,
+    selectedDealData,
+    viewMode,
+    handleFilterChange,
+    handleDealClick,
+    handleBackToDashboard,
+    resetFilters,
+    allDeals: mockDealsData
+  } = useDealsFilter();
 
   const renderDemoContent = () => {
+    if (viewMode === 'detail' && selectedDealData) {
+      return (
+        <DealDetailView
+          deal={selectedDealData}
+          onBack={handleBackToDashboard}
+        />
+      );
+    }
+
     switch (activeTab) {
       case 'dashboard':
         return (
@@ -47,12 +69,12 @@ const Demo = () => {
             </div>
 
             <OverviewTab
-              allDeals={mockDeals}
-              filteredDeals={mockDeals}
-              selectedDeal={null}
-              onFilterChange={() => {}}
-              onDealClick={() => {}}
-              onResetFilters={() => {}}
+              allDeals={mockDealsData}
+              filteredDeals={filteredDeals}
+              selectedDeal={selectedDeal}
+              onFilterChange={handleFilterChange}
+              onDealClick={handleDealClick}
+              onResetFilters={resetFilters}
             />
           </div>
         );
