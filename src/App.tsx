@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -12,6 +11,11 @@ import Demo from "./pages/Demo";
 import NotFound from "./pages/NotFound";
 import UserManagement from "./pages/UserManagement";
 import Onboarding from "./pages/Onboarding";
+import DealManagement from "./pages/DealManagement";
+import DealDetail from "./pages/DealDetail";
+import Documents from "./pages/Documents";
+import Settings from "./pages/Settings";
+import Activity from "./pages/Activity";
 
 const queryClient = new QueryClient();
 
@@ -53,10 +57,50 @@ const App = () => (
               } 
             />
             <Route 
-              path="/user-management" 
+              path="/deals" 
+              element={
+                <ProtectedRoute>
+                  <DealManagement />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/deal/:id" 
+              element={
+                <ProtectedRoute>
+                  <DealDetail />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/documents" 
+              element={
+                <ProtectedRoute>
+                  <Documents />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/users" 
               element={
                 <ProtectedRoute>
                   <UserManagement />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/settings" 
+              element={
+                <ProtectedRoute>
+                  <Settings />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/activity" 
+              element={
+                <ProtectedRoute>
+                  <Activity />
                 </ProtectedRoute>
               } 
             />

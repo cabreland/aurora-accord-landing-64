@@ -1,0 +1,127 @@
+
+import React from 'react';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Slider } from '@/components/ui/slider';
+import { CompanyFormData } from '../CompanyWizard';
+
+interface DealStepProps {
+  data: CompanyFormData;
+  onChange: (data: Partial<CompanyFormData>) => void;
+  isValid: boolean;
+}
+
+const dealStages = [
+  'Lead',
+  'Qualified',
+  'In Review',
+  'Due Diligence',
+  'Negotiation',
+  'Closing',
+  'Closed'
+];
+
+const priorities = [
+  'Low',
+  'Medium',
+  'High',
+  'Critical'
+];
+
+const DealStep: React.FC<DealStepProps> = ({ data, onChange, isValid }) => {
+  return (
+    <div className="space-y-6">
+      <div className="text-center mb-6">
+        <h3 className="text-lg font-semibold text-foreground mb-2">Deal Information</h3>
+        <p className="text-muted-foreground">
+          Configure deal-specific details and tracking information
+        </p>
+      </div>
+
+      <div className="space-y-4">
+        <div>
+          <Label htmlFor="stage" className="text-foreground">
+            Deal Stage <span className="text-destructive">*</span>
+          </Label>
+          <Select value={data.stage} onValueChange={(value) => onChange({ stage: value })}>
+            <SelectTrigger className="bg-background border-border">
+              <SelectValue placeholder="Select deal stage" />
+            </SelectTrigger>
+            <SelectContent>
+              {dealStages.map((stage) => (
+                <SelectItem key={stage} value={stage.toLowerCase().replace(' ', '_')}>
+                  {stage}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {!data.stage && (
+            <p className="text-sm text-destructive mt-1">Deal stage is required</p>
+          )}
+        </div>
+
+        <div>
+          <Label htmlFor="priority" className="text-foreground">
+            Priority <span className="text-destructive">*</span>
+          </Label>
+          <Select value={data.priority} onValueChange={(value) => onChange({ priority: value })}>
+            <SelectTrigger className="bg-background border-border">
+              <SelectValue placeholder="Select priority" />
+            </SelectTrigger>
+            <SelectContent>
+              {priorities.map((priority) => (
+                <SelectItem key={priority} value={priority.toLowerCase()}>
+                  {priority}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {!data.priority && (
+            <p className="text-sm text-destructive mt-1">Priority is required</p>
+          )}
+        </div>
+
+        <div>
+          <Label className="text-foreground">
+            Fit Score: {data.fit_score}%
+          </Label>
+          <div className="px-2 py-4">
+            <Slider
+              value={[data.fit_score]}
+              onValueChange={(value) => onChange({ fit_score: value[0] })}
+              max={100}
+              min={0}
+              step={5}
+              className="w-full"
+            />
+          </div>
+          <div className="flex justify-between text-xs text-muted-foreground">
+            <span>Poor Fit</span>
+            <span>Perfect Fit</span>
+          </div>
+        </div>
+
+        <div>
+          <Label htmlFor="owner_id" className="text-foreground">
+            Deal Owner <span className="text-destructive">*</span>
+          </Label>
+          <Select value={data.owner_id} onValueChange={(value) => onChange({ owner_id: value })}>
+            <SelectTrigger className="bg-background border-border">
+              <SelectValue placeholder="Select deal owner" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="current-user">Current User</SelectItem>
+              <SelectItem value="admin">Admin User</SelectItem>
+              <SelectItem value="other">Other Team Member</SelectItem>
+            </SelectContent>
+          </Select>
+          {!data.owner_id && (
+            <p className="text-sm text-destructive mt-1">Deal owner is required</p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default DealStep;

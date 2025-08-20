@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { 
   BarChart3, 
@@ -44,9 +43,10 @@ const DashboardLayout = ({ children, activeTab = 'dashboard', onTabChange }: Das
   const navigationItems = [
     { id: 'dashboard', label: 'Dashboard', icon: Home },
     { id: 'deals', label: 'Deals', icon: BarChart3 },
-    { id: 'documents', label: 'Documents', icon: FileText },
+    ...((!isDemo && canManageUsers()) ? [{ id: 'documents', label: 'Documents', icon: FileText }] : []),
     ...((!isDemo && canManageUsers()) ? [{ id: 'users', label: 'Users', icon: Users }] : []),
-    { id: 'settings', label: 'Settings', icon: Settings },
+    ...((!isDemo && canManageUsers()) ? [{ id: 'settings', label: 'Settings', icon: Settings }] : []),
+    ...((!isDemo && canManageUsers()) ? [{ id: 'activity', label: 'Activity', icon: Shield }] : []),
   ];
 
   return (

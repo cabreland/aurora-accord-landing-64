@@ -1,10 +1,27 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import DealManager from '@/components/deals/DealManager';
-import DocumentUpload from '@/components/documents/DocumentUpload';
-import DocumentList from '@/components/documents/DocumentList';
-import { Building2, Upload, FileText, Settings } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import CreateDealDialog from './CreateDealDialog';
+import { 
+  Plus, 
+  Search, 
+  Filter, 
+  Edit, 
+  Archive, 
+  Trash2, 
+  Building2,
+  MapPin,
+  DollarSign,
+  TrendingUp,
+  Calendar
+} from 'lucide-react';
+import CompanyWizard from '@/components/company/CompanyWizard';
+import { useUserProfile } from '@/hooks/useUserProfile';
 
 interface Deal {
   id: string;
@@ -21,26 +38,189 @@ interface Deal {
   created_by: string;
 }
 
-const DealManagement = () => {
-  const [selectedDeal, setSelectedDeal] = useState<Deal | null>(null);
-  const [refreshDocuments, setRefreshDocuments] = useState(0);
+interface DealManagerProps {
+  onDealSelect?: (deal: Deal) => void;
+  canCreate?: boolean;
+  canEdit?: boolean;
+  canDelete?: boolean;
+}
 
-  const handleDealSelect = (deal: Deal) => {
-    setSelectedDeal(deal);
+const statusOptions = [
+  { value: 'all', label: 'All Deals' },
+  { value: 'draft', label: 'Draft' },
+  { value: 'active', label: 'Active' },
+  { value: 'archived', label: 'Archived' }
+];
+
+const DealManagement = () => {
+  const [deals, setDeals] = useState<Deal[]>([]);
+  const [filteredDeals, setFilteredDeals] = useState<Deal[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedStatus, setSelectedStatus] = useState('all');
+  const [selectedIndustry, setSelectedIndustry] = useState('all');
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [editingDeal, setEditingDeal] = useState<Deal | null>(null);
+  const { toast } = useToast();
+  const [isCompanyWizardOpen, setIsCompanyWizardOpen] = useState(false);
+  const { canManageUsers } = useUserProfile();
+
+  useEffect(() => {
+    fetchDeals();
+  }, []);
+
+  useEffect(() => {
+    filterDeals();
+  }, [deals, searchTerm, selectedStatus, selectedIndustry]);
+
+  const fetchDeals = async () => {
+    try {
+      setIsLoading(true);
+      const { data, error } = await supabase
+        .from('deals')
+        .select('*')
+        .order('updated_at', { ascending: false });
+
+      if (error) throw error;
+      setDeals(data || []);
+    } catch (error) {
+      console.error('Error fetching deals:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load deals",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleUploadComplete = () => {
+  const filterDeals = () => {
+    let filtered = deals.filter(deal => {
+      const matchesSearch = 
+        deal.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        deal.company_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (deal.description && deal.description.toLowerCase().includes(searchTerm.toLowerCase()));
+      
+      const matchesStatus = selectedStatus === 'all' || deal.status === selectedStatus;
+      const matchesIndustry = selectedIndustry === 'all' || deal.industry === selectedIndustry;
+      
+      return matchesSearch && matchesStatus && matchesIndustry;
+    });
+
+    setFilteredDeals(filtered);
+  };
+
+  const handleStatusChange = async (dealId: string, newStatus: Deal['status']) => {
+    try {
+      const { error } = await supabase
+        .from('deals')
+        .update({ status: newStatus, updated_at: new Date().toISOString() })
+        .eq('id', dealId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: `Deal ${newStatus === 'archived' ? 'archived' : 'updated'} successfully`,
+      });
+
+      fetchDeals();
+    } catch (error) {
+      console.error('Error updating deal status:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update deal status",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDelete = async (dealId: string) => {
+    if (!canDelete) return;
+
+    try {
+      const { error } = await supabase
+        .from('deals')
+        .delete()
+        .eq('id', dealId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Deal deleted successfully",
+      });
+
+      fetchDeals();
+    } catch (error) {
+      console.error('Error deleting deal:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete deal",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const getStatusColor = (status: Deal['status']) => {
+    switch (status) {
+      case 'draft':
+        return 'bg-gray-500/20 text-gray-400 border-gray-500/30';
+      case 'active':
+        return 'bg-green-500/20 text-green-400 border-green-500/30';
+      case 'archived':
+        return 'bg-orange-500/20 text-orange-400 border-orange-500/30';
+      default:
+        return 'bg-gray-500/20 text-gray-400 border-gray-500/30';
+    }
+  };
+
+  const getStatusLabel = (status: Deal['status']) => {
+    return status.charAt(0).toUpperCase() + status.slice(1);
+  };
+
+  const formatCurrency = (value: string | null) => {
+    if (!value) return 'N/A';
+    return value.startsWith('$') ? value : `$${value}`;
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    });
+  };
+
+  const uniqueIndustries = Array.from(new Set(deals.map(deal => deal.industry).filter(Boolean)));
+
+  const handleCompanyWizardSuccess = (companyId: string) => {
+    // Redirect to deal detail page or refresh deals list
+    console.log('Company created:', companyId);
     setRefreshDocuments(prev => prev + 1);
   };
 
   return (
     <div className="min-h-screen bg-background p-6 space-y-6">
       <div className="max-w-7xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">Deal & Document Management</h1>
-          <p className="text-muted-foreground">
-            Manage deals, upload documents, and control access in real-time
-          </p>
+        <div className="mb-8 flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground mb-2">Deal & Document Management</h1>
+            <p className="text-muted-foreground">
+              Manage deals, upload documents, and control access in real-time
+            </p>
+          </div>
+          
+          {canManageUsers() && (
+            <Button
+              onClick={() => setIsCompanyWizardOpen(true)}
+              className="bg-primary hover:bg-primary/90 text-primary-foreground"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Add Company
+            </Button>
+          )}
         </div>
 
         <Tabs defaultValue="deals" className="space-y-6">
@@ -194,6 +374,13 @@ const DealManagement = () => {
             )}
           </TabsContent>
         </Tabs>
+
+        {/* Company Wizard */}
+        <CompanyWizard
+          isOpen={isCompanyWizardOpen}
+          onClose={() => setIsCompanyWizardOpen(false)}
+          onSuccess={handleCompanyWizardSuccess}
+        />
       </div>
     </div>
   );
