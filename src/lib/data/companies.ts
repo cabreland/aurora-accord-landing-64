@@ -1,4 +1,5 @@
 
+
 import { supabase } from '@/integrations/supabase/client';
 
 export interface CompanyData {
@@ -29,21 +30,26 @@ export const upsertCompanyDraft = async (data: Partial<CompanyData>, id?: string
 
     // Filter out empty string values for enums
     const cleanData = { ...data };
-    if (cleanData.stage === '') delete cleanData.stage;
-    if (cleanData.priority === '') delete cleanData.priority;
+    if ((cleanData.stage as any) === '') delete cleanData.stage;
+    if ((cleanData.priority as any) === '') delete cleanData.priority;
 
     const companyData = {
-      ...cleanData,
+      name: cleanData.name || 'Untitled Company', // Ensure name is always present
+      industry: cleanData.industry,
+      location: cleanData.location,
+      summary: cleanData.summary,
+      stage: cleanData.stage,
+      priority: cleanData.priority,
+      fit_score: cleanData.fit_score,
       owner_id: cleanData.owner_id || user.id,
+      revenue: cleanData.revenue,
+      ebitda: cleanData.ebitda,
+      asking_price: cleanData.asking_price,
+      passcode: cleanData.passcode,
       is_draft: true,
       highlights: JSON.stringify(cleanData.highlights || []),
       risks: JSON.stringify(cleanData.risks || []),
     };
-
-    // Ensure name is provided for database requirements
-    if (!companyData.name) {
-      companyData.name = 'Untitled Company';
-    }
 
     if (id) {
       // Update existing draft
@@ -77,11 +83,22 @@ export const finalizeCompany = async (id: string, data: Partial<CompanyData>): P
   try {
     // Filter out empty string values for enums
     const cleanData = { ...data };
-    if (cleanData.stage === '') delete cleanData.stage;
-    if (cleanData.priority === '') delete cleanData.priority;
+    if ((cleanData.stage as any) === '') delete cleanData.stage;
+    if ((cleanData.priority as any) === '') delete cleanData.priority;
 
     const companyData = {
-      ...cleanData,
+      name: cleanData.name || 'Untitled Company', // Ensure name is always present
+      industry: cleanData.industry,
+      location: cleanData.location,
+      summary: cleanData.summary,
+      stage: cleanData.stage,
+      priority: cleanData.priority,
+      fit_score: cleanData.fit_score,
+      owner_id: cleanData.owner_id,
+      revenue: cleanData.revenue,
+      ebitda: cleanData.ebitda,
+      asking_price: cleanData.asking_price,
+      passcode: cleanData.passcode,
       is_draft: false,
       highlights: JSON.stringify(cleanData.highlights || []),
       risks: JSON.stringify(cleanData.risks || []),
@@ -149,3 +166,4 @@ export const getCompanies = async (query?: string): Promise<CompanyData[]> => {
     return [];
   }
 };
+
