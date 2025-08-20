@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -22,6 +23,7 @@ import {
   SortDesc
 } from 'lucide-react';
 import { formatFileSize } from '@/lib/utils';
+import { useDebounce } from '@/hooks/useDebounce';
 
 interface Document {
   id: string;
@@ -58,6 +60,7 @@ const DocumentList = ({ dealId, canDownload = true, canDelete = false, section }
   const [filteredDocuments, setFilteredDocuments] = useState<Document[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const debouncedSearchTerm = useDebounce(searchTerm, 300);
   const [selectedTag, setSelectedTag] = useState('all');
   const [sortBy, setSortBy] = useState<'name' | 'date' | 'size'>('date');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
@@ -72,7 +75,7 @@ const DocumentList = ({ dealId, canDownload = true, canDelete = false, section }
 
   useEffect(() => {
     filterAndSortDocuments();
-  }, [documents, searchTerm, selectedTag, sortBy, sortOrder]);
+  }, [documents, debouncedSearchTerm, selectedTag, sortBy, sortOrder]);
 
   const fetchDocuments = async () => {
     try {
@@ -80,7 +83,7 @@ const DocumentList = ({ dealId, canDownload = true, canDelete = false, section }
       
       const { data, error } = await supabase
         .from('documents')
-        .select('*')
+        .select('id, name, file_path, file_size, file_type, tag, created_at, uploaded_by, version')
         .eq('deal_id', dealId)
         .order('created_at', { ascending: false });
 
@@ -100,7 +103,7 @@ const DocumentList = ({ dealId, canDownload = true, canDelete = false, section }
 
   const filterAndSortDocuments = () => {
     let filtered = documents.filter(doc => {
-      const matchesSearch = doc.name.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesSearch = doc.name.toLowerCase().includes(debouncedSearchTerm.toLowerCase());
       const matchesTag = selectedTag === 'all' || doc.tag === selectedTag;
       return matchesSearch && matchesTag;
     });
