@@ -87,7 +87,7 @@ const ReviewStep: React.FC<ReviewStepProps> = ({ data, onChange, isValid }) => {
               <div>
                 <p className="text-sm text-muted-foreground">Priority</p>
                 <Badge 
-                  variant={data.priority === 'high' || data.priority === 'critical' ? 'destructive' : 'secondary'}
+                  variant={data.priority === 'high' ? 'destructive' : 'secondary'}
                   className="capitalize"
                 >
                   {data.priority || 'Not set'}

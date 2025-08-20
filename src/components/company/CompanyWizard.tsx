@@ -40,7 +40,7 @@ export interface CompanyFormData {
   location: string;
   summary: string;
   
-  // Deal
+  // Deal - Allow empty strings for initial state, but filter them out before saving
   stage: 'teaser' | 'discovery' | 'dd' | 'closing' | '';
   priority: 'low' | 'medium' | 'high' | '';
   fit_score: number;
@@ -146,9 +146,22 @@ const CompanyWizard: React.FC<CompanyWizardProps> = ({
     
     try {
       setIsAutoSaving(true);
+      // Convert form data to the format expected by the database
       const dataToSave = {
-        ...formData,
+        name: formData.name,
+        industry: formData.industry,
+        location: formData.location,
+        summary: formData.summary,
+        stage: formData.stage !== '' ? formData.stage : undefined,
+        priority: formData.priority !== '' ? formData.priority : undefined,
+        fit_score: formData.fit_score,
         owner_id: formData.owner_id || user.id,
+        revenue: formData.revenue,
+        ebitda: formData.ebitda,
+        asking_price: formData.asking_price,
+        highlights: formData.highlights,
+        risks: formData.risks,
+        passcode: formData.passcode,
       };
       
       const id = await upsertCompanyDraft(dataToSave, draftId);
@@ -207,9 +220,22 @@ const CompanyWizard: React.FC<CompanyWizardProps> = ({
 
     setIsSubmitting(true);
     try {
+      // Convert form data to the format expected by the database
       const finalData = {
-        ...formData,
+        name: formData.name,
+        industry: formData.industry,
+        location: formData.location,
+        summary: formData.summary,
+        stage: formData.stage !== '' ? formData.stage : undefined,
+        priority: formData.priority !== '' ? formData.priority : undefined,
+        fit_score: formData.fit_score,
         owner_id: formData.owner_id || user?.id || '',
+        revenue: formData.revenue,
+        ebitda: formData.ebitda,
+        asking_price: formData.asking_price,
+        highlights: formData.highlights,
+        risks: formData.risks,
+        passcode: formData.passcode,
       };
       
       const companyId = await finalizeCompany(draftId, finalData);

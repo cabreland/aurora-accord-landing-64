@@ -1,6 +1,5 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 
 export interface CompanyData {
   id?: string;
@@ -28,13 +27,23 @@ export const upsertCompanyDraft = async (data: Partial<CompanyData>, id?: string
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('User not authenticated');
 
+    // Filter out empty string values for enums
+    const cleanData = { ...data };
+    if (cleanData.stage === '') delete cleanData.stage;
+    if (cleanData.priority === '') delete cleanData.priority;
+
     const companyData = {
-      ...data,
-      owner_id: data.owner_id || user.id,
+      ...cleanData,
+      owner_id: cleanData.owner_id || user.id,
       is_draft: true,
-      highlights: JSON.stringify(data.highlights || []),
-      risks: JSON.stringify(data.risks || []),
+      highlights: JSON.stringify(cleanData.highlights || []),
+      risks: JSON.stringify(cleanData.risks || []),
     };
+
+    // Ensure name is provided for database requirements
+    if (!companyData.name) {
+      companyData.name = 'Untitled Company';
+    }
 
     if (id) {
       // Update existing draft
@@ -66,11 +75,16 @@ export const upsertCompanyDraft = async (data: Partial<CompanyData>, id?: string
 
 export const finalizeCompany = async (id: string, data: Partial<CompanyData>): Promise<string> => {
   try {
+    // Filter out empty string values for enums
+    const cleanData = { ...data };
+    if (cleanData.stage === '') delete cleanData.stage;
+    if (cleanData.priority === '') delete cleanData.priority;
+
     const companyData = {
-      ...data,
+      ...cleanData,
       is_draft: false,
-      highlights: JSON.stringify(data.highlights || []),
-      risks: JSON.stringify(data.risks || []),
+      highlights: JSON.stringify(cleanData.highlights || []),
+      risks: JSON.stringify(cleanData.risks || []),
     };
 
     const { data: finalizedCompany, error } = await supabase
