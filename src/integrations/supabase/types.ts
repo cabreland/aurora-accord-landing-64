@@ -14,6 +14,69 @@ export type Database = {
   }
   public: {
     Tables: {
+      companies: {
+        Row: {
+          asking_price: string | null
+          created_at: string
+          ebitda: string | null
+          fit_score: number | null
+          highlights: Json | null
+          id: string
+          industry: string | null
+          is_draft: boolean
+          location: string | null
+          name: string
+          owner_id: string | null
+          passcode: string | null
+          priority: Database["public"]["Enums"]["priority_level"] | null
+          revenue: string | null
+          risks: Json | null
+          stage: Database["public"]["Enums"]["company_stage"] | null
+          summary: string | null
+          updated_at: string
+        }
+        Insert: {
+          asking_price?: string | null
+          created_at?: string
+          ebitda?: string | null
+          fit_score?: number | null
+          highlights?: Json | null
+          id?: string
+          industry?: string | null
+          is_draft?: boolean
+          location?: string | null
+          name: string
+          owner_id?: string | null
+          passcode?: string | null
+          priority?: Database["public"]["Enums"]["priority_level"] | null
+          revenue?: string | null
+          risks?: Json | null
+          stage?: Database["public"]["Enums"]["company_stage"] | null
+          summary?: string | null
+          updated_at?: string
+        }
+        Update: {
+          asking_price?: string | null
+          created_at?: string
+          ebitda?: string | null
+          fit_score?: number | null
+          highlights?: Json | null
+          id?: string
+          industry?: string | null
+          is_draft?: boolean
+          location?: string | null
+          name?: string
+          owner_id?: string | null
+          passcode?: string | null
+          priority?: Database["public"]["Enums"]["priority_level"] | null
+          revenue?: string | null
+          risks?: Json | null
+          stage?: Database["public"]["Enums"]["company_stage"] | null
+          summary?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       deal_assignments: {
         Row: {
           assigned_by: string
@@ -357,6 +420,7 @@ export type Database = {
         | "minority_partner"
         | "explore_options"
       business_type: "saas" | "ecom" | "agency" | "other"
+      company_stage: "teaser" | "discovery" | "dd" | "closing"
       deal_status: "active" | "archived" | "draft"
       document_tag:
         | "cim"
@@ -366,6 +430,7 @@ export type Database = {
         | "legal"
         | "due_diligence"
         | "other"
+      priority_level: "low" | "medium" | "high"
       referral_source: "referral" | "social_media" | "search" | "other"
       user_role: "admin" | "editor" | "viewer"
     }
@@ -501,6 +566,7 @@ export const Constants = {
         "explore_options",
       ],
       business_type: ["saas", "ecom", "agency", "other"],
+      company_stage: ["teaser", "discovery", "dd", "closing"],
       deal_status: ["active", "archived", "draft"],
       document_tag: [
         "cim",
@@ -511,6 +577,7 @@ export const Constants = {
         "due_diligence",
         "other",
       ],
+      priority_level: ["low", "medium", "high"],
       referral_source: ["referral", "social_media", "search", "other"],
       user_role: ["admin", "editor", "viewer"],
     },

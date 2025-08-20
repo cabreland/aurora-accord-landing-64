@@ -1,11 +1,15 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, ArrowRight, Save, Check } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useDebounce } from '@/hooks/useDebounce';
+import { upsertCompanyDraft, finalizeCompany, getCompany } from '@/lib/data/companies';
+import { useAuth } from '@/hooks/useAuth';
+import { useUserProfile } from '@/hooks/useUserProfile';
 import BasicsStep from './wizard/BasicsStep';
 import DealStep from './wizard/DealStep';
 import FinancialsStep from './wizard/FinancialsStep';
@@ -37,8 +41,8 @@ export interface CompanyFormData {
   summary: string;
   
   // Deal
-  stage: string;
-  priority: string;
+  stage: 'teaser' | 'discovery' | 'dd' | 'closing' | '';
+  priority: 'low' | 'medium' | 'high' | '';
   fit_score: number;
   owner_id: string;
   
@@ -79,21 +83,80 @@ const CompanyWizard: React.FC<CompanyWizardProps> = ({
     passcode: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isDraft, setIsDraft] = useState(true);
+  const [draftId, setDraftId] = useState<string | undefined>(editCompanyId);
+  const [isAutoSaving, setIsAutoSaving] = useState(false);
+  const { user } = useAuth();
+  const { profile } = useUserProfile();
   const { toast } = useToast();
+
+  // Debounce form data for auto-save (400ms)
+  const debouncedFormData = useDebounce(formData, 400);
+
+  // Load existing company data if editing
+  useEffect(() => {
+    if (editCompanyId && isOpen) {
+      loadCompanyData(editCompanyId);
+    }
+  }, [editCompanyId, isOpen]);
+
+  // Auto-save draft when debounced form data changes
+  useEffect(() => {
+    if (isOpen && formData.name.trim() && user) {
+      saveDraft();
+    }
+  }, [debouncedFormData, isOpen, user]);
+
+  const loadCompanyData = async (companyId: string) => {
+    try {
+      const company = await getCompany(companyId);
+      if (company) {
+        setFormData({
+          name: company.name || '',
+          industry: company.industry || '',
+          location: company.location || '',
+          summary: company.summary || '',
+          stage: company.stage || '',
+          priority: company.priority || '',
+          fit_score: company.fit_score || 50,
+          owner_id: company.owner_id || user?.id || '',
+          revenue: company.revenue || '',
+          ebitda: company.ebitda || '',
+          asking_price: company.asking_price || '',
+          highlights: company.highlights || [],
+          risks: company.risks || [],
+          passcode: company.passcode || ''
+        });
+      }
+    } catch (error) {
+      console.error('Error loading company data:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load company data",
+        variant: "destructive",
+      });
+    }
+  };
 
   const updateFormData = (stepData: Partial<CompanyFormData>) => {
     setFormData(prev => ({ ...prev, ...stepData }));
-    // Auto-save as draft
-    saveDraft({ ...formData, ...stepData });
   };
 
-  const saveDraft = async (data: CompanyFormData) => {
+  const saveDraft = async () => {
+    if (!user) return;
+    
     try {
-      // TODO: Implement draft save to companies table with is_draft=true
-      console.log('Saving draft:', data);
+      setIsAutoSaving(true);
+      const dataToSave = {
+        ...formData,
+        owner_id: formData.owner_id || user.id,
+      };
+      
+      const id = await upsertCompanyDraft(dataToSave, draftId);
+      setDraftId(id);
     } catch (error) {
       console.error('Error saving draft:', error);
+    } finally {
+      setIsAutoSaving(false);
     }
   };
 
@@ -133,7 +196,7 @@ const CompanyWizard: React.FC<CompanyWizardProps> = ({
   };
 
   const handleSubmit = async () => {
-    if (!validateStep(currentStep)) {
+    if (!validateStep(currentStep) || !draftId) {
       toast({
         title: "Validation Error",
         description: "Please fill in all required fields.",
@@ -144,17 +207,19 @@ const CompanyWizard: React.FC<CompanyWizardProps> = ({
 
     setIsSubmitting(true);
     try {
-      // TODO: Implement company creation with is_draft=false
-      console.log('Creating company:', formData);
+      const finalData = {
+        ...formData,
+        owner_id: formData.owner_id || user?.id || '',
+      };
       
-      const mockCompanyId = `company-${Date.now()}`;
+      const companyId = await finalizeCompany(draftId, finalData);
       
       toast({
         title: "Success",
         description: `Company "${formData.name}" has been created successfully.`,
       });
       
-      onSuccess(mockCompanyId);
+      onSuccess(companyId);
       onClose();
     } catch (error) {
       console.error('Error creating company:', error);
@@ -222,9 +287,14 @@ const CompanyWizard: React.FC<CompanyWizardProps> = ({
         {/* Footer */}
         <div className="flex items-center justify-between pt-4 border-t border-border bg-card">
           <div className="flex items-center gap-2">
-            {isDraft && (
+            {isAutoSaving && (
               <Badge variant="outline" className="text-muted-foreground">
-                Draft Auto-saved
+                Saving...
+              </Badge>
+            )}
+            {draftId && !isAutoSaving && (
+              <Badge variant="outline" className="text-muted-foreground">
+                Draft Saved
               </Badge>
             )}
           </div>
@@ -241,8 +311,8 @@ const CompanyWizard: React.FC<CompanyWizardProps> = ({
             
             <Button
               variant="outline"
-              onClick={() => saveDraft(formData)}
-              disabled={isSubmitting}
+              onClick={saveDraft}
+              disabled={isSubmitting || isAutoSaving}
             >
               <Save className="w-4 h-4 mr-2" />
               Save Draft
@@ -251,7 +321,7 @@ const CompanyWizard: React.FC<CompanyWizardProps> = ({
             {isLastStep ? (
               <Button
                 onClick={handleSubmit}
-                disabled={isSubmitting || !validateStep(currentStep)}
+                disabled={isSubmitting || !validateStep(currentStep) || !draftId}
                 className="bg-primary hover:bg-primary/90 text-primary-foreground"
               >
                 {isSubmitting ? 'Creating...' : 'Create Company'}

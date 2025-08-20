@@ -1,27 +1,9 @@
 
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { getCompany, getCompanies, upsertCompanyDraft, finalizeCompany, CompanyData } from '@/lib/data/companies';
 
-export interface Company {
-  id: string;
-  name: string;
-  industry: string;
-  location: string;
-  summary: string;
-  stage: string;
-  priority: string;
-  fit_score: number;
-  owner_id: string;
-  revenue: string;
-  ebitda: string;
-  asking_price: string;
-  highlights: string[];
-  risks: string[];
-  passcode: string;
-  is_draft: boolean;
-  created_at: string;
-  updated_at: string;
-}
+export interface Company extends CompanyData {}
 
 export const useCompany = (id?: string) => {
   const [company, setCompany] = useState<Company | null>(null);
@@ -37,29 +19,8 @@ export const useCompany = (id?: string) => {
   const fetchCompany = async (companyId: string) => {
     setLoading(true);
     try {
-      // TODO: Implement actual API call
-      console.log('Fetching company:', companyId);
-      // Mock data for now
-      setCompany({
-        id: companyId,
-        name: 'Sample Company',
-        industry: 'Technology',
-        location: 'San Francisco, CA',
-        summary: 'A sample company',
-        stage: 'active',
-        priority: 'high',
-        fit_score: 85,
-        owner_id: 'current-user',
-        revenue: '1000000',
-        ebitda: '200000',
-        asking_price: '5000000',
-        highlights: ['Strong team', 'Growing market'],
-        risks: ['Competition', 'Market volatility'],
-        passcode: '',
-        is_draft: false,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      });
+      const data = await getCompany(companyId);
+      setCompany(data);
     } catch (error) {
       console.error('Error fetching company:', error);
       toast({
@@ -91,10 +52,8 @@ export const useCompanies = (query?: string) => {
   const fetchCompanies = async (searchQuery?: string) => {
     setLoading(true);
     try {
-      // TODO: Implement actual API call
-      console.log('Fetching companies with query:', searchQuery);
-      // Mock data for now
-      setCompanies([]);
+      const data = await getCompanies(searchQuery);
+      setCompanies(data);
     } catch (error) {
       console.error('Error fetching companies:', error);
       toast({
@@ -116,9 +75,8 @@ export const useCompanies = (query?: string) => {
 
 export const createCompany = async (payload: Partial<Company>) => {
   try {
-    // TODO: Implement actual API call
-    console.log('Creating company:', payload);
-    return { success: true, id: `company-${Date.now()}` };
+    const id = await upsertCompanyDraft(payload);
+    return { success: true, id };
   } catch (error) {
     console.error('Error creating company:', error);
     throw error;
@@ -127,8 +85,7 @@ export const createCompany = async (payload: Partial<Company>) => {
 
 export const updateCompany = async (id: string, payload: Partial<Company>) => {
   try {
-    // TODO: Implement actual API call
-    console.log('Updating company:', id, payload);
+    await upsertCompanyDraft(payload, id);
     return { success: true };
   } catch (error) {
     console.error('Error updating company:', error);

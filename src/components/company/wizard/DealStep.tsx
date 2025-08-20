@@ -4,6 +4,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
 import { CompanyFormData } from '../CompanyWizard';
+import { useUserProfile } from '@/hooks/useUserProfile';
 
 interface DealStepProps {
   data: CompanyFormData;
@@ -12,23 +13,28 @@ interface DealStepProps {
 }
 
 const dealStages = [
-  'Lead',
-  'Qualified',
-  'In Review',
-  'Due Diligence',
-  'Negotiation',
-  'Closing',
-  'Closed'
+  { value: 'teaser', label: 'Teaser' },
+  { value: 'discovery', label: 'Discovery' },
+  { value: 'dd', label: 'Due Diligence' },
+  { value: 'closing', label: 'Closing' }
 ];
 
 const priorities = [
-  'Low',
-  'Medium',
-  'High',
-  'Critical'
+  { value: 'low', label: 'Low' },
+  { value: 'medium', label: 'Medium' },
+  { value: 'high', label: 'High' }
 ];
 
 const DealStep: React.FC<DealStepProps> = ({ data, onChange, isValid }) => {
+  const { profile } = useUserProfile();
+
+  // Set current user as default owner if not set
+  React.useEffect(() => {
+    if (!data.owner_id && profile?.user_id) {
+      onChange({ owner_id: profile.user_id });
+    }
+  }, [profile?.user_id, data.owner_id, onChange]);
+
   return (
     <div className="space-y-6">
       <div className="text-center mb-6">
@@ -43,14 +49,14 @@ const DealStep: React.FC<DealStepProps> = ({ data, onChange, isValid }) => {
           <Label htmlFor="stage" className="text-foreground">
             Deal Stage <span className="text-destructive">*</span>
           </Label>
-          <Select value={data.stage} onValueChange={(value) => onChange({ stage: value })}>
+          <Select value={data.stage} onValueChange={(value) => onChange({ stage: value as CompanyFormData['stage'] })}>
             <SelectTrigger className="bg-background border-border">
               <SelectValue placeholder="Select deal stage" />
             </SelectTrigger>
             <SelectContent>
               {dealStages.map((stage) => (
-                <SelectItem key={stage} value={stage.toLowerCase().replace(' ', '_')}>
-                  {stage}
+                <SelectItem key={stage.value} value={stage.value}>
+                  {stage.label}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -64,14 +70,14 @@ const DealStep: React.FC<DealStepProps> = ({ data, onChange, isValid }) => {
           <Label htmlFor="priority" className="text-foreground">
             Priority <span className="text-destructive">*</span>
           </Label>
-          <Select value={data.priority} onValueChange={(value) => onChange({ priority: value })}>
+          <Select value={data.priority} onValueChange={(value) => onChange({ priority: value as CompanyFormData['priority'] })}>
             <SelectTrigger className="bg-background border-border">
               <SelectValue placeholder="Select priority" />
             </SelectTrigger>
             <SelectContent>
               {priorities.map((priority) => (
-                <SelectItem key={priority} value={priority.toLowerCase()}>
-                  {priority}
+                <SelectItem key={priority.value} value={priority.value}>
+                  {priority.label}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -110,9 +116,11 @@ const DealStep: React.FC<DealStepProps> = ({ data, onChange, isValid }) => {
               <SelectValue placeholder="Select deal owner" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="current-user">Current User</SelectItem>
-              <SelectItem value="admin">Admin User</SelectItem>
-              <SelectItem value="other">Other Team Member</SelectItem>
+              <SelectItem value={profile?.user_id || 'current-user'}>
+                {profile?.first_name && profile?.last_name 
+                  ? `${profile.first_name} ${profile.last_name}` 
+                  : profile?.email || 'Current User'}
+              </SelectItem>
             </SelectContent>
           </Select>
           {!data.owner_id && (

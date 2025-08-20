@@ -26,10 +26,19 @@ export const withAuth = (requiredRole?: RequiredRole) => {
 
       if (requiredRole) {
         const userRole = profile?.role;
-        const hasAccess = 
-          requiredRole === 'admin' && userRole === 'admin' ||
-          requiredRole === 'staff' && ['admin', 'editor'].includes(userRole || '') ||
-          requiredRole === 'investor' && ['admin', 'editor', 'viewer'].includes(userRole || '');
+        let hasAccess = false;
+        
+        switch (requiredRole) {
+          case 'admin':
+            hasAccess = userRole === 'admin';
+            break;
+          case 'staff':
+            hasAccess = userRole === 'admin' || userRole === 'editor';
+            break;
+          case 'investor':
+            hasAccess = userRole === 'admin' || userRole === 'editor' || userRole === 'viewer';
+            break;
+        }
 
         if (!hasAccess) {
           return <Navigate to="/investor-portal" replace />;
