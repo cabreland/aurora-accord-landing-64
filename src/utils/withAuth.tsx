@@ -10,7 +10,7 @@ export const withAuth = (requiredRole?: RequiredRole) => {
   return function AuthWrapper(Component: React.ComponentType<any>) {
     return function WrappedComponent(props: any) {
       const { user, loading: authLoading } = useAuth();
-      const { getUserRole, loading: profileLoading } = useUserProfile();
+      const { profile, loading: profileLoading } = useUserProfile();
 
       if (authLoading || profileLoading) {
         return (
@@ -25,11 +25,11 @@ export const withAuth = (requiredRole?: RequiredRole) => {
       }
 
       if (requiredRole) {
-        const userRole = getUserRole();
+        const userRole = profile?.role;
         const hasAccess = 
           requiredRole === 'admin' && userRole === 'admin' ||
-          requiredRole === 'staff' && ['admin', 'editor'].includes(userRole) ||
-          requiredRole === 'investor' && ['admin', 'editor', 'viewer'].includes(userRole);
+          requiredRole === 'staff' && ['admin', 'editor'].includes(userRole || '') ||
+          requiredRole === 'investor' && ['admin', 'editor', 'viewer'].includes(userRole || '');
 
         if (!hasAccess) {
           return <Navigate to="/investor-portal" replace />;
