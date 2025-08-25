@@ -11,12 +11,16 @@ import UploadDialog from '@/components/documents/UploadDialog';
 
 const DocumentsPage = () => {
   const [showUploadDialog, setShowUploadDialog] = useState(false);
-  const [selectedDealId, setSelectedDealId] = useState<string>('');
+  const [selectedDealId, setSelectedDealId] = useState<string>('all');
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   const handleUploadComplete = () => {
     setRefreshTrigger(prev => prev + 1);
     setShowUploadDialog(false);
+  };
+
+  const handleDealSelect = (dealId: string) => {
+    setSelectedDealId(dealId);
   };
 
   return (
@@ -43,7 +47,7 @@ const DocumentsPage = () => {
         </div>
 
         <DocumentsToolbar 
-          onDealSelect={setSelectedDealId}
+          onDealSelect={handleDealSelect}
           selectedDealId={selectedDealId}
         />
 
@@ -53,7 +57,7 @@ const DocumentsPage = () => {
           </CardHeader>
           <CardContent className="p-0">
             <DocumentList
-              dealId={selectedDealId || 'all'}
+              dealId={selectedDealId === 'all' ? 'all' : selectedDealId}
               canDownload={true}
               canDelete={true}
               refreshTrigger={refreshTrigger}
@@ -65,7 +69,7 @@ const DocumentsPage = () => {
           isOpen={showUploadDialog}
           onClose={() => setShowUploadDialog(false)}
           onUploadComplete={handleUploadComplete}
-          selectedDealId={selectedDealId}
+          selectedDealId={selectedDealId === 'all' ? '' : selectedDealId}
         />
       </div>
     </DashboardLayout>

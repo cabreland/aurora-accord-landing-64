@@ -74,7 +74,7 @@ const DocumentsToolbar = ({ onDealSelect, selectedDealId }: DocumentsToolbarProp
                 <SelectValue placeholder="Filter by deal..." />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Deals</SelectItem>
+                <SelectItem value="all">All Deals</SelectItem>
                 {deals.map((deal) => (
                   <SelectItem key={deal.id} value={deal.id}>
                     <div className="flex flex-col">
@@ -88,7 +88,7 @@ const DocumentsToolbar = ({ onDealSelect, selectedDealId }: DocumentsToolbarProp
           </div>
 
           <div className="flex items-center gap-2">
-            {selectedDealId && (
+            {selectedDealId && selectedDealId !== 'all' && (
               <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">
                 <Filter className="w-3 h-3 mr-1" />
                 Filtered
