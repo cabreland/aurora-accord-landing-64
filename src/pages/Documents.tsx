@@ -1,44 +1,72 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import DashboardLayout from '@/components/investor/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { FileText } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { FileText, Upload, Plus } from 'lucide-react';
 import { withAuth } from '@/utils/withAuth';
+import DocumentList from '@/components/documents/DocumentList';
+import DocumentsToolbar from '@/components/documents/DocumentsToolbar';
+import UploadDialog from '@/components/documents/UploadDialog';
 
 const DocumentsPage = () => {
+  const [showUploadDialog, setShowUploadDialog] = useState(false);
+  const [selectedDealId, setSelectedDealId] = useState<string>('');
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  const handleUploadComplete = () => {
+    setRefreshTrigger(prev => prev + 1);
+    setShowUploadDialog(false);
+  };
+
   return (
     <DashboardLayout activeTab="documents">
       <div className="space-y-6">
-        <div className="flex items-center gap-3">
-          <FileText className="w-8 h-8 text-primary" />
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">Document Management</h1>
-            <p className="text-muted-foreground">
-              Manage documents across all deals and companies
-            </p>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <FileText className="w-8 h-8 text-primary" />
+            <div>
+              <h1 className="text-3xl font-bold text-foreground">Document Management</h1>
+              <p className="text-muted-foreground">
+                Manage documents across all deals and companies
+              </p>
+            </div>
           </div>
+          
+          <Button 
+            onClick={() => setShowUploadDialog(true)}
+            className="bg-primary hover:bg-primary/90"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Upload Documents
+          </Button>
         </div>
+
+        <DocumentsToolbar 
+          onDealSelect={setSelectedDealId}
+          selectedDealId={selectedDealId}
+        />
 
         <Card className="bg-card border-border">
           <CardHeader>
-            <CardTitle className="text-foreground">Document Overview</CardTitle>
+            <CardTitle className="text-foreground">All Documents</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-center py-12">
-              <FileText className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-foreground mb-2">
-                Document Management System
-              </h3>
-              <p className="text-muted-foreground">
-                TODO: Implement global document management features including:
-                <br />• Document search and filtering
-                <br />• Bulk operations
-                <br />• Access control management
-                <br />• Version history
-              </p>
-            </div>
+          <CardContent className="p-0">
+            <DocumentList
+              dealId={selectedDealId || 'all'}
+              canDownload={true}
+              canDelete={true}
+              refreshTrigger={refreshTrigger}
+            />
           </CardContent>
         </Card>
+
+        <UploadDialog
+          isOpen={showUploadDialog}
+          onClose={() => setShowUploadDialog(false)}
+          onUploadComplete={handleUploadComplete}
+          selectedDealId={selectedDealId}
+        />
       </div>
     </DashboardLayout>
   );
