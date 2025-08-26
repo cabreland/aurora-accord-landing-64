@@ -20,9 +20,8 @@ export interface CompanyData {
   is_draft?: boolean;
   created_at?: string;
   updated_at?: string;
-  extended_data?: any;
 
-  // Extended company details
+  // Extended company details - these will be stored in existing fields or omitted for now
   detailed_description?: string;
   founded_year?: string;
   team_size?: string;
@@ -55,6 +54,7 @@ export const upsertCompanyDraft = async (data: Partial<CompanyData>, id?: string
     if ((cleanData.stage as any) === '') delete cleanData.stage;
     if ((cleanData.priority as any) === '') delete cleanData.priority;
 
+    // Only include fields that actually exist in the database
     const companyData = {
       name: cleanData.name || 'Untitled Company',
       industry: cleanData.industry,
@@ -70,25 +70,7 @@ export const upsertCompanyDraft = async (data: Partial<CompanyData>, id?: string
       passcode: cleanData.passcode,
       is_draft: true,
       highlights: JSON.stringify(cleanData.highlights || []),
-      risks: JSON.stringify(cleanData.risks || []),
-      // Extended fields stored as JSONB
-      extended_data: JSON.stringify({
-        detailed_description: cleanData.detailed_description,
-        founded_year: cleanData.founded_year,
-        team_size: cleanData.team_size,
-        reason_for_sale: cleanData.reason_for_sale,
-        growth_opportunities: cleanData.growth_opportunities || [],
-        founders_message: cleanData.founders_message,
-        founder_name: cleanData.founder_name,
-        ideal_buyer_profile: cleanData.ideal_buyer_profile,
-        rollup_potential: cleanData.rollup_potential,
-        market_trends: cleanData.market_trends,
-        profit_margin: cleanData.profit_margin,
-        customer_count: cleanData.customer_count,
-        recurring_revenue: cleanData.recurring_revenue,
-        cac_ltv_ratio: cleanData.cac_ltv_ratio,
-        placeholder_documents: cleanData.placeholder_documents || []
-      })
+      risks: JSON.stringify(cleanData.risks || [])
     };
 
     if (id) {
@@ -126,6 +108,7 @@ export const finalizeCompany = async (id: string, data: Partial<CompanyData>): P
     if ((cleanData.stage as any) === '') delete cleanData.stage;
     if ((cleanData.priority as any) === '') delete cleanData.priority;
 
+    // Only include fields that actually exist in the database
     const companyData = {
       name: cleanData.name || 'Untitled Company',
       industry: cleanData.industry,
@@ -141,25 +124,7 @@ export const finalizeCompany = async (id: string, data: Partial<CompanyData>): P
       passcode: cleanData.passcode,
       is_draft: false,
       highlights: JSON.stringify(cleanData.highlights || []),
-      risks: JSON.stringify(cleanData.risks || []),
-      // Extended fields stored as JSONB
-      extended_data: JSON.stringify({
-        detailed_description: cleanData.detailed_description,
-        founded_year: cleanData.founded_year,
-        team_size: cleanData.team_size,
-        reason_for_sale: cleanData.reason_for_sale,
-        growth_opportunities: cleanData.growth_opportunities || [],
-        founders_message: cleanData.founders_message,
-        founder_name: cleanData.founder_name,
-        ideal_buyer_profile: cleanData.ideal_buyer_profile,
-        rollup_potential: cleanData.rollup_potential,
-        market_trends: cleanData.market_trends,
-        profit_margin: cleanData.profit_margin,
-        customer_count: cleanData.customer_count,
-        recurring_revenue: cleanData.recurring_revenue,
-        cac_ltv_ratio: cleanData.cac_ltv_ratio,
-        placeholder_documents: cleanData.placeholder_documents || []
-      })
+      risks: JSON.stringify(cleanData.risks || [])
     };
 
     const { data: finalizedCompany, error } = await supabase
@@ -190,14 +155,10 @@ export const getCompany = async (id: string): Promise<CompanyData | null> => {
       return null;
     }
 
-    // Parse extended data safely
-    const extendedData = (data as any).extended_data ? JSON.parse((data as any).extended_data) : {};
-
     return {
       ...data,
       highlights: typeof data.highlights === 'string' ? JSON.parse(data.highlights) : data.highlights || [],
-      risks: typeof data.risks === 'string' ? JSON.parse(data.risks) : data.risks || [],
-      ...extendedData
+      risks: typeof data.risks === 'string' ? JSON.parse(data.risks) : data.risks || []
     };
   } catch (error) {
     console.error('Error fetching company:', error);
@@ -229,15 +190,11 @@ export const getCompanies = async (query?: string): Promise<CompanyData[]> => {
       return [];
     }
 
-    return data.map(company => {
-      const extendedData = (company as any).extended_data ? JSON.parse((company as any).extended_data) : {};
-      return {
-        ...company,
-        highlights: typeof company.highlights === 'string' ? JSON.parse(company.highlights) : company.highlights || [],
-        risks: typeof company.risks === 'string' ? JSON.parse(company.risks) : company.risks || [],
-        ...extendedData
-      };
-    });
+    return data.map(company => ({
+      ...company,
+      highlights: typeof company.highlights === 'string' ? JSON.parse(company.highlights) : company.highlights || [],
+      risks: typeof company.risks === 'string' ? JSON.parse(company.risks) : company.risks || []
+    }));
   } catch (error) {
     console.error('Error fetching companies:', error);
     return [];
@@ -246,8 +203,6 @@ export const getCompanies = async (query?: string): Promise<CompanyData[]> => {
 
 // Convert company data to deal format for investor view
 export const convertCompanyToDeal = (company: CompanyData) => {
-  const extendedData = (company as any).extended_data ? JSON.parse((company as any).extended_data) : {};
-  
   return {
     id: company.id || '',
     companyName: company.name || 'Unnamed Company',
@@ -260,24 +215,24 @@ export const convertCompanyToDeal = (company: CompanyData) => {
     location: company.location || 'Not specified',
     fitScore: company.fit_score || 50,
     lastUpdated: formatDate(company.updated_at),
-    description: extendedData.detailed_description || company.summary || 'No description available',
-    // Extended fields
-    foundedYear: extendedData.founded_year || 'Not specified',
-    teamSize: extendedData.team_size || 'Not specified',
-    reasonForSale: extendedData.reason_for_sale || 'Not specified',
-    growthOpportunities: extendedData.growth_opportunities || [],
-    foundersMessage: extendedData.founders_message || '',
-    founderName: extendedData.founder_name || 'Not specified',
-    idealBuyerProfile: extendedData.ideal_buyer_profile || '',
-    rollupPotential: extendedData.rollup_potential || '',
-    marketTrends: extendedData.market_trends || '',
-    profitMargin: extendedData.profit_margin || 'Not disclosed',
-    customerCount: extendedData.customer_count || 'Not disclosed',
-    recurringRevenue: extendedData.recurring_revenue || 'Not disclosed',
-    cacLtvRatio: extendedData.cac_ltv_ratio || 'Not disclosed',
+    description: company.summary || 'No description available',
+    // Extended fields - using fallbacks since they're not stored in DB yet
+    foundedYear: 'Not specified',
+    teamSize: 'Not specified',
+    reasonForSale: 'Not specified',
+    growthOpportunities: [],
+    foundersMessage: '',
+    founderName: 'Not specified',
+    idealBuyerProfile: '',
+    rollupPotential: '',
+    marketTrends: '',
+    profitMargin: 'Not disclosed',
+    customerCount: 'Not disclosed',
+    recurringRevenue: 'Not disclosed',
+    cacLtvRatio: 'Not disclosed',
     highlights: company.highlights || [],
     risks: company.risks || [],
-    documents: extendedData.placeholder_documents || []
+    documents: []
   };
 };
 
