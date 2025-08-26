@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -16,6 +15,7 @@ import FinancialsStep from './wizard/FinancialsStep';
 import HighlightsStep from './wizard/HighlightsStep';
 import AccessStep from './wizard/AccessStep';
 import ReviewStep from './wizard/ReviewStep';
+import CompanyDetailsStep from './wizard/CompanyDetailsStep';
 
 interface CompanyWizardProps {
   isOpen: boolean;
@@ -28,6 +28,7 @@ const steps = [
   { id: 'basics', title: 'Company Basics', component: BasicsStep },
   { id: 'deal', title: 'Deal Information', component: DealStep },
   { id: 'financials', title: 'Financials', component: FinancialsStep },
+  { id: 'details', title: 'Company Details', component: CompanyDetailsStep },
   { id: 'highlights', title: 'Highlights & Risks', component: HighlightsStep },
   { id: 'access', title: 'Access Defaults', component: AccessStep },
   { id: 'review', title: 'Review & Create', component: ReviewStep },
@@ -50,6 +51,28 @@ export interface CompanyFormData {
   revenue: string;
   ebitda: string;
   asking_price: string;
+  
+  // Company Details
+  detailed_description?: string;
+  founded_year?: string;
+  team_size?: string;
+  reason_for_sale?: string;
+  growth_opportunities?: string[];
+  founders_message?: string;
+  founder_name?: string;
+  ideal_buyer_profile?: string;
+  rollup_potential?: string;
+  market_trends?: string;
+  profit_margin?: string;
+  customer_count?: string;
+  recurring_revenue?: string;
+  cac_ltv_ratio?: string;
+  placeholder_documents?: Array<{
+    name: string;
+    type: string;
+    size: string;
+    lastUpdated: string;
+  }>;
   
   // Highlights & Risks
   highlights: string[];
@@ -80,7 +103,9 @@ const CompanyWizard: React.FC<CompanyWizardProps> = ({
     asking_price: '',
     highlights: [],
     risks: [],
-    passcode: ''
+    passcode: '',
+    growth_opportunities: [],
+    placeholder_documents: []
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [draftId, setDraftId] = useState<string | undefined>(editCompanyId);
@@ -181,11 +206,13 @@ const CompanyWizard: React.FC<CompanyWizardProps> = ({
         return !!formData.stage && !!formData.priority && !!formData.owner_id;
       case 2: // Financials
         return true; // Optional fields
-      case 3: // Highlights
+      case 3: // Company Details
         return true; // Optional fields
-      case 4: // Access
+      case 4: // Highlights
         return true; // Optional fields
-      case 5: // Review
+      case 5: // Access
+        return true; // Optional fields
+      case 6: // Review
         return !!formData.name && !!formData.stage && !!formData.owner_id;
       default:
         return true;

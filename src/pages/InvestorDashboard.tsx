@@ -6,7 +6,7 @@ import DealDetailView from '@/components/investor/DealDetailView';
 import PortalHeader from '@/components/investor/PortalHeader';
 import PortalTabs from '@/components/investor/PortalTabs';
 import UserManagement from '@/components/admin/UserManagement';
-import { useDealsFilter } from '@/hooks/useDealsFilter';
+import { useInvestorDeals } from '@/hooks/useInvestorDeals';
 import { useOnboardingStatus } from '@/hooks/useOnboardingStatus';
 
 const InvestorDashboard = () => {
@@ -19,17 +19,20 @@ const InvestorDashboard = () => {
       navigate('/onboarding');
     }
   }, [onboardingCompleted, onboardingLoading, navigate]);
+
   const {
     filteredDeals,
     selectedDeal,
     selectedDealData,
     viewMode,
     allDeals,
+    loading,
     handleFilterChange,
     handleDealClick,
     handleBackToDashboard,
-    resetFilters
-  } = useDealsFilter();
+    resetFilters,
+    refresh
+  } = useInvestorDeals();
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -46,9 +49,11 @@ const InvestorDashboard = () => {
               filteredDeals={filteredDeals}
               selectedDeal={selectedDeal}
               allDeals={allDeals}
+              loading={loading}
               onFilterChange={handleFilterChange}
               onDealClick={handleDealClick}
               onResetFilters={resetFilters}
+              onRefresh={refresh}
             />
           </div>
         );

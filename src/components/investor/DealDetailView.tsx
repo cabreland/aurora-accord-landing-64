@@ -4,10 +4,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { Separator } from '@/components/ui/separator';
 import { 
   ArrowLeft,
-  Calendar,
   Users,
   TrendingUp,
   FileText,
@@ -17,43 +15,20 @@ import {
   Phone,
   FolderOpen,
   Building,
-  DollarSign,
   Target,
   Star,
   Clock,
   Shield
 } from 'lucide-react';
-
-interface Deal {
-  id: number;
-  companyName: string;
-  industry: string;
-  revenue: string;
-  ebitda: string;
-  stage: string;
-  progress: number;
-  priority: string;
-  location: string;
-  fitScore: number;
-  lastUpdated: string;
-  description: string;
-}
+import { InvestorDeal } from '@/hooks/useInvestorDeals';
 
 interface DealDetailViewProps {
-  deal: Deal;
+  deal: InvestorDeal;
   onBack: () => void;
 }
 
 const DealDetailView = ({ deal, onBack }: DealDetailViewProps) => {
   const ndaSigned = deal.stage === "NDA Signed" || deal.stage === "Due Diligence";
-
-  const documents = [
-    { name: "Confidential Information Memorandum", type: "PDF", size: "2.4 MB", lastUpdated: "2 days ago", icon: FileText },
-    { name: "Financial Statements (3 Years)", type: "XLSX", size: "1.2 MB", lastUpdated: "1 week ago", icon: FileText },
-    { name: "Asset List & Inventory", type: "PDF", size: "856 KB", lastUpdated: "3 days ago", icon: FileText },
-    { name: "Customer Contracts", type: "ZIP", size: "4.1 MB", lastUpdated: "1 week ago", icon: FolderOpen },
-    { name: "Legal Documentation", type: "PDF", size: "3.2 MB", lastUpdated: "5 days ago", icon: Shield },
-  ];
 
   return (
     <div className="space-y-6">
@@ -95,47 +70,50 @@ const DealDetailView = ({ deal, onBack }: DealDetailViewProps) => {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="bg-[#0A0F0F]/50 rounded-lg p-3 border border-[#D4AF37]/10">
                   <div className="text-[#F4E4BC]/60 text-sm">Founded</div>
-                  <div className="text-[#FAFAFA] font-bold">2018</div>
+                  <div className="text-[#FAFAFA] font-bold">{deal.foundedYear}</div>
                 </div>
                 <div className="bg-[#0A0F0F]/50 rounded-lg p-3 border border-[#D4AF37]/10">
                   <div className="text-[#F4E4BC]/60 text-sm">Team Size</div>
-                  <div className="text-[#FAFAFA] font-bold">45 Employees</div>
+                  <div className="text-[#FAFAFA] font-bold">{deal.teamSize}</div>
                 </div>
                 <div className="bg-[#0A0F0F]/50 rounded-lg p-3 border border-[#D4AF37]/10">
                   <div className="text-[#F4E4BC]/60 text-sm">Reason for Sale</div>
-                  <div className="text-[#FAFAFA] font-bold text-sm">Retirement</div>
+                  <div className="text-[#FAFAFA] font-bold text-sm">{deal.reasonForSale}</div>
                 </div>
               </div>
 
-              <div>
-                <h4 className="text-[#D4AF37] font-semibold mb-2">Growth Opportunities</h4>
-                <ul className="text-[#F4E4BC] space-y-1">
-                  <li>• Expand into new geographic markets</li>
-                  <li>• Develop additional product lines</li>
-                  <li>• Strategic partnerships with industry leaders</li>
-                  <li>• Technology modernization initiatives</li>
-                </ul>
-              </div>
+              {deal.growthOpportunities.length > 0 && (
+                <div>
+                  <h4 className="text-[#D4AF37] font-semibold mb-2">Growth Opportunities</h4>
+                  <ul className="text-[#F4E4BC] space-y-1">
+                    {deal.growthOpportunities.map((opportunity, index) => (
+                      <li key={index}>• {opportunity}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </CardContent>
           </Card>
 
           {/* Seller Commentary */}
-          <Card className="bg-gradient-to-br from-[#2A2F3A] to-[#1A1F2E] border-[#D4AF37]/20">
-            <CardContent className="p-6">
-              <div className="flex items-start space-x-4">
-                <div className="w-12 h-12 bg-gradient-to-r from-[#D4AF37] to-[#F4E4BC] rounded-full flex items-center justify-center">
-                  <Users className="w-6 h-6 text-[#0A0F0F]" />
+          {deal.foundersMessage && (
+            <Card className="bg-gradient-to-br from-[#2A2F3A] to-[#1A1F2E] border-[#D4AF37]/20">
+              <CardContent className="p-6">
+                <div className="flex items-start space-x-4">
+                  <div className="w-12 h-12 bg-gradient-to-r from-[#D4AF37] to-[#F4E4BC] rounded-full flex items-center justify-center">
+                    <Users className="w-6 h-6 text-[#0A0F0F]" />
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="text-[#D4AF37] font-semibold mb-2">Founder's Message</h4>
+                    <blockquote className="text-[#F4E4BC] italic border-l-2 border-[#D4AF37] pl-4">
+                      "{deal.foundersMessage}"
+                    </blockquote>
+                    <p className="text-[#F4E4BC]/60 text-sm mt-2">— {deal.founderName}</p>
+                  </div>
                 </div>
-                <div className="flex-1">
-                  <h4 className="text-[#D4AF37] font-semibold mb-2">Founder's Message</h4>
-                  <blockquote className="text-[#F4E4BC] italic border-l-2 border-[#D4AF37] pl-4">
-                    "After 15 years of building this company, I'm looking for the right buyer who shares our vision for innovation and customer excellence. This business has incredible potential for the right team."
-                  </blockquote>
-                  <p className="text-[#F4E4BC]/60 text-sm mt-2">— Sarah Johnson, Founder & CEO</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Strategic Fit */}
           <Card className="bg-gradient-to-br from-[#2A2F3A] to-[#1A1F2E] border-[#D4AF37]/20">
@@ -146,20 +124,26 @@ const DealDetailView = ({ deal, onBack }: DealDetailViewProps) => {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div>
-                <h4 className="text-[#D4AF37] font-semibold mb-2">Ideal Buyer Profile</h4>
-                <p className="text-[#F4E4BC]">Private equity firms or strategic acquirers with experience in SaaS/technology sector, looking for profitable, scalable businesses with strong recurring revenue models.</p>
-              </div>
+              {deal.idealBuyerProfile && (
+                <div>
+                  <h4 className="text-[#D4AF37] font-semibold mb-2">Ideal Buyer Profile</h4>
+                  <p className="text-[#F4E4BC]">{deal.idealBuyerProfile}</p>
+                </div>
+              )}
               
-              <div>
-                <h4 className="text-[#D4AF37] font-semibold mb-2">Roll-up Potential</h4>
-                <p className="text-[#F4E4BC]">High potential for horizontal integration with similar workflow automation platforms or vertical expansion into adjacent markets.</p>
-              </div>
+              {deal.rollupPotential && (
+                <div>
+                  <h4 className="text-[#D4AF37] font-semibold mb-2">Roll-up Potential</h4>
+                  <p className="text-[#F4E4BC]">{deal.rollupPotential}</p>
+                </div>
+              )}
 
-              <div>
-                <h4 className="text-[#D4AF37] font-semibold mb-2">Market Trends Alignment</h4>
-                <p className="text-[#F4E4BC]">Strong alignment with digital transformation trends, remote work acceleration, and enterprise efficiency initiatives.</p>
-              </div>
+              {deal.marketTrends && (
+                <div>
+                  <h4 className="text-[#D4AF37] font-semibold mb-2">Market Trends Alignment</h4>
+                  <p className="text-[#F4E4BC]">{deal.marketTrends}</p>
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -185,25 +169,22 @@ const DealDetailView = ({ deal, onBack }: DealDetailViewProps) => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {ndaSigned ? (
+              {ndaSigned && deal.documents.length > 0 ? (
                 <div className="grid grid-cols-1 gap-3">
-                  {documents.map((doc, index) => {
-                    const Icon = doc.icon;
-                    return (
-                      <div key={index} className="flex items-center justify-between p-3 bg-[#0A0F0F]/50 rounded-lg border border-[#D4AF37]/10 hover:border-[#D4AF37]/30 transition-colors">
-                        <div className="flex items-center space-x-3">
-                          <Icon className="w-5 h-5 text-[#D4AF37]" />
-                          <div>
-                            <div className="text-[#FAFAFA] font-medium">{doc.name}</div>
-                            <div className="text-[#F4E4BC]/60 text-sm">{doc.type} • {doc.size} • Updated {doc.lastUpdated}</div>
-                          </div>
+                  {deal.documents.map((doc, index) => (
+                    <div key={index} className="flex items-center justify-between p-3 bg-[#0A0F0F]/50 rounded-lg border border-[#D4AF37]/10 hover:border-[#D4AF37]/30 transition-colors">
+                      <div className="flex items-center space-x-3">
+                        <FileText className="w-5 h-5 text-[#D4AF37]" />
+                        <div>
+                          <div className="text-[#FAFAFA] font-medium">{doc.name}</div>
+                          <div className="text-[#F4E4BC]/60 text-sm">{doc.type} • {doc.size} • Updated {doc.lastUpdated}</div>
                         </div>
-                        <Button size="sm" className="bg-[#D4AF37] hover:bg-[#F4E4BC] text-[#0A0F0F]">
-                          <Download className="w-4 h-4" />
-                        </Button>
                       </div>
-                    );
-                  })}
+                      <Button size="sm" className="bg-[#D4AF37] hover:bg-[#F4E4BC] text-[#0A0F0F]">
+                        <Download className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  ))}
                 </div>
               ) : (
                 <div className="text-center py-8">
@@ -240,19 +221,19 @@ const DealDetailView = ({ deal, onBack }: DealDetailViewProps) => {
                 </div>
                 <div className="bg-[#0A0F0F]/50 rounded-lg p-3 border border-[#D4AF37]/10">
                   <div className="text-[#F4E4BC]/60 text-sm">Net Profit Margin</div>
-                  <div className="text-[#22C55E] font-bold text-xl">24.7%</div>
+                  <div className="text-[#22C55E] font-bold text-xl">{deal.profitMargin}%</div>
                 </div>
                 <div className="bg-[#0A0F0F]/50 rounded-lg p-3 border border-[#D4AF37]/10">
                   <div className="text-[#F4E4BC]/60 text-sm">Customer Count</div>
-                  <div className="text-[#FAFAFA] font-bold text-xl">500+</div>
+                  <div className="text-[#FAFAFA] font-bold text-xl">{deal.customerCount}</div>
                 </div>
                 <div className="bg-[#0A0F0F]/50 rounded-lg p-3 border border-[#D4AF37]/10">
                   <div className="text-[#F4E4BC]/60 text-sm">Recurring Revenue</div>
-                  <div className="text-[#22C55E] font-bold text-xl">85%</div>
+                  <div className="text-[#22C55E] font-bold text-xl">{deal.recurringRevenue}%</div>
                 </div>
                 <div className="bg-[#0A0F0F]/50 rounded-lg p-3 border border-[#D4AF37]/10">
                   <div className="text-[#F4E4BC]/60 text-sm">CAC / LTV Ratio</div>
-                  <div className="text-[#22C55E] font-bold text-xl">1:8.2</div>
+                  <div className="text-[#22C55E] font-bold text-xl">{deal.cacLtvRatio}</div>
                 </div>
               </div>
             </CardContent>

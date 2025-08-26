@@ -1,79 +1,97 @@
+
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import OverviewTab from './OverviewTab';
-import DealsList from '@/components/deals/DealsList';
-import DocumentUpload from '@/components/documents/DocumentUpload';
-import UserManagement from '@/components/admin/UserManagement';
-import { MockDeal } from '@/data/mockDeals';
+import { InvestorDeal } from '@/hooks/useInvestorDeals';
 
 interface PortalTabsProps {
-  filteredDeals: MockDeal[];
+  allDeals: InvestorDeal[];
+  filteredDeals: InvestorDeal[];
   selectedDeal: number | null;
-  allDeals: MockDeal[];
+  loading?: boolean;
   onFilterChange: (filters: any) => void;
   onDealClick: (dealId: number) => void;
   onResetFilters: () => void;
+  onRefresh?: () => void;
 }
 
-const PortalTabs = ({
-  filteredDeals,
-  selectedDeal,
-  allDeals,
-  onFilterChange,
-  onDealClick,
-  onResetFilters
+const PortalTabs = ({ 
+  allDeals, 
+  filteredDeals, 
+  selectedDeal, 
+  loading = false,
+  onFilterChange, 
+  onDealClick, 
+  onResetFilters,
+  onRefresh
 }: PortalTabsProps) => {
-
   return (
     <Tabs defaultValue="overview" className="w-full">
-      <TabsList className="grid w-full grid-cols-4 bg-[#0A0F0F] border border-[#D4AF37]/30">
+      <TabsList className="grid w-full grid-cols-4 bg-[#2A2F3A] border border-[#D4AF37]/20">
         <TabsTrigger 
-          value="overview"
+          value="overview" 
           className="text-[#F4E4BC] data-[state=active]:bg-[#D4AF37] data-[state=active]:text-[#0A0F0F]"
         >
           Overview
         </TabsTrigger>
         <TabsTrigger 
-          value="deals"
+          value="deals" 
           className="text-[#F4E4BC] data-[state=active]:bg-[#D4AF37] data-[state=active]:text-[#0A0F0F]"
         >
-          Deals Management
+          Active Deals
         </TabsTrigger>
         <TabsTrigger 
-          value="documents"
+          value="documents" 
           className="text-[#F4E4BC] data-[state=active]:bg-[#D4AF37] data-[state=active]:text-[#0A0F0F]"
         >
           Documents
         </TabsTrigger>
         <TabsTrigger 
-          value="users"
+          value="watchlist" 
           className="text-[#F4E4BC] data-[state=active]:bg-[#D4AF37] data-[state=active]:text-[#0A0F0F]"
         >
-          User Management
+          Watchlist
         </TabsTrigger>
       </TabsList>
 
-      <TabsContent value="overview" className="mt-6">
-        <OverviewTab
+      <TabsContent value="overview" className="mt-8">
+        <OverviewTab 
           allDeals={allDeals}
           filteredDeals={filteredDeals}
           selectedDeal={selectedDeal}
+          loading={loading}
           onFilterChange={onFilterChange}
           onDealClick={onDealClick}
           onResetFilters={onResetFilters}
+          onRefresh={onRefresh}
         />
       </TabsContent>
 
-      <TabsContent value="deals" className="mt-6">
-        <DealsList />
+      <TabsContent value="deals" className="mt-8">
+        <OverviewTab 
+          allDeals={allDeals}
+          filteredDeals={filteredDeals}
+          selectedDeal={selectedDeal}
+          loading={loading}
+          onFilterChange={onFilterChange}
+          onDealClick={onDealClick}
+          onResetFilters={onResetFilters}
+          onRefresh={onRefresh}
+        />
       </TabsContent>
 
-      <TabsContent value="documents" className="mt-6">
-        <DocumentUpload dealId="example-deal-id" onUploadComplete={() => {}} />
+      <TabsContent value="documents" className="mt-8">
+        <div className="text-center py-12">
+          <div className="text-[#F4E4BC] text-xl mb-4">Document Center</div>
+          <p className="text-[#F4E4BC]/60">Access and manage deal documents</p>
+        </div>
       </TabsContent>
 
-      <TabsContent value="users" className="mt-6">
-        <UserManagement />
+      <TabsContent value="watchlist" className="mt-8">
+        <div className="text-center py-12">
+          <div className="text-[#F4E4BC] text-xl mb-4">Your Watchlist</div>
+          <p className="text-[#F4E4BC]/60">Track deals you're interested in</p>
+        </div>
       </TabsContent>
     </Tabs>
   );
