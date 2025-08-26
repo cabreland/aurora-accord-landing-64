@@ -4,7 +4,6 @@ import DashboardLayout from '@/components/investor/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { FileText, Upload, Plus } from 'lucide-react';
-import { withAuth } from '@/utils/withAuth';
 import DocumentList from '@/components/documents/DocumentList';
 import DocumentsToolbar from '@/components/documents/DocumentsToolbar';
 import UploadDialog from '@/components/documents/UploadDialog';
@@ -76,4 +75,4 @@ const DocumentsPage = () => {
   );
 };
 
-export default withAuth('admin')(DocumentsPage);
+export default DocumentsPage;

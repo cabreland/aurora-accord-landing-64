@@ -3,7 +3,6 @@ import React from 'react';
 import DashboardLayout from '@/components/investor/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Activity as ActivityIcon } from 'lucide-react';
-import { withAuth } from '@/utils/withAuth';
 
 const ActivityPage = () => {
   return (
@@ -44,4 +43,4 @@ const ActivityPage = () => {
   );
 };
 
-export default withAuth('admin')(ActivityPage);
+export default ActivityPage;

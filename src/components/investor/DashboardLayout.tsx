@@ -28,7 +28,7 @@ const DashboardLayout = ({ children, activeTab = 'dashboard', onTabChange }: Das
   const [internalActiveTab, setInternalActiveTab] = useState(activeTab);
   const navigate = useNavigate();
   const location = useLocation();
-  const { getDisplayName, getRoleDisplayName, loading, canManageUsers } = useUserProfile();
+  const { getDisplayName, getRoleDisplayName, loading, canManageUsers, isAdmin } = useUserProfile();
 
   const isDemo = location.pathname === '/demo';
   const currentActiveTab = onTabChange ? activeTab : internalActiveTab;
@@ -52,14 +52,34 @@ const DashboardLayout = ({ children, activeTab = 'dashboard', onTabChange }: Das
     return location.pathname === path;
   };
 
-  const navigationItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: Home, path: '/investor-portal' },
-    { id: 'deals', label: 'Deals', icon: BarChart3, path: '/deals' },
-    ...((!isDemo && canManageUsers()) ? [{ id: 'documents', label: 'Documents', icon: FileText, path: '/documents' }] : []),
-    ...((!isDemo && canManageUsers()) ? [{ id: 'users', label: 'Users', icon: Users, path: '/users' }] : []),
-    ...((!isDemo && canManageUsers()) ? [{ id: 'settings', label: 'Settings', icon: Settings, path: '/settings' }] : []),
-    ...((!isDemo && canManageUsers()) ? [{ id: 'activity', label: 'Activity', icon: Shield, path: '/activity' }] : []),
-  ];
+  // Role-based navigation items
+  const getNavigationItems = () => {
+    const baseItems = [
+      { id: 'dashboard', label: 'Dashboard', icon: Home, path: '/investor-portal' },
+      { id: 'deals', label: 'Deals', icon: BarChart3, path: '/deals' },
+    ];
+
+    // Admin/Staff only items
+    const adminItems = [
+      { id: 'documents', label: 'Documents', icon: FileText, path: '/documents' },
+      { id: 'users', label: 'Users', icon: Users, path: '/users' },
+      { id: 'settings', label: 'Settings', icon: Settings, path: '/settings' },
+      { id: 'activity', label: 'Activity', icon: Shield, path: '/activity' },
+    ];
+
+    // Return appropriate items based on role and demo status
+    if (isDemo) {
+      return baseItems; // Demo users only see basic items
+    }
+
+    if (isAdmin()) {
+      return [...baseItems, ...adminItems]; // Admins see everything
+    }
+
+    return baseItems; // Regular investors see basic items
+  };
+
+  const navigationItems = getNavigationItems();
 
   return (
     <div className="min-h-screen bg-[#1C2526] flex">
@@ -89,7 +109,7 @@ const DashboardLayout = ({ children, activeTab = 'dashboard', onTabChange }: Das
               <div className="w-10 h-10 bg-gradient-to-r from-[#D4AF37] to-[#F4E4BC] rounded-full flex items-center justify-center">
                 <User className="w-5 h-5 text-[#0A0F0F]" />
               </div>
-               <div>
+              <div>
                 <div className="text-[#FAFAFA] font-medium">
                   {isDemo ? 'Demo User' : (loading ? 'Loading...' : getDisplayName())}
                 </div>

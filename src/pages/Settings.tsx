@@ -3,7 +3,6 @@ import React from 'react';
 import DashboardLayout from '@/components/investor/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Settings as SettingsIcon } from 'lucide-react';
-import { withAuth } from '@/utils/withAuth';
 
 const SettingsPage = () => {
   return (
@@ -44,4 +43,4 @@ const SettingsPage = () => {
   );
 };
 
-export default withAuth('admin')(SettingsPage);
+export default SettingsPage;

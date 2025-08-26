@@ -14,8 +14,8 @@ export const withAuth = (requiredRole?: RequiredRole) => {
 
       if (authLoading || profileLoading) {
         return (
-          <div className="min-h-screen bg-background flex items-center justify-center">
-            <div className="text-foreground">Loading...</div>
+          <div className="min-h-screen bg-[#1C2526] flex items-center justify-center">
+            <div className="text-[#FAFAFA]">Loading...</div>
           </div>
         );
       }

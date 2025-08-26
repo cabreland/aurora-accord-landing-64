@@ -26,10 +26,10 @@ const Activity = lazy(() => import("./pages/Activity"));
 const ProtectedInvestorDashboard = withAuth('investor')(InvestorDashboard);
 const ProtectedDealManagement = withAuth('investor')(DealManagement);
 const ProtectedDealDetail = withAuth('investor')(DealDetail);
-const ProtectedDocuments = withAuth('staff')(Documents);
-const ProtectedUserManagement = withAuth('staff')(UserManagement);
-const ProtectedSettings = withAuth('staff')(Settings);
-const ProtectedActivity = withAuth('staff')(Activity);
+const ProtectedDocuments = withAuth('admin')(Documents);
+const ProtectedUserManagement = withAuth('admin')(UserManagement);
+const ProtectedSettings = withAuth('admin')(Settings);
+const ProtectedActivity = withAuth('admin')(Activity);
 const ProtectedOnboarding = withAuth('investor')(Onboarding);
 
 const queryClient = new QueryClient({
@@ -69,7 +69,6 @@ const App = () => (
               <Route path="/settings" element={<ProtectedSettings />} />
               <Route path="/activity" element={<ProtectedActivity />} />
               <Route path="/onboarding" element={<ProtectedOnboarding />} />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>
