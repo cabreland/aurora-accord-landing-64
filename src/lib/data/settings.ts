@@ -39,7 +39,13 @@ export const getSettings = async (): Promise<Setting[]> => {
     .select('*')
     .order('key');
 
-  if (error) throw error;
+  if (error) {
+    // Handle RLS permission errors gracefully
+    if (error.code === '42501' || error.message?.includes('permission denied')) {
+      throw new Error('Access denied. Admin privileges required to view settings.');
+    }
+    throw error;
+  }
   return data || [];
 };
 
@@ -50,7 +56,12 @@ export const getSetting = async (key: string): Promise<Setting | null> => {
     .eq('key', key)
     .single();
 
-  if (error && error.code !== 'PGRST116') throw error;
+  if (error && error.code !== 'PGRST116') {
+    if (error.code === '42501' || error.message?.includes('permission denied')) {
+      throw new Error('Access denied. Admin privileges required to view settings.');
+    }
+    throw error;
+  }
   return data;
 };
 
@@ -59,7 +70,12 @@ export const upsertSetting = async (key: string, value: any): Promise<void> => {
     .from('settings')
     .upsert({ key, value }, { onConflict: 'key' });
 
-  if (error) throw error;
+  if (error) {
+    if (error.code === '42501' || error.message?.includes('permission denied')) {
+      throw new Error('Access denied. Admin privileges required to modify settings.');
+    }
+    throw error;
+  }
 };
 
 // Growth opportunities functions
@@ -72,7 +88,12 @@ export const getGrowthOpportunities = async (activeOnly = false): Promise<Growth
 
   const { data, error } = await query.order('title');
 
-  if (error) throw error;
+  if (error) {
+    if (error.code === '42501' || error.message?.includes('permission denied')) {
+      throw new Error('Access denied. Admin or staff privileges required to view growth opportunities.');
+    }
+    throw error;
+  }
   return data || [];
 };
 
@@ -83,7 +104,12 @@ export const createGrowthOpportunity = async (data: Omit<GrowthOpportunity, 'id'
     .select('id')
     .single();
 
-  if (error) throw error;
+  if (error) {
+    if (error.code === '42501' || error.message?.includes('permission denied')) {
+      throw new Error('Access denied. Admin or staff privileges required to create growth opportunities.');
+    }
+    throw error;
+  }
   return result.id;
 };
 
@@ -93,7 +119,12 @@ export const updateGrowthOpportunity = async (id: string, data: Partial<GrowthOp
     .update(data)
     .eq('id', id);
 
-  if (error) throw error;
+  if (error) {
+    if (error.code === '42501' || error.message?.includes('permission denied')) {
+      throw new Error('Access denied. Admin or staff privileges required to update growth opportunities.');
+    }
+    throw error;
+  }
 };
 
 // Custom fields functions
@@ -106,7 +137,12 @@ export const getCustomFields = async (activeOnly = false): Promise<CustomField[]
 
   const { data, error } = await query.order('label');
 
-  if (error) throw error;
+  if (error) {
+    if (error.code === '42501' || error.message?.includes('permission denied')) {
+      throw new Error('Access denied. Admin or staff privileges required to view custom fields.');
+    }
+    throw error;
+  }
   
   // Cast the type field to match our CustomField interface
   return (data || []).map(field => ({
@@ -122,7 +158,12 @@ export const createCustomField = async (data: Omit<CustomField, 'id' | 'created_
     .select('id')
     .single();
 
-  if (error) throw error;
+  if (error) {
+    if (error.code === '42501' || error.message?.includes('permission denied')) {
+      throw new Error('Access denied. Admin or staff privileges required to create custom fields.');
+    }
+    throw error;
+  }
   return result.id;
 };
 
@@ -132,7 +173,12 @@ export const updateCustomField = async (id: string, data: Partial<CustomField>):
     .update(data)
     .eq('id', id);
 
-  if (error) throw error;
+  if (error) {
+    if (error.code === '42501' || error.message?.includes('permission denied')) {
+      throw new Error('Access denied. Admin or staff privileges required to update custom fields.');
+    }
+    throw error;
+  }
 };
 
 // Custom values functions
@@ -142,7 +188,12 @@ export const getCompanyCustomValues = async (companyId: string): Promise<CustomV
     .select('*')
     .eq('company_id', companyId);
 
-  if (error) throw error;
+  if (error) {
+    if (error.code === '42501' || error.message?.includes('permission denied')) {
+      throw new Error('Access denied. Admin or staff privileges required to view custom values.');
+    }
+    throw error;
+  }
   return data || [];
 };
 
@@ -154,7 +205,12 @@ export const upsertCustomValue = async (fieldId: string, companyId: string, valu
       { onConflict: 'field_id,company_id' }
     );
 
-  if (error) throw error;
+  if (error) {
+    if (error.code === '42501' || error.message?.includes('permission denied')) {
+      throw new Error('Access denied. Admin or staff privileges required to modify custom values.');
+    }
+    throw error;
+  }
 };
 
 // Company growth opportunities functions
@@ -167,7 +223,12 @@ export const getCompanyGrowthOpportunities = async (companyId: string) => {
     `)
     .eq('company_id', companyId);
 
-  if (error) throw error;
+  if (error) {
+    if (error.code === '42501' || error.message?.includes('permission denied')) {
+      throw new Error('Access denied. Admin or staff privileges required to view company growth opportunities.');
+    }
+    throw error;
+  }
   return data || [];
 };
 
@@ -176,7 +237,12 @@ export const addCompanyGrowthOpportunity = async (companyId: string, growthId: s
     .from('company_growth_opps')
     .insert({ company_id: companyId, growth_id: growthId, note });
 
-  if (error) throw error;
+  if (error) {
+    if (error.code === '42501' || error.message?.includes('permission denied')) {
+      throw new Error('Access denied. Admin or staff privileges required to add company growth opportunities.');
+    }
+    throw error;
+  }
 };
 
 export const removeCompanyGrowthOpportunity = async (companyId: string, growthId: string): Promise<void> => {
@@ -186,5 +252,10 @@ export const removeCompanyGrowthOpportunity = async (companyId: string, growthId
     .eq('company_id', companyId)
     .eq('growth_id', growthId);
 
-  if (error) throw error;
+  if (error) {
+    if (error.code === '42501' || error.message?.includes('permission denied')) {
+      throw new Error('Access denied. Admin or staff privileges required to remove company growth opportunities.');
+    }
+    throw error;
+  }
 };
