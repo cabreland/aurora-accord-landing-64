@@ -8,7 +8,7 @@ import DashboardLayout from '@/components/investor/DashboardLayout';
 import OverviewTab from '@/components/investor/OverviewTab';
 import DealDetailView from '@/components/investor/DealDetailView';
 import { mockDeals } from '@/data/mockDeals';
-import { useDealsFilter } from '@/hooks/useDealsFilter';
+import { useInvestorDeals } from '@/hooks/useInvestorDeals';
 
 const Demo = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -22,7 +22,7 @@ const Demo = () => {
     handleBackToDashboard,
     resetFilters,
     allDeals: mockDealsData
-  } = useDealsFilter();
+  } = useInvestorDeals();
 
   // Convert mock deals to InvestorDeal format for the demo
   const convertedMockDeals = mockDeals.map(deal => ({

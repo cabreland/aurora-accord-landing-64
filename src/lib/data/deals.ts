@@ -11,7 +11,7 @@ export interface DealData {
   revenue?: string;
   ebitda?: string;
   location?: string;
-  status?: 'draft' | 'active' | 'closed';
+  status?: 'draft' | 'active' | 'archived';
   created_by?: string;
   created_at?: string;
   updated_at?: string;
