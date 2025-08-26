@@ -77,6 +77,102 @@ export type Database = {
         }
         Relationships: []
       }
+      company_custom_fields: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          is_required: boolean | null
+          key: string
+          label: string
+          type: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_required?: boolean | null
+          key: string
+          label: string
+          type: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_required?: boolean | null
+          key?: string
+          label?: string
+          type?: string
+        }
+        Relationships: []
+      }
+      company_custom_values: {
+        Row: {
+          company_id: string
+          field_id: string
+          value: Json | null
+        }
+        Insert: {
+          company_id: string
+          field_id: string
+          value?: Json | null
+        }
+        Update: {
+          company_id?: string
+          field_id?: string
+          value?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_custom_values_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_custom_values_field_id_fkey"
+            columns: ["field_id"]
+            isOneToOne: false
+            referencedRelation: "company_custom_fields"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      company_growth_opps: {
+        Row: {
+          company_id: string
+          growth_id: string
+          note: string | null
+        }
+        Insert: {
+          company_id: string
+          growth_id: string
+          note?: string | null
+        }
+        Update: {
+          company_id?: string
+          growth_id?: string
+          note?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_growth_opps_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_growth_opps_growth_id_fkey"
+            columns: ["growth_id"]
+            isOneToOne: false
+            referencedRelation: "growth_opportunities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       deal_assignments: {
         Row: {
           assigned_by: string
@@ -226,6 +322,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      growth_opportunities: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          tags: string[] | null
+          title: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          tags?: string[] | null
+          title: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          tags?: string[] | null
+          title?: string
+        }
+        Relationships: []
       }
       onboarding_responses: {
         Row: {
@@ -404,6 +527,24 @@ export type Database = {
           ip_address?: unknown | null
           user_agent?: string | null
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      settings: {
+        Row: {
+          key: string
+          updated_at: string | null
+          value: Json | null
+        }
+        Insert: {
+          key: string
+          updated_at?: string | null
+          value?: Json | null
+        }
+        Update: {
+          key?: string
+          updated_at?: string | null
+          value?: Json | null
         }
         Relationships: []
       }
