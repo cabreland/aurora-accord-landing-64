@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { 
   BarChart3, 
@@ -14,7 +15,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useUserProfile } from '@/hooks/useUserProfile';
 
 interface DashboardLayoutProps {
@@ -40,13 +41,24 @@ const DashboardLayout = ({ children, activeTab = 'dashboard', onTabChange }: Das
     }
   };
 
+  // Helper function to determine if nav item is active
+  const isNavItemActive = (path: string) => {
+    if (path === '/investor-portal') {
+      return location.pathname === '/investor-portal';
+    }
+    if (path === '/deals') {
+      return location.pathname.startsWith('/deals') || location.pathname.startsWith('/deal/');
+    }
+    return location.pathname === path;
+  };
+
   const navigationItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: Home },
-    { id: 'deals', label: 'Deals', icon: BarChart3 },
-    ...((!isDemo && canManageUsers()) ? [{ id: 'documents', label: 'Documents', icon: FileText }] : []),
-    ...((!isDemo && canManageUsers()) ? [{ id: 'users', label: 'Users', icon: Users }] : []),
-    ...((!isDemo && canManageUsers()) ? [{ id: 'settings', label: 'Settings', icon: Settings }] : []),
-    ...((!isDemo && canManageUsers()) ? [{ id: 'activity', label: 'Activity', icon: Shield }] : []),
+    { id: 'dashboard', label: 'Dashboard', icon: Home, path: '/investor-portal' },
+    { id: 'deals', label: 'Deals', icon: BarChart3, path: '/deals' },
+    ...((!isDemo && canManageUsers()) ? [{ id: 'documents', label: 'Documents', icon: FileText, path: '/documents' }] : []),
+    ...((!isDemo && canManageUsers()) ? [{ id: 'users', label: 'Users', icon: Users, path: '/users' }] : []),
+    ...((!isDemo && canManageUsers()) ? [{ id: 'settings', label: 'Settings', icon: Settings, path: '/settings' }] : []),
+    ...((!isDemo && canManageUsers()) ? [{ id: 'activity', label: 'Activity', icon: Shield, path: '/activity' }] : []),
   ];
 
   return (
@@ -92,12 +104,12 @@ const DashboardLayout = ({ children, activeTab = 'dashboard', onTabChange }: Das
           <nav className="space-y-2">
             {navigationItems.map((item) => {
               const Icon = item.icon;
-              const isActive = currentActiveTab === item.id;
+              const isActive = isNavItemActive(item.path);
               
               return (
-                <button
+                <Link
                   key={item.id}
-                  onClick={() => handleTabChange(item.id)}
+                  to={item.path}
                   className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-300 group ${
                     isActive 
                       ? 'bg-gradient-to-r from-[#D4AF37]/20 to-[#F4E4BC]/10 text-[#D4AF37] border border-[#D4AF37]/30' 
@@ -109,7 +121,7 @@ const DashboardLayout = ({ children, activeTab = 'dashboard', onTabChange }: Das
                   {item.id === 'deals' && !isDemo && (
                     <Badge className="ml-auto bg-[#F28C38] text-[#0A0F0F] text-xs">4</Badge>
                   )}
-                </button>
+                </Link>
               );
             })}
           </nav>

@@ -4,13 +4,12 @@ import { useParams } from 'react-router-dom';
 import DashboardLayout from '@/components/investor/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Building2 } from 'lucide-react';
-import { withAuth } from '@/utils/withAuth';
 
 const DealDetailPage = () => {
   const { id } = useParams<{ id: string }>();
 
   return (
-    <DashboardLayout activeTab="deals">
+    <DashboardLayout>
       <div className="space-y-6">
         <div className="flex items-center gap-3">
           <Building2 className="w-8 h-8 text-primary" />
@@ -47,4 +46,4 @@ const DealDetailPage = () => {
   );
 };
 
-export default withAuth('investor')(DealDetailPage);
+export default DealDetailPage;

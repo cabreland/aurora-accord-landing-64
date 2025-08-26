@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
+import { withAuth } from "@/utils/withAuth";
 import React, { Suspense, lazy } from "react";
 
 // Lazy-load pages to reduce initial bundle size
@@ -21,6 +22,16 @@ const Documents = lazy(() => import("./pages/Documents"));
 const Settings = lazy(() => import("./pages/Settings"));
 const Activity = lazy(() => import("./pages/Activity"));
 
+// Wrap protected components with authentication
+const ProtectedInvestorDashboard = withAuth('investor')(InvestorDashboard);
+const ProtectedDealManagement = withAuth('investor')(DealManagement);
+const ProtectedDealDetail = withAuth('investor')(DealDetail);
+const ProtectedDocuments = withAuth('staff')(Documents);
+const ProtectedUserManagement = withAuth('staff')(UserManagement);
+const ProtectedSettings = withAuth('staff')(Settings);
+const ProtectedActivity = withAuth('staff')(Activity);
+const ProtectedOnboarding = withAuth('investor')(Onboarding);
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -31,24 +42,6 @@ const queryClient = new QueryClient({
     },
   },
 });
-
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user, loading } = useAuth();
-  
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-[#1C2526] flex items-center justify-center">
-        <div className="text-[#FAFAFA]">Loading...</div>
-      </div>
-    );
-  }
-  
-  if (!user) {
-    return <Navigate to="/auth" replace />;
-  }
-  
-  return <>{children}</>;
-};
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -68,70 +61,14 @@ const App = () => (
               <Route path="/" element={<Index />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/demo" element={<Demo />} />
-              <Route 
-                path="/investor-portal" 
-                element={
-                  <ProtectedRoute>
-                    <InvestorDashboard />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/deals" 
-                element={
-                  <ProtectedRoute>
-                    <DealManagement />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/deal/:id" 
-                element={
-                  <ProtectedRoute>
-                    <DealDetail />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/documents" 
-                element={
-                  <ProtectedRoute>
-                    <Documents />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/users" 
-                element={
-                  <ProtectedRoute>
-                    <UserManagement />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/settings" 
-                element={
-                  <ProtectedRoute>
-                    <Settings />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/activity" 
-                element={
-                  <ProtectedRoute>
-                    <Activity />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/onboarding" 
-                element={
-                  <ProtectedRoute>
-                    <Onboarding />
-                  </ProtectedRoute>
-                } 
-              />
+              <Route path="/investor-portal" element={<ProtectedInvestorDashboard />} />
+              <Route path="/deals" element={<ProtectedDealManagement />} />
+              <Route path="/deal/:id" element={<ProtectedDealDetail />} />
+              <Route path="/documents" element={<ProtectedDocuments />} />
+              <Route path="/users" element={<ProtectedUserManagement />} />
+              <Route path="/settings" element={<ProtectedSettings />} />
+              <Route path="/activity" element={<ProtectedActivity />} />
+              <Route path="/onboarding" element={<ProtectedOnboarding />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
@@ -143,4 +80,3 @@ const App = () => (
 );
 
 export default App;
-
