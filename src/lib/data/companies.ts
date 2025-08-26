@@ -1,5 +1,3 @@
-
-
 import { supabase } from '@/integrations/supabase/client';
 
 export interface CompanyData {
@@ -21,7 +19,8 @@ export interface CompanyData {
   is_draft?: boolean;
   created_at?: string;
   updated_at?: string;
-  
+  extended_data?: any;
+
   // Extended company details
   detailed_description?: string;
   founded_year?: string;
@@ -238,7 +237,7 @@ export const convertCompanyToDeal = (company: CompanyData) => {
   const extendedData = company.extended_data ? JSON.parse(company.extended_data) : {};
   
   return {
-    id: company.id,
+    id: company.id || '',
     companyName: company.name || 'Unnamed Company',
     industry: company.industry || 'Not specified',
     revenue: company.revenue || 'Not disclosed',

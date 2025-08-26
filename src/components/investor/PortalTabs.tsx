@@ -10,7 +10,7 @@ interface PortalTabsProps {
   selectedDeal: number | null;
   loading?: boolean;
   onFilterChange: (filters: any) => void;
-  onDealClick: (dealId: number) => void;
+  onDealClick: (dealId: string | number) => void;
   onResetFilters: () => void;
   onRefresh?: () => void;
 }

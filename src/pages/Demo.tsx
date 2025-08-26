@@ -24,6 +24,12 @@ const Demo = () => {
     allDeals: mockDealsData
   } = useDealsFilter();
 
+  // Convert mock deals to InvestorDeal format for the demo
+  const convertedMockDeals = mockDeals.map(deal => ({
+    ...deal,
+    id: deal.id
+  }));
+
   const renderDemoContent = () => {
     if (viewMode === 'detail' && selectedDealData) {
       return (
@@ -69,8 +75,8 @@ const Demo = () => {
             </div>
 
             <OverviewTab
-              allDeals={mockDealsData}
-              filteredDeals={filteredDeals}
+              allDeals={convertedMockDeals}
+              filteredDeals={convertedMockDeals}
               selectedDeal={selectedDeal}
               onFilterChange={handleFilterChange}
               onDealClick={handleDealClick}

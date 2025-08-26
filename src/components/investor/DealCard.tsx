@@ -11,24 +11,10 @@ import {
   FileText,
   Eye
 } from 'lucide-react';
-
-interface Deal {
-  id: number;
-  companyName: string;
-  industry: string;
-  revenue: string;
-  ebitda: string;
-  stage: string;
-  progress: number;
-  priority: string;
-  location: string;
-  fitScore: number;
-  lastUpdated: string;
-  description: string;
-}
+import { InvestorDeal } from '@/hooks/useInvestorDeals';
 
 interface DealCardProps {
-  deal: Deal;
+  deal: InvestorDeal;
   onClick: () => void;
   isSelected: boolean;
 }

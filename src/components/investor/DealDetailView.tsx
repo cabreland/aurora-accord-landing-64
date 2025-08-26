@@ -1,24 +1,22 @@
 
 import React from 'react';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { Separator } from '@/components/ui/separator';
 import { 
-  ArrowLeft,
-  Users,
-  TrendingUp,
-  FileText,
-  Download,
-  Lock,
-  Unlock,
-  Phone,
-  FolderOpen,
-  Building,
-  Target,
+  ArrowLeft, 
+  Building2, 
+  MapPin, 
+  Calendar, 
+  Users, 
+  DollarSign, 
+  TrendingUp, 
+  FileText, 
   Star,
-  Clock,
-  Shield
+  Target,
+  Briefcase
 } from 'lucide-react';
 import { InvestorDeal } from '@/hooks/useInvestorDeals';
 
@@ -28,263 +26,268 @@ interface DealDetailViewProps {
 }
 
 const DealDetailView = ({ deal, onBack }: DealDetailViewProps) => {
-  const ndaSigned = deal.stage === "NDA Signed" || deal.stage === "Due Diligence";
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case 'High': return 'bg-red-100 text-red-800';
+      case 'Medium': return 'bg-yellow-100 text-yellow-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const getStageColor = (stage: string) => {
+    switch (stage) {
+      case 'NDA Signed': return 'text-green-600';
+      case 'Due Diligence': return 'text-orange-600';
+      case 'Discovery Call': return 'text-blue-600';
+      default: return 'text-gray-600';
+    }
+  };
 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <Button 
-            variant="outline" 
-            onClick={onBack}
-            className="border-[#D4AF37] text-[#D4AF37] hover:bg-[#D4AF37] hover:text-[#0A0F0F]"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Dashboard
-          </Button>
-          <div>
-            <h1 className="text-3xl font-bold text-[#FAFAFA]">{deal.companyName}</h1>
-            <p className="text-[#F4E4BC]/80">{deal.industry} • {deal.location}</p>
+      <div className="flex items-center gap-4">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={onBack}
+          className="border-[#D4AF37] text-[#D4AF37] hover:bg-[#D4AF37] hover:text-[#0A0F0F]"
+        >
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Back to Dashboard
+        </Button>
+        <div className="flex-1">
+          <h1 className="text-3xl font-bold text-[#FAFAFA] mb-2">{deal.companyName}</h1>
+          <div className="flex items-center gap-4 flex-wrap">
+            <Badge className="bg-[#D4AF37]/20 text-[#D4AF37] border border-[#D4AF37]/30">
+              {deal.industry}
+            </Badge>
+            <Badge className={getPriorityColor(deal.priority)}>
+              {deal.priority} Priority
+            </Badge>
+            <div className="flex items-center gap-2 text-[#F4E4BC]/80">
+              <MapPin className="w-4 h-4" />
+              <span>{deal.location}</span>
+            </div>
           </div>
         </div>
-        <Badge className={`${deal.priority === 'High' ? 'bg-[#F28C38]' : 'bg-[#D4AF37]'} text-[#0A0F0F] font-bold px-4 py-2`}>
-          {deal.priority} Priority
-        </Badge>
+        <div className="text-right">
+          <div className="flex items-center gap-2 mb-2">
+            <Star className="w-5 h-5 text-[#F28C38]" />
+            <span className="text-2xl font-bold text-[#FAFAFA]">{deal.fitScore}%</span>
+          </div>
+          <p className="text-sm text-[#F4E4BC]/60">Fit Score</p>
+        </div>
       </div>
 
+      {/* Progress */}
+      <Card className="bg-[#2A2F3A] border-[#D4AF37]/20">
+        <CardContent className="p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-[#FAFAFA]">Deal Progress</h3>
+            <span className={`text-sm font-medium ${getStageColor(deal.stage)}`}>
+              {deal.stage}
+            </span>
+          </div>
+          <Progress value={deal.progress} className="h-3 mb-2" />
+          <p className="text-sm text-[#F4E4BC]/60">{deal.progress}% Complete</p>
+        </CardContent>
+      </Card>
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Main Content - Left Column */}
+        {/* Main Content */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Deal Overview */}
-          <Card className="bg-gradient-to-br from-[#2A2F3A] to-[#1A1F2E] border-[#D4AF37]/20">
+          {/* Company Overview */}
+          <Card className="bg-[#2A2F3A] border-[#D4AF37]/20">
             <CardHeader>
-              <CardTitle className="text-[#FAFAFA] flex items-center">
-                <Building className="w-5 h-5 mr-2 text-[#D4AF37]" />
+              <CardTitle className="text-[#FAFAFA] flex items-center gap-2">
+                <Building2 className="w-5 h-5" />
                 Company Overview
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <p className="text-[#F4E4BC] leading-relaxed">{deal.description}</p>
+              <p className="text-[#F4E4BC]">{deal.description}</p>
               
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-[#0A0F0F]/50 rounded-lg p-3 border border-[#D4AF37]/10">
-                  <div className="text-[#F4E4BC]/60 text-sm">Founded</div>
-                  <div className="text-[#FAFAFA] font-bold">{deal.foundedYear}</div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-[#F4E4BC]/60 mb-1">Founded</p>
+                  <p className="text-[#FAFAFA] font-medium">{deal.foundedYear}</p>
                 </div>
-                <div className="bg-[#0A0F0F]/50 rounded-lg p-3 border border-[#D4AF37]/10">
-                  <div className="text-[#F4E4BC]/60 text-sm">Team Size</div>
-                  <div className="text-[#FAFAFA] font-bold">{deal.teamSize}</div>
-                </div>
-                <div className="bg-[#0A0F0F]/50 rounded-lg p-3 border border-[#D4AF37]/10">
-                  <div className="text-[#F4E4BC]/60 text-sm">Reason for Sale</div>
-                  <div className="text-[#FAFAFA] font-bold text-sm">{deal.reasonForSale}</div>
+                <div>
+                  <p className="text-sm text-[#F4E4BC]/60 mb-1">Team Size</p>
+                  <p className="text-[#FAFAFA] font-medium">{deal.teamSize}</p>
                 </div>
               </div>
 
-              {deal.growthOpportunities.length > 0 && (
-                <div>
-                  <h4 className="text-[#D4AF37] font-semibold mb-2">Growth Opportunities</h4>
-                  <ul className="text-[#F4E4BC] space-y-1">
-                    {deal.growthOpportunities.map((opportunity, index) => (
-                      <li key={index}>• {opportunity}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+              <div>
+                <p className="text-sm text-[#F4E4BC]/60 mb-1">Reason for Sale</p>
+                <p className="text-[#FAFAFA]">{deal.reasonForSale}</p>
+              </div>
             </CardContent>
           </Card>
 
-          {/* Seller Commentary */}
-          {deal.foundersMessage && (
-            <Card className="bg-gradient-to-br from-[#2A2F3A] to-[#1A1F2E] border-[#D4AF37]/20">
-              <CardContent className="p-6">
-                <div className="flex items-start space-x-4">
-                  <div className="w-12 h-12 bg-gradient-to-r from-[#D4AF37] to-[#F4E4BC] rounded-full flex items-center justify-center">
-                    <Users className="w-6 h-6 text-[#0A0F0F]" />
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="text-[#D4AF37] font-semibold mb-2">Founder's Message</h4>
-                    <blockquote className="text-[#F4E4BC] italic border-l-2 border-[#D4AF37] pl-4">
-                      "{deal.foundersMessage}"
-                    </blockquote>
-                    <p className="text-[#F4E4BC]/60 text-sm mt-2">— {deal.founderName}</p>
-                  </div>
+          {/* Financial Metrics */}
+          <Card className="bg-[#2A2F3A] border-[#D4AF37]/20">
+            <CardHeader>
+              <CardTitle className="text-[#FAFAFA] flex items-center gap-2">
+                <DollarSign className="w-5 h-5" />
+                Financial Metrics
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-[#FAFAFA] mb-1">{deal.revenue}</p>
+                  <p className="text-sm text-[#F4E4BC]/60">Revenue</p>
                 </div>
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-[#FAFAFA] mb-1">{deal.ebitda}</p>
+                  <p className="text-sm text-[#F4E4BC]/60">EBITDA</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-[#FAFAFA] mb-1">{deal.profitMargin}</p>
+                  <p className="text-sm text-[#F4E4BC]/60">Profit Margin</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-[#FAFAFA] mb-1">{deal.customerCount}</p>
+                  <p className="text-sm text-[#F4E4BC]/60">Customers</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Highlights & Risks */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Card className="bg-[#2A2F3A] border-[#D4AF37]/20">
+              <CardHeader>
+                <CardTitle className="text-[#FAFAFA] flex items-center gap-2">
+                  <TrendingUp className="w-5 h-5 text-green-500" />
+                  Key Highlights
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-2">
+                  {deal.highlights.map((highlight, index) => (
+                    <li key={index} className="flex items-start gap-2 text-[#F4E4BC]">
+                      <span className="w-2 h-2 rounded-full bg-green-500 mt-2 flex-shrink-0"></span>
+                      {highlight}
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-[#2A2F3A] border-[#D4AF37]/20">
+              <CardHeader>
+                <CardTitle className="text-[#FAFAFA] flex items-center gap-2">
+                  <Target className="w-5 h-5 text-red-500" />
+                  Risk Factors
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-2">
+                  {deal.risks.map((risk, index) => (
+                    <li key={index} className="flex items-start gap-2 text-[#F4E4BC]">
+                      <span className="w-2 h-2 rounded-full bg-red-500 mt-2 flex-shrink-0"></span>
+                      {risk}
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Founder's Message */}
+          {deal.foundersMessage && (
+            <Card className="bg-[#2A2F3A] border-[#D4AF37]/20">
+              <CardHeader>
+                <CardTitle className="text-[#FAFAFA] flex items-center gap-2">
+                  <Users className="w-5 h-5" />
+                  Message from {deal.founderName}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-[#F4E4BC] italic">"{deal.foundersMessage}"</p>
               </CardContent>
             </Card>
           )}
+        </div>
 
-          {/* Strategic Fit */}
-          <Card className="bg-gradient-to-br from-[#2A2F3A] to-[#1A1F2E] border-[#D4AF37]/20">
+        {/* Sidebar */}
+        <div className="space-y-6">
+          {/* Quick Actions */}
+          <Card className="bg-[#2A2F3A] border-[#D4AF37]/20">
             <CardHeader>
-              <CardTitle className="text-[#FAFAFA] flex items-center">
-                <Target className="w-5 h-5 mr-2 text-[#D4AF37]" />
-                Strategic Fit Analysis
-              </CardTitle>
+              <CardTitle className="text-[#FAFAFA]">Quick Actions</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              {deal.idealBuyerProfile && (
-                <div>
-                  <h4 className="text-[#D4AF37] font-semibold mb-2">Ideal Buyer Profile</h4>
-                  <p className="text-[#F4E4BC]">{deal.idealBuyerProfile}</p>
-                </div>
-              )}
-              
-              {deal.rollupPotential && (
-                <div>
-                  <h4 className="text-[#D4AF37] font-semibold mb-2">Roll-up Potential</h4>
-                  <p className="text-[#F4E4BC]">{deal.rollupPotential}</p>
-                </div>
-              )}
-
-              {deal.marketTrends && (
-                <div>
-                  <h4 className="text-[#D4AF37] font-semibold mb-2">Market Trends Alignment</h4>
-                  <p className="text-[#F4E4BC]">{deal.marketTrends}</p>
-                </div>
-              )}
+            <CardContent className="space-y-3">
+              <Button className="w-full bg-[#D4AF37] hover:bg-[#F4E4BC] text-[#0A0F0F]">
+                Request Access
+              </Button>
+              <Button variant="outline" className="w-full border-[#D4AF37]/30 text-[#F4E4BC] hover:bg-[#D4AF37]/10">
+                Download Teaser
+              </Button>
+              <Button variant="outline" className="w-full border-[#D4AF37]/30 text-[#F4E4BC] hover:bg-[#D4AF37]/10">
+                Schedule Call
+              </Button>
             </CardContent>
           </Card>
 
           {/* Deal Documents */}
-          <Card className="bg-gradient-to-br from-[#2A2F3A] to-[#1A1F2E] border-[#D4AF37]/20">
+          <Card className="bg-[#2A2F3A] border-[#D4AF37]/20">
             <CardHeader>
-              <CardTitle className="text-[#FAFAFA] flex items-center justify-between">
-                <div className="flex items-center">
-                  <FileText className="w-5 h-5 mr-2 text-[#D4AF37]" />
-                  Deal Documents
-                </div>
-                {ndaSigned ? (
-                  <Badge className="bg-[#22C55E] text-[#0A0F0F]">
-                    <Unlock className="w-3 h-3 mr-1" />
-                    Access Granted
-                  </Badge>
-                ) : (
-                  <Badge className="bg-[#F28C38] text-[#0A0F0F]">
-                    <Lock className="w-3 h-3 mr-1" />
-                    NDA Required
-                  </Badge>
-                )}
+              <CardTitle className="text-[#FAFAFA] flex items-center gap-2">
+                <FileText className="w-5 h-5" />
+                Documents
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {ndaSigned && deal.documents.length > 0 ? (
-                <div className="grid grid-cols-1 gap-3">
+              {deal.documents && deal.documents.length > 0 ? (
+                <div className="space-y-3">
                   {deal.documents.map((doc, index) => (
-                    <div key={index} className="flex items-center justify-between p-3 bg-[#0A0F0F]/50 rounded-lg border border-[#D4AF37]/10 hover:border-[#D4AF37]/30 transition-colors">
-                      <div className="flex items-center space-x-3">
-                        <FileText className="w-5 h-5 text-[#D4AF37]" />
+                    <div key={index} className="flex items-center justify-between p-3 bg-[#1A1F2E] rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <FileText className="w-4 h-4 text-[#D4AF37]" />
                         <div>
-                          <div className="text-[#FAFAFA] font-medium">{doc.name}</div>
-                          <div className="text-[#F4E4BC]/60 text-sm">{doc.type} • {doc.size} • Updated {doc.lastUpdated}</div>
+                          <p className="text-sm font-medium text-[#FAFAFA]">{doc.name}</p>
+                          <p className="text-xs text-[#F4E4BC]/60">{doc.size}</p>
                         </div>
                       </div>
-                      <Button size="sm" className="bg-[#D4AF37] hover:bg-[#F4E4BC] text-[#0A0F0F]">
-                        <Download className="w-4 h-4" />
+                      <Button size="sm" variant="ghost" className="text-[#D4AF37] hover:bg-[#D4AF37]/10">
+                        View
                       </Button>
                     </div>
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-8">
-                  <Lock className="w-12 h-12 text-[#F4E4BC]/40 mx-auto mb-4" />
-                  <p className="text-[#F4E4BC] mb-4">Financial documents and detailed information are protected</p>
-                  <Button className="bg-[#F28C38] hover:bg-[#F28C38]/80 text-[#0A0F0F] font-bold">
-                    Sign NDA to Unlock Documents
-                  </Button>
-                </div>
+                <p className="text-[#F4E4BC]/60 text-center py-4">No documents available</p>
               )}
             </CardContent>
           </Card>
-        </div>
 
-        {/* Sidebar - Right Column */}
-        <div className="space-y-6">
-          {/* Metrics Summary */}
-          <Card className="bg-gradient-to-br from-[#2A2F3A] to-[#1A1F2E] border-[#D4AF37]/20">
-            <CardHeader>
-              <CardTitle className="text-[#FAFAFA] flex items-center">
-                <TrendingUp className="w-5 h-5 mr-2 text-[#D4AF37]" />
-                Financial Metrics
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 gap-3">
-                <div className="bg-[#0A0F0F]/50 rounded-lg p-3 border border-[#D4AF37]/10">
-                  <div className="text-[#F4E4BC]/60 text-sm">Annual Revenue</div>
-                  <div className="text-[#FAFAFA] font-bold text-xl">{deal.revenue}</div>
+          {/* Strategic Fit */}
+          {deal.idealBuyerProfile && (
+            <Card className="bg-[#2A2F3A] border-[#D4AF37]/20">
+              <CardHeader>
+                <CardTitle className="text-[#FAFAFA] flex items-center gap-2">
+                  <Briefcase className="w-5 h-5" />
+                  Strategic Fit
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <p className="text-sm text-[#F4E4BC]/60 mb-1">Ideal Buyer Profile</p>
+                  <p className="text-[#F4E4BC]">{deal.idealBuyerProfile}</p>
                 </div>
-                <div className="bg-[#0A0F0F]/50 rounded-lg p-3 border border-[#D4AF37]/10">
-                  <div className="text-[#F4E4BC]/60 text-sm">EBITDA</div>
-                  <div className="text-[#FAFAFA] font-bold text-xl">{deal.ebitda}</div>
-                </div>
-                <div className="bg-[#0A0F0F]/50 rounded-lg p-3 border border-[#D4AF37]/10">
-                  <div className="text-[#F4E4BC]/60 text-sm">Net Profit Margin</div>
-                  <div className="text-[#22C55E] font-bold text-xl">{deal.profitMargin}%</div>
-                </div>
-                <div className="bg-[#0A0F0F]/50 rounded-lg p-3 border border-[#D4AF37]/10">
-                  <div className="text-[#F4E4BC]/60 text-sm">Customer Count</div>
-                  <div className="text-[#FAFAFA] font-bold text-xl">{deal.customerCount}</div>
-                </div>
-                <div className="bg-[#0A0F0F]/50 rounded-lg p-3 border border-[#D4AF37]/10">
-                  <div className="text-[#F4E4BC]/60 text-sm">Recurring Revenue</div>
-                  <div className="text-[#22C55E] font-bold text-xl">{deal.recurringRevenue}%</div>
-                </div>
-                <div className="bg-[#0A0F0F]/50 rounded-lg p-3 border border-[#D4AF37]/10">
-                  <div className="text-[#F4E4BC]/60 text-sm">CAC / LTV Ratio</div>
-                  <div className="text-[#22C55E] font-bold text-xl">{deal.cacLtvRatio}</div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Deal Progress */}
-          <Card className="bg-gradient-to-br from-[#2A2F3A] to-[#1A1F2E] border-[#D4AF37]/20">
-            <CardHeader>
-              <CardTitle className="text-[#FAFAFA] flex items-center">
-                <Clock className="w-5 h-5 mr-2 text-[#D4AF37]" />
-                Deal Progress
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-[#F4E4BC] font-medium">{deal.stage}</span>
-                  <span className="text-[#F4E4BC]/60 text-sm">{deal.progress}%</span>
-                </div>
-                <Progress value={deal.progress} className="h-3" />
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <Star className="w-4 h-4 text-[#F28C38]" />
-                  <span className="text-[#F4E4BC] text-sm">Fit Score</span>
-                </div>
-                <Badge className="bg-[#22C55E] text-[#0A0F0F] font-bold">
-                  {deal.fitScore}%
-                </Badge>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Action Buttons */}
-          <Card className="bg-gradient-to-br from-[#2A2F3A] to-[#1A1F2E] border-[#D4AF37]/20">
-            <CardContent className="p-6 space-y-3">
-              <Button className="w-full bg-[#D4AF37] hover:bg-[#F4E4BC] text-[#0A0F0F] font-bold">
-                <Phone className="w-4 h-4 mr-2" />
-                Schedule Buyer-Seller Call
-              </Button>
-              <Button className="w-full bg-[#F28C38] hover:bg-[#F28C38]/80 text-[#0A0F0F] font-bold">
-                <Download className="w-4 h-4 mr-2" />
-                Download Full Packet
-              </Button>
-              <Button className="w-full border-[#D4AF37] text-[#D4AF37] hover:bg-[#D4AF37] hover:text-[#0A0F0F]" variant="outline">
-                <FolderOpen className="w-4 h-4 mr-2" />
-                Open Deal Room
-              </Button>
-            </CardContent>
-          </Card>
+                {deal.rollupPotential && (
+                  <div>
+                    <p className="text-sm text-[#F4E4BC]/60 mb-1">Roll-up Potential</p>
+                    <p className="text-[#F4E4BC]">{deal.rollupPotential}</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
     </div>
