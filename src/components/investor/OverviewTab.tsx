@@ -11,7 +11,7 @@ import { InvestorDeal } from '@/hooks/useInvestorDeals';
 interface OverviewTabProps {
   allDeals: InvestorDeal[];
   filteredDeals: InvestorDeal[];
-  selectedDeal: number | null;
+  selectedDeal: string | null;
   loading?: boolean;
   onFilterChange: (filters: any) => void;
   onDealClick: (dealId: string | number) => void;
@@ -72,17 +72,14 @@ const OverviewTab = ({
 
       {/* Deals Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-        {filteredDeals.map((deal) => {
-          const numericId = parseInt(deal.id.slice(-4), 16);
-          return (
-            <DealCard
-              key={deal.id}
-              deal={deal}
-              onClick={() => onDealClick(deal.id)}
-              isSelected={selectedDeal === numericId}
-            />
-          );
-        })}
+        {filteredDeals.map((deal) => (
+          <DealCard
+            key={deal.id}
+            deal={deal}
+            onClick={() => onDealClick(deal.id)}
+            isSelected={selectedDeal === deal.id}
+          />
+        ))}
       </div>
 
       {filteredDeals.length === 0 && !loading && (

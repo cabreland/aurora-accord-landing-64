@@ -7,7 +7,7 @@ import { InvestorDeal } from '@/hooks/useInvestorDeals';
 interface PortalTabsProps {
   allDeals: InvestorDeal[];
   filteredDeals: InvestorDeal[];
-  selectedDeal: number | null;
+  selectedDeal: string | null;
   loading?: boolean;
   onFilterChange: (filters: any) => void;
   onDealClick: (dealId: string | number) => void;
