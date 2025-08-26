@@ -11,7 +11,7 @@ interface FilterCriteria {
 
 export const useDealsFilter = () => {
   const [filteredDeals, setFilteredDeals] = useState<MockDeal[]>(mockDeals);
-  const [selectedDeal, setSelectedDeal] = useState<number | null>(null);
+  const [selectedDeal, setSelectedDeal] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'dashboard' | 'detail'>('dashboard');
 
   const handleFilterChange = (filters: FilterCriteria) => {
@@ -39,8 +39,9 @@ export const useDealsFilter = () => {
     setFilteredDeals(filtered);
   };
 
-  const handleDealClick = (dealId: number) => {
-    setSelectedDeal(dealId);
+  const handleDealClick = (dealId: string | number) => {
+    const stringId = typeof dealId === 'number' ? dealId.toString() : dealId;
+    setSelectedDeal(stringId);
     setViewMode('detail');
   };
 

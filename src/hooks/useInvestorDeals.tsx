@@ -49,7 +49,7 @@ interface FilterCriteria {
 export const useInvestorDeals = () => {
   const [allDeals, setAllDeals] = useState<InvestorDeal[]>([]);
   const [filteredDeals, setFilteredDeals] = useState<InvestorDeal[]>([]);
-  const [selectedDeal, setSelectedDeal] = useState<number | null>(null);
+  const [selectedDeal, setSelectedDeal] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'dashboard' | 'detail'>('dashboard');
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
@@ -103,9 +103,8 @@ export const useInvestorDeals = () => {
   };
 
   const handleDealClick = (dealId: string | number) => {
-    // Convert string ID to number for compatibility with existing components
-    const numericId = typeof dealId === 'string' ? parseInt(dealId.slice(-4), 16) : dealId;
-    setSelectedDeal(numericId);
+    const stringId = typeof dealId === 'number' ? dealId.toString() : dealId;
+    setSelectedDeal(stringId);
     setViewMode('detail');
   };
 
@@ -118,10 +117,7 @@ export const useInvestorDeals = () => {
     setFilteredDeals(allDeals);
   };
 
-  const selectedDealData = allDeals.find(deal => {
-    const numericId = parseInt(deal.id.slice(-4), 16);
-    return numericId === selectedDeal;
-  });
+  const selectedDealData = allDeals.find(deal => deal.id === selectedDeal);
 
   const refresh = () => {
     fetchDeals();

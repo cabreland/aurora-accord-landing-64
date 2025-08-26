@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 
 export interface CompanyData {
@@ -186,8 +187,8 @@ export const getCompany = async (id: string): Promise<CompanyData | null> => {
 
     if (error) throw error;
 
-    // Parse extended data
-    const extendedData = data.extended_data ? JSON.parse(data.extended_data) : {};
+    // Parse extended data safely
+    const extendedData = (data as any).extended_data ? JSON.parse((data as any).extended_data) : {};
 
     return {
       ...data,
@@ -218,7 +219,7 @@ export const getCompanies = async (query?: string): Promise<CompanyData[]> => {
     if (error) throw error;
 
     return data.map(company => {
-      const extendedData = company.extended_data ? JSON.parse(company.extended_data) : {};
+      const extendedData = (company as any).extended_data ? JSON.parse((company as any).extended_data) : {};
       return {
         ...company,
         highlights: typeof company.highlights === 'string' ? JSON.parse(company.highlights) : company.highlights || [],
@@ -234,7 +235,7 @@ export const getCompanies = async (query?: string): Promise<CompanyData[]> => {
 
 // Convert company data to deal format for investor view
 export const convertCompanyToDeal = (company: CompanyData) => {
-  const extendedData = company.extended_data ? JSON.parse(company.extended_data) : {};
+  const extendedData = (company as any).extended_data ? JSON.parse((company as any).extended_data) : {};
   
   return {
     id: company.id || '',
