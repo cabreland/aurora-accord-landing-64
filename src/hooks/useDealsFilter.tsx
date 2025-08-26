@@ -1,70 +1,18 @@
-
-import { useState } from 'react';
-import { mockDeals, MockDeal } from '@/data/mockDeals';
-
-interface FilterCriteria {
-  industry?: string;
-  stage?: string;
-  priority?: string;
-  minRevenue?: number;
-}
+// This file is now deprecated - using useInvestorDeals instead
+// Keeping for reference but all functionality moved to useInvestorDeals
 
 export const useDealsFilter = () => {
-  const [filteredDeals, setFilteredDeals] = useState<MockDeal[]>(mockDeals);
-  const [selectedDeal, setSelectedDeal] = useState<string | null>(null);
-  const [viewMode, setViewMode] = useState<'dashboard' | 'detail'>('dashboard');
-
-  const handleFilterChange = (filters: FilterCriteria) => {
-    let filtered = mockDeals;
-    
-    if (filters.industry && filters.industry !== 'all') {
-      filtered = filtered.filter(deal => deal.industry.toLowerCase() === filters.industry!.toLowerCase());
-    }
-    
-    if (filters.stage && filters.stage !== 'all') {
-      filtered = filtered.filter(deal => deal.stage === filters.stage);
-    }
-    
-    if (filters.priority && filters.priority !== 'all') {
-      filtered = filtered.filter(deal => deal.priority === filters.priority);
-    }
-    
-    if (filters.minRevenue) {
-      filtered = filtered.filter(deal => {
-        const revenue = parseFloat(deal.revenue.replace('$', '').replace('M', ''));
-        return revenue >= filters.minRevenue!;
-      });
-    }
-    
-    setFilteredDeals(filtered);
-  };
-
-  const handleDealClick = (dealId: string | number) => {
-    const stringId = typeof dealId === 'number' ? dealId.toString() : dealId;
-    setSelectedDeal(stringId);
-    setViewMode('detail');
-  };
-
-  const handleBackToDashboard = () => {
-    setViewMode('dashboard');
-    setSelectedDeal(null);
-  };
-
-  const resetFilters = () => {
-    setFilteredDeals(mockDeals);
-  };
-
-  const selectedDealData = mockDeals.find(deal => deal.id === selectedDeal);
-
+  console.warn('useDealsFilter is deprecated. Use useInvestorDeals instead.');
+  
   return {
-    filteredDeals,
-    selectedDeal,
-    selectedDealData,
-    viewMode,
-    handleFilterChange,
-    handleDealClick,
-    handleBackToDashboard,
-    resetFilters,
-    allDeals: mockDeals
+    filteredDeals: [],
+    selectedDeal: null,
+    selectedDealData: null,
+    viewMode: 'dashboard' as const,
+    handleFilterChange: () => {},
+    handleDealClick: () => {},
+    handleBackToDashboard: () => {},
+    resetFilters: () => {},
+    allDeals: []
   };
 };

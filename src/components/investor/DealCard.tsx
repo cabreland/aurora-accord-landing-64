@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -9,9 +10,12 @@ import {
   Clock, 
   Star,
   FileText,
-  Eye
+  Eye,
+  Edit
 } from 'lucide-react';
 import { InvestorDeal } from '@/hooks/useInvestorDeals';
+import { createDealFromCompany, getDealByCompanyId } from '@/lib/data/deals';
+import { toast } from 'sonner';
 
 interface DealCardProps {
   deal: InvestorDeal;
@@ -20,6 +24,8 @@ interface DealCardProps {
 }
 
 const DealCard = ({ deal, onClick, isSelected }: DealCardProps) => {
+  const navigate = useNavigate();
+
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case 'High': return 'bg-[#F28C38] text-[#0A0F0F]';
@@ -34,6 +40,27 @@ const DealCard = ({ deal, onClick, isSelected }: DealCardProps) => {
       case 'Due Diligence': return 'text-[#F28C38]';
       case 'Discovery Call': return 'text-[#D4AF37]';
       default: return 'text-[#F4E4BC]';
+    }
+  };
+
+  const handleEditDeal = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    try {
+      // Check if there's already a deal for this company
+      let existingDeal = await getDealByCompanyId(deal.id);
+      
+      if (!existingDeal) {
+        // Create a new deal linked to this company
+        const dealId = await createDealFromCompany(deal.id, `${deal.companyName} - Investment Opportunity`);
+        toast.success('Deal created successfully');
+      }
+      
+      // Navigate to company wizard for editing (this gives full access to all fields)
+      navigate(`/deals/${deal.id}/edit`);
+    } catch (error) {
+      console.error('Error handling edit deal:', error);
+      toast.error('Failed to edit deal');
     }
   };
 
@@ -128,6 +155,13 @@ const DealCard = ({ deal, onClick, isSelected }: DealCardProps) => {
         >
           <Eye className="w-4 h-4 mr-2" />
           View Details
+        </Button>
+        <Button 
+          variant="outline"
+          className="border-[#D4AF37] text-[#D4AF37] hover:bg-[#D4AF37] hover:text-[#0A0F0F] transition-all duration-300"
+          onClick={handleEditDeal}
+        >
+          <Edit className="w-4 h-4" />
         </Button>
         <Button 
           variant="outline"

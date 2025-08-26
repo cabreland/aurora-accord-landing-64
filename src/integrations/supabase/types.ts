@@ -123,6 +123,7 @@ export type Database = {
       }
       deals: {
         Row: {
+          company_id: string | null
           company_name: string
           created_at: string
           created_by: string
@@ -137,6 +138,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          company_id?: string | null
           company_name: string
           created_at?: string
           created_by: string
@@ -151,6 +153,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          company_id?: string | null
           company_name?: string
           created_at?: string
           created_by?: string
@@ -164,7 +167,15 @@ export type Database = {
           title?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "deals_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       documents: {
         Row: {

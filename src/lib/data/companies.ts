@@ -185,7 +185,10 @@ export const getCompany = async (id: string): Promise<CompanyData | null> => {
       .eq('id', id)
       .single();
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error fetching company:', error);
+      return null;
+    }
 
     // Parse extended data safely
     const extendedData = (data as any).extended_data ? JSON.parse((data as any).extended_data) : {};
@@ -216,7 +219,15 @@ export const getCompanies = async (query?: string): Promise<CompanyData[]> => {
 
     const { data, error } = await queryBuilder;
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error fetching companies:', error);
+      return [];
+    }
+
+    if (!data) {
+      console.log('No companies found');
+      return [];
+    }
 
     return data.map(company => {
       const extendedData = (company as any).extended_data ? JSON.parse((company as any).extended_data) : {};
