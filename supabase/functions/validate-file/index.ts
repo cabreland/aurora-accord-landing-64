@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
@@ -38,6 +39,16 @@ const FILE_VALIDATION = {
     /(<object[\s\S]*?>)/gi,
     /(<embed[\s\S]*?>)/gi
   ]
+}
+
+// Sanitize filename to be safe but allow common business document characters
+const sanitizeFilename = (filename: string): string => {
+  // Remove or replace dangerous characters but allow spaces, hyphens, underscores, parentheses, ampersands
+  return filename
+    .replace(/[<>:"|?*]/g, '_') // Replace Windows-forbidden chars
+    .replace(/\.\./g, '_') // Replace path traversal attempts
+    .replace(/^\./, '_') // Don't allow hidden files
+    .trim()
 }
 
 serve(async (req) => {
@@ -94,28 +105,45 @@ serve(async (req) => {
       throw new Error('Invalid file type detected')
     }
 
-    // Check filename for path traversal and malicious patterns
-    const sanitizedName = fileName.replace(/[^a-zA-Z0-9.-]/g, '_')
-    if (sanitizedName !== fileName) {
-      throw new Error('Invalid characters in filename')
+    // Sanitize filename - now more permissive for business documents
+    const sanitizedName = sanitizeFilename(fileName)
+    
+    // Check for filename length
+    if (sanitizedName.length > 255) {
+      throw new Error('Filename is too long. Maximum 255 characters allowed.')
     }
 
-    // Read file content for additional validation
-    const fileContent = await file.text()
-    
-    // Check for dangerous patterns in file content
-    for (const pattern of FILE_VALIDATION.DANGEROUS_PATTERNS) {
-      if (pattern.test(fileContent)) {
-        await supabase.rpc('log_security_event', {
-          p_event_type: 'malicious_file_detected',
-          p_event_data: {
-            filename: fileName,
-            dealId,
-            userId: user.id,
-            pattern: pattern.toString()
-          }
-        })
-        throw new Error('File contains potentially malicious content')
+    // Check for reserved Windows names
+    const baseName = sanitizedName.split('.')[0].toUpperCase()
+    const reservedNames = ['CON', 'PRN', 'AUX', 'NUL', 'COM1', 'COM2', 'COM3', 'COM4', 'COM5', 'COM6', 'COM7', 'COM8', 'COM9', 'LPT1', 'LPT2', 'LPT3', 'LPT4', 'LPT5', 'LPT6', 'LPT7', 'LPT8', 'LPT9']
+    if (reservedNames.includes(baseName)) {
+      throw new Error('Filename uses a reserved system name')
+    }
+
+    // Check for executable extensions (security)
+    const executableExtensions = ['.exe', '.bat', '.cmd', '.scr', '.pif', '.com', '.vbs', '.js', '.jar', '.app', '.dmg']
+    if (executableExtensions.includes(extension)) {
+      throw new Error('Executable file types are not allowed')
+    }
+
+    // Read file content for additional validation (only for text-based files to avoid memory issues)
+    if (file.type.startsWith('text/') && file.size < 1024 * 1024) { // Only check text files under 1MB
+      const fileContent = await file.text()
+      
+      // Check for dangerous patterns in file content
+      for (const pattern of FILE_VALIDATION.DANGEROUS_PATTERNS) {
+        if (pattern.test(fileContent)) {
+          await supabase.rpc('log_security_event', {
+            p_event_type: 'malicious_file_detected',
+            p_event_data: {
+              filename: fileName,
+              dealId,
+              userId: user.id,
+              pattern: pattern.toString()
+            }
+          })
+          throw new Error('File contains potentially malicious content')
+        }
       }
     }
 
