@@ -107,7 +107,12 @@ export const getCustomFields = async (activeOnly = false): Promise<CustomField[]
   const { data, error } = await query.order('label');
 
   if (error) throw error;
-  return data || [];
+  
+  // Cast the type field to match our CustomField interface
+  return (data || []).map(field => ({
+    ...field,
+    type: field.type as CustomField['type']
+  }));
 };
 
 export const createCustomField = async (data: Omit<CustomField, 'id' | 'created_at'>): Promise<string> => {
