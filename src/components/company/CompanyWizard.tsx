@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -25,13 +26,13 @@ interface CompanyWizardProps {
 }
 
 const steps = [
-  { id: 'basics', title: 'Company Basics', component: BasicsStep },
-  { id: 'deal', title: 'Deal Information', component: DealStep },
+  { id: 'basics', title: 'Basics', component: BasicsStep },
+  { id: 'deal', title: 'Deal Info', component: DealStep },
   { id: 'financials', title: 'Financials', component: FinancialsStep },
-  { id: 'details', title: 'Company Details', component: CompanyDetailsStep },
-  { id: 'highlights', title: 'Highlights & Risks', component: HighlightsStep },
-  { id: 'access', title: 'Access Defaults', component: AccessStep },
-  { id: 'review', title: 'Review & Create', component: ReviewStep },
+  { id: 'details', title: 'Details', component: CompanyDetailsStep },
+  { id: 'highlights', title: 'Highlights', component: HighlightsStep },
+  { id: 'access', title: 'Access', component: AccessStep },
+  { id: 'review', title: 'Review', component: ReviewStep },
 ];
 
 export interface CompanyFormData {
@@ -126,7 +127,7 @@ const CompanyWizard: React.FC<CompanyWizardProps> = ({
 
   // Auto-save draft when debounced form data changes
   useEffect(() => {
-    if (isOpen && formData.name.trim() && user) {
+    if (isOpen && formData.name.trim() && user && !isSubmitting) {
       saveDraft();
     }
   }, [debouncedFormData, isOpen, user]);
@@ -149,7 +150,23 @@ const CompanyWizard: React.FC<CompanyWizardProps> = ({
           asking_price: company.asking_price || '',
           highlights: company.highlights || [],
           risks: company.risks || [],
-          passcode: company.passcode || ''
+          passcode: company.passcode || '',
+          // Extended fields
+          detailed_description: company.detailed_description || '',
+          founded_year: company.founded_year || '',
+          team_size: company.team_size || '',
+          reason_for_sale: company.reason_for_sale || '',
+          growth_opportunities: company.growth_opportunities || [],
+          founders_message: company.founders_message || '',
+          founder_name: company.founder_name || '',
+          ideal_buyer_profile: company.ideal_buyer_profile || '',
+          rollup_potential: company.rollup_potential || '',
+          market_trends: company.market_trends || '',
+          profit_margin: company.profit_margin || '',
+          customer_count: company.customer_count || '',
+          recurring_revenue: company.recurring_revenue || '',
+          cac_ltv_ratio: company.cac_ltv_ratio || '',
+          placeholder_documents: company.placeholder_documents || []
         });
       }
     } catch (error) {
@@ -167,7 +184,7 @@ const CompanyWizard: React.FC<CompanyWizardProps> = ({
   };
 
   const saveDraft = async () => {
-    if (!user) return;
+    if (!user || isAutoSaving) return;
     
     try {
       setIsAutoSaving(true);
@@ -187,12 +204,33 @@ const CompanyWizard: React.FC<CompanyWizardProps> = ({
         highlights: formData.highlights,
         risks: formData.risks,
         passcode: formData.passcode,
+        // Extended fields
+        detailed_description: formData.detailed_description,
+        founded_year: formData.founded_year,
+        team_size: formData.team_size,
+        reason_for_sale: formData.reason_for_sale,
+        growth_opportunities: formData.growth_opportunities,
+        founders_message: formData.founders_message,
+        founder_name: formData.founder_name,
+        ideal_buyer_profile: formData.ideal_buyer_profile,
+        rollup_potential: formData.rollup_potential,
+        market_trends: formData.market_trends,
+        profit_margin: formData.profit_margin,
+        customer_count: formData.customer_count,
+        recurring_revenue: formData.recurring_revenue,
+        cac_ltv_ratio: formData.cac_ltv_ratio,
+        placeholder_documents: formData.placeholder_documents
       };
       
       const id = await upsertCompanyDraft(dataToSave, draftId);
       setDraftId(id);
     } catch (error) {
       console.error('Error saving draft:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save draft",
+        variant: "destructive",
+      });
     } finally {
       setIsAutoSaving(false);
     }
@@ -235,8 +273,27 @@ const CompanyWizard: React.FC<CompanyWizardProps> = ({
     setCurrentStep(prev => Math.max(prev - 1, 0));
   };
 
+  const handleSaveDraft = async () => {
+    if (!user) return;
+    
+    try {
+      await saveDraft();
+      toast({
+        title: "Success",
+        description: "Draft saved successfully",
+      });
+    } catch (error) {
+      console.error('Error saving draft:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save draft",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleSubmit = async () => {
-    if (!validateStep(currentStep) || !draftId) {
+    if (!validateStep(currentStep) || !draftId || isSubmitting) {
       toast({
         title: "Validation Error",
         description: "Please fill in all required fields.",
@@ -263,6 +320,22 @@ const CompanyWizard: React.FC<CompanyWizardProps> = ({
         highlights: formData.highlights,
         risks: formData.risks,
         passcode: formData.passcode,
+        // Extended fields
+        detailed_description: formData.detailed_description,
+        founded_year: formData.founded_year,
+        team_size: formData.team_size,
+        reason_for_sale: formData.reason_for_sale,
+        growth_opportunities: formData.growth_opportunities,
+        founders_message: formData.founders_message,
+        founder_name: formData.founder_name,
+        ideal_buyer_profile: formData.ideal_buyer_profile,
+        rollup_potential: formData.rollup_potential,
+        market_trends: formData.market_trends,
+        profit_margin: formData.profit_margin,
+        customer_count: formData.customer_count,
+        recurring_revenue: formData.recurring_revenue,
+        cac_ltv_ratio: formData.cac_ltv_ratio,
+        placeholder_documents: formData.placeholder_documents
       };
       
       const companyId = await finalizeCompany(draftId, finalData);
@@ -292,43 +365,47 @@ const CompanyWizard: React.FC<CompanyWizardProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="w-[95vw] max-w-2xl max-h-[95vh] overflow-hidden bg-card border-border">
-        <DialogHeader className="pb-4">
-          <DialogTitle className="text-foreground">
+      <DialogContent className="w-[95vw] max-w-4xl max-h-[95vh] overflow-hidden bg-card border-border">
+        <DialogHeader className="pb-4 border-b border-border">
+          <DialogTitle className="text-foreground text-xl">
             {editCompanyId ? 'Edit Company' : 'Add New Company'}
           </DialogTitle>
         </DialogHeader>
 
         {/* Step Progress */}
-        <div className="flex items-center justify-between mb-6 px-1 overflow-x-auto">
-          {steps.map((step, index) => (
-            <div key={step.id} className="flex items-center flex-shrink-0">
-              <div className="flex items-center">
-                <div
-                  className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                    index < currentStep
-                      ? 'bg-primary text-primary-foreground'
-                      : index === currentStep
-                      ? 'bg-primary text-primary-foreground'
-                      : 'bg-muted text-muted-foreground'
-                  }`}
-                >
-                  {index < currentStep ? <Check className="w-4 h-4" /> : index + 1}
+        <div className="py-4">
+          <div className="flex items-center justify-center space-x-2 overflow-x-visible">
+            {steps.map((step, index) => (
+              <React.Fragment key={step.id}>
+                <div className="flex flex-col items-center">
+                  <div
+                    className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-colors ${
+                      index < currentStep
+                        ? 'bg-primary text-primary-foreground'
+                        : index === currentStep
+                        ? 'bg-primary text-primary-foreground'
+                        : 'bg-muted text-muted-foreground'
+                    }`}
+                  >
+                    {index < currentStep ? <Check className="w-4 h-4" /> : index + 1}
+                  </div>
+                  <span className="mt-1 text-xs text-center text-foreground font-medium min-w-0">
+                    {step.title}
+                  </span>
                 </div>
-                <span className="ml-2 text-sm text-foreground hidden md:inline whitespace-nowrap">
-                  {step.title}
-                </span>
-              </div>
-              {index < steps.length - 1 && (
-                <div className="w-4 md:w-8 h-0.5 bg-muted mx-2" />
-              )}
-            </div>
-          ))}
+                {index < steps.length - 1 && (
+                  <div className={`w-8 h-0.5 transition-colors ${
+                    index < currentStep ? 'bg-primary' : 'bg-muted'
+                  }`} />
+                )}
+              </React.Fragment>
+            ))}
+          </div>
         </div>
 
         {/* Step Content */}
         <Card className="bg-background border-border flex-1 min-h-0">
-          <CardContent className="p-4 md:p-6 overflow-y-auto" style={{ maxHeight: '50vh' }}>
+          <CardContent className="p-6 overflow-y-auto" style={{ maxHeight: '60vh' }}>
             <CurrentStepComponent
               data={formData}
               onChange={updateFormData}
@@ -347,32 +424,32 @@ const CompanyWizard: React.FC<CompanyWizardProps> = ({
               </Badge>
             )}
             {draftId && !isAutoSaving && (
-              <Badge variant="outline" className="text-muted-foreground">
+              <Badge variant="outline" className="text-success">
                 Draft Saved
               </Badge>
             )}
           </div>
           
           {/* Buttons */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-2">
+          <div className="flex items-center justify-between gap-4">
             <Button
               variant="outline"
               onClick={handlePrevious}
-              disabled={isFirstStep}
-              className="w-full sm:w-auto order-2 sm:order-1"
+              disabled={isFirstStep || isSubmitting}
+              className="flex items-center gap-2"
             >
-              <ArrowLeft className="w-4 h-4 mr-2" />
+              <ArrowLeft className="w-4 h-4" />
               Back
             </Button>
             
-            <div className="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto order-1 sm:order-2">
+            <div className="flex items-center gap-3">
               <Button
                 variant="outline"
-                onClick={saveDraft}
-                disabled={isSubmitting || isAutoSaving}
-                className="w-full sm:w-auto"
+                onClick={handleSaveDraft}
+                disabled={isSubmitting || isAutoSaving || !formData.name.trim()}
+                className="flex items-center gap-2"
               >
-                <Save className="w-4 h-4 mr-2" />
+                <Save className="w-4 h-4" />
                 Save Draft
               </Button>
               
@@ -380,18 +457,25 @@ const CompanyWizard: React.FC<CompanyWizardProps> = ({
                 <Button
                   onClick={handleSubmit}
                   disabled={isSubmitting || !validateStep(currentStep) || !draftId}
-                  className="bg-primary hover:bg-primary/90 text-primary-foreground w-full sm:w-auto"
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground flex items-center gap-2"
                 >
-                  {isSubmitting ? 'Creating...' : 'Create Company'}
+                  {isSubmitting ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      Creating...
+                    </>
+                  ) : (
+                    'Create Company'
+                  )}
                 </Button>
               ) : (
                 <Button
                   onClick={handleNext}
-                  disabled={!validateStep(currentStep)}
-                  className="bg-primary hover:bg-primary/90 text-primary-foreground w-full sm:w-auto"
+                  disabled={!validateStep(currentStep) || isSubmitting}
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground flex items-center gap-2"
                 >
                   Next
-                  <ArrowRight className="w-4 h-4 ml-2" />
+                  <ArrowRight className="w-4 h-4" />
                 </Button>
               )}
             </div>
