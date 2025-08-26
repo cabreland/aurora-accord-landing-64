@@ -292,17 +292,17 @@ const CompanyWizard: React.FC<CompanyWizardProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden bg-card border-border">
-        <DialogHeader>
+      <DialogContent className="w-[95vw] max-w-2xl max-h-[95vh] overflow-hidden bg-card border-border">
+        <DialogHeader className="pb-4">
           <DialogTitle className="text-foreground">
             {editCompanyId ? 'Edit Company' : 'Add New Company'}
           </DialogTitle>
         </DialogHeader>
 
         {/* Step Progress */}
-        <div className="flex items-center justify-between mb-6 px-1">
+        <div className="flex items-center justify-between mb-6 px-1 overflow-x-auto">
           {steps.map((step, index) => (
-            <div key={step.id} className="flex items-center">
+            <div key={step.id} className="flex items-center flex-shrink-0">
               <div className="flex items-center">
                 <div
                   className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
@@ -315,12 +315,12 @@ const CompanyWizard: React.FC<CompanyWizardProps> = ({
                 >
                   {index < currentStep ? <Check className="w-4 h-4" /> : index + 1}
                 </div>
-                <span className="ml-2 text-sm text-foreground hidden sm:inline">
+                <span className="ml-2 text-sm text-foreground hidden md:inline whitespace-nowrap">
                   {step.title}
                 </span>
               </div>
               {index < steps.length - 1 && (
-                <div className="w-8 h-0.5 bg-muted mx-2" />
+                <div className="w-4 md:w-8 h-0.5 bg-muted mx-2" />
               )}
             </div>
           ))}
@@ -328,7 +328,7 @@ const CompanyWizard: React.FC<CompanyWizardProps> = ({
 
         {/* Step Content */}
         <Card className="bg-background border-border flex-1 min-h-0">
-          <CardContent className="p-6 overflow-y-auto max-h-96">
+          <CardContent className="p-4 md:p-6 overflow-y-auto" style={{ maxHeight: '50vh' }}>
             <CurrentStepComponent
               data={formData}
               onChange={updateFormData}
@@ -338,8 +338,9 @@ const CompanyWizard: React.FC<CompanyWizardProps> = ({
         </Card>
 
         {/* Footer */}
-        <div className="flex items-center justify-between pt-4 border-t border-border bg-card">
-          <div className="flex items-center gap-2">
+        <div className="flex flex-col gap-4 pt-4 border-t border-border bg-card">
+          {/* Status badges */}
+          <div className="flex items-center justify-center">
             {isAutoSaving && (
               <Badge variant="outline" className="text-muted-foreground">
                 Saving...
@@ -352,43 +353,48 @@ const CompanyWizard: React.FC<CompanyWizardProps> = ({
             )}
           </div>
           
-          <div className="flex items-center gap-2">
+          {/* Buttons */}
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-2">
             <Button
               variant="outline"
               onClick={handlePrevious}
               disabled={isFirstStep}
+              className="w-full sm:w-auto order-2 sm:order-1"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back
             </Button>
             
-            <Button
-              variant="outline"
-              onClick={saveDraft}
-              disabled={isSubmitting || isAutoSaving}
-            >
-              <Save className="w-4 h-4 mr-2" />
-              Save Draft
-            </Button>
-            
-            {isLastStep ? (
+            <div className="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto order-1 sm:order-2">
               <Button
-                onClick={handleSubmit}
-                disabled={isSubmitting || !validateStep(currentStep) || !draftId}
-                className="bg-primary hover:bg-primary/90 text-primary-foreground"
+                variant="outline"
+                onClick={saveDraft}
+                disabled={isSubmitting || isAutoSaving}
+                className="w-full sm:w-auto"
               >
-                {isSubmitting ? 'Creating...' : 'Create Company'}
+                <Save className="w-4 h-4 mr-2" />
+                Save Draft
               </Button>
-            ) : (
-              <Button
-                onClick={handleNext}
-                disabled={!validateStep(currentStep)}
-                className="bg-primary hover:bg-primary/90 text-primary-foreground"
-              >
-                Next
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </Button>
-            )}
+              
+              {isLastStep ? (
+                <Button
+                  onClick={handleSubmit}
+                  disabled={isSubmitting || !validateStep(currentStep) || !draftId}
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground w-full sm:w-auto"
+                >
+                  {isSubmitting ? 'Creating...' : 'Create Company'}
+                </Button>
+              ) : (
+                <Button
+                  onClick={handleNext}
+                  disabled={!validateStep(currentStep)}
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground w-full sm:w-auto"
+                >
+                  Next
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </Button>
+              )}
+            </div>
           </div>
         </div>
       </DialogContent>
