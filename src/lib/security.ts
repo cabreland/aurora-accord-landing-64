@@ -1,3 +1,4 @@
+
 import DOMPurify from 'isomorphic-dompurify';
 
 // File validation configuration
@@ -51,14 +52,6 @@ export const validateFile = (file: File): { isValid: boolean; error?: string } =
   }
 
   // Updated filename validation - more permissive for business documents
-  const dangerousPatterns = [
-    /\.\./,  // Path traversal
-    /[<>:"|?*]/,  // Invalid Windows chars (but allow spaces, &, parentheses, hyphens)
-    /^\..*\..*$/,  // Multiple dots at start (hidden files)
-    /^(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])$/i,  // Windows reserved names (base name only)
-    /\.(exe|bat|cmd|scr|pif|com|vbs|js|jar|app|dmg)$/i  // Executable extensions
-  ];
-  
   // Check base filename (without extension) against reserved names
   const baseName = file.name.split('.')[0];
   const reservedNamePattern = /^(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])$/i;
@@ -70,16 +63,32 @@ export const validateFile = (file: File): { isValid: boolean; error?: string } =
     };
   }
 
-  // Check for other dangerous patterns (excluding reserved names which we checked above)
-  const otherDangerousPatterns = dangerousPatterns.filter(pattern => 
-    pattern !== /^(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])$/i
-  );
-  
-  const hasInvalidChars = otherDangerousPatterns.some(pattern => pattern.test(file.name));
-  if (hasInvalidChars) {
+  // Check for dangerous patterns individually
+  if (/\.\./.test(file.name)) {
     return {
       isValid: false,
-      error: `Filename contains invalid characters. Please avoid: < > : " | ? * and path traversal patterns.`
+      error: `Filename contains path traversal patterns. Please rename the file.`
+    };
+  }
+
+  if (/[<>:"|?*]/.test(file.name)) {
+    return {
+      isValid: false,
+      error: `Filename contains invalid characters. Please avoid: < > : " | ? *`
+    };
+  }
+
+  if (/^\..*\..*$/.test(file.name)) {
+    return {
+      isValid: false,
+      error: `Invalid filename format. Please rename the file.`
+    };
+  }
+
+  if (/\.(exe|bat|cmd|scr|pif|com|vbs|js|jar|app|dmg)$/i.test(file.name)) {
+    return {
+      isValid: false,
+      error: `Executable file types are not allowed for security reasons.`
     };
   }
 
