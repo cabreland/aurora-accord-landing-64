@@ -10,6 +10,8 @@ const resend = new Resend(Deno.env.get('RESEND_API_KEY') as string)
 
 interface InviteRequest {
   email: string;
+  first_name?: string;
+  last_name?: string;
   role: 'viewer' | 'editor' | 'admin';
 }
 
@@ -82,7 +84,7 @@ Deno.serve(async (req) => {
     }
 
     // Parse request body
-    const { email, role }: InviteRequest = await req.json();
+    const { email, first_name, last_name, role }: InviteRequest = await req.json();
 
     if (!email || !email.trim()) {
       return new Response(
@@ -112,7 +114,11 @@ Deno.serve(async (req) => {
       type: 'invite',
       email: email.trim().toLowerCase(),
       options: {
-        redirectTo: `${siteUrl}/auth/accept`
+        redirectTo: `${siteUrl}/auth/accept`,
+        data: {
+          first_name: first_name?.trim(),
+          last_name: last_name?.trim()
+        }
       }
     });
 
@@ -126,6 +132,7 @@ Deno.serve(async (req) => {
 
     // Send custom branded email
     const roleDisplayName = role === 'admin' ? 'Administrator' : role === 'editor' ? 'Editor' : 'Viewer';
+    const displayName = first_name && last_name ? `${first_name} ${last_name}` : email.trim().toLowerCase();
     
     const emailHtml = `
       <!DOCTYPE html>
@@ -150,7 +157,7 @@ Deno.serve(async (req) => {
             <h1 class="logo">Exclusive Business Brokers</h1>
           </div>
           <div class="content">
-            <h2 class="title">You've been invited!</h2>
+            <h2 class="title">Welcome ${first_name ? first_name : ''}!</h2>
             <p class="text">
               You've been invited as <strong>${roleDisplayName}</strong> to join the Exclusive Business Brokers investor platform. 
               Click the button below to verify your account and set your password.
@@ -192,6 +199,8 @@ Deno.serve(async (req) => {
       await supabaseServiceRole.from('profiles').upsert({
         user_id: inviteData.user.id,
         email: email.trim().toLowerCase(),
+        first_name: first_name?.trim() || null,
+        last_name: last_name?.trim() || null,
         role: role,
         onboarding_completed: false
       });

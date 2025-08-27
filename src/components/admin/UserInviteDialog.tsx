@@ -15,6 +15,8 @@ interface UserInviteDialogProps {
 const UserInviteDialog = ({ onInviteSuccess }: UserInviteDialogProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [inviteRole, setInviteRole] = useState<'viewer' | 'editor' | 'admin'>('viewer');
   const { toast } = useToast();
 
@@ -26,6 +28,8 @@ const UserInviteDialog = ({ onInviteSuccess }: UserInviteDialogProps) => {
       const { data, error } = await supabase.functions.invoke('send-custom-invite', {
         body: { 
           email: inviteEmail.trim(),
+          first_name: firstName.trim(),
+          last_name: lastName.trim(),
           role: inviteRole
         }
       });
@@ -56,6 +60,8 @@ const UserInviteDialog = ({ onInviteSuccess }: UserInviteDialogProps) => {
 
       setIsOpen(false);
       setInviteEmail('');
+      setFirstName('');
+      setLastName('');
       setInviteRole('viewer');
       onInviteSuccess();
     } catch (error) {
@@ -81,6 +87,30 @@ const UserInviteDialog = ({ onInviteSuccess }: UserInviteDialogProps) => {
           <DialogTitle>Invite New User</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleInviteUser} className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="firstName">First Name</Label>
+              <Input
+                id="firstName"
+                type="text"
+                placeholder="John"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="lastName">Last Name</Label>
+              <Input
+                id="lastName"
+                type="text"
+                placeholder="Doe"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                required
+              />
+            </div>
+          </div>
           <div>
             <Label htmlFor="inviteEmail">Email Address</Label>
             <Input
@@ -109,6 +139,8 @@ const UserInviteDialog = ({ onInviteSuccess }: UserInviteDialogProps) => {
             <Button type="button" variant="outline" onClick={() => {
               setIsOpen(false);
               setInviteEmail('');
+              setFirstName('');
+              setLastName('');
               setInviteRole('viewer');
             }}>
               Cancel
