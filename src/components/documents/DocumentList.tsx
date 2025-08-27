@@ -76,7 +76,10 @@ const DocumentList = ({ dealId, companyId, canDownload = true, canDelete = false
   const { toast } = useToast();
   
   // Use document access control for NDA gating
-  const { canAccessDocument } = useDocumentAccess(companyId || dealId);
+  // Only pass valid UUIDs to useDocumentAccess, not filter values like "all"
+  const validCompanyId = companyId && companyId !== 'all' ? companyId : undefined;
+  const validDealId = dealId && dealId !== 'all' ? dealId : undefined;
+  const { canAccessDocument } = useDocumentAccess(validCompanyId || validDealId);
 
   const isGlobalView = dealId === 'all' || !dealId;
 
