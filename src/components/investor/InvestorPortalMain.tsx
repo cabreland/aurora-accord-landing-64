@@ -117,7 +117,7 @@ const sampleDeals = [
 const InvestorPortalMain = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { isAdmin } = useUserProfile();
+  const { isAdmin, isEditor, getDisplayName, getRoleDisplayName, loading } = useUserProfile();
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
 
@@ -138,16 +138,19 @@ const InvestorPortalMain = () => {
     if (path === '/investor-portal') {
       return location.pathname === '/investor-portal';
     }
+    if (path === '/dashboard') {
+      return location.pathname === '/dashboard';
+    }
     if (path === '/deals') {
       return location.pathname.startsWith('/deals') || location.pathname.startsWith('/deal/');
     }
     return location.pathname === path;
   };
 
-  // Role-based navigation items
   const getNavigationItems = () => {
+    const dashboardPath = (isAdmin() || isEditor()) ? '/dashboard' : '/investor-portal';
     const baseItems = [
-      { id: 'dashboard', label: 'Dashboard', icon: Home, path: '/investor-portal', badge: null },
+      { id: 'dashboard', label: 'Dashboard', icon: Home, path: dashboardPath, badge: null },
       { id: 'deals', label: 'Active Deals', icon: BarChart3, path: '/deals', badge: '4' },
       { id: 'documents', label: 'Documents', icon: FileText, path: '/documents', badge: null },
       { id: 'analytics', label: 'Analytics', icon: TrendingUp, path: '/analytics', badge: null },
@@ -210,8 +213,12 @@ const InvestorPortalMain = () => {
                 <User className="w-5 h-5 text-[#0A0F0F]" />
               </div>
               <div>
-                <div className="text-[#FAFAFA] font-medium">John Investor</div>
-                <div className="text-[#F4E4BC]/60 text-sm">Premium Access</div>
+                <div className="text-[#FAFAFA] font-medium">
+                  {loading ? 'Loading…' : getDisplayName()}
+                </div>
+                <div className="text-[#F4E4BC]/60 text-sm">
+                  {loading ? '' : getRoleDisplayName()}
+                </div>
               </div>
             </div>
           </div>

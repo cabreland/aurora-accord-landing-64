@@ -19,6 +19,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useNavigate } from 'react-router-dom';
+import { useUserProfile } from '@/hooks/useUserProfile';
 
 interface DealDetailPageProps {
   dealId?: string;
@@ -26,6 +27,7 @@ interface DealDetailPageProps {
 
 const DealDetailPage = ({ dealId }: DealDetailPageProps) => {
   const navigate = useNavigate();
+  const { isAdmin, isEditor, getDisplayName, getRoleDisplayName, loading } = useUserProfile();
   const [ndaAccepted, setNdaAccepted] = useState(true); // For demo, set to true to show documents
 
   // Sample data - this would come from props or API call in real implementation
@@ -66,7 +68,8 @@ const DealDetailPage = ({ dealId }: DealDetailPageProps) => {
   ];
 
   const handleBack = () => {
-    navigate('/investor-portal');
+    const dest = (isAdmin() || isEditor()) ? '/dashboard' : '/investor-portal';
+    navigate(dest);
   };
 
   return (
@@ -96,8 +99,8 @@ const DealDetailPage = ({ dealId }: DealDetailPageProps) => {
                 <User className="w-5 h-5 text-[#0A0F0F]" />
               </div>
               <div>
-                <div className="text-[#FAFAFA] font-medium">John Investor</div>
-                <div className="text-[#F4E4BC]/60 text-sm">Premium Access</div>
+                <div className="text-[#FAFAFA] font-medium">{loading ? 'Loading…' : getDisplayName()}</div>
+                <div className="text-[#F4E4BC]/60 text-sm">{loading ? '' : getRoleDisplayName()}</div>
               </div>
             </div>
           </div>
@@ -106,7 +109,7 @@ const DealDetailPage = ({ dealId }: DealDetailPageProps) => {
           <nav className="space-y-2">
             <div 
               className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-[#F4E4BC] hover:bg-[#D4AF37]/10 hover:text-[#D4AF37] transition-all duration-300 cursor-pointer"
-              onClick={() => navigate('/investor-portal')}
+              onClick={() => navigate((isAdmin() || isEditor()) ? '/dashboard' : '/investor-portal')}
             >
               <ArrowLeft className="w-5 h-5" />
               <span className="font-medium">Dashboard</span>
