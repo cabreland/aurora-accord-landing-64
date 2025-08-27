@@ -109,10 +109,16 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Generate invite link using service role
-    const { data: inviteData, error: inviteError } = await supabaseServiceRole.auth.admin.generateLink({
+    // Generate invite or recovery link using service role (handle existing users)
+    let linkData: any | null = null;
+    let linkError: any | null = null;
+    let isExistingUser = false;
+
+    const lowerEmail = email.trim().toLowerCase();
+
+    ({ data: linkData, error: linkError } = await supabaseServiceRole.auth.admin.generateLink({
       type: 'invite',
-      email: email.trim().toLowerCase(),
+      email: lowerEmail,
       options: {
         redirectTo: `${siteUrl}/auth/accept`,
         data: {
@@ -120,19 +126,37 @@ Deno.serve(async (req) => {
           last_name: last_name?.trim()
         }
       }
-    });
+    }));
 
-    if (inviteError || !inviteData.properties?.action_link) {
-      console.error('Error generating invite link:', inviteError);
+    if (linkError && (linkError.status === 422 || linkError?.code === 'email_exists')) {
+      // User already exists - send a password setup (recovery) link instead
+      isExistingUser = true;
+      ({ data: linkData, error: linkError } = await supabaseServiceRole.auth.admin.generateLink({
+        type: 'recovery',
+        email: lowerEmail,
+        options: {
+          redirectTo: `${siteUrl}/auth/accept`
+        }
+      }));
+    }
+
+    if (linkError || !linkData?.properties?.action_link) {
+      console.error('Error generating invite/recovery link:', linkError);
       return new Response(
         JSON.stringify({ error: 'Failed to generate invitation link' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
+    const actionLink = linkData.properties.action_link;
+
     // Send custom branded email
     const roleDisplayName = role === 'admin' ? 'Administrator' : role === 'editor' ? 'Editor' : 'Viewer';
     const displayName = first_name && last_name ? `${first_name} ${last_name}` : email.trim().toLowerCase();
+    const introText = isExistingUser
+      ? `You've been granted access. Click the button below to sign in and set your password.`
+      : `You've been invited as <strong>${roleDisplayName}</strong> to join the Exclusive Business Brokers investor platform. Click the button below to verify your account and set your password.`;
+    const buttonText = isExistingUser ? 'Set Password & Sign In' : 'Accept Invitation & Set Password';
     
     const emailHtml = `
       <!DOCTYPE html>
@@ -159,12 +183,11 @@ Deno.serve(async (req) => {
           <div class="content">
             <h2 class="title">Welcome ${first_name ? first_name : ''}!</h2>
             <p class="text">
-              You've been invited as <strong>${roleDisplayName}</strong> to join the Exclusive Business Brokers investor platform. 
-              Click the button below to verify your account and set your password.
+              ${introText}
             </p>
             <p style="text-align: center; margin: 32px 0;">
-              <a href="${inviteData.properties.action_link}" class="button">
-                Accept Invitation & Set Password
+              <a href="${actionLink}" class="button">
+                ${buttonText}
               </a>
             </p>
             <p class="text">
@@ -182,7 +205,7 @@ Deno.serve(async (req) => {
     const { error: emailError } = await resend.emails.send({
       from: 'Exclusive Business Brokers <onboarding@resend.dev>',
       to: [email.trim().toLowerCase()],
-      subject: "You're invited to Exclusive Business Brokers",
+      subject: isExistingUser ? "Complete your access to Exclusive Business Brokers" : "You're invited to Exclusive Business Brokers",
       html: emailHtml,
     });
 
@@ -194,22 +217,32 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Create pending profile entry for invited user
-    if (inviteData.user?.id) {
+    // Create or update profile entry
+    if (linkData.user?.id) {
       await supabaseServiceRole.from('profiles').upsert({
-        user_id: inviteData.user.id,
-        email: email.trim().toLowerCase(),
+        user_id: linkData.user.id,
+        email: lowerEmail,
         first_name: first_name?.trim() || null,
         last_name: last_name?.trim() || null,
-        role: role,
+        role,
         onboarding_completed: false
       });
+    } else {
+      // Existing user without user object in response - update by email
+      await supabaseServiceRole
+        .from('profiles')
+        .update({
+          first_name: first_name?.trim() || null,
+          last_name: last_name?.trim() || null,
+          role
+        })
+        .eq('email', lowerEmail);
     }
 
     // Log security event
     await supabaseServiceRole.rpc('log_security_event', {
       p_event_type: 'user_invited',
-      p_event_data: { invited_email: email.trim().toLowerCase(), invited_user_id: inviteData.user?.id, role },
+      p_event_data: { invited_email: lowerEmail, invited_user_id: linkData.user?.id, role, existing_user: isExistingUser },
       p_user_id: user.id
     });
 
@@ -217,7 +250,7 @@ Deno.serve(async (req) => {
       JSON.stringify({ 
         success: true, 
         message: 'Invitation sent successfully',
-        user_id: inviteData.user?.id 
+        user_id: linkData.user?.id 
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
