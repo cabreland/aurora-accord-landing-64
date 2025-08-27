@@ -23,7 +23,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
+import { useUserProfile } from '@/hooks/useUserProfile';
 
 // Sample data for deals
 const sampleDeals = [
@@ -115,6 +116,8 @@ const sampleDeals = [
 
 const InvestorPortalMain = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { isAdmin } = useUserProfile();
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
 
@@ -129,6 +132,43 @@ const InvestorPortalMain = () => {
         : [...prev, filter]
     );
   };
+
+  // Helper function to determine if nav item is active
+  const isNavItemActive = (path: string) => {
+    if (path === '/investor-portal') {
+      return location.pathname === '/investor-portal';
+    }
+    if (path === '/deals') {
+      return location.pathname.startsWith('/deals') || location.pathname.startsWith('/deal/');
+    }
+    return location.pathname === path;
+  };
+
+  // Role-based navigation items
+  const getNavigationItems = () => {
+    const baseItems = [
+      { id: 'dashboard', label: 'Dashboard', icon: Home, path: '/investor-portal', badge: null },
+      { id: 'deals', label: 'Active Deals', icon: BarChart3, path: '/deals', badge: '4' },
+      { id: 'documents', label: 'Documents', icon: FileText, path: '/documents', badge: null },
+      { id: 'analytics', label: 'Analytics', icon: TrendingUp, path: '/analytics', badge: null },
+      { id: 'compliance', label: 'Compliance', icon: Shield, path: '/compliance', badge: null },
+      { id: 'settings', label: 'Settings', icon: Settings, path: '/settings', badge: null }
+    ];
+
+    // Admin only items
+    const adminItems = [
+      { id: 'users', label: 'Users', icon: Users, path: '/users', badge: null },
+      { id: 'activity', label: 'Activity', icon: Shield, path: '/activity', badge: null }
+    ];
+
+    if (isAdmin()) {
+      return [...baseItems, ...adminItems];
+    }
+
+    return baseItems;
+  };
+
+  const navigationItems = getNavigationItems();
 
   const getPriorityColor = (priority: string) => {
     return priority === 'High' ? 'bg-[#F28C38] text-[#0A0F0F]' : 'bg-[#3B82F6] text-white';
@@ -178,31 +218,30 @@ const InvestorPortalMain = () => {
 
           {/* Navigation */}
           <nav className="space-y-2">
-            <div className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl bg-gradient-to-r from-[#D4AF37]/20 to-[#F4E4BC]/10 text-[#D4AF37] border border-[#D4AF37]/30">
-              <Home className="w-5 h-5" />
-              <span className="font-medium">Dashboard</span>
-            </div>
-            <div className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-[#F4E4BC] hover:bg-[#D4AF37]/10 hover:text-[#D4AF37] transition-all duration-300 cursor-pointer">
-              <BarChart3 className="w-5 h-5" />
-              <span className="font-medium">Active Deals</span>
-              <Badge className="ml-auto bg-[#F28C38] text-[#0A0F0F] text-xs">4</Badge>
-            </div>
-            <div className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-[#F4E4BC] hover:bg-[#D4AF37]/10 hover:text-[#D4AF37] transition-all duration-300 cursor-pointer">
-              <FileText className="w-5 h-5" />
-              <span className="font-medium">Documents</span>
-            </div>
-            <div className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-[#F4E4BC] hover:bg-[#D4AF37]/10 hover:text-[#D4AF37] transition-all duration-300 cursor-pointer">
-              <TrendingUp className="w-5 h-5" />
-              <span className="font-medium">Analytics</span>
-            </div>
-            <div className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-[#F4E4BC] hover:bg-[#D4AF37]/10 hover:text-[#D4AF37] transition-all duration-300 cursor-pointer">
-              <Shield className="w-5 h-5" />
-              <span className="font-medium">Compliance</span>
-            </div>
-            <div className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-[#F4E4BC] hover:bg-[#D4AF37]/10 hover:text-[#D4AF37] transition-all duration-300 cursor-pointer">
-              <Settings className="w-5 h-5" />
-              <span className="font-medium">Settings</span>
-            </div>
+            {navigationItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = isNavItemActive(item.path);
+              
+              return (
+                <Link
+                  key={item.id}
+                  to={item.path}
+                  className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-300 ${
+                    isActive 
+                      ? 'bg-gradient-to-r from-[#D4AF37]/20 to-[#F4E4BC]/10 text-[#D4AF37] border border-[#D4AF37]/30' 
+                      : 'text-[#F4E4BC] hover:bg-[#D4AF37]/10 hover:text-[#D4AF37]'
+                  }`}
+                >
+                  <Icon className="w-5 h-5" />
+                  <span className="font-medium">{item.label}</span>
+                  {item.badge && (
+                    <Badge className="ml-auto bg-[#F28C38] text-[#0A0F0F] text-xs">
+                      {item.badge}
+                    </Badge>
+                  )}
+                </Link>
+              );
+            })}
           </nav>
         </div>
       </div>
