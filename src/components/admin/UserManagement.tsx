@@ -24,15 +24,13 @@ const UserManagement = () => {
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const ready = !profileLoading && profile?.role === 'admin';
+
   useEffect(() => {
-    if (profileLoading) return; // Wait for profile to load
+    if (!ready) return;
     
-    if (profile && isAdmin()) {
-      fetchUsers();
-    } else {
-      setLoading(false);
-    }
-  }, [profileLoading, profile, isAdmin]);
+    fetchUsers();
+  }, [ready]);
 
   const fetchUsers = async () => {
     try {
@@ -94,7 +92,7 @@ const UserManagement = () => {
     }
   };
 
-  if (!isAdmin()) {
+  if (!profile || profile.role !== 'admin') {
     return (
       <Card>
         <CardContent className="flex items-center justify-center py-12">
