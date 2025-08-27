@@ -23,7 +23,7 @@ const UserInviteDialog = ({ onInviteSuccess }: UserInviteDialogProps) => {
     if (!inviteEmail.trim()) return;
 
     try {
-      const { data, error } = await supabase.functions.invoke('invite-user', {
+      const { data, error } = await supabase.functions.invoke('send-custom-invite', {
         body: { 
           email: inviteEmail.trim(),
           role: inviteRole
@@ -51,7 +51,7 @@ const UserInviteDialog = ({ onInviteSuccess }: UserInviteDialogProps) => {
 
       toast({
         title: 'Success',
-        description: 'User invitation sent successfully',
+        description: 'Branded invitation sent successfully! User will receive an email to set their password.',
       });
 
       setIsOpen(false);

@@ -13,6 +13,7 @@ const Index = lazy(() => import("./pages/Index"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const InvestorDashboard = lazy(() => import("./pages/InvestorDashboard"));
 const Auth = lazy(() => import("./pages/Auth"));
+const AuthAccept = lazy(() => import("./pages/AuthAccept"));
 const Demo = lazy(() => import("./pages/Demo"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const UserManagement = lazy(() => import("./pages/UserManagement"));
@@ -62,6 +63,7 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/auth" element={<Auth />} />
+              <Route path="/auth/accept" element={<AuthAccept />} />
               <Route path="/demo" element={<Demo />} />
               <Route path="/dashboard" element={<ProtectedDashboard />} />
               <Route path="/investor-portal" element={<ProtectedInvestorDashboard />} />
