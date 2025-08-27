@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useDocumentAccess } from '@/hooks/useDocumentAccess';
 import DocumentPreview from './DocumentPreview';
 import { 
   Search, 
@@ -17,7 +18,8 @@ import {
   File,
   SortAsc,
   SortDesc,
-  Building2
+  Building2,
+  Lock
 } from 'lucide-react';
 import { formatFileSize } from '@/lib/utils';
 import { useDebounce } from '@/hooks/useDebounce';
@@ -29,6 +31,7 @@ interface Document {
   file_size: number | null;
   file_type: string | null;
   tag: string;
+  confidentiality_level?: string;
   created_at: string;
   uploaded_by: string;
   version: number;
@@ -43,6 +46,7 @@ interface Document {
 
 interface DocumentListProps {
   dealId: string; // Can be 'all' for global view
+  companyId?: string; // For NDA access control
   canDownload?: boolean;
   canDelete?: boolean;
   refreshTrigger?: number;
@@ -59,7 +63,7 @@ const documentTags = [
   { value: 'other', label: 'Other' }
 ];
 
-const DocumentList = ({ dealId, canDownload = true, canDelete = false, refreshTrigger = 0 }: DocumentListProps) => {
+const DocumentList = ({ dealId, companyId, canDownload = true, canDelete = false, refreshTrigger = 0 }: DocumentListProps) => {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [filteredDocuments, setFilteredDocuments] = useState<Document[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -70,6 +74,9 @@ const DocumentList = ({ dealId, canDownload = true, canDelete = false, refreshTr
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [previewDocument, setPreviewDocument] = useState<Document | null>(null);
   const { toast } = useToast();
+  
+  // Use document access control for NDA gating
+  const { canAccessDocument } = useDocumentAccess(companyId || dealId);
 
   const isGlobalView = dealId === 'all' || !dealId;
 
@@ -119,7 +126,11 @@ const DocumentList = ({ dealId, canDownload = true, canDelete = false, refreshTr
         (isGlobalView && doc.deal?.title?.toLowerCase().includes(debouncedSearchTerm.toLowerCase())) ||
         (isGlobalView && doc.deal?.company_name?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()));
       const matchesTag = selectedTag === 'all' || doc.tag === selectedTag;
-      return matchesSearch && matchesTag;
+      
+      // Apply NDA gating - for now, show all docs if NDA accepted or not required
+      const hasAccess = true; // Simplified for Phase 3 - will enhance in Phase 4
+      
+      return matchesSearch && matchesTag && hasAccess;
     });
 
     // Sort documents
@@ -172,6 +183,9 @@ const DocumentList = ({ dealId, canDownload = true, canDelete = false, refreshTr
   };
 
   const handleDownload = async (document: Document) => {
+    if (!canDownload) return;
+    
+    // Simplified access check for Phase 3
     if (!canDownload) return;
 
     try {
@@ -370,9 +384,11 @@ const DocumentList = ({ dealId, canDownload = true, canDelete = false, refreshTr
                     )}
                     
                     <td className="p-4 hidden sm:table-cell">
-                      <Badge variant="outline" className={getTagColor(document.tag)}>
-                        {document.tag.replace('_', ' ').toUpperCase()}
-                      </Badge>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline" className={getTagColor(document.tag)}>
+                          {document.tag.replace('_', ' ').toUpperCase()}
+                        </Badge>
+                      </div>
                     </td>
                     
                     <td className="p-4 hidden md:table-cell">
@@ -390,21 +406,34 @@ const DocumentList = ({ dealId, canDownload = true, canDelete = false, refreshTr
                     
                     <td className="p-4">
                       <div className="flex items-center gap-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setPreviewDocument(document)}
-                        >
-                          <Eye className="w-4 h-4" />
-                        </Button>
-                        
-                        {canDownload && (
+                        {canAccessDocument() ? (
+                          <>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setPreviewDocument(document)}
+                            >
+                              <Eye className="w-4 h-4" />
+                            </Button>
+                            
+                            {canDownload && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleDownload(document)}
+                              >
+                                <Download className="w-4 h-4" />
+                              </Button>
+                            )}
+                          </>
+                        ) : (
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => handleDownload(document)}
+                            disabled
+                            className="text-muted-foreground"
                           >
-                            <Download className="w-4 h-4" />
+                            <Lock className="w-4 h-4" />
                           </Button>
                         )}
                         

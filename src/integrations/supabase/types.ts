@@ -196,6 +196,51 @@ export type Database = {
           },
         ]
       }
+      company_nda_acceptances: {
+        Row: {
+          accepted_at: string
+          company_id: string
+          id: string
+          ip_address: unknown | null
+          nda_version: string | null
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          accepted_at?: string
+          company_id: string
+          id?: string
+          ip_address?: unknown | null
+          nda_version?: string | null
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          accepted_at?: string
+          company_id?: string
+          id?: string
+          ip_address?: unknown | null
+          nda_version?: string | null
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_nda_acceptances_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_nda_acceptances_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "public_company_teasers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       deal_assignments: {
         Row: {
           assigned_by: string
@@ -639,6 +684,10 @@ export type Database = {
       }
     }
     Functions: {
+      accept_company_nda: {
+        Args: { p_company_id: string }
+        Returns: Json
+      }
       get_user_role: {
         Args: { user_uuid: string }
         Returns: Database["public"]["Enums"]["user_role"]
@@ -646,6 +695,10 @@ export type Database = {
       log_security_event: {
         Args: { p_event_data?: Json; p_event_type: string; p_user_id?: string }
         Returns: string
+      }
+      user_has_accepted_nda: {
+        Args: { p_company_id: string; p_user_id: string }
+        Returns: boolean
       }
       user_has_deal_access: {
         Args: { deal_uuid: string; user_uuid: string }
