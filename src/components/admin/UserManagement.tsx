@@ -6,6 +6,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Shield, Users } from 'lucide-react';
 import UserInviteDialog from './UserInviteDialog';
 import UserTable from './UserTable';
+import UserForceRemoveDialog from './UserForceRemoveDialog';
 
 interface UserProfile {
   id: string;
@@ -130,7 +131,10 @@ const UserManagement = () => {
                 Manage user roles and permissions
               </p>
             </div>
-            <UserInviteDialog onInviteSuccess={fetchUsers} />
+            <div className="flex gap-2">
+              <UserForceRemoveDialog onRemoveSuccess={fetchUsers} />
+              <UserInviteDialog onInviteSuccess={fetchUsers} />
+            </div>
           </div>
         </CardHeader>
         <CardContent>
