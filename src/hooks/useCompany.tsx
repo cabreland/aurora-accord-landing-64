@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { getCompany, getCompanies, upsertCompanyDraft, finalizeCompany, CompanyData } from '@/lib/data/companies';
 
@@ -91,4 +92,29 @@ export const updateCompany = async (id: string, payload: Partial<Company>) => {
     console.error('Error updating company:', error);
     throw error;
   }
+};
+
+// Hook for managing company selection via URL params
+export const useCompanySelection = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  
+  const selectedCompanyId = searchParams.get('company');
+  
+  const selectCompany = (companyId: string | null) => {
+    if (companyId) {
+      setSearchParams({ company: companyId });
+    } else {
+      setSearchParams({});
+    }
+  };
+  
+  const clearSelection = () => {
+    setSearchParams({});
+  };
+  
+  return {
+    selectedCompanyId,
+    selectCompany,
+    clearSelection
+  };
 };
