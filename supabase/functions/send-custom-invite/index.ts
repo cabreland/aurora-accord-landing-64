@@ -6,7 +6,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-const resend = new Resend(Deno.env.get('RESEND_API_KEY') as string)
+// Resend client will be created inside the request handler to avoid preflight failures
 
 interface InviteRequest {
   email: string;
@@ -82,6 +82,17 @@ Deno.serve(async (req) => {
         { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
+
+    // Initialize Resend inside handler to avoid preflight failures
+    const RESEND_KEY = Deno.env.get('RESEND_API_KEY');
+    if (!RESEND_KEY) {
+      console.error('Missing RESEND_API_KEY secret');
+      return new Response(
+        JSON.stringify({ error: 'Email service not configured' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    const resend = new Resend(RESEND_KEY);
 
     // Parse request body
     const { email, first_name, last_name, role }: InviteRequest = await req.json();
