@@ -13,24 +13,34 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    /* Friendly color palette */
-    --primary: 262 83% 58%;  /* Purple-blue */
-    --primary-foreground: 0 0% 98%;
+    /* M&A Portal Color Palette */
+    --primary: 45 84% 54%;  /* Gold #D4AF37 */
+    --primary-foreground: 162 14% 4%;  /* Dark #0A0F0F */
 
-    --secondary: 142 76% 65%;  /* Mint green */
-    --secondary-foreground: 0 0% 98%;
+    --secondary: 23 85% 59%;  /* Orange #F28C38 */
+    --secondary-foreground: 162 14% 4%;  /* Dark #0A0F0F */
 
-    --tertiary: 45 93% 67%;  /* Warm yellow */
-    --tertiary-foreground: 222.2 84% 4.9%;
+    --tertiary: 45 85% 81%;  /* Light Gold #F4E4BC */
+    --tertiary-foreground: 162 14% 4%;  /* Dark #0A0F0F */
 
-    --accent: 12 76% 61%;  /* Coral */
-    --accent-foreground: 0 0% 98%;
+    --accent: 45 84% 54%;  /* Gold accent */
+    --accent-foreground: 162 14% 4%;
 
-    --success: 142 76% 65%;  /* Green */
+    --success: 141 76% 47%;  /* Green #22C55E */
     --success-foreground: 0 0% 98%;
 
-    --warning: 45 93% 67%;  /* Yellow */
-    --warning-foreground: 222.2 84% 4.9%;
+    --warning: 23 85% 59%;  /* Orange #F28C38 */
+    --warning-foreground: 162 14% 4%;
+
+    /* Portal backgrounds */
+    --portal-bg: 191 14% 16%;  /* #1C2526 */
+    --portal-dark: 162 14% 4%;  /* #0A0F0F */
+    --portal-card: 211 18% 14%;  /* #1A1F2E */
+    --portal-card-light: 210 16% 20%;  /* #2A2F3A */
+
+    /* Text colors */
+    --text-primary: 0 0% 98%;  /* #FAFAFA */
+    --text-secondary: 45 68% 85%;  /* #F4E4BC */
 
     --muted: 220 14% 96%;
     --muted-foreground: 215.4 16.3% 46.9%;
@@ -40,14 +50,14 @@
 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 262 83% 58%;
+    --ring: 45 84% 54%;
 
     --radius: 0.75rem;
 
-    /* Gradient colors */
-    --gradient-start: 262 83% 58%;  /* Primary purple */
-    --gradient-middle: 217 91% 60%;  /* Blue */
-    --gradient-end: 142 76% 65%;  /* Green */
+    /* Portal gradients */
+    --gradient-gold: linear-gradient(135deg, hsl(45 84% 54%), hsl(45 85% 81%));
+    --gradient-dark: linear-gradient(135deg, hsl(162 14% 4%), hsl(211 18% 14%));
+    --gradient-card: linear-gradient(135deg, hsl(210 16% 20%), hsl(211 18% 14%));
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
