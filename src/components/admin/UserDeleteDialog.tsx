@@ -26,15 +26,24 @@ const UserDeleteDialog = ({ user, onDeleteSuccess }: UserDeleteDialogProps) => {
 
   const handleDeleteUser = async () => {
     try {
-      const { error } = await supabase
-        .from('profiles')
-        .delete()
-        .eq('id', user.id);
+      const { data, error } = await supabase.functions.invoke('delete-user', {
+        body: { user_id: user.user_id }
+      });
 
       if (error) {
+        console.error('Error deleting user:', error);
         toast({
           title: 'Error',
-          description: 'Failed to delete user',
+          description: error.message || 'Failed to delete user',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      if (data?.error) {
+        toast({
+          title: 'Error',
+          description: data.error,
           variant: 'destructive',
         });
         return;
@@ -42,12 +51,17 @@ const UserDeleteDialog = ({ user, onDeleteSuccess }: UserDeleteDialogProps) => {
 
       toast({
         title: 'Success',
-        description: `User ${user.email} deleted successfully`,
+        description: `User ${user.email} has been permanently deleted from the system`,
       });
 
       onDeleteSuccess();
     } catch (error) {
       console.error('Error deleting user:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to delete user',
+        variant: 'destructive',
+      });
     }
   };
 
@@ -60,9 +74,17 @@ const UserDeleteDialog = ({ user, onDeleteSuccess }: UserDeleteDialogProps) => {
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Delete User</AlertDialogTitle>
+          <AlertDialogTitle>Delete User Permanently</AlertDialogTitle>
           <AlertDialogDescription>
-            Are you sure you want to delete {user.first_name} {user.last_name} ({user.email})? 
+            Are you sure you want to permanently delete {user.first_name} {user.last_name} ({user.email})? 
+            <br /><br />
+            <strong>This will:</strong>
+            <ul className="list-disc ml-4 mt-2">
+              <li>Remove the user from the authentication system</li>
+              <li>Delete their profile and all associated data</li>
+              <li>Prevent them from signing in again</li>
+            </ul>
+            <br />
             This action cannot be undone.
           </AlertDialogDescription>
         </AlertDialogHeader>
@@ -72,7 +94,7 @@ const UserDeleteDialog = ({ user, onDeleteSuccess }: UserDeleteDialogProps) => {
             onClick={handleDeleteUser}
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
           >
-            Delete User
+            Yes, Delete Permanently
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
