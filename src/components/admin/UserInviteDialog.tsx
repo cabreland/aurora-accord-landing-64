@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { UserPlus, Mail } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -14,6 +15,7 @@ interface UserInviteDialogProps {
 const UserInviteDialog = ({ onInviteSuccess }: UserInviteDialogProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
+  const [inviteRole, setInviteRole] = useState<'viewer' | 'editor' | 'admin'>('viewer');
   const { toast } = useToast();
 
   const handleInviteUser = async (e: React.FormEvent) => {
@@ -22,7 +24,10 @@ const UserInviteDialog = ({ onInviteSuccess }: UserInviteDialogProps) => {
 
     try {
       const { data, error } = await supabase.functions.invoke('invite-user', {
-        body: { email: inviteEmail.trim() }
+        body: { 
+          email: inviteEmail.trim(),
+          role: inviteRole
+        }
       });
 
       if (error) {
@@ -51,6 +56,7 @@ const UserInviteDialog = ({ onInviteSuccess }: UserInviteDialogProps) => {
 
       setIsOpen(false);
       setInviteEmail('');
+      setInviteRole('viewer');
       onInviteSuccess();
     } catch (error) {
       console.error('Error inviting user:', error);
@@ -86,10 +92,24 @@ const UserInviteDialog = ({ onInviteSuccess }: UserInviteDialogProps) => {
               required
             />
           </div>
+          <div>
+            <Label htmlFor="inviteRole">Role</Label>
+            <Select value={inviteRole} onValueChange={(value: 'viewer' | 'editor' | 'admin') => setInviteRole(value)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select a role" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="viewer">Investor (Viewer)</SelectItem>
+                <SelectItem value="editor">Manager (Editor)</SelectItem>
+                <SelectItem value="admin">Administrator</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           <div className="flex justify-end gap-2">
             <Button type="button" variant="outline" onClick={() => {
               setIsOpen(false);
               setInviteEmail('');
+              setInviteRole('viewer');
             }}>
               Cancel
             </Button>

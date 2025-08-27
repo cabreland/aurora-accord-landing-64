@@ -7,6 +7,7 @@ const corsHeaders = {
 
 interface InviteRequest {
   email: string;
+  role?: 'viewer' | 'editor' | 'admin';
 }
 
 Deno.serve(async (req) => {
@@ -55,14 +56,22 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Check if user is admin
-    const { data: profile, error: profileError } = await supabase
+    // Check if user is admin using service role
+    const { data: profile, error: profileError } = await supabaseServiceRole
       .from('profiles')
       .select('role')
       .eq('user_id', user.id)
       .maybeSingle();
 
-    if (profileError || !profile || profile.role !== 'admin') {
+    if (profileError) {
+      console.error('Profile lookup error:', profileError);
+      return new Response(
+        JSON.stringify({ error: 'Failed to verify admin privileges' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    if (!profile || profile.role !== 'admin') {
       return new Response(
         JSON.stringify({ error: 'Admin privileges required' }),
         { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -70,7 +79,7 @@ Deno.serve(async (req) => {
     }
 
     // Parse request body
-    const { email }: InviteRequest = await req.json();
+    const { email, role = 'viewer' }: InviteRequest = await req.json();
 
     if (!email || !email.trim()) {
       return new Response(
@@ -80,7 +89,7 @@ Deno.serve(async (req) => {
     }
 
     // Check if user already exists
-    const { data: existingProfile } = await supabase
+    const { data: existingProfile } = await supabaseServiceRole
       .from('profiles')
       .select('id')
       .eq('email', email.trim().toLowerCase())
@@ -99,8 +108,10 @@ Deno.serve(async (req) => {
       {
         data: { 
           invited_by_admin: true,
-          invited_by: user.id
-        }
+          invited_by: user.id,
+          role: role
+        },
+        redirectTo: `${Deno.env.get('SUPABASE_URL')}/auth/callback`
       }
     );
 
@@ -112,10 +123,20 @@ Deno.serve(async (req) => {
       );
     }
 
+    // Create pending profile entry for invited user
+    if (inviteData.user?.id) {
+      await supabaseServiceRole.from('profiles').upsert({
+        user_id: inviteData.user.id,
+        email: email.trim().toLowerCase(),
+        role: role,
+        onboarding_completed: false
+      });
+    }
+
     // Log security event
-    await supabase.rpc('log_security_event', {
+    await supabaseServiceRole.rpc('log_security_event', {
       p_event_type: 'user_invited',
-      p_event_data: { invited_email: email.trim().toLowerCase(), invited_user_id: inviteData.user?.id },
+      p_event_data: { invited_email: email.trim().toLowerCase(), invited_user_id: inviteData.user?.id, role },
       p_user_id: user.id
     });
 
