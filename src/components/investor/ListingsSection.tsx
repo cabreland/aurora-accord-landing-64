@@ -16,7 +16,10 @@ import {
   Shield,
   CheckCircle,
   Timer,
-  BarChart3
+  BarChart3,
+  Star,
+  FileText,
+  Download
 } from 'lucide-react';
 import { useInvestorListings, StatusFilter, ListingItem } from '@/hooks/useInvestorListings';
 import { useUserProfile } from '@/hooks/useUserProfile';
@@ -27,7 +30,28 @@ interface StatusFilterPillsProps {
   counts: { all: number; draft: number; scheduled: number; live: number };
 }
 
-// Portfolio metrics component
+// Dashboard Header Component
+const DashboardHeader = ({ totalDeals, canFilter }: { totalDeals: number, canFilter: boolean }) => {
+  return (
+    <div className="bg-gradient-to-r from-[#0A0F0F] to-[#1A1F2E] rounded-2xl border border-[#D4AF37]/30 p-8 mb-8">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-4xl font-bold text-[#FAFAFA] mb-2">Investor Portal</h1>
+          <p className="text-[#F4E4BC] text-lg">
+            Real-time access to curated M&A opportunities with comprehensive deal analytics
+          </p>
+        </div>
+        <Button
+          className="bg-[#D4AF37] hover:bg-[#F4E4BC] text-[#0A0F0F] font-bold px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+        >
+          Live Deals Dashboard
+        </Button>
+      </div>
+    </div>
+  );
+};
+
+// Portfolio metrics component with exact design specifications
 const PortfolioMetrics = ({ items, canFilter }: { items: ListingItem[], canFilter: boolean }) => {
   const totalValue = items.reduce((sum, item) => {
     const revenue = parseFloat(item.revenue?.replace(/[\$,]/g, '') || '0');
@@ -36,8 +60,8 @@ const PortfolioMetrics = ({ items, canFilter }: { items: ListingItem[], canFilte
 
   const activeDeals = items.filter(item => !item.is_draft && item.is_published).length;
   const highPriority = items.filter(item => item.stage === 'growth' || item.stage === 'mature').length;
-  const ndaSigned = Math.floor(items.length * 0.4); // Mock calculation
-  const dueDiligence = Math.floor(items.length * 0.2); // Mock calculation
+  const ndaSigned = Math.floor(items.length * 0.4);
+  const dueDiligence = Math.floor(items.length * 0.2);
 
   const metrics = [
     {
@@ -45,67 +69,67 @@ const PortfolioMetrics = ({ items, canFilter }: { items: ListingItem[], canFilte
       label: 'Total Deal Value',
       value: `$${(totalValue / 1000000).toFixed(1)}M`,
       subtitle: 'Combined revenue',
-      color: 'from-emerald-500/20 to-emerald-600/20',
-      iconColor: 'text-emerald-400',
-      borderColor: 'border-emerald-500/30'
+      color: 'from-[#22C55E]/20 to-[#22C55E]/10',
+      iconColor: 'text-[#22C55E]',
+      borderColor: 'border-[#22C55E]/30'
     },
     {
       icon: Target,
       label: 'Active Deals',
       value: activeDeals.toString(),
-      subtitle: 'In pipeline',
-      color: 'from-amber-500/20 to-yellow-600/20',
-      iconColor: 'text-amber-400',
-      borderColor: 'border-amber-500/30'
+      subtitle: 'In pipeline', 
+      color: 'from-[#D4AF37]/20 to-[#D4AF37]/10',
+      iconColor: 'text-[#D4AF37]',
+      borderColor: 'border-[#D4AF37]/30'
     },
     {
       icon: TrendingUp,
-      label: 'High Priority',
+      label: 'High Priority', 
       value: highPriority.toString(),
       subtitle: 'Urgent deals',
-      color: 'from-orange-500/20 to-red-600/20',
-      iconColor: 'text-orange-400',
-      borderColor: 'border-orange-500/30'
+      color: 'from-[#F28C38]/20 to-[#F28C38]/10',
+      iconColor: 'text-[#F28C38]',
+      borderColor: 'border-[#F28C38]/30'
     },
     {
       icon: Shield,
       label: 'NDAs Signed',
       value: ndaSigned.toString(),
       subtitle: 'Ready for review',
-      color: 'from-cyan-500/20 to-blue-600/20',
-      iconColor: 'text-cyan-400',
-      borderColor: 'border-cyan-500/30'
+      color: 'from-[#22C55E]/20 to-[#22C55E]/10', 
+      iconColor: 'text-[#22C55E]',
+      borderColor: 'border-[#22C55E]/30'
     },
     {
       icon: CheckCircle,
       label: 'Due Diligence',
       value: dueDiligence.toString(),
       subtitle: 'Advanced stage',
-      color: 'from-purple-500/20 to-indigo-600/20',
-      iconColor: 'text-purple-400',
-      borderColor: 'border-purple-500/30'
+      color: 'from-[#D4AF37]/20 to-[#D4AF37]/10',
+      iconColor: 'text-[#D4AF37]',
+      borderColor: 'border-[#D4AF37]/30'
     },
     {
       icon: Timer,
       label: 'Avg Timeline',
       value: '14 days',
       subtitle: 'to NDA signing',
-      color: 'from-gray-500/20 to-slate-600/20',
-      iconColor: 'text-gray-400',
-      borderColor: 'border-gray-500/30'
+      color: 'from-[#F4E4BC]/20 to-[#F4E4BC]/10',
+      iconColor: 'text-[#F4E4BC]',
+      borderColor: 'border-[#F4E4BC]/30'
     }
   ];
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 mb-8">
       {metrics.map((metric, index) => {
         const Icon = metric.icon;
         return (
-          <Card key={index} className={`bg-gradient-to-br ${metric.color} border ${metric.borderColor} hover:shadow-lg transition-all duration-300`}>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between mb-2">
+          <Card key={index} className={`bg-gradient-to-br ${metric.color} border ${metric.borderColor} hover:shadow-xl hover:shadow-[#D4AF37]/20 transition-all duration-300 transform hover:scale-105`}>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-4">
                 <Icon className={`w-5 h-5 ${metric.iconColor}`} />
-                <div className="w-2 h-2 bg-current rounded-full opacity-60"></div>
+                <div className={`w-2 h-2 ${metric.iconColor} rounded-full opacity-60`}></div>
               </div>
               <div className="space-y-1">
                 <div className="text-2xl font-bold text-[#FAFAFA]">{metric.value}</div>
@@ -122,28 +146,31 @@ const PortfolioMetrics = ({ items, canFilter }: { items: ListingItem[], canFilte
 
 const StatusFilterPills = ({ statusFilter, onStatusFilterChange, counts }: StatusFilterPillsProps) => {
   const filters = [
-    { value: 'all' as const, label: 'All Deals', count: counts.all },
-    { value: 'live' as const, label: 'High Priority', count: counts.live },
-    { value: 'scheduled' as const, label: 'NDA Signed', count: counts.scheduled },
-    { value: 'draft' as const, label: '$1M+ Revenue', count: counts.draft }
+    { value: 'all' as const, label: 'All Deals', count: counts.all, badge: 'High Priority' },
+    { value: 'live' as const, label: 'NDA Signed', count: counts.live, badge: 'NDA Signed' },
+    { value: 'scheduled' as const, label: '$1M+ Revenue', count: counts.scheduled, badge: '$1M+ Revenue' },
+    { value: 'draft' as const, label: 'Draft', count: counts.draft, badge: 'Draft' }
   ];
 
   return (
-    <div className="flex gap-3 flex-wrap">
+    <div className="flex gap-4 flex-wrap items-center">
+      <div className="flex items-center gap-2">
+        <Filter className="w-4 h-4 text-[#D4AF37]" />
+        <span className="text-sm font-medium text-[#F4E4BC]">Filter Deals</span>
+      </div>
       {filters.map((filter) => (
-        <Button
+        <Badge
           key={filter.value}
           variant={statusFilter === filter.value ? "default" : "outline"}
-          size="sm"
-          onClick={() => onStatusFilterChange(filter.value)}
-          className={`rounded-full px-4 py-2 transition-all duration-300 ${
+          className={`cursor-pointer px-4 py-2 rounded-full transition-all duration-300 ${
             statusFilter === filter.value
               ? 'bg-[#D4AF37] text-[#0A0F0F] hover:bg-[#F4E4BC] shadow-lg'
               : 'border-[#D4AF37]/40 text-[#F4E4BC] hover:bg-[#D4AF37]/20 hover:border-[#D4AF37]/60'
           }`}
+          onClick={() => onStatusFilterChange(filter.value)}
         >
-          {filter.label}
-        </Button>
+          {filter.badge}
+        </Badge>
       ))}
     </div>
   );
@@ -156,19 +183,20 @@ interface ListingCardProps {
 }
 
 const ListingCard = ({ item, onClick, showStatus = false }: ListingCardProps) => {
-  // Mock data for enhanced display
+  // Priority badge logic following exact design specs
   const getPriorityBadge = (item: ListingItem) => {
     const revenue = parseFloat(item.revenue?.replace(/[\$,]/g, '') || '0');
     if (revenue > 10000000) {
-      return <Badge className="bg-[#F28C38] text-[#0A0F0F] text-xs font-medium">High</Badge>;
+      return <Badge className="bg-[#F28C38] text-[#0A0F0F] text-xs font-medium px-2 py-1">High</Badge>;
     }
-    return <Badge className="bg-[#D4AF37]/30 text-[#F4E4BC] text-xs font-medium">Medium</Badge>;
+    return <Badge className="bg-[#D4AF37] text-[#0A0F0F] text-xs font-medium px-2 py-1">Medium</Badge>;
   };
 
+  // Industry tag following design specs  
   const getIndustryTag = (industry: string) => {
     const tags: { [key: string]: string } = {
       'Technology': 'SaaS',
-      'Healthcare': 'HealthTech',
+      'Healthcare': 'HealthTech', 
       'Manufacturing': 'Industrial',
       'Retail': 'Retail',
       'Financial Services': 'FinTech'
@@ -176,6 +204,7 @@ const ListingCard = ({ item, onClick, showStatus = false }: ListingCardProps) =>
     return tags[industry] || industry?.split(' ')[0] || 'Tech';
   };
 
+  // Progress calculation
   const getCompletionPercentage = (item: ListingItem) => {
     if (item.is_draft) return 25;
     if (!item.is_published) return 50;
@@ -183,11 +212,12 @@ const ListingCard = ({ item, onClick, showStatus = false }: ListingCardProps) =>
     return 95;
   };
 
+  // Fit score with proper color coding
   const getFitScore = (item: ListingItem) => {
     const revenue = parseFloat(item.revenue?.replace(/[\$,]/g, '') || '0');
-    if (revenue > 10000000) return { score: '92%', color: 'text-green-400', bg: 'bg-green-500/20' };
-    if (revenue > 5000000) return { score: '87%', color: 'text-amber-400', bg: 'bg-amber-500/20' };
-    return { score: '78%', color: 'text-orange-400', bg: 'bg-orange-500/20' };
+    if (revenue > 10000000) return { score: '92%', color: 'text-[#22C55E]', bg: 'bg-[#22C55E]/20' };
+    if (revenue > 5000000) return { score: '87%', color: 'text-[#F28C38]', bg: 'bg-[#F28C38]/20' };
+    return { score: '78%', color: 'text-[#F28C38]', bg: 'bg-[#F28C38]/20' };
   };
 
   const completion = getCompletionPercentage(item);
@@ -195,70 +225,73 @@ const ListingCard = ({ item, onClick, showStatus = false }: ListingCardProps) =>
   const timeAgo = Math.floor(Math.random() * 5) + 1;
 
   return (
-    <Card className="bg-gradient-to-br from-[#2A2F3A] via-[#252A36] to-[#1E242E] border-[#D4AF37]/20 hover:border-[#D4AF37]/50 hover:shadow-2xl hover:shadow-[#D4AF37]/10 transition-all duration-500 cursor-pointer group overflow-hidden">
+    <Card className="bg-gradient-to-br from-[#2A2F3A] to-[#1A1F2E] border-[#D4AF37]/20 hover:border-[#D4AF37] hover:shadow-xl hover:shadow-[#D4AF37]/20 transition-all duration-300 cursor-pointer group transform hover:scale-[1.02] rounded-2xl">
       <CardContent className="p-6">
-        {/* Header */}
+        {/* Header - Company name + badges */}
         <div className="flex items-start justify-between mb-4">
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-2">
-              <h3 className="text-[#FAFAFA] text-lg font-bold group-hover:text-[#D4AF37] transition-colors">
+              <h3 className="text-xl font-bold text-[#FAFAFA] group-hover:text-[#D4AF37] transition-colors">
                 {item.name}
               </h3>
               {getPriorityBadge(item)}
             </div>
             {item.industry && (
-              <Badge variant="outline" className="text-xs text-[#D4AF37] border-[#D4AF37]/40 bg-[#D4AF37]/5">
+              <Badge variant="outline" className="text-xs text-[#D4AF37] border-[#D4AF37]/40 bg-[#D4AF37]/10">
                 {getIndustryTag(item.industry)}
               </Badge>
             )}
           </div>
         </div>
 
-        {/* Description */}
+        {/* Description - 2-line clamp */}
         {item.summary && (
-          <p className="text-[#F4E4BC]/70 text-sm mb-4 line-clamp-2 leading-relaxed">
+          <p className="text-sm text-[#F4E4BC]/80 mb-4 line-clamp-2 leading-relaxed">
             {item.summary}
           </p>
         )}
 
-        {/* Financial Metrics */}
-        <div className="grid grid-cols-2 gap-3 mb-4">
+        {/* Metrics grid - 2 columns */}
+        <div className="grid grid-cols-2 gap-4 mb-4">
           {item.revenue && (
-            <div className="bg-[#0A0F0F]/60 rounded-lg p-3 border border-[#D4AF37]/10">
-              <div className="text-[#F4E4BC]/50 text-xs mb-1 font-medium">Revenue</div>
-              <div className="text-[#FAFAFA] font-bold text-base">{item.revenue}</div>
+            <div className="bg-[#0A0F0F]/50 rounded-lg p-3 border border-[#D4AF37]/10">
+              <div className="text-[#F4E4BC]/60 text-xs mb-1 font-medium">Revenue</div>
+              <div className="text-lg font-bold text-[#FAFAFA]">{item.revenue}</div>
             </div>
           )}
           {item.ebitda && (
-            <div className="bg-[#0A0F0F]/60 rounded-lg p-3 border border-[#D4AF37]/10">
-              <div className="text-[#F4E4BC]/50 text-xs mb-1 font-medium">EBITDA</div>
-              <div className="text-[#FAFAFA] font-bold text-base">{item.ebitda}</div>
+            <div className="bg-[#0A0F0F]/50 rounded-lg p-3 border border-[#D4AF37]/10">
+              <div className="text-[#F4E4BC]/60 text-xs mb-1 font-medium">EBITDA</div>
+              <div className="text-lg font-bold text-[#FAFAFA]">{item.ebitda}</div>
             </div>
           )}
         </div>
 
-        {/* Progress and Status */}
+        {/* Progress bar - Custom gold gradient */}
         <div className="space-y-3 mb-4">
           <div className="flex items-center justify-between">
-            <span className="text-[#F4E4BC]/60 text-xs font-medium">NDA Signed</span>
+            <span className="text-[#F4E4BC]/60 text-xs font-medium">NDA Progress</span>
             <span className="text-[#FAFAFA] text-xs font-bold">{completion}% Complete</span>
           </div>
-          <Progress 
-            value={completion} 
-            className="h-2 bg-[#1A1F2E]"
-          />
-          
-          <div className="flex items-center justify-between">
-            <div className={`flex items-center gap-2 px-2 py-1 rounded-full ${fitScore.bg}`}>
-              <BarChart3 className={`w-3 h-3 ${fitScore.color}`} />
-              <span className="text-xs font-bold text-[#FAFAFA]">Fit Score</span>
-              <span className={`text-xs font-bold ${fitScore.color}`}>{fitScore.score}</span>
-            </div>
+          <div className="w-full bg-[#1A1F2E] rounded-full h-2 overflow-hidden">
+            <div 
+              className="h-full bg-gradient-to-r from-[#D4AF37] to-[#F4E4BC] rounded-full transition-all duration-300"
+              style={{ width: `${completion}%` }}
+            />
           </div>
         </div>
 
-        {/* Footer */}
-        <div className="flex items-center justify-between text-[#F4E4BC]/50 text-xs mb-4">
+        {/* Fit score with star icon */}
+        <div className="flex items-center justify-between mb-4">
+          <div className={`flex items-center gap-2 px-3 py-1 rounded-full ${fitScore.bg}`}>
+            <Star className={`w-4 h-4 ${fitScore.color}`} />
+            <span className="text-xs font-bold text-[#FAFAFA]">Fit Score</span>
+            <span className={`text-xs font-bold ${fitScore.color}`}>{fitScore.score}</span>
+          </div>
+        </div>
+
+        {/* Location/timestamp */}
+        <div className="flex items-center justify-between text-[#F4E4BC]/60 text-xs mb-6">
           {item.location && (
             <div className="flex items-center gap-1">
               <MapPin className="w-3 h-3" />
@@ -271,17 +304,26 @@ const ListingCard = ({ item, onClick, showStatus = false }: ListingCardProps) =>
           </div>
         </div>
 
-        {/* Action Button */}
-        <Button 
-          className="w-full bg-[#D4AF37] hover:bg-[#F4E4BC] text-[#0A0F0F] font-bold py-2.5 transition-all duration-300 transform hover:scale-[1.02]"
-          onClick={(e) => {
-            e.stopPropagation();
-            onClick();
-          }}
-        >
-          <Building2 className="w-4 h-4 mr-2" />
-          View Details
-        </Button>
+        {/* Action buttons - Primary + Secondary */}
+        <div className="flex gap-2">
+          <Button 
+            className="flex-1 bg-[#D4AF37] hover:bg-[#F4E4BC] text-[#0A0F0F] font-bold py-2.5 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl"
+            onClick={(e) => {
+              e.stopPropagation();
+              onClick();
+            }}
+          >
+            <Building2 className="w-4 h-4 mr-2" />
+            View Details
+          </Button>
+          <Button 
+            variant="outline"
+            className="bg-[#F28C38] hover:bg-[#F28C38]/80 text-[#0A0F0F] border-[#F28C38] font-bold py-2.5 px-4 rounded-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <FileText className="w-4 h-4" />
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );
@@ -319,45 +361,26 @@ const ListingsSection = () => {
   }
 
   return (
-    <div className="space-y-8">
-      {/* Premium Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-4xl font-bold text-[#FAFAFA] mb-2">Investor Portal</h1>
-          <p className="text-[#F4E4BC]/80 text-lg">
-            Real-time access to curated M&A opportunities with comprehensive deal analytics
-          </p>
-        </div>
-        <Button
-          onClick={() => navigate('/deals')}
-          className="bg-[#D4AF37] hover:bg-[#F4E4BC] text-[#0A0F0F] font-bold px-6 py-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
-        >
-          Live Deals Dashboard
-        </Button>
-      </div>
+    <div className="py-24 space-y-8">
+      {/* Dashboard Header */}
+      <DashboardHeader totalDeals={items.length} canFilter={canFilter} />
 
       {/* Portfolio Metrics */}
       <PortfolioMetrics items={items} canFilter={canFilter} />
 
-      {/* Enhanced Filter Section */}
+      {/* Filter Section */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-3">
-            <Filter className="w-5 h-5 text-[#D4AF37]" />
-            <span className="text-[#F4E4BC] font-medium">Filter Deals</span>
-          </div>
-          <StatusFilterPills 
-            statusFilter={statusFilter}
-            onStatusFilterChange={setStatusFilter}
-            counts={countsByStatus}
-          />
-        </div>
+        <StatusFilterPills 
+          statusFilter={statusFilter}
+          onStatusFilterChange={setStatusFilter}
+          counts={countsByStatus}
+        />
         <Button
           onClick={refresh}
           variant="outline"
           size="sm"
           disabled={isLoading}
-          className="border-[#D4AF37]/40 text-[#F4E4BC] hover:bg-[#D4AF37]/20 hover:border-[#D4AF37]/60 rounded-full"
+          className="border-[#D4AF37] text-[#D4AF37] hover:bg-[#D4AF37] hover:text-[#0A0F0F] rounded-xl transition-all duration-300"
         >
           <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
           Refresh
@@ -366,23 +389,23 @@ const ListingsSection = () => {
 
       {/* Loading State */}
       {isLoading ? (
-        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {[...Array(6)].map((_, i) => (
-            <Card key={i} className="bg-[#2A2F3A] border-[#D4AF37]/30 animate-pulse h-96">
+            <Card key={i} className="bg-gradient-to-br from-[#2A2F3A] to-[#1A1F2E] border-[#D4AF37]/20 animate-pulse rounded-2xl">
               <CardContent className="p-6">
                 <div className="h-6 bg-[#1A1F2E] rounded mb-4"></div>
                 <div className="h-4 bg-[#1A1F2E] rounded mb-2 w-3/4"></div>
                 <div className="h-4 bg-[#1A1F2E] rounded w-1/2 mb-4"></div>
                 <div className="h-20 bg-[#1A1F2E] rounded mb-4"></div>
-                <div className="h-8 bg-[#1A1F2E] rounded"></div>
+                <div className="h-10 bg-[#1A1F2E] rounded"></div>
               </CardContent>
             </Card>
           ))}
         </div>
       ) : (
         <>
-          {/* Premium Listings Grid */}
-          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+          {/* Deal Cards Grid - 3 columns XL, 2 LG, 1 mobile */}
+          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
             {items.map((item) => (
               <ListingCard
                 key={item.id}
@@ -393,18 +416,18 @@ const ListingsSection = () => {
             ))}
           </div>
 
-          {/* Enhanced Empty State */}
+          {/* Empty State */}
           {items.length === 0 && (
-            <div className="text-center py-16">
-              <div className="bg-[#2A2F3A]/50 rounded-2xl p-8 max-w-md mx-auto border border-[#D4AF37]/20">
-                <Building2 className="w-16 h-16 text-[#D4AF37] mx-auto mb-4" />
-                <div className="text-[#F4E4BC] text-xl mb-2 font-medium">
+            <div className="text-center py-24">
+              <div className="bg-gradient-to-br from-[#2A2F3A] to-[#1A1F2E] rounded-2xl p-12 max-w-md mx-auto border border-[#D4AF37]/20">
+                <Building2 className="w-16 h-16 text-[#D4AF37] mx-auto mb-6" />
+                <div className="text-[#F4E4BC] text-xl mb-4 font-medium">
                   {canFilter 
                     ? "No deals match your current filter" 
                     : "No investment opportunities available"
                   }
                 </div>
-                <p className="text-[#F4E4BC]/60 mb-6">
+                <p className="text-[#F4E4BC]/60 mb-8">
                   {canFilter 
                     ? "Try adjusting your filter criteria to see more deals"
                     : "New opportunities will appear here when they become available"
@@ -413,7 +436,7 @@ const ListingsSection = () => {
                 {canFilter && statusFilter !== 'all' && (
                   <Button 
                     onClick={() => setStatusFilter('all')}
-                    className="bg-[#D4AF37] hover:bg-[#F4E4BC] text-[#0A0F0F] font-bold rounded-full px-6 py-2"
+                    className="bg-[#D4AF37] hover:bg-[#F4E4BC] text-[#0A0F0F] font-bold rounded-xl px-8 py-3 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
                   >
                     Show All Deals
                   </Button>
