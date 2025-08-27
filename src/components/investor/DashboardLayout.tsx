@@ -43,6 +43,9 @@ const DashboardLayout = ({ children, activeTab = 'dashboard', onTabChange }: Das
 
   // Helper function to determine if nav item is active
   const isNavItemActive = (path: string) => {
+    if (path === '/dashboard') {
+      return location.pathname === '/dashboard';
+    }
     if (path === '/investor-portal') {
       return location.pathname === '/investor-portal';
     }
@@ -55,7 +58,7 @@ const DashboardLayout = ({ children, activeTab = 'dashboard', onTabChange }: Das
   // Role-based navigation items
   const getNavigationItems = () => {
     const baseItems = [
-      { id: 'dashboard', label: 'Dashboard', icon: Home, path: '/investor-portal' },
+      { id: 'dashboard', label: 'Dashboard', icon: Home, path: '/dashboard' },
       { id: 'deals', label: 'Deals', icon: BarChart3, path: '/deals' },
     ];
 

@@ -10,6 +10,7 @@ import React, { Suspense, lazy } from "react";
 
 // Lazy-load pages to reduce initial bundle size
 const Index = lazy(() => import("./pages/Index"));
+const Dashboard = lazy(() => import("./pages/Dashboard"));
 const InvestorDashboard = lazy(() => import("./pages/InvestorDashboard"));
 const Auth = lazy(() => import("./pages/Auth"));
 const Demo = lazy(() => import("./pages/Demo"));
@@ -23,13 +24,14 @@ const Settings = lazy(() => import("./pages/Settings"));
 const Activity = lazy(() => import("./pages/Activity"));
 
 // Wrap protected components with authentication
+const ProtectedDashboard = withAuth('investor')(Dashboard);
 const ProtectedInvestorDashboard = withAuth('investor')(InvestorDashboard);
 const ProtectedDealManagement = withAuth('investor')(DealManagement);
 const ProtectedDealDetail = withAuth('investor')(DealDetail);
-const ProtectedDocuments = withAuth('admin')(Documents);
+const ProtectedDocuments = withAuth('staff')(Documents);
 const ProtectedUserManagement = withAuth('admin')(UserManagement);
-const ProtectedSettings = withAuth('admin')(Settings);
-const ProtectedActivity = withAuth('admin')(Activity);
+const ProtectedSettings = withAuth('staff')(Settings);
+const ProtectedActivity = withAuth('staff')(Activity);
 const ProtectedOnboarding = withAuth('investor')(Onboarding);
 
 const queryClient = new QueryClient({
@@ -61,6 +63,7 @@ const App = () => (
               <Route path="/" element={<Index />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/demo" element={<Demo />} />
+              <Route path="/dashboard" element={<ProtectedDashboard />} />
               <Route path="/investor-portal" element={<ProtectedInvestorDashboard />} />
               <Route path="/deals" element={<ProtectedDealManagement />} />
               <Route path="/deal/:id" element={<ProtectedDealDetail />} />

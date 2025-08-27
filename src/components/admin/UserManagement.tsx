@@ -43,17 +43,25 @@ const UserManagement = () => {
         .order('created_at', { ascending: false });
 
       if (error) {
+        console.error('Error fetching users:', error);
         toast({
           title: 'Error',
           description: 'Failed to fetch users',
           variant: 'destructive',
         });
+        setUsers([]);
         return;
       }
 
       setUsers(data || []);
     } catch (error) {
       console.error('Error fetching users:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to fetch users',
+        variant: 'destructive',
+      });
+      setUsers([]);
     } finally {
       setLoading(false);
     }
