@@ -5,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Building2, MapPin, DollarSign, TrendingUp, FileText, Upload, Settings } from 'lucide-react';
 import DocumentUpload from '@/components/documents/DocumentUpload';
 import DocumentList from '@/components/documents/DocumentList';
+import PublishControls from './PublishControls';
 import { Company } from '@/hooks/useCompany';
 
 interface CompanyDetailViewProps {
@@ -26,7 +27,15 @@ const CompanyDetailView: React.FC<CompanyDetailViewProps> = ({
     if (company.is_draft) {
       return <Badge variant="secondary" className="bg-gray-500/20 text-gray-400">Draft</Badge>;
     }
-    // Will add publish status logic in phase 2
+    
+    if (!company.is_published) {
+      return <Badge variant="secondary" className="bg-gray-500/20 text-gray-400">Draft</Badge>;
+    }
+    
+    if (company.publish_at && new Date(company.publish_at) > new Date()) {
+      return <Badge variant="default" className="bg-amber-500/20 text-amber-400">Scheduled</Badge>;
+    }
+    
     return <Badge variant="default" className="bg-green-500/20 text-green-400">Live</Badge>;
   };
 
@@ -192,6 +201,13 @@ const CompanyDetailView: React.FC<CompanyDetailViewProps> = ({
 
         {canManageSettings && (
           <TabsContent value="settings" className="space-y-6">
+            <PublishControls 
+              company={company} 
+              onUpdate={() => {
+                onUploadComplete(); // Trigger refresh
+              }} 
+            />
+            
             <Card className="bg-card border-border">
               <CardHeader>
                 <CardTitle className="text-foreground">Company Settings</CardTitle>

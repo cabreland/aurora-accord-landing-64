@@ -22,7 +22,15 @@ const CompanyList: React.FC<CompanyListProps> = ({
     if (company.is_draft) {
       return <Badge variant="secondary" className="bg-gray-500/20 text-gray-400 text-xs">Draft</Badge>;
     }
-    // Will add publish status logic in phase 2
+    
+    if (!company.is_published) {
+      return <Badge variant="secondary" className="bg-gray-500/20 text-gray-400 text-xs">Draft</Badge>;
+    }
+    
+    if (company.publish_at && new Date(company.publish_at) > new Date()) {
+      return <Badge variant="default" className="bg-amber-500/20 text-amber-400 text-xs">Scheduled</Badge>;
+    }
+    
     return <Badge variant="default" className="bg-green-500/20 text-green-400 text-xs">Live</Badge>;
   };
 

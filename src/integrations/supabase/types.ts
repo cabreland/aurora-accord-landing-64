@@ -24,15 +24,18 @@ export type Database = {
           id: string
           industry: string | null
           is_draft: boolean
+          is_published: boolean
           location: string | null
           name: string
           owner_id: string | null
           passcode: string | null
           priority: Database["public"]["Enums"]["priority_level"] | null
+          publish_at: string | null
           revenue: string | null
           risks: Json | null
           stage: Database["public"]["Enums"]["company_stage"] | null
           summary: string | null
+          teaser_payload: Json | null
           updated_at: string
         }
         Insert: {
@@ -44,15 +47,18 @@ export type Database = {
           id?: string
           industry?: string | null
           is_draft?: boolean
+          is_published?: boolean
           location?: string | null
           name: string
           owner_id?: string | null
           passcode?: string | null
           priority?: Database["public"]["Enums"]["priority_level"] | null
+          publish_at?: string | null
           revenue?: string | null
           risks?: Json | null
           stage?: Database["public"]["Enums"]["company_stage"] | null
           summary?: string | null
+          teaser_payload?: Json | null
           updated_at?: string
         }
         Update: {
@@ -64,15 +70,18 @@ export type Database = {
           id?: string
           industry?: string | null
           is_draft?: boolean
+          is_published?: boolean
           location?: string | null
           name?: string
           owner_id?: string | null
           passcode?: string | null
           priority?: Database["public"]["Enums"]["priority_level"] | null
+          publish_at?: string | null
           revenue?: string | null
           risks?: Json | null
           stage?: Database["public"]["Enums"]["company_stage"] | null
           summary?: string | null
+          teaser_payload?: Json | null
           updated_at?: string
         }
         Relationships: []
@@ -132,6 +141,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "company_custom_values_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "public_company_teasers"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "company_custom_values_field_id_fkey"
             columns: ["field_id"]
             isOneToOne: false
@@ -162,6 +178,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_growth_opps_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "public_company_teasers"
             referencedColumns: ["id"]
           },
           {
@@ -269,6 +292,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deals_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "public_company_teasers"
             referencedColumns: ["id"]
           },
         ]
@@ -550,7 +580,63 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      public_company_teasers: {
+        Row: {
+          asking_price: string | null
+          created_at: string | null
+          ebitda: string | null
+          fit_score: number | null
+          id: string | null
+          industry: string | null
+          is_published: boolean | null
+          location: string | null
+          name: string | null
+          priority: Database["public"]["Enums"]["priority_level"] | null
+          publish_at: string | null
+          revenue: string | null
+          stage: Database["public"]["Enums"]["company_stage"] | null
+          summary: string | null
+          teaser_payload: Json | null
+          updated_at: string | null
+        }
+        Insert: {
+          asking_price?: string | null
+          created_at?: string | null
+          ebitda?: string | null
+          fit_score?: number | null
+          id?: string | null
+          industry?: string | null
+          is_published?: boolean | null
+          location?: string | null
+          name?: string | null
+          priority?: Database["public"]["Enums"]["priority_level"] | null
+          publish_at?: string | null
+          revenue?: string | null
+          stage?: Database["public"]["Enums"]["company_stage"] | null
+          summary?: string | null
+          teaser_payload?: Json | null
+          updated_at?: string | null
+        }
+        Update: {
+          asking_price?: string | null
+          created_at?: string | null
+          ebitda?: string | null
+          fit_score?: number | null
+          id?: string | null
+          industry?: string | null
+          is_published?: boolean | null
+          location?: string | null
+          name?: string | null
+          priority?: Database["public"]["Enums"]["priority_level"] | null
+          publish_at?: string | null
+          revenue?: string | null
+          stage?: Database["public"]["Enums"]["company_stage"] | null
+          summary?: string | null
+          teaser_payload?: Json | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       get_user_role: {

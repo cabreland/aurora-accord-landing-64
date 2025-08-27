@@ -18,6 +18,9 @@ export interface CompanyData {
   risks?: string[];
   passcode?: string;
   is_draft?: boolean;
+  is_published?: boolean;
+  publish_at?: string;
+  teaser_payload?: any;
   created_at?: string;
   updated_at?: string;
 
@@ -69,8 +72,13 @@ export const upsertCompanyDraft = async (data: Partial<CompanyData>, id?: string
       asking_price: cleanData.asking_price,
       passcode: cleanData.passcode,
       is_draft: true,
+      is_published: false,
       highlights: JSON.stringify(cleanData.highlights || []),
-      risks: JSON.stringify(cleanData.risks || [])
+      risks: JSON.stringify(cleanData.risks || []),
+      teaser_payload: JSON.stringify({
+        highlights: cleanData.highlights || [],
+        risks: cleanData.risks || []
+      })
     };
 
     if (id) {
@@ -123,8 +131,13 @@ export const finalizeCompany = async (id: string, data: Partial<CompanyData>): P
       asking_price: cleanData.asking_price,
       passcode: cleanData.passcode,
       is_draft: false,
+      is_published: false,
       highlights: JSON.stringify(cleanData.highlights || []),
-      risks: JSON.stringify(cleanData.risks || [])
+      risks: JSON.stringify(cleanData.risks || []),
+      teaser_payload: JSON.stringify({
+        highlights: cleanData.highlights || [],
+        risks: cleanData.risks || []
+      })
     };
 
     const { data: finalizedCompany, error } = await supabase
@@ -171,7 +184,6 @@ export const getCompanies = async (query?: string): Promise<CompanyData[]> => {
     let queryBuilder = supabase
       .from('companies')
       .select('*')
-      .eq('is_draft', false)
       .order('created_at', { ascending: false });
 
     if (query) {

@@ -1,11 +1,12 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Plus, Building2 } from 'lucide-react';
 import CompanyWizard from '@/components/company/CompanyWizard';
 import CompanyList from '@/components/company/CompanyList';
 import CompanyDetailView from '@/components/company/CompanyDetailView';
+import CompanyFilters, { CompanyStatusFilter } from '@/components/company/CompanyFilters';
 import DashboardLayout from '@/components/investor/DashboardLayout';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { useNavigate } from 'react-router-dom';
@@ -16,21 +17,39 @@ import { useQueryClient } from '@tanstack/react-query';
 const DealManagement = () => {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [isCompanyWizardOpen, setIsCompanyWizardOpen] = useState(false);
+  const [statusFilter, setStatusFilter] = useState<CompanyStatusFilter>('all');
   const { profile, canManageUsers } = useUserProfile();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  // Company selection and data fetching
   const { selectedCompanyId, selectCompany, clearSelection } = useCompanySelection();
   const { companies, loading: companiesLoading, refetch: refetchCompanies } = useCompanies();
-  const { company: selectedCompany, loading: companyLoading } = useCompany(selectedCompanyId || undefined);
+  const { company: selectedCompany, loading: companyLoading, refetch: refetchCompany } = useCompany(selectedCompanyId || undefined);
+
+  // Filter companies based on status
+  const filteredCompanies = useMemo(() => {
+    if (statusFilter === 'all') return companies;
+    
+    return companies.filter(company => {
+      switch (statusFilter) {
+        case 'draft':
+          return company.is_draft || !company.is_published;
+        case 'scheduled':
+          return !company.is_draft && company.is_published && company.publish_at && new Date(company.publish_at) > new Date();
+        case 'live':
+          return !company.is_draft && company.is_published && (!company.publish_at || new Date(company.publish_at) <= new Date());
+        default:
+          return true;
+      }
+    });
+  }, [companies, statusFilter]);
 
   // Auto-select first company if none selected and companies exist
   useEffect(() => {
-    if (!selectedCompanyId && companies.length > 0 && !companiesLoading) {
-      selectCompany(companies[0].id);
+    if (!selectedCompanyId && filteredCompanies.length > 0 && !companiesLoading) {
+      selectCompany(filteredCompanies[0].id);
     }
-  }, [companies, companiesLoading, selectedCompanyId, selectCompany]);
+  }, [filteredCompanies, companiesLoading, selectedCompanyId, selectCompany]);
 
   const handleCompanySelect = (companyId: string) => {
     selectCompany(companyId);
@@ -38,6 +57,15 @@ const DealManagement = () => {
 
   const handleUploadComplete = () => {
     setRefreshTrigger(prev => prev + 1);
+    // Invalidate both company list and selected company
+    queryClient.invalidateQueries({ queryKey: ['companies'] });
+    if (selectedCompanyId) {
+      queryClient.invalidateQueries({ queryKey: ['company', selectedCompanyId] });
+    }
+    refetchCompanies();
+    if (selectedCompanyId) {
+      refetchCompany();
+    }
   };
 
   const handleCompanyWizardSuccess = (companyId: string) => {
@@ -82,16 +110,21 @@ const DealManagement = () => {
 
           {/* Master-Detail Layout */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Master Panel - Company List */}
             <div className="lg:col-span-1">
               <Card className="bg-card border-border">
-                <CardHeader>
-                  <CardTitle className="text-foreground">Companies</CardTitle>
+                <CardHeader className="pb-4">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-foreground">Companies</CardTitle>
+                    <CompanyFilters
+                      statusFilter={statusFilter}
+                      onStatusFilterChange={setStatusFilter}
+                    />
+                  </div>
                 </CardHeader>
                 <CardContent className="p-0">
                   <div className="p-4">
                     <CompanyList
-                      companies={companies}
+                      companies={filteredCompanies}
                       loading={companiesLoading}
                       selectedCompanyId={selectedCompanyId}
                       onCompanySelect={handleCompanySelect}

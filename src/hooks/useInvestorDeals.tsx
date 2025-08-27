@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { getCompanies, convertCompanyToDeal, CompanyData } from '@/lib/data/companies';
+import { getPublishedTeasers, TeaserData } from '@/lib/data/teasers';
 import { useToast } from '@/hooks/use-toast';
 
 export interface InvestorDeal {
@@ -61,8 +61,8 @@ export const useInvestorDeals = () => {
   const fetchDeals = async () => {
     setLoading(true);
     try {
-      const companies = await getCompanies();
-      const deals = companies.map(convertCompanyToDeal);
+      const teasers = await getPublishedTeasers();
+      const deals = teasers.map(convertTeaserToDeal);
       setAllDeals(deals);
       setFilteredDeals(deals);
     } catch (error) {
@@ -136,4 +136,76 @@ export const useInvestorDeals = () => {
     resetFilters,
     refresh
   };
+};
+
+// Convert teaser data to deal format for investor view
+const convertTeaserToDeal = (teaser: TeaserData): InvestorDeal => {
+  return {
+    id: teaser.id,
+    companyName: teaser.name || 'Unnamed Company',
+    industry: teaser.industry || 'Not specified',
+    revenue: teaser.revenue || 'Not disclosed',
+    ebitda: teaser.ebitda || 'Not disclosed',
+    stage: mapStageToDisplay(teaser.stage),
+    progress: calculateProgress(teaser.stage),
+    priority: capitalizeFirst(teaser.priority || 'medium'),
+    location: teaser.location || 'Not specified',
+    fitScore: teaser.fit_score || 50,
+    lastUpdated: formatDate(teaser.updated_at),
+    description: teaser.summary || 'No description available',
+    // Extended fields - using fallbacks since they're teaser-only
+    foundedYear: 'Not specified',
+    teamSize: 'Not specified',
+    reasonForSale: 'Not specified',
+    growthOpportunities: [],
+    foundersMessage: '',
+    founderName: 'Not specified',
+    idealBuyerProfile: '',
+    rollupPotential: '',
+    marketTrends: '',
+    profitMargin: 'Not disclosed',
+    customerCount: 'Not disclosed',
+    recurringRevenue: 'Not disclosed',
+    cacLtvRatio: 'Not disclosed',
+    highlights: (teaser.teaser_payload?.highlights as string[]) || [],
+    risks: (teaser.teaser_payload?.risks as string[]) || [],
+    documents: []
+  };
+};
+
+const mapStageToDisplay = (stage?: string) => {
+  switch (stage) {
+    case 'teaser': return 'Initial Review';
+    case 'discovery': return 'NDA Signed';
+    case 'dd': return 'Due Diligence';
+    case 'closing': return 'Closing';
+    default: return 'Initial Review';
+  }
+};
+
+const calculateProgress = (stage?: string) => {
+  switch (stage) {
+    case 'teaser': return 25;
+    case 'discovery': return 50;
+    case 'dd': return 75;
+    case 'closing': return 90;
+    default: return 25;
+  }
+};
+
+const capitalizeFirst = (str: string) => {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+};
+
+const formatDate = (dateString?: string) => {
+  if (!dateString) return 'Recently';
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffTime = Math.abs(now.getTime() - date.getTime());
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  
+  if (diffDays === 1) return '1 day ago';
+  if (diffDays < 7) return `${diffDays} days ago`;
+  if (diffDays < 30) return `${Math.ceil(diffDays / 7)} weeks ago`;
+  return `${Math.ceil(diffDays / 30)} months ago`;
 };
