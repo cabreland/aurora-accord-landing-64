@@ -8,12 +8,11 @@ const VideoHero = () => {
       {/* YouTube Video Background */}
       <div className="absolute inset-0 w-full h-full">
         <iframe
-          src="https://www.youtube.com/embed/Wua-TMQlqIs?autoplay=1&mute=1&loop=1&playlist=Wua-TMQlqIs&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1"
+          src="https://www.youtube.com/embed/Wua-TMQlqIs?autoplay=1&mute=1&loop=1&playlist=Wua-TMQlqIs&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&enablejsapi=1"
           title="Background Video"
-          className="w-full h-full object-cover"
+          className="w-full h-full"
           allow="autoplay; encrypted-media"
           allowFullScreen
-          style={{ pointerEvents: 'none' }}
         />
       </div>
       
@@ -25,30 +24,30 @@ const VideoHero = () => {
         <nav className="flex items-center justify-between px-8 py-6">
           {/* Logo */}
           <div className="flex items-center gap-2">
-            <div className="w-10 h-10 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-lg flex items-center justify-center">
-              <div className="w-6 h-6 border-2 border-white transform rotate-45"></div>
+            <div className="w-10 h-10 bg-gradient-to-br from-[#D4AF37] to-[#B8941F] rounded-lg flex items-center justify-center">
+              <div className="w-6 h-6 border-2 border-black transform rotate-45"></div>
             </div>
             <span className="text-white text-xl font-bold">EBB</span>
           </div>
           
           {/* Navigation Links */}
           <div className="hidden md:flex items-center gap-8">
-            <a href="#" className="text-white hover:text-yellow-400 transition-colors">Case Studies</a>
-            <a href="#" className="text-white hover:text-yellow-400 transition-colors">About</a>
-            <a href="#" className="text-white hover:text-yellow-400 transition-colors">Blog</a>
-            <a href="#" className="text-white hover:text-yellow-400 transition-colors">FAQs</a>
+            <a href="#" className="text-white hover:text-[#D4AF37] transition-colors">Case Studies</a>
+            <a href="#" className="text-white hover:text-[#D4AF37] transition-colors">About</a>
+            <a href="#" className="text-white hover:text-[#D4AF37] transition-colors">Blog</a>
+            <a href="#" className="text-white hover:text-[#D4AF37] transition-colors">FAQs</a>
           </div>
           
           {/* CTA Buttons */}
           <div className="flex items-center gap-4">
             <Button 
               variant="outline" 
-              className="border-white/30 text-white hover:bg-white/10"
+              className="border-white/30 text-white hover:bg-white/10 rounded-full px-6"
             >
               For Buyers
             </Button>
             <Button 
-              className="bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-black font-bold"
+              className="bg-[#D4AF37] hover:bg-[#B8941F] text-black font-bold rounded-full px-6"
             >
               Apply to Sell
             </Button>
@@ -83,26 +82,26 @@ const VideoHero = () => {
       </div>
       
       {/* Bottom Right Info Box */}
-      <div className="absolute bottom-8 right-8 bg-gradient-to-br from-yellow-600/90 to-yellow-500/90 backdrop-blur-sm rounded-2xl p-6 max-w-xs border border-yellow-400/30">
-        <h3 className="text-xl font-bold text-white mb-4">Bishoi's Story</h3>
+      <div className="absolute bottom-8 right-8 bg-gradient-to-br from-[#D4AF37]/90 to-[#B8941F]/90 backdrop-blur-sm rounded-2xl p-6 max-w-xs border border-[#D4AF37]/50">
+        <h3 className="text-xl font-bold text-black mb-4">Bishoi's Story</h3>
         
         <div className="space-y-3 mb-6">
           <div className="flex items-center gap-3">
-            <Check className="w-5 h-5 text-white flex-shrink-0" />
-            <span className="text-white text-sm">Saved $10K+ in fees</span>
+            <Check className="w-5 h-5 text-black flex-shrink-0" />
+            <span className="text-black text-sm font-medium">Saved $10K+ in fees</span>
           </div>
           <div className="flex items-center gap-3">
-            <Check className="w-5 h-5 text-white flex-shrink-0" />
-            <span className="text-white text-sm">Sold for 3X EBITDA</span>
+            <Check className="w-5 h-5 text-black flex-shrink-0" />
+            <span className="text-black text-sm font-medium">Sold for 3X EBITDA</span>
           </div>
           <div className="flex items-center gap-3">
-            <Check className="w-5 h-5 text-white flex-shrink-0" />
-            <span className="text-white text-sm">LOI by week 2</span>
+            <Check className="w-5 h-5 text-black flex-shrink-0" />
+            <span className="text-black text-sm font-medium">LOI by week 2</span>
           </div>
         </div>
         
         <Button 
-          className="w-full bg-white text-yellow-700 hover:bg-gray-100 font-bold py-2 rounded-xl shadow-lg mb-3"
+          className="w-full bg-white text-black hover:bg-gray-100 font-bold py-2 rounded-xl shadow-lg mb-3"
         >
           Book a Call
         </Button>
