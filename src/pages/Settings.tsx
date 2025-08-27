@@ -2,7 +2,6 @@
 import React from 'react';
 import DashboardLayout from '@/components/investor/DashboardLayout';
 import SettingsManager from '@/components/settings/SettingsManager';
-import { withAuth } from '@/utils/withAuth';
 
 const SettingsPage = () => {
   return (
@@ -12,4 +11,4 @@ const SettingsPage = () => {
   );
 };
 
-export default withAuth('staff')(SettingsPage);
+export default SettingsPage;
