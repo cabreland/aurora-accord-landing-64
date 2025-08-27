@@ -102,6 +102,23 @@ Deno.serve(async (req) => {
       );
     }
 
+    // Determine the site URL for redirect
+    let siteUrl = Deno.env.get('SITE_URL');
+    if (!siteUrl) {
+      const origin = req.headers.get('origin');
+      // Allowed origins for redirect
+      const allowedOrigins = [
+        'http://localhost:3000',
+        'https://gbjmklhvrmecawaacqeb.lovable.dev'
+      ];
+      
+      if (origin && allowedOrigins.includes(origin)) {
+        siteUrl = origin;
+      } else {
+        siteUrl = 'https://gbjmklhvrmecawaacqeb.lovable.dev'; // fallback to deployed app
+      }
+    }
+
     // Invite user using service role
     const { data: inviteData, error: inviteError } = await supabaseServiceRole.auth.admin.inviteUserByEmail(
       email.trim().toLowerCase(),
@@ -111,7 +128,7 @@ Deno.serve(async (req) => {
           invited_by: user.id,
           role: role
         },
-        redirectTo: `${Deno.env.get('SUPABASE_URL')}/auth/callback`
+        redirectTo: `${siteUrl}/auth/callback`
       }
     );
 
