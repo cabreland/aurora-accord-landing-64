@@ -6,7 +6,8 @@ const corsHeaders = {
 }
 
 interface DeleteUserRequest {
-  user_id: string;
+  user_id?: string;
+  email?: string;
 }
 
 Deno.serve(async (req) => {
@@ -77,65 +78,135 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Parse request body
-    const { user_id }: DeleteUserRequest = await req.json();
+    // Parse request body (accept either user_id or email)
+    const { user_id: bodyUserId, email }: DeleteUserRequest = await req.json();
 
-    if (!user_id || !user_id.trim()) {
+    let targetUserId = bodyUserId?.trim() || '';
+    let targetEmail = email?.trim() || '';
+
+    if (!targetUserId && !targetEmail) {
       return new Response(
-        JSON.stringify({ error: 'User ID is required' }),
+        JSON.stringify({ error: 'Provide user_id or email' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
+    // If only email provided, try to resolve user_id via profiles first
+    if (!targetUserId && targetEmail) {
+      const { data: profByEmail } = await supabaseServiceRole
+        .from('profiles')
+        .select('user_id')
+        .eq('email', targetEmail)
+        .maybeSingle();
+      if (profByEmail?.user_id) {
+        targetUserId = profByEmail.user_id;
+      }
+
+      // If still no user_id, search auth users (paginate)
+      if (!targetUserId) {
+        try {
+          let page = 1;
+          const perPage = 200;
+          while (true) {
+            const { data: list, error: listErr } = await supabaseServiceRole.auth.admin.listUsers({ page, perPage });
+            if (listErr) {
+              console.warn('listUsers error:', listErr);
+              break;
+            }
+            const match = list?.users?.find(u => u.email?.toLowerCase() === targetEmail.toLowerCase());
+            if (match) {
+              targetUserId = match.id;
+              break;
+            }
+            if (!list || list.users.length < perPage) break;
+            page += 1;
+          }
+        } catch (e) {
+          console.warn('Error searching auth users by email:', e);
+        }
+      }
+    }
+
     // Prevent admin from deleting themselves
-    if (user_id === user.id) {
+    if (targetUserId && targetUserId === user.id) {
       return new Response(
         JSON.stringify({ error: 'Cannot delete your own account' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Get user profile before deletion for logging
-    const { data: targetProfile, error: targetError } = await supabaseServiceRole
-      .from('profiles')
-      .select('email, first_name, last_name')
-      .eq('user_id', user_id)
-      .maybeSingle();
-
-    if (targetError) {
-      console.error('Error fetching target user:', targetError);
-      return new Response(
-        JSON.stringify({ error: 'User not found' }),
-        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+    // Get user profile before deletion for logging (try by user_id then email)
+    let targetProfile: { email: string | null; first_name: string | null; last_name: string | null } | null = null;
+    if (targetUserId) {
+      const { data } = await supabaseServiceRole
+        .from('profiles')
+        .select('email, first_name, last_name')
+        .eq('user_id', targetUserId)
+        .maybeSingle();
+      if (data) targetProfile = data;
+    }
+    if (!targetProfile && targetEmail) {
+      const { data } = await supabaseServiceRole
+        .from('profiles')
+        .select('email, first_name, last_name')
+        .eq('email', targetEmail)
+        .maybeSingle();
+      if (data) targetProfile = data;
     }
 
-    // Delete user from auth (this will cascade delete the profile due to foreign key)
-    const { error: deleteError } = await supabaseServiceRole.auth.admin.deleteUser(user_id);
+    // Try to delete from auth if we have an id
+    let authDeleted = false;
+    if (targetUserId) {
+      const { error: deleteError } = await supabaseServiceRole.auth.admin.deleteUser(targetUserId);
+      if (deleteError) {
+        console.warn('Error deleting user from auth (continuing to clean profiles):', deleteError);
+      } else {
+        authDeleted = true;
+      }
+    }
 
-    if (deleteError) {
-      console.error('Error deleting user:', deleteError);
-      return new Response(
-        JSON.stringify({ error: 'Failed to delete user from authentication system' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+    // Always delete profile rows (by user_id or email)
+    let profileDeletedCount = 0;
+    if (targetUserId) {
+      const { error: profDelErr, count } = await supabaseServiceRole
+        .from('profiles')
+        .delete({ count: 'exact' })
+        .eq('user_id', targetUserId);
+      if (!profDelErr) profileDeletedCount += (count || 0);
+    }
+    if (targetEmail) {
+      const { error: profDelByEmailErr, count } = await supabaseServiceRole
+        .from('profiles')
+        .delete({ count: 'exact' })
+        .eq('email', targetEmail);
+      if (!profDelByEmailErr) profileDeletedCount += (count || 0);
     }
 
     // Log security event
     await supabaseServiceRole.rpc('log_security_event', {
       p_event_type: 'user_deleted',
-      p_event_data: { 
-        deleted_user_id: user_id, 
-        deleted_email: targetProfile?.email,
-        deleted_name: targetProfile ? `${targetProfile.first_name || ''} ${targetProfile.last_name || ''}`.trim() : null
+      p_event_data: {
+        deleted_user_id: targetUserId || null,
+        deleted_email: targetProfile?.email || targetEmail || null,
+        deleted_name: targetProfile ? `${targetProfile.first_name || ''} ${targetProfile.last_name || ''}`.trim() : null,
+        auth_deleted: authDeleted,
+        profiles_removed: profileDeletedCount
       },
       p_user_id: user.id
     });
 
+    if (!authDeleted && profileDeletedCount === 0) {
+      return new Response(
+        JSON.stringify({ error: 'User not found in auth or profiles' }),
+        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     return new Response(
-      JSON.stringify({ 
-        success: true, 
-        message: 'User deleted successfully from authentication system and database' 
+      JSON.stringify({
+        success: true,
+        message: 'User removed from authentication system and/or profiles',
+        details: { authDeleted, profileDeletedCount }
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
