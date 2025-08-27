@@ -21,14 +21,24 @@ const UserInviteDialog = ({ onInviteSuccess }: UserInviteDialogProps) => {
     if (!inviteEmail.trim()) return;
 
     try {
-      const { data, error } = await supabase.auth.admin.inviteUserByEmail(inviteEmail, {
-        data: { invited_by_admin: true }
+      const { data, error } = await supabase.functions.invoke('invite-user', {
+        body: { email: inviteEmail.trim() }
       });
 
       if (error) {
+        console.error('Error inviting user:', error);
         toast({
           title: 'Error',
-          description: 'Failed to invite user. Make sure you have admin privileges.',
+          description: error.message || 'Failed to invite user',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      if (data?.error) {
+        toast({
+          title: 'Error', 
+          description: data.error,
           variant: 'destructive',
         });
         return;
