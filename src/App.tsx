@@ -10,6 +10,7 @@ import React, { Suspense, lazy } from "react";
 
 // Lazy-load pages to reduce initial bundle size
 const Index = lazy(() => import("./pages/Index"));
+const IndexV2 = lazy(() => import("./pages/IndexV2"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const InvestorDashboard = lazy(() => import("./pages/InvestorDashboard"));
 const Auth = lazy(() => import("./pages/Auth"));
@@ -62,6 +63,7 @@ const App = () => (
           >
             <Routes>
               <Route path="/" element={<Index />} />
+              <Route path="/v2" element={<IndexV2 />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/auth/accept" element={<AuthAccept />} />
               <Route path="/demo" element={<Demo />} />
