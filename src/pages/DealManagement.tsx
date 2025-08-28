@@ -1,286 +1,205 @@
 
-import React, { useState, useEffect, useMemo } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { Plus, Search, Filter, MoreVertical } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
-import { Plus, Building2, Grid3X3, List, Kanban } from 'lucide-react';
-import CompanyWizard from '@/components/company/CompanyWizard';
-import CompanyList from '@/components/company/CompanyList';
-import CompanyDetailView from '@/components/company/CompanyDetailView';
-import CompanyFilters, { CompanyStatusFilter } from '@/components/company/CompanyFilters';
-import DashboardLayout from '@/components/investor/DashboardLayout';
+import { Input } from '@/components/ui/input';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useMyDeals } from '@/hooks/useMyDeals';
 import { useUserProfile } from '@/hooks/useUserProfile';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useCompanies, useCompany, useCompanySelection } from '@/hooks/useCompany';
-import { useQueryClient } from '@tanstack/react-query';
+import DashboardLayout from '@/components/investor/DashboardLayout';
+import { DealMetricsBar } from '@/components/deals/DealMetricsBar';
+import { DealFilters } from '@/components/deals/DealFilters';
+import { DealCardsView } from '@/components/deals/DealCardsView';
+import { DealListView } from '@/components/deals/DealListView';
+import { DealKanbanView } from '@/components/deals/DealKanbanView';
+import { DealDetailPanel } from '@/components/deals/DealDetailPanel';
+import { CreateDealDialog } from '@/components/deals/CreateDealDialog';
 
+type ViewType = 'cards' | 'list' | 'kanban';
 
-const DealManagement = () => {
-  const [refreshTrigger, setRefreshTrigger] = useState(0);
-  const [isCompanyWizardOpen, setIsCompanyWizardOpen] = useState(false);
-  const [statusFilter, setStatusFilter] = useState<CompanyStatusFilter>('all');
-  const { profile, canManageUsers } = useUserProfile();
-  const navigate = useNavigate();
-  const queryClient = useQueryClient();
-
-  const { selectedCompanyId, selectCompany, clearSelection } = useCompanySelection();
-  const { companies, loading: companiesLoading, refetch: refetchCompanies } = useCompanies();
-  const { company: selectedCompany, loading: companyLoading, refetch: refetchCompany } = useCompany(selectedCompanyId || undefined);
-
-  // Filter companies based on status
-  const filteredCompanies = useMemo(() => {
-    if (statusFilter === 'all') return companies;
-    
-    return companies.filter(company => {
-      switch (statusFilter) {
-        case 'draft':
-          return company.is_draft || !company.is_published;
-        case 'scheduled':
-          return !company.is_draft && company.is_published && company.publish_at && new Date(company.publish_at) > new Date();
-        case 'live':
-          return !company.is_draft && company.is_published && (!company.publish_at || new Date(company.publish_at) <= new Date());
-        default:
-          return true;
-      }
-    });
-  }, [companies, statusFilter]);
-
-  // Auto-select first company if none selected and companies exist
-  useEffect(() => {
-    if (!selectedCompanyId && filteredCompanies.length > 0 && !companiesLoading) {
-      selectCompany(filteredCompanies[0].id);
-    }
-  }, [filteredCompanies, companiesLoading, selectedCompanyId, selectCompany]);
-
-  const handleCompanySelect = (companyId: string) => {
-    selectCompany(companyId);
-  };
-
-  const handleUploadComplete = () => {
-    setRefreshTrigger(prev => prev + 1);
-    // Invalidate both company list and selected company
-    queryClient.invalidateQueries({ queryKey: ['companies'] });
-    if (selectedCompanyId) {
-      queryClient.invalidateQueries({ queryKey: ['company', selectedCompanyId] });
-    }
-    refetchCompanies();
-    if (selectedCompanyId) {
-      refetchCompany();
-    }
-  };
-
-  const handleCompanyWizardSuccess = (companyId: string) => {
-    console.log('Company created:', companyId);
-    // Invalidate and refetch companies list
-    queryClient.invalidateQueries({ queryKey: ['companies'] });
-    refetchCompanies();
-    setRefreshTrigger(prev => prev + 1);
-    // Route to the new company
-    selectCompany(companyId);
-    setIsCompanyWizardOpen(false);
-  };
-
-  // Role-based permissions
-  const isAdmin = profile?.role === 'admin';
-  const isEditor = profile?.role === 'editor';
-  const canUpload = isAdmin || isEditor;
-  const canManageSettings = isAdmin || isEditor;
-
-  // URL-based view state management
+const DealManagement: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const currentView = searchParams.get('view') || 'cards';
+  const { profile } = useUserProfile();
+  
+  const currentView = (searchParams.get('view') as ViewType) || 'cards';
+  const selectedDealId = searchParams.get('deal') || null;
+  
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  
+  const { 
+    deals, 
+    loading, 
+    filters, 
+    updateFilters, 
+    clearFilters, 
+    refresh, 
+    totalDeals, 
+    filteredCount 
+  } = useMyDeals();
 
-  const handleViewChange = (view: string) => {
-    const newSearchParams = new URLSearchParams(searchParams);
-    if (view === 'cards') {
-      newSearchParams.delete('view'); // Default view, no need to set in URL
-    } else {
-      newSearchParams.set('view', view);
+  useEffect(() => {
+    updateFilters({ search: searchQuery });
+  }, [searchQuery, updateFilters]);
+
+  const handleViewChange = (view: ViewType) => {
+    const newParams = new URLSearchParams(searchParams);
+    newParams.set('view', view);
+    if (selectedDealId) {
+      newParams.delete('deal');
     }
-    setSearchParams(newSearchParams);
+    setSearchParams(newParams);
   };
 
-  const renderDetailContent = () => {
-    if (!selectedCompany) {
-      return (
-        <Card className="bg-card border-border">
-          <CardContent className="p-8">
-            <div className="text-center py-12">
-              <Building2 className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-foreground mb-2">
-                Select a company to manage uploads & settings
-              </h3>
-              <p className="text-muted-foreground mb-6">
-                Choose a company from the list to view details, upload documents, and manage settings.
-              </p>
-              {canManageUsers() && companies.length === 0 && !companiesLoading && (
-                <Button
-                  onClick={() => setIsCompanyWizardOpen(true)}
-                  className="bg-primary hover:bg-primary/90 text-primary-foreground"
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add Company
-                </Button>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      );
+  const handleDealSelect = (dealId: string | null) => {
+    const newParams = new URLSearchParams(searchParams);
+    if (dealId) {
+      newParams.set('deal', dealId);
+    } else {
+      newParams.delete('deal');
     }
+    setSearchParams(newParams);
+  };
 
+  const isAdmin = profile?.role === 'admin';
+  const canCreateDeals = isAdmin || profile?.role === 'editor';
+
+  const renderMainContent = () => {
     switch (currentView) {
       case 'list':
         return (
-          <Card className="bg-card border-border">
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                <span>Company Details - List View</span>
-                <ToggleGroup type="single" value={currentView} onValueChange={handleViewChange}>
-                  <ToggleGroupItem value="cards" aria-label="Cards view">
-                    <Grid3X3 className="h-4 w-4" />
-                  </ToggleGroupItem>
-                  <ToggleGroupItem value="list" aria-label="List view">
-                    <List className="h-4 w-4" />
-                  </ToggleGroupItem>
-                  <ToggleGroupItem value="kanban" aria-label="Kanban view">
-                    <Kanban className="h-4 w-4" />
-                  </ToggleGroupItem>
-                </ToggleGroup>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-12">
-                <List className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-foreground mb-2">List View</h3>
-                <p className="text-muted-foreground">Coming soon...</p>
-              </div>
-            </CardContent>
-          </Card>
+          <DealListView 
+            deals={deals} 
+            loading={loading} 
+            onDealSelect={handleDealSelect}
+            selectedDealId={selectedDealId}
+          />
         );
       case 'kanban':
         return (
-          <Card className="bg-card border-border">
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                <span>Company Details - Kanban View</span>
-                <ToggleGroup type="single" value={currentView} onValueChange={handleViewChange}>
-                  <ToggleGroupItem value="cards" aria-label="Cards view">
-                    <Grid3X3 className="h-4 w-4" />
-                  </ToggleGroupItem>
-                  <ToggleGroupItem value="list" aria-label="List view">
-                    <List className="h-4 w-4" />
-                  </ToggleGroupItem>
-                  <ToggleGroupItem value="kanban" aria-label="Kanban view">
-                    <Kanban className="h-4 w-4" />
-                  </ToggleGroupItem>
-                </ToggleGroup>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-12">
-                <Kanban className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-foreground mb-2">Kanban View</h3>
-                <p className="text-muted-foreground">Coming soon...</p>
-              </div>
-            </CardContent>
-          </Card>
+          <DealKanbanView 
+            deals={deals} 
+            loading={loading} 
+            onDealSelect={handleDealSelect}
+            selectedDealId={selectedDealId}
+          />
         );
-      case 'cards':
       default:
         return (
-          <div className="space-y-4">
-            <Card className="bg-card border-border">
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  <span>Company Details</span>
-                  <ToggleGroup type="single" value={currentView} onValueChange={handleViewChange}>
-                    <ToggleGroupItem value="cards" aria-label="Cards view">
-                      <Grid3X3 className="h-4 w-4" />
-                    </ToggleGroupItem>
-                    <ToggleGroupItem value="list" aria-label="List view">
-                      <List className="h-4 w-4" />
-                    </ToggleGroupItem>
-                    <ToggleGroupItem value="kanban" aria-label="Kanban view">
-                      <Kanban className="h-4 w-4" />
-                    </ToggleGroupItem>
-                  </ToggleGroup>
-                </CardTitle>
-              </CardHeader>
-            </Card>
-            <CompanyDetailView
-              company={selectedCompany}
-              onUploadComplete={handleUploadComplete}
-              refreshTrigger={refreshTrigger}
-              canUpload={canUpload}
-              canManageSettings={canManageSettings}
-            />
-          </div>
+          <DealCardsView 
+            deals={deals} 
+            loading={loading} 
+            onDealSelect={handleDealSelect}
+            selectedDealId={selectedDealId}
+          />
         );
     }
   };
 
   return (
     <DashboardLayout>
-      <div className="min-h-screen bg-background space-y-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="mb-8 flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-foreground mb-2">Company Management</h1>
-              <p className="text-muted-foreground">
-                Manage companies, upload documents, and control access
-              </p>
+      <div className="flex h-screen bg-background">
+        {/* Main Content Area */}
+        <div className={`flex-1 flex flex-col ${selectedDealId ? 'mr-96' : ''} transition-all duration-300`}>
+          {/* Header */}
+          <div className="border-b border-border bg-card p-4">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h1 className="text-2xl font-semibold text-foreground">Deal Management</h1>
+                <p className="text-muted-foreground">
+                  Manage your investment opportunities and pipeline
+                </p>
+              </div>
+              
+              <div className="flex items-center gap-3">
+                {canCreateDeals && (
+                  <Button onClick={() => setShowCreateDialog(true)}>
+                    <Plus className="w-4 h-4 mr-2" />
+                    New Deal
+                  </Button>
+                )}
+                <Button variant="outline" size="icon">
+                  <MoreVertical className="w-4 h-4" />
+                </Button>
+              </div>
             </div>
-            
-            {canManageUsers() && (
-              <Button
-                onClick={() => setIsCompanyWizardOpen(true)}
-                className="bg-primary hover:bg-primary/90 text-primary-foreground"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Add Company
-              </Button>
+
+            {/* Metrics Bar */}
+            <DealMetricsBar 
+              totalDeals={totalDeals}
+              filteredCount={filteredCount}
+              deals={deals}
+            />
+
+            {/* Search and Controls */}
+            <div className="flex items-center justify-between mt-4">
+              <div className="flex items-center gap-3 flex-1 max-w-md">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search deals..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-9"
+                  />
+                </div>
+                <Button 
+                  variant="outline" 
+                  size="icon"
+                  onClick={() => setShowFilters(!showFilters)}
+                  className={showFilters ? 'bg-muted' : ''}
+                >
+                  <Filter className="w-4 h-4" />
+                </Button>
+              </div>
+
+              {/* View Switcher */}
+              <Tabs value={currentView} onValueChange={handleViewChange}>
+                <TabsList>
+                  <TabsTrigger value="cards">Cards</TabsTrigger>
+                  <TabsTrigger value="list">List</TabsTrigger>
+                  <TabsTrigger value="kanban">Kanban</TabsTrigger>
+                </TabsList>
+              </Tabs>
+            </div>
+
+            {/* Filters Panel */}
+            {showFilters && (
+              <div className="mt-4">
+                <DealFilters 
+                  filters={filters}
+                  onFiltersChange={updateFilters}
+                  onClearFilters={clearFilters}
+                />
+              </div>
             )}
           </div>
 
-          {/* Master-Detail Layout */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-1">
-              <Card className="bg-card border-border">
-                <CardHeader className="pb-4">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-foreground">Companies</CardTitle>
-                    <CompanyFilters
-                      statusFilter={statusFilter}
-                      onStatusFilterChange={setStatusFilter}
-                    />
-                  </div>
-                </CardHeader>
-                <CardContent className="p-0">
-                  <div className="p-4">
-                    <CompanyList
-                      companies={filteredCompanies}
-                      loading={companiesLoading}
-                      selectedCompanyId={selectedCompanyId}
-                      onCompanySelect={handleCompanySelect}
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Detail Panel - Company Details */}
-            <div className="lg:col-span-2">
-              {renderDetailContent()}
-            </div>
+          {/* Main Content */}
+          <div className="flex-1 overflow-auto">
+            {renderMainContent()}
           </div>
-
-          {/* Company Wizard */}
-          <CompanyWizard
-            isOpen={isCompanyWizardOpen}
-            onClose={() => setIsCompanyWizardOpen(false)}
-            onSuccess={handleCompanyWizardSuccess}
-          />
         </div>
+
+        {/* Deal Detail Panel */}
+        {selectedDealId && (
+          <DealDetailPanel 
+            dealId={selectedDealId}
+            onClose={() => handleDealSelect(null)}
+            onDealUpdated={refresh}
+          />
+        )}
+
+        {/* Create Deal Dialog */}
+        <CreateDealDialog 
+          open={showCreateDialog}
+          onOpenChange={setShowCreateDialog}
+          onDealCreated={refresh}
+        />
       </div>
     </DashboardLayout>
   );
