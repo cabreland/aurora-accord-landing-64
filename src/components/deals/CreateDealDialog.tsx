@@ -97,9 +97,12 @@ export const CreateDealDialog: React.FC<CreateDealDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md" aria-describedby="create-deal-description">
         <DialogHeader>
           <DialogTitle>Create New Deal</DialogTitle>
+          <p id="create-deal-description" className="text-sm text-muted-foreground">
+            Enter basic information to create a new deal. You can add more details after creation.
+          </p>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">

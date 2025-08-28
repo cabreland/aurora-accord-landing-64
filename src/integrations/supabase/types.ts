@@ -296,6 +296,7 @@ export type Database = {
           id: string
           industry: string | null
           location: string | null
+          priority: string
           revenue: string | null
           status: Database["public"]["Enums"]["deal_status"]
           title: string
@@ -311,6 +312,7 @@ export type Database = {
           id?: string
           industry?: string | null
           location?: string | null
+          priority?: string
           revenue?: string | null
           status?: Database["public"]["Enums"]["deal_status"]
           title: string
@@ -326,6 +328,7 @@ export type Database = {
           id?: string
           industry?: string | null
           location?: string | null
+          priority?: string
           revenue?: string | null
           status?: Database["public"]["Enums"]["deal_status"]
           title?: string
