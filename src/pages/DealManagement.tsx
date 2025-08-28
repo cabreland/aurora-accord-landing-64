@@ -2,14 +2,15 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Plus, Building2 } from 'lucide-react';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { Plus, Building2, Grid3X3, List, Kanban } from 'lucide-react';
 import CompanyWizard from '@/components/company/CompanyWizard';
 import CompanyList from '@/components/company/CompanyList';
 import CompanyDetailView from '@/components/company/CompanyDetailView';
 import CompanyFilters, { CompanyStatusFilter } from '@/components/company/CompanyFilters';
 import DashboardLayout from '@/components/investor/DashboardLayout';
 import { useUserProfile } from '@/hooks/useUserProfile';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useCompanies, useCompany, useCompanySelection } from '@/hooks/useCompany';
 import { useQueryClient } from '@tanstack/react-query';
 
@@ -85,6 +86,139 @@ const DealManagement = () => {
   const canUpload = isAdmin || isEditor;
   const canManageSettings = isAdmin || isEditor;
 
+  // URL-based view state management
+  const [searchParams, setSearchParams] = useSearchParams();
+  const currentView = searchParams.get('view') || 'cards';
+
+  const handleViewChange = (view: string) => {
+    const newSearchParams = new URLSearchParams(searchParams);
+    if (view === 'cards') {
+      newSearchParams.delete('view'); // Default view, no need to set in URL
+    } else {
+      newSearchParams.set('view', view);
+    }
+    setSearchParams(newSearchParams);
+  };
+
+  const renderDetailContent = () => {
+    if (!selectedCompany) {
+      return (
+        <Card className="bg-card border-border">
+          <CardContent className="p-8">
+            <div className="text-center py-12">
+              <Building2 className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-foreground mb-2">
+                Select a company to manage uploads & settings
+              </h3>
+              <p className="text-muted-foreground mb-6">
+                Choose a company from the list to view details, upload documents, and manage settings.
+              </p>
+              {canManageUsers() && companies.length === 0 && !companiesLoading && (
+                <Button
+                  onClick={() => setIsCompanyWizardOpen(true)}
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Company
+                </Button>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      );
+    }
+
+    switch (currentView) {
+      case 'list':
+        return (
+          <Card className="bg-card border-border">
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                <span>Company Details - List View</span>
+                <ToggleGroup type="single" value={currentView} onValueChange={handleViewChange}>
+                  <ToggleGroupItem value="cards" aria-label="Cards view">
+                    <Grid3X3 className="h-4 w-4" />
+                  </ToggleGroupItem>
+                  <ToggleGroupItem value="list" aria-label="List view">
+                    <List className="h-4 w-4" />
+                  </ToggleGroupItem>
+                  <ToggleGroupItem value="kanban" aria-label="Kanban view">
+                    <Kanban className="h-4 w-4" />
+                  </ToggleGroupItem>
+                </ToggleGroup>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center py-12">
+                <List className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-foreground mb-2">List View</h3>
+                <p className="text-muted-foreground">Coming soon...</p>
+              </div>
+            </CardContent>
+          </Card>
+        );
+      case 'kanban':
+        return (
+          <Card className="bg-card border-border">
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                <span>Company Details - Kanban View</span>
+                <ToggleGroup type="single" value={currentView} onValueChange={handleViewChange}>
+                  <ToggleGroupItem value="cards" aria-label="Cards view">
+                    <Grid3X3 className="h-4 w-4" />
+                  </ToggleGroupItem>
+                  <ToggleGroupItem value="list" aria-label="List view">
+                    <List className="h-4 w-4" />
+                  </ToggleGroupItem>
+                  <ToggleGroupItem value="kanban" aria-label="Kanban view">
+                    <Kanban className="h-4 w-4" />
+                  </ToggleGroupItem>
+                </ToggleGroup>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center py-12">
+                <Kanban className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-foreground mb-2">Kanban View</h3>
+                <p className="text-muted-foreground">Coming soon...</p>
+              </div>
+            </CardContent>
+          </Card>
+        );
+      case 'cards':
+      default:
+        return (
+          <div className="space-y-4">
+            <Card className="bg-card border-border">
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                  <span>Company Details</span>
+                  <ToggleGroup type="single" value={currentView} onValueChange={handleViewChange}>
+                    <ToggleGroupItem value="cards" aria-label="Cards view">
+                      <Grid3X3 className="h-4 w-4" />
+                    </ToggleGroupItem>
+                    <ToggleGroupItem value="list" aria-label="List view">
+                      <List className="h-4 w-4" />
+                    </ToggleGroupItem>
+                    <ToggleGroupItem value="kanban" aria-label="Kanban view">
+                      <Kanban className="h-4 w-4" />
+                    </ToggleGroupItem>
+                  </ToggleGroup>
+                </CardTitle>
+              </CardHeader>
+            </Card>
+            <CompanyDetailView
+              company={selectedCompany}
+              onUploadComplete={handleUploadComplete}
+              refreshTrigger={refreshTrigger}
+              canUpload={canUpload}
+              canManageSettings={canManageSettings}
+            />
+          </div>
+        );
+    }
+  };
+
   return (
     <DashboardLayout>
       <div className="min-h-screen bg-background space-y-6">
@@ -136,38 +270,7 @@ const DealManagement = () => {
 
             {/* Detail Panel - Company Details */}
             <div className="lg:col-span-2">
-              {selectedCompany ? (
-                <CompanyDetailView
-                  company={selectedCompany}
-                  onUploadComplete={handleUploadComplete}
-                  refreshTrigger={refreshTrigger}
-                  canUpload={canUpload}
-                  canManageSettings={canManageSettings}
-                />
-              ) : (
-                <Card className="bg-card border-border">
-                  <CardContent className="p-8">
-                    <div className="text-center py-12">
-                      <Building2 className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-                      <h3 className="text-lg font-medium text-foreground mb-2">
-                        Select a company to manage uploads & settings
-                      </h3>
-                      <p className="text-muted-foreground mb-6">
-                        Choose a company from the list to view details, upload documents, and manage settings.
-                      </p>
-                      {canManageUsers() && companies.length === 0 && !companiesLoading && (
-                        <Button
-                          onClick={() => setIsCompanyWizardOpen(true)}
-                          className="bg-primary hover:bg-primary/90 text-primary-foreground"
-                        >
-                          <Plus className="w-4 h-4 mr-2" />
-                          Add Company
-                        </Button>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
+              {renderDetailContent()}
             </div>
           </div>
 
