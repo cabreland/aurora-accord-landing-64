@@ -1,0 +1,371 @@
+import React, { useState } from 'react';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
+import { ChevronLeft, ChevronRight, Check } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+
+import { BasicInfoStep } from './BasicInfoStep';
+import { FinancialsStep } from './FinancialsStep';
+import { GrowthStrategyStep } from './GrowthStrategyStep';
+import { FounderTeamStep } from './FounderTeamStep';
+import { DocumentsStep } from './DocumentsStep';
+import { PublishingStep } from './PublishingStep';
+
+interface DealWizardProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onDealCreated: () => void;
+}
+
+export interface DealFormData {
+  // Basic Info
+  title: string;
+  company_name: string;
+  industry: string;
+  location: string;
+  description: string;
+  
+  // Financials
+  revenue: string;
+  ebitda: string;
+  asking_price: string;
+  profit_margin: string;
+  growth_rate: string;
+  
+  // Growth & Strategy
+  growth_opportunities: string[];
+  market_position: string;
+  competitive_advantages: string;
+  strategic_fit: string;
+  
+  // Founder & Team
+  founder_message: string;
+  team_size: string;
+  key_personnel: string;
+  management_experience: string;
+  
+  // Documents
+  documents: File[];
+  document_categories: string[];
+  
+  // Publishing
+  status: 'draft' | 'active' | 'archived';
+  priority: 'low' | 'medium' | 'high';
+  publish_immediately: boolean;
+  scheduled_publish: Date | null;
+}
+
+const steps = [
+  { id: 'basic', title: 'Basic Info', component: BasicInfoStep },
+  { id: 'financials', title: 'Financials', component: FinancialsStep },
+  { id: 'growth', title: 'Growth & Strategy', component: GrowthStrategyStep },
+  { id: 'founder', title: 'Founder & Team', component: FounderTeamStep },
+  { id: 'documents', title: 'Documents', component: DocumentsStep },
+  { id: 'publishing', title: 'Publishing', component: PublishingStep },
+];
+
+export const DealWizard: React.FC<DealWizardProps> = ({
+  open,
+  onOpenChange,
+  onDealCreated
+}) => {
+  const [currentStep, setCurrentStep] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState<DealFormData>({
+    title: '',
+    company_name: '',
+    industry: '',
+    location: '',
+    description: '',
+    revenue: '',
+    ebitda: '',
+    asking_price: '',
+    profit_margin: '',
+    growth_rate: '',
+    growth_opportunities: [],
+    market_position: '',
+    competitive_advantages: '',
+    strategic_fit: '',
+    founder_message: '',
+    team_size: '',
+    key_personnel: '',
+    management_experience: '',
+    documents: [],
+    document_categories: [],
+    status: 'draft',
+    priority: 'medium',
+    publish_immediately: false,
+    scheduled_publish: null,
+  });
+  const { toast } = useToast();
+
+  const updateFormData = (updates: Partial<DealFormData>) => {
+    setFormData(prev => ({ ...prev, ...updates }));
+  };
+
+  const validateStep = (stepIndex: number): boolean => {
+    switch (stepIndex) {
+      case 0: // Basic Info
+        return !!(formData.title && formData.company_name);
+      case 1: // Financials
+        return !!(formData.revenue || formData.ebitda);
+      case 2: // Growth & Strategy
+        return true; // Optional step
+      case 3: // Founder & Team
+        return true; // Optional step
+      case 4: // Documents
+        return true; // Optional step
+      case 5: // Publishing
+        return true; // Always valid
+      default:
+        return true;
+    }
+  };
+
+  const handleNext = () => {
+    if (!validateStep(currentStep)) {
+      toast({
+        title: "Validation Error",
+        description: "Please fill in the required fields",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (currentStep < steps.length - 1) {
+      setCurrentStep(currentStep + 1);
+    }
+  };
+
+  const handlePrevious = () => {
+    if (currentStep > 0) {
+      setCurrentStep(currentStep - 1);
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (!validateStep(currentStep)) {
+      toast({
+        title: "Validation Error",
+        description: "Please fill in the required fields",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setLoading(true);
+      
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
+
+      // Create the deal with comprehensive data
+      const { data: deal, error: dealError } = await supabase
+        .from('deals')
+        .insert({
+          title: formData.title,
+          company_name: formData.company_name,
+          industry: formData.industry,
+          location: formData.location,
+          description: formData.description,
+          revenue: formData.revenue,
+          ebitda: formData.ebitda,
+          status: formData.status,
+          priority: formData.priority,
+          created_by: user.id
+        })
+        .select()
+        .single();
+
+      if (dealError) throw dealError;
+
+      // Create associated company record with full details
+      const { error: companyError } = await supabase
+        .from('companies')
+        .insert({
+          name: formData.company_name,
+          industry: formData.industry,
+          location: formData.location,
+          summary: formData.description,
+          revenue: formData.revenue,
+          ebitda: formData.ebitda,
+          asking_price: formData.asking_price,
+          owner_id: user.id,
+          is_draft: formData.status === 'draft',
+          teaser_payload: {
+            growth_opportunities: formData.growth_opportunities,
+            market_position: formData.market_position,
+            competitive_advantages: formData.competitive_advantages,
+            strategic_fit: formData.strategic_fit,
+            founder_message: formData.founder_message,
+            team_size: formData.team_size,
+            key_personnel: formData.key_personnel,
+            management_experience: formData.management_experience,
+            profit_margin: formData.profit_margin,
+            growth_rate: formData.growth_rate
+          }
+        });
+
+      if (companyError) {
+        console.warn('Company creation failed:', companyError);
+        // Don't fail the entire process if company creation fails
+      }
+
+      toast({
+        title: "Success",
+        description: "Deal created successfully with comprehensive details",
+      });
+
+      // Reset form and close
+      setFormData({
+        title: '',
+        company_name: '',
+        industry: '',
+        location: '',
+        description: '',
+        revenue: '',
+        ebitda: '',
+        asking_price: '',
+        profit_margin: '',
+        growth_rate: '',
+        growth_opportunities: [],
+        market_position: '',
+        competitive_advantages: '',
+        strategic_fit: '',
+        founder_message: '',
+        team_size: '',
+        key_personnel: '',
+        management_experience: '',
+        documents: [],
+        document_categories: [],
+        status: 'draft',
+        priority: 'medium',
+        publish_immediately: false,
+        scheduled_publish: null,
+      });
+      setCurrentStep(0);
+      onDealCreated();
+      onOpenChange(false);
+
+    } catch (error: any) {
+      console.error('Error creating deal:', error);
+      toast({
+        title: "Error",
+        description: "Failed to create deal",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const CurrentStepComponent = steps[currentStep].component;
+  const progress = ((currentStep + 1) / steps.length) * 100;
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden" aria-describedby="deal-wizard-description">
+        <div className="flex flex-col h-full">
+          {/* Header */}
+          <div className="border-b border-border p-6 pb-4">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h2 className="text-2xl font-semibold text-foreground">Create New Deal</h2>
+                <p id="deal-wizard-description" className="text-sm text-muted-foreground">
+                  Step {currentStep + 1} of {steps.length}: {steps[currentStep].title}
+                </p>
+              </div>
+              <div className="text-sm text-muted-foreground">
+                {Math.round(progress)}% Complete
+              </div>
+            </div>
+            
+            {/* Progress Bar */}
+            <Progress value={progress} className="mb-4" />
+            
+            {/* Step Indicators */}
+            <div className="flex items-center justify-between">
+              {steps.map((step, index) => (
+                <div key={step.id} className="flex items-center">
+                  <div className={`
+                    w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium
+                    ${index < currentStep 
+                      ? 'bg-primary text-primary-foreground' 
+                      : index === currentStep 
+                        ? 'bg-primary/20 text-primary border-2 border-primary' 
+                        : 'bg-muted text-muted-foreground'
+                    }
+                  `}>
+                    {index < currentStep ? <Check className="w-4 h-4" /> : index + 1}
+                  </div>
+                  <span className={`ml-2 text-xs ${index === currentStep ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>
+                    {step.title}
+                  </span>
+                  {index < steps.length - 1 && (
+                    <div className={`mx-3 h-px w-8 ${index < currentStep ? 'bg-primary' : 'bg-muted'}`} />
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Step Content */}
+          <div className="flex-1 overflow-auto p-6">
+            <CurrentStepComponent 
+              data={formData}
+              onChange={updateFormData}
+              isValid={validateStep(currentStep)}
+            />
+          </div>
+
+          {/* Footer */}
+          <div className="border-t border-border p-6 pt-4">
+            <div className="flex items-center justify-between">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handlePrevious}
+                disabled={currentStep === 0}
+                className="flex items-center"
+              >
+                <ChevronLeft className="w-4 h-4 mr-2" />
+                Previous
+              </Button>
+
+              <div className="flex items-center gap-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => onOpenChange(false)}
+                >
+                  Cancel
+                </Button>
+                
+                {currentStep === steps.length - 1 ? (
+                  <Button
+                    onClick={handleSubmit}
+                    disabled={loading}
+                    className="flex items-center"
+                  >
+                    {loading ? 'Creating...' : 'Create Deal'}
+                    <Check className="w-4 h-4 ml-2" />
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={handleNext}
+                    className="flex items-center"
+                  >
+                    Next
+                    <ChevronRight className="w-4 h-4 ml-2" />
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};

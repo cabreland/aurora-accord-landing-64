@@ -16,7 +16,7 @@ import { DealCardsView } from '@/components/deals/DealCardsView';
 import { DealListView } from '@/components/deals/DealListView';
 import { DealKanbanView } from '@/components/deals/DealKanbanView';
 import { DealDetailPanel } from '@/components/deals/DealDetailPanel';
-import { CreateDealDialog } from '@/components/deals/CreateDealDialog';
+import { DealWizard } from '@/components/deals/wizard/DealWizard';
 
 type ViewType = 'cards' | 'list' | 'kanban';
 
@@ -194,8 +194,8 @@ const DealManagement: React.FC = () => {
           />
         )}
 
-        {/* Create Deal Dialog */}
-        <CreateDealDialog 
+        {/* Deal Creation Wizard */}
+        <DealWizard 
           open={showCreateDialog}
           onOpenChange={setShowCreateDialog}
           onDealCreated={refresh}
