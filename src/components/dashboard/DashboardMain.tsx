@@ -63,9 +63,11 @@ const DashboardMain = () => {
         </div>
 
         {/* Main Widgets Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* My Deals Widget - Takes 2 columns */}
-          <MyDealsWidget />
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+          {/* My Deals Widget - Takes 2 columns on xl screens */}
+          <div className="xl:col-span-2">
+            <MyDealsWidget />
+          </div>
           
           {/* Right Column Widgets */}
           <div className="space-y-6">

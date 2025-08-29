@@ -68,16 +68,17 @@ export const QuickActionsWidget = () => {
     <WidgetContainer title="Quick Actions" icon={Zap}>
       <div className="space-y-4">
         {/* Primary Actions */}
-        <div className="space-y-3">
+        <div className="space-y-2">
           {primaryActions.map((action) => (
             <Link key={action.label} to={action.path}>
               <Button 
-                className={`w-full justify-start h-auto p-4 ${action.color}`}
+                className={`w-full justify-start h-auto p-3 ${action.color}`}
+                size="sm"
               >
-                <action.icon className="w-5 h-5 mr-3 flex-shrink-0" />
-                <div className="text-left">
-                  <div className="font-medium">{action.label}</div>
-                  <div className="text-xs opacity-80 mt-1">{action.description}</div>
+                <action.icon className="w-4 h-4 mr-2 flex-shrink-0" />
+                <div className="text-left min-w-0 flex-1">
+                  <div className="font-medium text-sm truncate">{action.label}</div>
+                  <div className="text-xs opacity-75 mt-0.5 truncate">{action.description}</div>
                 </div>
               </Button>
             </Link>
@@ -86,19 +87,23 @@ export const QuickActionsWidget = () => {
 
         {/* Divider */}
         {secondaryActions.length > 0 && (
-          <div className="border-t border-[#D4AF37]/20 pt-4">
-            <h4 className="text-sm font-medium text-[#F4E4BC] mb-3">More Actions</h4>
-            <div className="grid grid-cols-1 gap-2">
+          <div className="border-t border-border pt-3">
+            <h4 className="text-sm font-medium text-muted-foreground mb-2">More Actions</h4>
+            <div className="space-y-1">
               {secondaryActions.map((action) => (
                 <Link key={action.label} to={action.path}>
                   <Button 
-                    variant="outline" 
-                    className="w-full justify-start bg-[#2A2F3A] border-[#D4AF37]/30 text-[#F4E4BC] hover:bg-[#D4AF37]/20 hover:text-[#D4AF37]"
+                    variant="ghost" 
+                    className="w-full justify-between bg-card/50 hover:bg-accent/50 h-8 px-2"
                     size="sm"
                   >
-                    <action.icon className="w-4 h-4 mr-2" />
-                    <span className="flex-1 text-left">{action.label}</span>
-                    <span className="text-xs opacity-60">{action.description}</span>
+                    <div className="flex items-center gap-2 min-w-0 flex-1">
+                      <action.icon className="w-3 h-3 flex-shrink-0" />
+                      <span className="text-xs truncate">{action.label}</span>
+                    </div>
+                    <span className="text-xs text-muted-foreground hidden sm:inline truncate ml-2">
+                      {action.description}
+                    </span>
                   </Button>
                 </Link>
               ))}
@@ -107,20 +112,20 @@ export const QuickActionsWidget = () => {
         )}
 
         {/* Help Section */}
-        <div className="bg-[#1A1F2E] rounded-lg p-3 border border-[#D4AF37]/20">
-          <div className="flex items-start gap-3">
-            <FileText className="w-4 h-4 text-[#D4AF37] mt-0.5 flex-shrink-0" />
-            <div>
-              <p className="text-sm text-[#FAFAFA] font-medium mb-1">Need Help?</p>
-              <p className="text-xs text-[#F4E4BC]/60 mb-2">
-                Access guides, tutorials, and support documentation.
+        <div className="bg-card rounded-lg p-3 border border-border">
+          <div className="flex items-start gap-2">
+            <FileText className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-medium mb-1">Need Help?</p>
+              <p className="text-xs text-muted-foreground mb-2 truncate">
+                Access guides and support docs
               </p>
               <Button 
                 variant="outline" 
                 size="sm" 
-                className="h-7 text-xs bg-transparent border-[#D4AF37]/50 text-[#D4AF37] hover:bg-[#D4AF37]/10"
+                className="h-6 text-xs"
               >
-                View Documentation
+                View Docs
               </Button>
             </div>
           </div>

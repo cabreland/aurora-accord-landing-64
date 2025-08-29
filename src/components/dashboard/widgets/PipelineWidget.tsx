@@ -45,14 +45,13 @@ export const PipelineWidget = () => {
             
             return (
               <div key={stage.stage} className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm font-medium text-[#FAFAFA]">
+                <div className="flex justify-between items-start gap-2">
+                  <span className="text-sm font-medium text-foreground truncate flex-1 min-w-0">
                     {stage.displayName}
                   </span>
-                  <div className="flex items-center gap-2 text-xs text-[#F4E4BC]/60">
-                    <span>{stage.count} deals</span>
-                    <span>•</span>
-                    <span>${formatValue(stage.totalValue)}</span>
+                  <div className="flex flex-col items-end gap-1 text-xs text-muted-foreground flex-shrink-0">
+                    <span className="whitespace-nowrap">{stage.count} deals</span>
+                    <span className="whitespace-nowrap">${formatValue(stage.totalValue)}</span>
                   </div>
                 </div>
                 
