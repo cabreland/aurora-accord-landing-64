@@ -8,14 +8,15 @@ import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { withAuth } from "@/utils/withAuth";
 import React, { Suspense, lazy } from "react";
 
-// Lazy-load pages to reduce initial bundle size
-const Index = lazy(() => import("./pages/Index"));
+import Index from "./pages/Index";
+import Demo from "./pages/Demo";
+import InvestorDashboard from "./pages/InvestorDashboard";
+
+// Lazy-load remaining pages to reduce initial bundle size
 const IndexV2 = lazy(() => import("./pages/IndexV2"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
-const InvestorDashboard = lazy(() => import("./pages/InvestorDashboard"));
 const Auth = lazy(() => import("./pages/Auth"));
 const AuthAccept = lazy(() => import("./pages/AuthAccept"));
-const Demo = lazy(() => import("./pages/Demo"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const UserManagement = lazy(() => import("./pages/UserManagement"));
 const Onboarding = lazy(() => import("./pages/Onboarding"));
