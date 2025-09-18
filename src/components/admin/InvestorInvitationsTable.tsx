@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
-import { MoreHorizontal, Send, Ban, Clock, CheckCircle } from 'lucide-react';
+import { MoreHorizontal, Send, Ban, Clock, CheckCircle, Users, Package, Globe, Building } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -43,6 +43,10 @@ interface InvestorInvitation {
   investor_name?: string;
   company_name?: string;
   notes?: string;
+  access_type: 'single' | 'multiple' | 'portfolio' | 'custom';
+  deal_ids?: any; // JSON data from Supabase
+  portfolio_access: boolean;
+  master_nda_signed: boolean;
   deals?: {
     title: string;
     company_name: string;
@@ -118,16 +122,69 @@ const InvestorInvitationsTable: React.FC<InvestorInvitationsTableProps> = ({ onR
     }
   };
 
+  const getAccessTypeBadge = (accessType: string, portfolioAccess: boolean) => {
+    switch (accessType) {
+      case 'single':
+        return <Badge variant="outline"><Users className="w-3 h-3 mr-1" />Single Deal</Badge>;
+      case 'multiple':
+        return <Badge variant="outline"><Package className="w-3 h-3 mr-1" />Multiple Deals</Badge>;
+      case 'portfolio':
+        return <Badge variant="default"><Globe className="w-3 h-3 mr-1" />Portfolio</Badge>;
+      case 'custom':
+        return <Badge variant="outline"><Building className="w-3 h-3 mr-1" />Custom</Badge>;
+      default:
+        return <Badge variant="outline">Single Deal</Badge>;
+    }
+  };
+
+  const getDealDisplay = (invitation: InvestorInvitation) => {
+    if (invitation.access_type === 'portfolio') {
+      return <div className="text-sm text-muted-foreground">All deals (Portfolio)</div>;
+    }
+    
+    if (invitation.access_type === 'multiple' || invitation.access_type === 'custom') {
+      try {
+        const dealIds = Array.isArray(invitation.deal_ids) 
+          ? invitation.deal_ids 
+          : JSON.parse(invitation.deal_ids || '[]');
+        return (
+          <div className="text-sm">
+            <div className="font-medium">{dealIds.length} deals selected</div>
+            <div className="text-muted-foreground">Multiple access</div>
+          </div>
+        );
+      } catch {
+        return <div className="text-sm text-muted-foreground">Invalid deal data</div>;
+      }
+    }
+
+    // Single deal
+    return (
+      <div>
+        <div className="font-medium">{invitation.deals?.title}</div>
+        <div className="text-sm text-muted-foreground">{invitation.deals?.company_name}</div>
+      </div>
+    );
+  };
+
   const handleResendInvitation = async (invitation: InvestorInvitation) => {
     setActionLoading(invitation.id);
     try {
+      const dealIds = Array.isArray(invitation.deal_ids) 
+        ? invitation.deal_ids 
+        : (invitation.deal_ids ? JSON.parse(invitation.deal_ids) : []);
+      
       const { error } = await supabase.functions.invoke('send-investor-invitation', {
         body: {
           invitationId: invitation.id,
           email: invitation.email,
           investorName: invitation.investor_name,
           invitationCode: invitation.invitation_code,
+          accessType: invitation.access_type,
           dealId: invitation.deal_id,
+          dealIds: dealIds,
+          portfolioAccess: invitation.portfolio_access,
+          masterNda: invitation.master_nda_signed,
           expiresAt: invitation.expires_at,
           isResend: true,
         },
@@ -227,7 +284,8 @@ const InvestorInvitationsTable: React.FC<InvestorInvitationsTableProps> = ({ onR
           <TableHeader>
             <TableRow>
               <TableHead>Investor</TableHead>
-              <TableHead>Deal</TableHead>
+              <TableHead>Access Type</TableHead>
+              <TableHead>Deal(s)</TableHead>
               <TableHead>Email</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Invited</TableHead>
@@ -239,7 +297,7 @@ const InvestorInvitationsTable: React.FC<InvestorInvitationsTableProps> = ({ onR
           <TableBody>
             {invitations.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={8} className="text-center text-muted-foreground">
+                <TableCell colSpan={9} className="text-center text-muted-foreground">
                   No invitations found
                 </TableCell>
               </TableRow>
@@ -254,12 +312,8 @@ const InvestorInvitationsTable: React.FC<InvestorInvitationsTableProps> = ({ onR
                       )}
                     </div>
                   </TableCell>
-                  <TableCell>
-                    <div>
-                      <div className="font-medium">{invitation.deals?.title}</div>
-                      <div className="text-sm text-muted-foreground">{invitation.deals?.company_name}</div>
-                    </div>
-                  </TableCell>
+                  <TableCell>{getAccessTypeBadge(invitation.access_type, invitation.portfolio_access)}</TableCell>
+                  <TableCell>{getDealDisplay(invitation)}</TableCell>
                   <TableCell>{invitation.email}</TableCell>
                   <TableCell>{getStatusBadge(invitation.status, invitation.expires_at)}</TableCell>
                   <TableCell>{format(new Date(invitation.invited_at), 'PP')}</TableCell>

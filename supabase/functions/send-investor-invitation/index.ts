@@ -19,7 +19,11 @@ interface InvitationRequest {
   email: string;
   investorName: string;
   invitationCode: string;
-  dealId: string;
+  accessType: 'single' | 'multiple' | 'portfolio' | 'custom';
+  dealId?: string;
+  dealIds?: string[];
+  portfolioAccess?: boolean;
+  masterNda?: boolean;
   expiresAt: string;
   isResend?: boolean;
 }
@@ -36,23 +40,60 @@ const handler = async (req: Request): Promise<Response> => {
       email,
       investorName,
       invitationCode,
+      accessType,
       dealId,
+      dealIds,
+      portfolioAccess = false,
+      masterNda = false,
       expiresAt,
       isResend = false
     }: InvitationRequest = await req.json();
 
-    console.log(`${isResend ? 'Resending' : 'Sending'} invitation to ${email} for deal ${dealId}`);
+    console.log(`${isResend ? 'Resending' : 'Sending'} invitation to ${email} for ${accessType} access`);
 
-    // Get deal information
-    const { data: deal, error: dealError } = await supabase
-      .from('deals')
-      .select('title, company_name, description')
-      .eq('id', dealId)
-      .single();
+    // Get deal information based on access type
+    let dealInfo = null;
+    let dealsInfo: any[] = [];
 
-    if (dealError) {
-      console.error('Error fetching deal:', dealError);
-      throw new Error('Failed to fetch deal information');
+    if (accessType === 'single' && dealId) {
+      const { data, error } = await supabase
+        .from('deals')
+        .select('title, company_name, description')
+        .eq('id', dealId)
+        .single();
+      
+      if (error) {
+        console.error('Error fetching deal:', error);
+        throw new Error('Failed to fetch deal information');
+      }
+      dealInfo = data;
+    } else if ((accessType === 'multiple' || accessType === 'custom') && dealIds && dealIds.length > 0) {
+      const { data, error } = await supabase
+        .from('deals')
+        .select('title, company_name, description')
+        .in('id', dealIds);
+      
+      if (error) {
+        console.error('Error fetching deals:', error);
+        throw new Error('Failed to fetch deals information');
+      }
+      dealsInfo = data || [];
+    } else if (accessType === 'portfolio') {
+      // For portfolio access, we'll get a summary count
+      const { count, error } = await supabase
+        .from('deals')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'active');
+      
+      if (error) {
+        console.error('Error fetching portfolio count:', error);
+      }
+      
+      dealInfo = {
+        title: 'Portfolio Access',
+        company_name: `${count || 0} Active Deals`,
+        description: 'Access to all current and future deals in the portfolio'
+      };
     }
 
     // Create invitation link
@@ -68,7 +109,7 @@ const handler = async (req: Request): Promise<Response> => {
     const emailResponse = await resend.emails.send({
       from: "Data Room <onboarding@resend.dev>",
       to: [email],
-      subject: `${isResend ? '[Resent] ' : ''}Investment Opportunity: ${deal.title}`,
+      subject: `${isResend ? '[Resent] ' : ''}Investment Opportunity${accessType === 'single' && dealInfo ? `: ${dealInfo.title}` : 's'}`,
       html: `
         <!DOCTYPE html>
         <html>
@@ -85,15 +126,9 @@ const handler = async (req: Request): Promise<Response> => {
           <div style="background: white; padding: 30px; border: 1px solid #e1e1e1; border-top: none; border-radius: 0 0 8px 8px;">
             <p style="font-size: 18px; margin-bottom: 20px;">Hello ${investorName},</p>
             
-            <p>You have been invited to review an exclusive investment opportunity:</p>
+            ${getInvitationContent(accessType, dealInfo, dealsInfo, masterNda, portfolioAccess)}
             
-            <div style="background: #f8f9fa; padding: 20px; border-radius: 6px; margin: 20px 0;">
-              <h2 style="margin: 0 0 10px 0; color: #667eea;">${deal.title}</h2>
-              <p style="margin: 0; color: #666; font-size: 14px;">Company: ${deal.company_name}</p>
-              ${deal.description ? `<p style="margin: 10px 0 0 0; font-size: 14px;">${deal.description}</p>` : ''}
-            </div>
-            
-            <p>To access the secure data room and review detailed information about this opportunity, please click the button below:</p>
+            <p>To access the secure data room and review detailed information about ${accessType === 'single' ? 'this opportunity' : 'these opportunities'}, please click the button below:</p>
             
             <div style="text-align: center; margin: 30px 0;">
               <a href="${invitationUrl}" 
@@ -113,6 +148,7 @@ const handler = async (req: Request): Promise<Response> => {
               <p style="margin: 0; font-size: 14px; color: #856404;">
                 <strong>Important:</strong> This invitation expires on ${expiryDate}. 
                 Please complete your registration before this date.
+                ${masterNda ? '<br><strong>Note:</strong> A master NDA will be required for portfolio access.' : ''}
               </p>
             </div>
             
@@ -159,5 +195,61 @@ const handler = async (req: Request): Promise<Response> => {
     );
   }
 };
+
+// Helper function to generate invitation content based on access type
+function getInvitationContent(accessType: string, dealInfo: any, dealsInfo: any[], masterNda: boolean, portfolioAccess: boolean): string {
+  switch (accessType) {
+    case 'single':
+      return `
+        <p>You have been invited to review an exclusive investment opportunity:</p>
+        <div style="background: #f8f9fa; padding: 20px; border-radius: 6px; margin: 20px 0;">
+          <h2 style="margin: 0 0 10px 0; color: #667eea;">${dealInfo?.title || 'Investment Opportunity'}</h2>
+          <p style="margin: 0; color: #666; font-size: 14px;">Company: ${dealInfo?.company_name || 'Not specified'}</p>
+          ${dealInfo?.description ? `<p style="margin: 10px 0 0 0; font-size: 14px;">${dealInfo.description}</p>` : ''}
+        </div>
+      `;
+    
+    case 'multiple':
+      return `
+        <p>You have been invited to review multiple exclusive investment opportunities:</p>
+        <div style="background: #f8f9fa; padding: 20px; border-radius: 6px; margin: 20px 0;">
+          <h2 style="margin: 0 0 15px 0; color: #667eea;">Selected Investment Opportunities</h2>
+          ${dealsInfo.map(deal => `
+            <div style="border-bottom: 1px solid #e1e1e1; padding-bottom: 10px; margin-bottom: 10px;">
+              <p style="margin: 0; font-weight: 600;">${deal.title}</p>
+              <p style="margin: 0; color: #666; font-size: 14px;">Company: ${deal.company_name}</p>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    
+    case 'portfolio':
+      return `
+        <p>You have been granted portfolio access to our investment opportunities:</p>
+        <div style="background: #f8f9fa; padding: 20px; border-radius: 6px; margin: 20px 0;">
+          <h2 style="margin: 0 0 10px 0; color: #667eea;">Portfolio Access</h2>
+          <p style="margin: 0; color: #666; font-size: 14px;">Access Level: All current and future deals</p>
+          <p style="margin: 5px 0 0 0; font-size: 14px;">This gives you comprehensive access to our entire deal pipeline.</p>
+        </div>
+      `;
+    
+    case 'custom':
+      return `
+        <p>You have been invited to a custom investment package:</p>
+        <div style="background: #f8f9fa; padding: 20px; border-radius: 6px; margin: 20px 0;">
+          <h2 style="margin: 0 0 15px 0; color: #667eea;">Custom Investment Package</h2>
+          ${dealsInfo.map(deal => `
+            <div style="border-bottom: 1px solid #e1e1e1; padding-bottom: 10px; margin-bottom: 10px;">
+              <p style="margin: 0; font-weight: 600;">${deal.title}</p>
+              <p style="margin: 0; color: #666; font-size: 14px;">Company: ${deal.company_name}</p>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    
+    default:
+      return `<p>You have been invited to review investment opportunities.</p>`;
+  }
+}
 
 serve(handler);
