@@ -506,6 +506,48 @@ export type Database = {
           },
         ]
       }
+      nda_signatures: {
+        Row: {
+          company_id: string | null
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          invitation_id: string | null
+          ip_address: unknown | null
+          signature_data: Json
+          signed_at: string
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string
+          email: string
+          full_name: string
+          id?: string
+          invitation_id?: string | null
+          ip_address?: unknown | null
+          signature_data: Json
+          signed_at?: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          invitation_id?: string | null
+          ip_address?: unknown | null
+          signature_data?: Json
+          signed_at?: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       onboarding_responses: {
         Row: {
           acquisition_goal:

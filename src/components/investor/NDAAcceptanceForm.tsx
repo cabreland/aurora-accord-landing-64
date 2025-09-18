@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { FileText, Shield, AlertTriangle, CheckCircle } from 'lucide-react';
@@ -10,6 +9,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { supabase } from '@/integrations/supabase/client';
 import { InvitationDetails } from '@/hooks/useInvitationValidation';
+import { ESignature, SignatureData } from './ESignature';
 
 interface NDAAcceptanceFormProps {
   invitation: InvitationDetails;
@@ -22,7 +22,7 @@ export const NDAAcceptanceForm: React.FC<NDAAcceptanceFormProps> = ({
   registrationData,
   onComplete,
 }) => {
-  const [ndaAccepted, setNDAAccepted] = useState(false);
+  const [signatureData, setSignatureData] = useState<SignatureData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const { user } = useAuth();
@@ -31,11 +31,15 @@ export const NDAAcceptanceForm: React.FC<NDAAcceptanceFormProps> = ({
   // Check if this is admin dev mode
   const isDevMode = profile?.role === 'admin' && invitation.id === 'dev-mode';
 
+  const handleSign = (signature: SignatureData) => {
+    setSignatureData(signature);
+  };
+
   const handleCreateAccount = async () => {
-    if (!ndaAccepted) {
+    if (!signatureData) {
       toast({
-        title: 'NDA Required',
-        description: 'You must accept the NDA to continue.',
+        title: 'Signature Required',
+        description: 'You must sign the NDA to continue.',
         variant: 'destructive',
       });
       return;
@@ -96,24 +100,46 @@ export const NDAAcceptanceForm: React.FC<NDAAcceptanceFormProps> = ({
         // Don't throw here as it's not critical for the flow
       }
 
-      // 4. Accept NDA for the company/deal
+      // 4. Store NDA signature
+      let companyId = null;
       if (invitation.access_type === 'single' && invitation.deal_id) {
-        // For single deal access, accept NDA for that deal's company
-        // We'll need to get the company_id from the deal
+        // For single deal access, get company_id from the deal
         const { data: dealData } = await supabase
           .from('deals')
           .select('company_id')
           .eq('id', invitation.deal_id)
           .single();
-
-        if (dealData?.company_id) {
-          await supabase.rpc('accept_company_nda', {
-            p_company_id: dealData.company_id
-          });
-        }
+        
+        companyId = dealData?.company_id;
       }
 
-      // 5. Mark invitation as accepted
+      // Store the e-signature
+      const { error: signatureError } = await supabase
+        .from('nda_signatures')
+        .insert({
+          user_id: authData.user.id,
+          company_id: companyId,
+          invitation_id: invitation.id,
+          signature_data: signatureData as any,
+          ip_address: signatureData.ipAddress,
+          user_agent: signatureData.userAgent,
+          full_name: signatureData.fullName,
+          email: registrationData.email,
+        });
+
+      if (signatureError) {
+        console.error('Signature storage error:', signatureError);
+        // Don't throw here as the account is created
+      }
+
+      // 5. Accept NDA for the company/deal
+      if (companyId) {
+        await supabase.rpc('accept_company_nda', {
+          p_company_id: companyId
+        });
+      }
+
+      // 6. Mark invitation as accepted
       const { error: invitationError } = await supabase
         .from('investor_invitations')
         .update({
@@ -127,7 +153,7 @@ export const NDAAcceptanceForm: React.FC<NDAAcceptanceFormProps> = ({
         // Don't throw here as the account is created
       }
 
-      // 6. Log the successful registration
+      // 7. Log the successful registration
       await supabase.rpc('log_security_event', {
         p_event_type: 'investor_registration_completed',
         p_event_data: {
@@ -160,48 +186,84 @@ export const NDAAcceptanceForm: React.FC<NDAAcceptanceFormProps> = ({
     if (invitation.access_type === 'portfolio' || invitation.master_nda_signed) {
       return {
         title: 'Master Non-Disclosure Agreement',
-        content: `This Master Non-Disclosure Agreement ("Agreement") governs your access to confidential information across our entire portfolio of investment opportunities...
+        content: `EXCLUSIVE BUSINESS BROKERS, INC.
+MASTER NON-DISCLOSURE AGREEMENT
 
-CONFIDENTIALITY OBLIGATIONS:
-• All information shared is strictly confidential
-• Information may not be disclosed to third parties
-• Use of information is limited to investment evaluation purposes
-• Confidentiality obligations survive termination of this agreement
+This Master Non-Disclosure Agreement ("Agreement") is entered into between Exclusive Business Brokers, Inc. ("Disclosing Party") and the undersigned ("Receiving Party") to facilitate the evaluation of confidential business information across multiple investment opportunities.
 
-PERMITTED USES:
-• Evaluation of investment opportunities
-• Internal discussion with authorized team members
-• Due diligence activities as approved
+1. CONFIDENTIAL INFORMATION
+"Confidential Information" includes all financial statements, business plans, customer lists, supplier information, operational data, proprietary processes, marketing strategies, and any other business information disclosed by the Disclosing Party or its clients.
 
-PROHIBITED ACTIVITIES:
-• Sharing information with competitors or unauthorized parties
-• Using information for purposes other than investment evaluation
-• Reverse engineering or attempting to replicate business models
+2. OBLIGATIONS OF RECEIVING PARTY
+The Receiving Party agrees to:
+• Hold all Confidential Information in strict confidence
+• Use Confidential Information solely for the purpose of evaluating potential investment opportunities
+• Not disclose Confidential Information to any third party without prior written consent
+• Limit access to Confidential Information to authorized personnel with a legitimate need to know
+• Return or destroy all Confidential Information upon request
 
-This agreement provides access to multiple investment opportunities and confidential materials across our portfolio.`,
+3. PERMITTED DISCLOSURES
+Confidential Information may be disclosed if required by law, court order, or government regulation, provided the Receiving Party gives prompt written notice to allow the Disclosing Party to seek protective measures.
+
+4. TERM AND SURVIVAL
+This Agreement remains in effect indefinitely. The obligations of confidentiality shall survive termination of this Agreement and continue in perpetuity.
+
+5. REMEDIES
+The Receiving Party acknowledges that breach of this Agreement would cause irreparable harm and agrees that the Disclosing Party shall be entitled to injunctive relief and monetary damages.
+
+6. GOVERNING LAW
+This Agreement shall be governed by the laws of the jurisdiction where Exclusive Business Brokers, Inc. is domiciled.
+
+By signing below, the Receiving Party acknowledges reading, understanding, and agreeing to be bound by all terms of this Agreement.`,
       };
     } else {
       return {
-        title: 'Deal-Specific Non-Disclosure Agreement',
-        content: `This Non-Disclosure Agreement ("Agreement") governs your access to confidential information regarding the specific investment opportunity you have been invited to review...
+        title: 'Non-Disclosure Agreement',
+        content: `EXCLUSIVE BUSINESS BROKERS, INC.
+NON-DISCLOSURE AGREEMENT
 
-SCOPE OF CONFIDENTIAL INFORMATION:
-• Financial statements and projections
-• Business plans and strategic information
-• Customer and supplier information
-• Proprietary technology and processes
-• Management presentations and materials
+This Non-Disclosure Agreement ("Agreement") is entered into between Exclusive Business Brokers, Inc. ("Disclosing Party") and the undersigned ("Receiving Party") regarding confidential information related to a specific business opportunity.
 
-CONFIDENTIALITY OBLIGATIONS:
-• Maintain strict confidentiality of all materials
-• Limit access to authorized personnel only
-• Return or destroy materials upon request
-• No reproduction without written consent
+1. PURPOSE
+The Disclosing Party wishes to disclose certain confidential information to the Receiving Party for the sole purpose of evaluating a potential business acquisition or investment opportunity.
 
-INVESTMENT EVALUATION PURPOSE:
-This information is provided solely for your evaluation of potential investment opportunities and may not be used for any other purpose.
+2. CONFIDENTIAL INFORMATION
+"Confidential Information" includes, but is not limited to:
+• Financial statements, tax returns, and accounting records
+• Business plans, forecasts, and projections
+• Customer and supplier lists and contracts
+• Employee information and compensation data
+• Proprietary processes, systems, and trade secrets
+• Marketing strategies and competitive information
+• Any other information marked or identified as confidential
 
-Duration: This agreement remains in effect indefinitely unless terminated by mutual consent.`,
+3. RECEIVING PARTY OBLIGATIONS
+The Receiving Party covenants and agrees to:
+• Maintain the confidentiality of all Confidential Information
+• Use Confidential Information solely for evaluation purposes
+• Not disclose Confidential Information to any unauthorized person
+• Limit access to Confidential Information to authorized representatives
+• Exercise the same degree of care as with their own confidential information
+• Not make copies of any materials without written permission
+• Return or destroy all Confidential Information upon request
+
+4. EXCEPTIONS
+The obligations of confidentiality shall not apply to information that:
+• Is or becomes publicly available through no breach of this Agreement
+• Was known to the Receiving Party prior to disclosure
+• Is independently developed without use of Confidential Information
+• Is required to be disclosed by law or court order
+
+5. TERM
+This Agreement shall remain in effect indefinitely unless terminated by mutual written consent.
+
+6. REMEDIES
+The Receiving Party acknowledges that any breach of this Agreement would cause irreparable harm to the Disclosing Party and agrees that the Disclosing Party shall be entitled to seek injunctive relief and monetary damages.
+
+7. GOVERNING LAW
+This Agreement shall be governed by and construed in accordance with applicable state and federal laws.
+
+The Receiving Party acknowledges that they have read, understood, and agree to be bound by all terms and conditions of this Agreement.`,
       };
     }
   };
@@ -240,27 +302,12 @@ Duration: This agreement remains in effect indefinitely unless terminated by mut
               </ScrollArea>
             </Card>
 
-            <div className="flex items-start space-x-3 p-4 border rounded-lg">
-              <Checkbox
-                id="nda-acceptance"
-                checked={ndaAccepted}
-                onCheckedChange={(checked) => setNDAAccepted(checked === true)}
-                className="mt-1"
-              />
-              <div className="space-y-1">
-                <label
-                  htmlFor="nda-acceptance"
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-                >
-                  I accept the Non-Disclosure Agreement
-                </label>
-                <p className="text-xs text-muted-foreground">
-                  By checking this box, I acknowledge that I have read, understood, and agree to be bound by 
-                  the terms of this Non-Disclosure Agreement. I understand that violation of this agreement 
-                  may result in legal action and immediate revocation of access.
-                </p>
-              </div>
-            </div>
+            <ESignature
+              fullName={`${registrationData.firstName} ${registrationData.lastName}`}
+              email={registrationData.email}
+              onSign={handleSign}
+              className="mt-4"
+            />
           </div>
         </CardContent>
       </Card>
@@ -268,7 +315,7 @@ Duration: This agreement remains in effect indefinitely unless terminated by mut
       <div className="flex flex-col gap-4">
         <Button
           onClick={handleCreateAccount}
-          disabled={!ndaAccepted || isLoading}
+          disabled={!signatureData || isLoading}
           size="lg"
           className="w-full"
         >
@@ -280,7 +327,7 @@ Duration: This agreement remains in effect indefinitely unless terminated by mut
           ) : (
             <>
               <CheckCircle className="w-4 h-4 mr-2" />
-              {isDevMode ? 'Accept NDA (Dev Mode)' : 'Accept NDA & Create Account'}
+              {isDevMode ? 'Complete Registration (Dev Mode)' : 'Complete Registration'}
             </>
           )}
         </Button>
