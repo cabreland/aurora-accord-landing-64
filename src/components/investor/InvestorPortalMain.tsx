@@ -25,6 +25,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useUserProfile } from '@/hooks/useUserProfile';
+import UserMenuDropdown from '@/components/ui/UserMenuDropdown';
 
 // Sample data for deals
 const sampleDeals = [
@@ -265,9 +266,12 @@ const InvestorPortalMain = () => {
                   Real-time access to curated M&A opportunities with comprehensive deal analytics
                 </p>
               </div>
-              <Badge className="bg-gradient-to-r from-[#D4AF37] to-[#F4E4BC] text-[#0A0F0F] px-6 py-3 text-base font-bold rounded-full">
-                Live Deals Dashboard
-              </Badge>
+              <div className="flex items-center gap-4">
+                <Badge className="bg-gradient-to-r from-[#D4AF37] to-[#F4E4BC] text-[#0A0F0F] px-6 py-3 text-base font-bold rounded-full">
+                  Live Deals Dashboard
+                </Badge>
+                <UserMenuDropdown />
+              </div>
             </div>
           </CardContent>
         </Card>

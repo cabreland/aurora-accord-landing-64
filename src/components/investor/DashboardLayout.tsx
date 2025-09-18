@@ -18,6 +18,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useUserProfile } from '@/hooks/useUserProfile';
+import UserMenuDropdown from '@/components/ui/UserMenuDropdown';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -156,6 +157,12 @@ const DashboardLayout = ({ children, activeTab = 'dashboard', onTabChange }: Das
 
       {/* Main Content */}
       <div className="flex-1 overflow-auto">
+        {/* Header with User Menu */}
+        <div className="bg-card border-b border-border p-4 lg:p-6">
+          <div className="flex justify-end">
+            <UserMenuDropdown />
+          </div>
+        </div>
         <div className="p-6 lg:p-8">
           {children}
         </div>
