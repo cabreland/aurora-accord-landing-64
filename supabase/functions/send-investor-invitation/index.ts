@@ -97,7 +97,7 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     // Create invitation link
-    const invitationUrl = `${supabaseUrl.replace('supabase.co', 'lovable.app')}/investor-registration?code=${invitationCode}`;
+    const invitationUrl = `https://aurora-accord-landing-64.lovable.app/investor-registration?code=${invitationCode}`;
     
     // Format expiry date
     const expiryDate = new Date(expiresAt).toLocaleDateString('en-US', {
