@@ -27,17 +27,23 @@ export const withAuth = (requiredRole?: RequiredRole) => {
 
       if (requiredRole) {
         const userRole = profile?.role;
+        
+        // ADMIN BYPASS: Admin users have full access to everything for development/testing
+        if (userRole === 'admin') {
+          return <Component {...props} />;
+        }
+        
         let hasAccess = false;
         
         switch (requiredRole) {
           case 'admin':
-            hasAccess = userRole === 'admin';
+            hasAccess = false; // Only admin can access, already handled by bypass above
             break;
           case 'staff':
-            hasAccess = userRole === 'admin' || userRole === 'editor';
+            hasAccess = userRole === 'editor';
             break;
           case 'investor':
-            hasAccess = userRole === 'admin' || userRole === 'editor' || userRole === 'viewer';
+            hasAccess = userRole === 'editor' || userRole === 'viewer';
             break;
         }
 

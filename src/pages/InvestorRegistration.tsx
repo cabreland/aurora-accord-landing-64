@@ -4,8 +4,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
-import { AlertCircle, CheckCircle, Building, Calendar, User, Mail } from 'lucide-react';
+import { AlertCircle, CheckCircle, Building, Calendar, User, Mail, Shield } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
+import { useUserProfile } from '@/hooks/useUserProfile';
 import { useInvitationValidation } from '@/hooks/useInvitationValidation';
 import { InvestorRegistrationForm } from '@/components/investor/InvestorRegistrationForm';
 import { NDAAcceptanceForm } from '@/components/investor/NDAAcceptanceForm';
@@ -17,26 +19,43 @@ const InvestorRegistration = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user } = useAuth();
+  const { profile } = useUserProfile();
   const [currentStep, setCurrentStep] = useState<RegistrationStep>('validating');
   const [registrationData, setRegistrationData] = useState<any>(null);
   
   const invitationCode = searchParams.get('code');
   const { invitation, loading, error, validateInvitation } = useInvitationValidation();
 
+  // ADMIN BYPASS: Check if current user is admin for development access
+  const isAdminUser = profile?.role === 'admin';
+  const isDevMode = isAdminUser && user;
+
   useEffect(() => {
+    // ADMIN BYPASS: Allow admin users to view page without invitation code for testing
+    if (isDevMode && !invitationCode) {
+      setCurrentStep('registration');
+      return;
+    }
+    
     if (invitationCode) {
       validateInvitation(invitationCode);
     } else {
       setCurrentStep('invalid');
     }
-  }, [invitationCode, validateInvitation]);
+  }, [invitationCode, validateInvitation, isDevMode]);
 
   useEffect(() => {
+    // Skip validation logic if admin is in dev mode
+    if (isDevMode && !invitationCode) {
+      return;
+    }
+    
     if (!loading) {
       if (error || !invitation) {
         setCurrentStep('invalid');
-      } else if (invitation.status === 'accepted') {
-        // Already accepted, redirect to investor portal
+      } else if (invitation.status === 'accepted' && !isDevMode) {
+        // ADMIN BYPASS: Allow admin users to view accepted invitations for testing
         toast({
           title: 'Already Registered',
           description: 'This invitation has already been accepted. Redirecting to your portal.',
@@ -46,14 +65,28 @@ const InvestorRegistration = () => {
         setCurrentStep('registration');
       }
     }
-  }, [loading, error, invitation, navigate, toast]);
+  }, [loading, error, invitation, navigate, toast, isDevMode, invitationCode]);
 
   const handleRegistrationComplete = (data: any) => {
+    if (isDevMode) {
+      toast({
+        title: 'Development Mode',
+        description: 'Registration form completed in development mode. Proceeding to NDA step.',
+      });
+    }
     setRegistrationData(data);
     setCurrentStep('nda');
   };
 
   const handleNDAComplete = () => {
+    if (isDevMode) {
+      toast({
+        title: 'Development Mode',
+        description: 'NDA acceptance completed in development mode. No account was created.',
+      });
+      return;
+    }
+    
     setCurrentStep('success');
     // Redirect to investor portal after a brief success message
     setTimeout(() => {
@@ -170,6 +203,22 @@ const InvestorRegistration = () => {
   return (
     <div className="min-h-screen bg-background py-8">
       <div className="container mx-auto px-4 max-w-2xl">
+        {/* Admin Development Mode Indicator */}
+        {isDevMode && (
+          <Alert className="mb-6 border-blue-500 bg-blue-500/10">
+            <Shield className="h-4 w-4" />
+            <AlertDescription>
+              <strong>Development Mode:</strong> You are viewing this page as an admin user. 
+              This bypasses normal invitation validation for testing purposes.
+              {!invitationCode && (
+                <span className="block mt-1 text-sm">
+                  No invitation code provided - showing registration form for testing.
+                </span>
+              )}
+            </AlertDescription>
+          </Alert>
+        )}
+        
         {/* Invitation Details */}
         {invitation && (
           <Card className="mb-6">
@@ -214,16 +263,36 @@ const InvestorRegistration = () => {
         )}
 
         {/* Registration Steps */}
-        {currentStep === 'registration' && invitation && (
+        {currentStep === 'registration' && (invitation || isDevMode) && (
           <InvestorRegistrationForm
-            invitation={invitation}
+            invitation={invitation || {
+              // Mock invitation for admin dev mode
+              id: 'dev-mode',
+              email: user?.email || 'admin@example.com',
+              invitation_code: 'dev-mode',
+              status: 'pending',
+              access_type: 'single',
+              portfolio_access: false,
+              master_nda_signed: false,
+              expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+            }}
             onComplete={handleRegistrationComplete}
           />
         )}
 
-        {currentStep === 'nda' && invitation && registrationData && (
+        {currentStep === 'nda' && (invitation || isDevMode) && registrationData && (
           <NDAAcceptanceForm
-            invitation={invitation}
+            invitation={invitation || {
+              // Mock invitation for admin dev mode
+              id: 'dev-mode',
+              email: user?.email || 'admin@example.com',
+              invitation_code: 'dev-mode',
+              status: 'pending',
+              access_type: 'single',
+              portfolio_access: false,
+              master_nda_signed: false,
+              expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+            }}
             registrationData={registrationData}
             onComplete={handleNDAComplete}
           />
