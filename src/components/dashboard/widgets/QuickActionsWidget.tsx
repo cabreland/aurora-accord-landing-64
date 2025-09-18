@@ -10,7 +10,8 @@ import {
   FileDown,
   Settings,
   Building2,
-  FileText
+  FileText,
+  Mail
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -44,6 +45,12 @@ export const QuickActionsWidget = () => {
   ];
 
   const secondaryActions = [
+    ...(isAdmin ? [{
+      label: 'Invite Investors',
+      icon: Mail,
+      path: '/investor-invitations',
+      description: 'Send deal invitations'
+    }] : []),
     ...(isAdmin ? [{
       label: 'Invite User',
       icon: UserPlus,

@@ -428,6 +428,72 @@ export type Database = {
         }
         Relationships: []
       }
+      investor_invitations: {
+        Row: {
+          accepted_at: string | null
+          company_name: string | null
+          created_at: string
+          deal_id: string
+          email: string
+          expires_at: string
+          id: string
+          investor_name: string | null
+          invitation_code: string
+          invited_at: string
+          invited_by: string
+          notes: string | null
+          status: Database["public"]["Enums"]["invitation_status"]
+          updated_at: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          company_name?: string | null
+          created_at?: string
+          deal_id: string
+          email: string
+          expires_at: string
+          id?: string
+          investor_name?: string | null
+          invitation_code: string
+          invited_at?: string
+          invited_by: string
+          notes?: string | null
+          status?: Database["public"]["Enums"]["invitation_status"]
+          updated_at?: string
+        }
+        Update: {
+          accepted_at?: string | null
+          company_name?: string | null
+          created_at?: string
+          deal_id?: string
+          email?: string
+          expires_at?: string
+          id?: string
+          investor_name?: string | null
+          invitation_code?: string
+          invited_at?: string
+          invited_by?: string
+          notes?: string | null
+          status?: Database["public"]["Enums"]["invitation_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_investor_invitations_deal"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_investor_invitations_invited_by"
+            columns: ["invited_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       onboarding_responses: {
         Row: {
           acquisition_goal:
@@ -724,6 +790,7 @@ export type Database = {
         | "legal"
         | "due_diligence"
         | "other"
+      invitation_status: "pending" | "accepted" | "expired" | "revoked"
       priority_level: "low" | "medium" | "high"
       referral_source: "referral" | "social_media" | "search" | "other"
       user_role: "admin" | "editor" | "viewer"
@@ -871,6 +938,7 @@ export const Constants = {
         "due_diligence",
         "other",
       ],
+      invitation_status: ["pending", "accepted", "expired", "revoked"],
       priority_level: ["low", "medium", "high"],
       referral_source: ["referral", "social_media", "search", "other"],
       user_role: ["admin", "editor", "viewer"],

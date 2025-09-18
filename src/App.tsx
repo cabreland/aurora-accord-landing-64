@@ -25,6 +25,7 @@ const DealDetail = lazy(() => import("./pages/DealDetail"));
 const Documents = lazy(() => import("./pages/Documents"));
 const Settings = lazy(() => import("./pages/Settings"));
 const Activity = lazy(() => import("./pages/Activity"));
+const InvestorInvitations = lazy(() => import("./pages/InvestorInvitations"));
 
 // Wrap protected components with authentication
 const ProtectedDashboard = withAuth('investor')(Dashboard);
@@ -36,6 +37,7 @@ const ProtectedUserManagement = withAuth('admin')(UserManagement);
 const ProtectedSettings = withAuth('staff')(Settings);
 const ProtectedActivity = withAuth('staff')(Activity);
 const ProtectedOnboarding = withAuth('investor')(Onboarding);
+const ProtectedInvestorInvitations = withAuth('admin')(InvestorInvitations);
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -77,6 +79,7 @@ const App = () => (
               <Route path="/settings" element={<ProtectedSettings />} />
               <Route path="/activity" element={<ProtectedActivity />} />
               <Route path="/onboarding" element={<ProtectedOnboarding />} />
+              <Route path="/investor-invitations" element={<ProtectedInvestorInvitations />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>
