@@ -62,7 +62,7 @@ const UserDeleteDialog = ({ user, onDeleteSuccess }: UserDeleteDialogProps) => {
           <Trash2 className="w-4 h-4" />
         </Button>
       </AlertDialogTrigger>
-      <AlertDialogContent>
+      <AlertDialogContent className="z-50">
         <AlertDialogHeader>
           <AlertDialogTitle>Delete User Permanently</AlertDialogTitle>
           <AlertDialogDescription>

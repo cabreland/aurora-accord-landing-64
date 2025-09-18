@@ -63,7 +63,7 @@ const UserEditDialog = ({ user, onEditSuccess }: UserEditDialogProps) => {
           <Edit className="w-4 h-4" />
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="z-50">
         <DialogHeader>
           <DialogTitle>Edit User</DialogTitle>
         </DialogHeader>

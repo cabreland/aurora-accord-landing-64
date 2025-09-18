@@ -80,7 +80,7 @@ const UserForceRemoveDialog = ({ onRemoveSuccess }: UserForceRemoveDialogProps) 
           Force Remove by Email
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="z-50">
         <DialogHeader>
           <DialogTitle>Force Remove User by Email</DialogTitle>
           <DialogDescription>

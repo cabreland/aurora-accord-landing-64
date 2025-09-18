@@ -82,7 +82,7 @@ const UserInviteDialog = ({ onInviteSuccess }: UserInviteDialogProps) => {
           Add User
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="z-50">
         <DialogHeader>
           <DialogTitle>Invite New User</DialogTitle>
         </DialogHeader>
