@@ -434,7 +434,7 @@ export type Database = {
           access_type: Database["public"]["Enums"]["access_type"]
           company_name: string | null
           created_at: string
-          deal_id: string
+          deal_id: string | null
           deal_ids: Json | null
           email: string
           expires_at: string
@@ -454,7 +454,7 @@ export type Database = {
           access_type?: Database["public"]["Enums"]["access_type"]
           company_name?: string | null
           created_at?: string
-          deal_id: string
+          deal_id?: string | null
           deal_ids?: Json | null
           email: string
           expires_at: string
@@ -474,7 +474,7 @@ export type Database = {
           access_type?: Database["public"]["Enums"]["access_type"]
           company_name?: string | null
           created_at?: string
-          deal_id?: string
+          deal_id?: string | null
           deal_ids?: Json | null
           email?: string
           expires_at?: string

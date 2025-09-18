@@ -65,9 +65,12 @@ const inviteSchema = z.object({
   if ((data.accessType === 'multiple' || data.accessType === 'custom') && (!data.dealIds || data.dealIds.length === 0)) {
     return false;
   }
+  if (data.accessType === 'portfolio' && !data.masterNda) {
+    return false;
+  }
   return true;
 }, {
-  message: 'Please select appropriate deals for the chosen access type',
+  message: 'Please select appropriate deals or Master NDA for the chosen access type',
   path: ['dealId'],
 });
 
@@ -134,24 +137,25 @@ const InvestorInviteDialog: React.FC<InvestorInviteDialogProps> = ({
 
       const invitationCode = generateInvitationCode();
 
-      // Ensure we always have a deal_id value
-      let primaryDealId: string;
+      // Determine deal_id and portfolio_access based on access type
+      let primaryDealId: string | null = null;
+      let portfolioAccess = false;
       
       if (data.accessType === 'single') {
         if (!data.dealId || data.dealId.trim() === '') {
           throw new Error('Please select a deal for single deal access');
         }
         primaryDealId = data.dealId;
+        portfolioAccess = false;
       } else if (data.accessType === 'multiple' || data.accessType === 'custom') {
         if (!data.dealIds || data.dealIds.length === 0) {
           throw new Error('Please select at least one deal for multiple deal access');
         }
-        primaryDealId = data.dealIds[0];
+        primaryDealId = null; // No single deal for multiple access
+        portfolioAccess = false;
       } else if (data.accessType === 'portfolio') {
-        if (!deals || deals.length === 0) {
-          throw new Error('No deals available for portfolio access');
-        }
-        primaryDealId = deals[0].id;
+        primaryDealId = null; // No single deal for portfolio access
+        portfolioAccess = true;
       } else {
         throw new Error('Invalid access type selected');
       }
@@ -166,8 +170,8 @@ const InvestorInviteDialog: React.FC<InvestorInviteDialogProps> = ({
         company_name: data.companyName || null,
         notes: data.notes || null,
         access_type: data.accessType,
-        deal_id: primaryDealId, // Always ensure this is set
-        portfolio_access: data.accessType === 'portfolio' ? true : data.portfolioAccess,
+        deal_id: primaryDealId, // Will be null for portfolio/multiple access
+        portfolio_access: portfolioAccess,
         master_nda_signed: data.masterNda,
         // Handle deal assignment based on access type
         ...(data.accessType === 'multiple' || data.accessType === 'custom') && { 
