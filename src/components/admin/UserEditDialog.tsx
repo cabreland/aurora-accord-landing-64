@@ -7,17 +7,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Edit } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { UserProfile } from '@/hooks/useUserProfile';
+import { Database } from '@/integrations/supabase/types';
 
-interface UserProfile {
-  id: string;
-  user_id: string;
-  email: string;
-  first_name: string | null;
-  last_name: string | null;
-  role: 'admin' | 'editor' | 'viewer';
-  created_at: string;
-  updated_at: string;
-}
+type UserRole = Database['public']['Enums']['user_role'];
 
 interface UserEditDialogProps {
   user: UserProfile;
@@ -38,7 +31,7 @@ const UserEditDialog = ({ user, onEditSuccess }: UserEditDialogProps) => {
         .update({
           first_name: formData.get('firstName') as string,
           last_name: formData.get('lastName') as string,
-          role: formData.get('role') as 'admin' | 'editor' | 'viewer',
+          role: formData.get('role') as UserRole,
         })
         .eq('id', user.id);
 
@@ -98,6 +91,7 @@ const UserEditDialog = ({ user, onEditSuccess }: UserEditDialogProps) => {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="super_admin">Super Administrator</SelectItem>
                 <SelectItem value="admin">Administrator</SelectItem>
                 <SelectItem value="editor">Manager</SelectItem>
                 <SelectItem value="viewer">Investor</SelectItem>

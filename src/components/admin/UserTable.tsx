@@ -5,21 +5,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import UserEditDialog from './UserEditDialog';
 import UserDeleteDialog from './UserDeleteDialog';
 import { getRoleBadgeColor, getRoleDisplayName } from './userUtils';
+import { UserProfile } from '@/hooks/useUserProfile';
+import { Database } from '@/integrations/supabase/types';
 
-interface UserProfile {
-  id: string;
-  user_id: string;
-  email: string;
-  first_name: string | null;
-  last_name: string | null;
-  role: 'admin' | 'editor' | 'viewer';
-  created_at: string;
-  updated_at: string;
-}
+type UserRole = Database['public']['Enums']['user_role'];
 
 interface UserTableProps {
   users: UserProfile[];
-  onRoleUpdate: (userId: string, newRole: 'admin' | 'editor' | 'viewer') => void;
+  onRoleUpdate: (userId: string, newRole: UserRole) => void;
   onUserUpdated: () => void;
 }
 
@@ -59,12 +52,13 @@ const UserTable = ({ users, onRoleUpdate, onUserUpdated }: UserTableProps) => {
                 
                 <Select
                   value={user.role}
-                  onValueChange={(value) => onRoleUpdate(user.id, value as 'admin' | 'editor' | 'viewer')}
+                  onValueChange={(value) => onRoleUpdate(user.id, value as UserRole)}
                 >
                   <SelectTrigger className="w-32">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="super_admin">Super Admin</SelectItem>
                     <SelectItem value="admin">Admin</SelectItem>
                     <SelectItem value="editor">Manager</SelectItem>
                     <SelectItem value="viewer">Investor</SelectItem>

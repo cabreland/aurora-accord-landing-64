@@ -1,10 +1,11 @@
-
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { getDashboardRoute, getFallbackDashboardRoute } from '@/lib/auth-utils';
+import { Database } from '@/integrations/supabase/types';
 
+type UserRole = Database['public']['Enums']['user_role'];
 export type RequiredRole = 'admin' | 'staff' | 'investor';
 
 export const withAuth = (requiredRole?: RequiredRole) => {
@@ -28,8 +29,8 @@ export const withAuth = (requiredRole?: RequiredRole) => {
       if (requiredRole) {
         const userRole = profile?.role;
         
-        // ADMIN BYPASS: Admin users have full access to everything for development/testing
-        if (userRole === 'admin') {
+        // SUPER ADMIN BYPASS: Super admin and admin users have full access to everything
+        if (userRole === 'super_admin' || userRole === 'admin') {
           return <Component {...props} />;
         }
         
@@ -37,7 +38,7 @@ export const withAuth = (requiredRole?: RequiredRole) => {
         
         switch (requiredRole) {
           case 'admin':
-            hasAccess = false; // Only admin can access, already handled by bypass above
+            hasAccess = false; // Only admin/super_admin can access, already handled by bypass above
             break;
           case 'staff':
             hasAccess = userRole === 'editor';

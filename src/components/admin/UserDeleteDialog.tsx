@@ -4,17 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Trash2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-
-interface UserProfile {
-  id: string;
-  user_id: string;
-  email: string;
-  first_name: string | null;
-  last_name: string | null;
-  role: 'admin' | 'editor' | 'viewer';
-  created_at: string;
-  updated_at: string;
-}
+import { UserProfile } from '@/hooks/useUserProfile';
 
 interface UserDeleteDialogProps {
   user: UserProfile;

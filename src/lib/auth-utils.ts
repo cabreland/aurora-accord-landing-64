@@ -7,6 +7,7 @@ type UserRole = Database['public']['Enums']['user_role'];
  */
 export const getDashboardRoute = (role: UserRole): string => {
   switch (role) {
+    case 'super_admin':
     case 'admin':
     case 'editor':
       return '/dashboard';
@@ -20,21 +21,21 @@ export const getDashboardRoute = (role: UserRole): string => {
  * Determines if a user role has admin privileges
  */
 export const isAdminRole = (role: UserRole): boolean => {
-  return role === 'admin';
+  return role === 'super_admin' || role === 'admin';
 };
 
 /**
  * Determines if a user role has staff privileges
  */
 export const isStaffRole = (role: UserRole): boolean => {
-  return role === 'admin' || role === 'editor';
+  return role === 'super_admin' || role === 'admin' || role === 'editor';
 };
 
 /**
  * Determines if a user role can manage other users
  */
 export const canManageUsers = (role: UserRole): boolean => {
-  return role === 'admin';
+  return role === 'super_admin' || role === 'admin';
 };
 
 /**

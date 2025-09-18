@@ -1,5 +1,11 @@
-export const getRoleBadgeColor = (role: string) => {
+import { Database } from '@/integrations/supabase/types';
+
+type UserRole = Database['public']['Enums']['user_role'];
+
+export const getRoleBadgeColor = (role: UserRole) => {
   switch (role) {
+    case 'super_admin':
+      return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200';
     case 'admin':
       return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
     case 'editor':
@@ -11,8 +17,10 @@ export const getRoleBadgeColor = (role: string) => {
   }
 };
 
-export const getRoleDisplayName = (role: string) => {
+export const getRoleDisplayName = (role: UserRole) => {
   switch (role) {
+    case 'super_admin':
+      return 'Super Admin';
     case 'admin':
       return 'Administrator';
     case 'editor':

@@ -1,23 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useUserProfile } from '@/hooks/useUserProfile';
+import { useUserProfile, UserProfile } from '@/hooks/useUserProfile';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { Shield, Users } from 'lucide-react';
 import UserInviteDialog from './UserInviteDialog';
 import UserTable from './UserTable';
 import UserForceRemoveDialog from './UserForceRemoveDialog';
+import { Database } from '@/integrations/supabase/types';
 
-interface UserProfile {
-  id: string;
-  user_id: string;
-  email: string;
-  first_name: string | null;
-  last_name: string | null;
-  role: 'admin' | 'editor' | 'viewer';
-  created_at: string;
-  updated_at: string;
-}
+type UserRole = Database['public']['Enums']['user_role'];
 
 const UserManagement = () => {
   const { isAdmin, loading: profileLoading, profile } = useUserProfile();
@@ -25,7 +17,7 @@ const UserManagement = () => {
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const ready = !profileLoading && profile?.role === 'admin';
+  const ready = !profileLoading && (profile?.role === 'admin' || profile?.role === 'super_admin');
 
   useEffect(() => {
     if (!ready) return;
@@ -66,7 +58,7 @@ const UserManagement = () => {
     }
   };
 
-  const handleUpdateRole = async (userId: string, newRole: 'admin' | 'editor' | 'viewer') => {
+  const handleUpdateRole = async (userId: string, newRole: UserRole) => {
     try {
       const { error } = await supabase
         .from('profiles')
@@ -93,7 +85,7 @@ const UserManagement = () => {
     }
   };
 
-  if (!profile || profile.role !== 'admin') {
+  if (!profile || (profile.role !== 'admin' && profile.role !== 'super_admin')) {
     return (
       <Card>
         <CardContent className="flex items-center justify-center py-12">

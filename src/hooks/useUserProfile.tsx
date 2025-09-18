@@ -1,16 +1,20 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
+import { Database } from '@/integrations/supabase/types';
 
-interface UserProfile {
+type UserRole = Database['public']['Enums']['user_role'];
+
+export interface UserProfile {
   id: string;
   user_id: string;
   email: string;
   first_name: string | null;
   last_name: string | null;
-  role: 'admin' | 'editor' | 'viewer';
+  role: UserRole;
   created_at: string;
   updated_at: string;
+  onboarding_completed: boolean | null;
 }
 
 export const useUserProfile = () => {
@@ -69,6 +73,8 @@ export const useUserProfile = () => {
     if (!profile) return 'User';
     
     switch (profile.role) {
+      case 'super_admin':
+        return 'Super Administrator';
       case 'admin':
         return 'Administrator';
       case 'editor':
@@ -86,10 +92,10 @@ export const useUserProfile = () => {
     error,
     getDisplayName,
     getRoleDisplayName,
-    hasRole: (role: string) => profile?.role === role,
-    isAdmin: () => profile?.role === 'admin',
-    isEditor: () => profile?.role === 'editor' || profile?.role === 'admin',
-    canManageUsers: () => profile?.role === 'admin',
-    canCreateDeals: () => profile?.role === 'admin' || profile?.role === 'editor',
+    hasRole: (role: UserRole) => profile?.role === role,
+    isAdmin: () => profile?.role === 'super_admin' || profile?.role === 'admin',
+    isEditor: () => profile?.role === 'super_admin' || profile?.role === 'admin' || profile?.role === 'editor',
+    canManageUsers: () => profile?.role === 'super_admin' || profile?.role === 'admin',
+    canCreateDeals: () => profile?.role === 'super_admin' || profile?.role === 'admin' || profile?.role === 'editor',
   };
 };
