@@ -5,8 +5,6 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { FileText, Shield, AlertTriangle, CheckCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/hooks/useAuth';
-import { useUserProfile } from '@/hooks/useUserProfile';
 import { supabase } from '@/integrations/supabase/client';
 import { InvitationDetails } from '@/hooks/useInvitationValidation';
 import { ESignature, SignatureData } from './ESignature';
@@ -26,12 +24,7 @@ export const NDAAcceptanceForm: React.FC<NDAAcceptanceFormProps> = ({
   const [signatureData, setSignatureData] = useState<SignatureData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const { user } = useAuth();
-  const { profile } = useUserProfile();
   const { getSetting } = useRegistrationSettings('nda');
-  
-  // Check if this is admin dev mode
-  const isDevMode = profile?.role === 'admin' && invitation.id === 'dev-mode';
 
   const handleSign = (signature: SignatureData) => {
     setSignatureData(signature);
@@ -44,16 +37,6 @@ export const NDAAcceptanceForm: React.FC<NDAAcceptanceFormProps> = ({
         description: 'You must sign the NDA to continue.',
         variant: 'destructive',
       });
-      return;
-    }
-
-    // Handle dev mode differently
-    if (isDevMode) {
-      toast({
-        title: 'Development Mode',
-        description: 'NDA accepted in development mode. No account creation performed.',
-      });
-      onComplete();
       return;
     }
 
@@ -257,22 +240,18 @@ export const NDAAcceptanceForm: React.FC<NDAAcceptanceFormProps> = ({
           {isLoading ? (
             <>
               <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
-              {isDevMode ? 'Processing...' : 'Creating Your Account...'}
+              Creating Your Account...
             </>
           ) : (
             <>
               <CheckCircle className="w-4 h-4 mr-2" />
-              {isDevMode ? 'Complete Registration (Dev Mode)' : 'Complete Registration'}
+              Complete Registration
             </>
           )}
         </Button>
         
         <p className="text-xs text-muted-foreground text-center">
-          {isDevMode ? (
-            'Development mode: No account will be created. This is for testing the registration flow only.'
-          ) : (
-            'By creating your account, you agree to our terms of service and privacy policy. You will receive email confirmation once your account is ready.'
-          )}
+          By creating your account, you agree to our terms of service and privacy policy. You will receive email confirmation once your account is ready.
         </p>
       </div>
     </div>
