@@ -767,21 +767,171 @@ export type Database = {
         }
         Relationships: []
       }
+      security_events: {
+        Row: {
+          created_at: string
+          event_data: Json | null
+          event_type: string
+          id: string
+          ip_address: unknown | null
+          severity: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          event_data?: Json | null
+          event_type: string
+          id?: string
+          ip_address?: unknown | null
+          severity?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          event_data?: Json | null
+          event_type?: string
+          id?: string
+          ip_address?: unknown | null
+          severity?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       settings: {
         Row: {
+          category: string | null
+          description: string | null
+          is_sensitive: boolean | null
           key: string
+          setting_type: string | null
           updated_at: string | null
           value: Json | null
         }
         Insert: {
+          category?: string | null
+          description?: string | null
+          is_sensitive?: boolean | null
           key: string
+          setting_type?: string | null
           updated_at?: string | null
           value?: Json | null
         }
         Update: {
+          category?: string | null
+          description?: string | null
+          is_sensitive?: boolean | null
           key?: string
+          setting_type?: string | null
           updated_at?: string | null
           value?: Json | null
+        }
+        Relationships: []
+      }
+      settings_history: {
+        Row: {
+          change_reason: string | null
+          changed_at: string
+          changed_by: string | null
+          id: string
+          new_value: Json | null
+          old_value: Json | null
+          setting_key: string
+        }
+        Insert: {
+          change_reason?: string | null
+          changed_at?: string
+          changed_by?: string | null
+          id?: string
+          new_value?: Json | null
+          old_value?: Json | null
+          setting_key: string
+        }
+        Update: {
+          change_reason?: string | null
+          changed_at?: string
+          changed_by?: string | null
+          id?: string
+          new_value?: Json | null
+          old_value?: Json | null
+          setting_key?: string
+        }
+        Relationships: []
+      }
+      user_activity_log: {
+        Row: {
+          action: string
+          created_at: string
+          id: string
+          ip_address: unknown | null
+          metadata: Json | null
+          resource_id: string | null
+          resource_type: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          id?: string
+          ip_address?: unknown | null
+          metadata?: Json | null
+          resource_id?: string | null
+          resource_type?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          id?: string
+          ip_address?: unknown | null
+          metadata?: Json | null
+          resource_id?: string | null
+          resource_type?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      user_sessions: {
+        Row: {
+          created_at: string
+          expires_at: string
+          id: string
+          ip_address: unknown | null
+          is_active: boolean
+          last_activity: string
+          location_data: Json | null
+          session_token: string
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          expires_at: string
+          id?: string
+          ip_address?: unknown | null
+          is_active?: boolean
+          last_activity?: string
+          location_data?: Json | null
+          session_token: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          ip_address?: unknown | null
+          is_active?: boolean
+          last_activity?: string
+          location_data?: Json | null
+          session_token?: string
+          user_agent?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -860,6 +1010,19 @@ export type Database = {
       }
       log_security_event: {
         Args: { p_event_data?: Json; p_event_type: string; p_user_id?: string }
+        Returns: string
+      }
+      log_user_activity: {
+        Args: {
+          p_action: string
+          p_metadata?: Json
+          p_resource_id?: string
+          p_resource_type?: string
+        }
+        Returns: string
+      }
+      record_security_event: {
+        Args: { p_event_data?: Json; p_event_type: string; p_severity?: string }
         Returns: string
       }
       user_has_accepted_nda: {

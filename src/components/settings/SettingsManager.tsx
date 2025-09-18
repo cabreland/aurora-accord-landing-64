@@ -1,9 +1,9 @@
 
 import React from 'react';
-import SettingsLayout from './SettingsLayout';
+import UnifiedSettingsLayout from '@/components/settings/UnifiedSettingsLayout';
 
 const SettingsManager: React.FC = () => {
-  return <SettingsLayout />;
+  return <UnifiedSettingsLayout />;
 };
 
 export default SettingsManager;
