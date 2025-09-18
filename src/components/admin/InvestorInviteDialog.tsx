@@ -59,7 +59,7 @@ const inviteSchema = z.object({
   }),
   notes: z.string().optional(),
 }).refine((data) => {
-  if (data.accessType === 'single' && !data.dealId) {
+  if (data.accessType === 'single' && (!data.dealId || data.dealId.trim() === '')) {
     return false;
   }
   if ((data.accessType === 'multiple' || data.accessType === 'custom') && (!data.dealIds || data.dealIds.length === 0)) {
@@ -86,6 +86,9 @@ const InvestorInviteDialog: React.FC<InvestorInviteDialogProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
+  // Debug deals loading
+  console.log('InvestorInviteDialog: deals prop:', deals);
+
   const form = useForm<InviteFormData>({
     resolver: zodResolver(inviteSchema),
     defaultValues: {
@@ -111,6 +114,11 @@ const InvestorInviteDialog: React.FC<InvestorInviteDialogProps> = ({
 
   const handleInviteInvestor = async (data: InviteFormData) => {
     setIsLoading(true);
+    
+    // Debug logging
+    console.log('Form data submitted:', data);
+    console.log('Available deals:', deals);
+    
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('User not authenticated');
@@ -126,6 +134,28 @@ const InvestorInviteDialog: React.FC<InvestorInviteDialogProps> = ({
 
       const invitationCode = generateInvitationCode();
 
+      // Ensure we always have a deal_id value
+      let primaryDealId: string;
+      
+      if (data.accessType === 'single') {
+        if (!data.dealId || data.dealId.trim() === '') {
+          throw new Error('Please select a deal for single deal access');
+        }
+        primaryDealId = data.dealId;
+      } else if (data.accessType === 'multiple' || data.accessType === 'custom') {
+        if (!data.dealIds || data.dealIds.length === 0) {
+          throw new Error('Please select at least one deal for multiple deal access');
+        }
+        primaryDealId = data.dealIds[0];
+      } else if (data.accessType === 'portfolio') {
+        if (!deals || deals.length === 0) {
+          throw new Error('No deals available for portfolio access');
+        }
+        primaryDealId = deals[0].id;
+      } else {
+        throw new Error('Invalid access type selected');
+      }
+
       // Create invitation record
       const insertData = {
         email: data.email,
@@ -136,19 +166,19 @@ const InvestorInviteDialog: React.FC<InvestorInviteDialogProps> = ({
         company_name: data.companyName || null,
         notes: data.notes || null,
         access_type: data.accessType,
+        deal_id: primaryDealId, // Always ensure this is set
         portfolio_access: data.accessType === 'portfolio' ? true : data.portfolioAccess,
         master_nda_signed: data.masterNda,
         // Handle deal assignment based on access type
-        ...(data.accessType === 'single' && { deal_id: data.dealId }),
         ...(data.accessType === 'multiple' || data.accessType === 'custom') && { 
-          deal_ids: JSON.stringify(data.dealIds),
-          deal_id: data.dealIds?.[0] // Use first deal as primary for backwards compatibility
+          deal_ids: JSON.stringify(data.dealIds)
         },
         ...(data.accessType === 'portfolio' && { 
-          deal_id: deals[0]?.id, // Use first available deal as placeholder
           deal_ids: JSON.stringify(deals.map(d => d.id))
         }),
       };
+
+      console.log('Insert data:', insertData);
 
       const { data: invitation, error: inviteError } = await supabase
         .from('investor_invitations')
@@ -282,14 +312,25 @@ const InvestorInviteDialog: React.FC<InvestorInviteDialogProps> = ({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {deals.map((deal) => (
-                          <SelectItem key={deal.id} value={deal.id}>
-                            {deal.title} - {deal.company_name}
+                        {deals.length === 0 ? (
+                          <SelectItem value="" disabled>
+                            No deals available
                           </SelectItem>
-                        ))}
+                        ) : (
+                          deals.map((deal) => (
+                            <SelectItem key={deal.id} value={deal.id}>
+                              {deal.title} - {deal.company_name}
+                            </SelectItem>
+                          ))
+                        )}
                       </SelectContent>
                     </Select>
                     <FormMessage />
+                    {deals.length === 0 && (
+                      <p className="text-sm text-destructive">
+                        No deals available. Please create a deal first.
+                      </p>
+                    )}
                   </FormItem>
                 )}
               />
