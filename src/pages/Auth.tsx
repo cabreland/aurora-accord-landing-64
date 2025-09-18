@@ -9,44 +9,47 @@ import { useOnboardingStatus } from '@/hooks/useOnboardingStatus';
 import { GoogleAuthButton } from '@/components/auth/GoogleAuthButton';
 import { SignInForm } from '@/components/auth/SignInForm';
 import { SignUpForm } from '@/components/auth/SignUpForm';
+import { getDashboardRoute, getFallbackDashboardRoute } from '@/lib/auth-utils';
 
 const Auth = () => {
   const navigate = useNavigate();
   const { loading, handleGoogleSignIn, handleSignIn, handleSignUp } = useAuthHandlers();
   const { onboardingCompleted, loading: onboardingLoading } = useOnboardingStatus();
 
+  const redirectToAppropriateRoute = async (userId: string) => {
+    try {
+      // Get user profile with role
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('onboarding_completed, role')
+        .eq('user_id', userId)
+        .single();
+      
+      if (!profile?.onboarding_completed) {
+        navigate('/onboarding');
+        return;
+      }
+
+      // Route based on user role
+      const dashboardRoute = profile.role ? getDashboardRoute(profile.role) : getFallbackDashboardRoute();
+      navigate(dashboardRoute);
+    } catch (error) {
+      console.error('Error determining user route:', error);
+      navigate(getFallbackDashboardRoute());
+    }
+  };
+
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (session?.user && !onboardingLoading) {
-        // Check onboarding status after authentication
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('onboarding_completed')
-          .eq('user_id', session.user.id)
-          .single();
-        
-        if (profile?.onboarding_completed) {
-          navigate('/investor-portal');
-        } else {
-          navigate('/onboarding');
-        }
+        await redirectToAppropriateRoute(session.user.id);
       }
     });
 
     // Check for existing session
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session?.user && !onboardingLoading) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('onboarding_completed')
-          .eq('user_id', session.user.id)
-          .single();
-        
-        if (profile?.onboarding_completed) {
-          navigate('/investor-portal');
-        } else {
-          navigate('/onboarding');
-        }
+        await redirectToAppropriateRoute(session.user.id);
       }
     });
 

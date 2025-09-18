@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { validatePassword, sanitizeInput, sanitizeEmail, checkRateLimit, logSecurityEvent, getSafeErrorMessage } from '@/lib/security';
+import { getDashboardRoute, getFallbackDashboardRoute } from '@/lib/auth-utils';
 
 export const useAuthHandlers = () => {
   const [loading, setLoading] = useState(false);
@@ -19,13 +20,36 @@ export const useAuthHandlers = () => {
     return data !== null;
   };
 
+  // Helper to get appropriate redirect URL based on current user or fallback
+  const getRedirectUrl = async (): Promise<string> => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('user_id', user.id)
+          .single();
+        
+        const route = profile?.role ? getDashboardRoute(profile.role) : getFallbackDashboardRoute();
+        return `${window.location.origin}${route}`;
+      }
+    } catch (error) {
+      console.error('Error getting redirect URL:', error);
+    }
+    
+    return `${window.location.origin}${getFallbackDashboardRoute()}`;
+  };
+
   const handleGoogleSignIn = async () => {
     setLoading(true);
+    
+    const redirectTo = await getRedirectUrl();
     
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/investor-portal`
+        redirectTo
       }
     });
 
@@ -144,7 +168,7 @@ export const useAuthHandlers = () => {
       return;
     }
 
-    const redirectUrl = `${window.location.origin}/investor-portal`;
+    const redirectUrl = await getRedirectUrl();
 
     const { error } = await supabase.auth.signUp({
       email: cleanEmail,

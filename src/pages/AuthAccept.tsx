@@ -9,6 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { getDashboardRoute, getFallbackDashboardRoute } from '@/lib/auth-utils';
 
 const passwordSchema = z.object({
   password: z.string().min(8, 'Password must be at least 8 characters'),
@@ -197,7 +198,26 @@ const AuthAccept = () => {
           ) : (
             <div className="text-center">
               <p className="text-muted-foreground mb-4">Your account is ready!</p>
-              <Button onClick={() => navigate('/investor-portal')} className="w-full">
+              <Button onClick={async () => {
+                try {
+                  const { data: { user } } = await supabase.auth.getUser();
+                  if (user) {
+                    const { data: profile } = await supabase
+                      .from('profiles')
+                      .select('role')
+                      .eq('user_id', user.id)
+                      .single();
+                    
+                    const route = profile?.role ? getDashboardRoute(profile.role) : getFallbackDashboardRoute();
+                    navigate(route);
+                  } else {
+                    navigate(getFallbackDashboardRoute());
+                  }
+                } catch (error) {
+                  console.error('Error determining route:', error);
+                  navigate(getFallbackDashboardRoute());
+                }
+              }} className="w-full">
                 Continue to Dashboard
               </Button>
             </div>

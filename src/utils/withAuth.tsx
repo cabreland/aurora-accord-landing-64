@@ -3,6 +3,7 @@ import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserProfile } from '@/hooks/useUserProfile';
+import { getDashboardRoute, getFallbackDashboardRoute } from '@/lib/auth-utils';
 
 export type RequiredRole = 'admin' | 'staff' | 'investor';
 
@@ -41,7 +42,9 @@ export const withAuth = (requiredRole?: RequiredRole) => {
         }
 
         if (!hasAccess) {
-          return <Navigate to="/investor-portal" replace />;
+          // Redirect to appropriate dashboard based on user role
+          const redirectRoute = userRole ? getDashboardRoute(userRole) : getFallbackDashboardRoute();
+          return <Navigate to={redirectRoute} replace />;
         }
       }
 

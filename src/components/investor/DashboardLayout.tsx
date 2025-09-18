@@ -63,7 +63,7 @@ const DashboardLayout = ({ children, activeTab = 'dashboard', onTabChange }: Das
       { id: 'deals', label: 'Deals', icon: BarChart3, path: '/deals' },
     ];
 
-    // Admin/Staff only items
+    // Admin/Staff only items - based on USER ROLE, not current route
     const adminItems = [
       { id: 'documents', label: 'Documents', icon: FileText, path: '/documents' },
       { id: 'investor-invitations', label: 'Investor Relations', icon: Mail, path: '/investor-invitations' },
@@ -72,13 +72,14 @@ const DashboardLayout = ({ children, activeTab = 'dashboard', onTabChange }: Das
       { id: 'activity', label: 'Activity', icon: Shield, path: '/activity' },
     ];
 
-    // Return appropriate items based on role and demo status
+    // Return appropriate items based on role (not demo status)
     if (isDemo) {
       return baseItems; // Demo users only see basic items
     }
 
-    if (isAdmin()) {
-      return [...baseItems, ...adminItems]; // Admins see everything
+    // Check actual user permissions, not just admin role
+    if (canManageUsers()) {
+      return [...baseItems, ...adminItems]; // Users who can manage users see everything
     }
 
     return baseItems; // Regular investors see basic items

@@ -6,6 +6,7 @@ import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { getDashboardRoute, getFallbackDashboardRoute } from '@/lib/auth-utils';
 import { ContactStep } from './steps/ContactStep';
 import { BusinessStep } from './steps/BusinessStep';
 import { GoalsStep } from './steps/GoalsStep';
@@ -160,12 +161,25 @@ const OnboardingQuestionnaire = () => {
 
       if (profileError) throw profileError;
 
+      // Get updated profile with role for proper routing
+      const { data: updatedProfile, error: updatedProfileError } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('user_id', user.id)
+        .single();
+
+      if (updatedProfileError) {
+        console.error('Error fetching updated profile:', updatedProfileError);
+      }
+
       toast({
         title: "Onboarding Complete!",
         description: "Welcome to EBB Data Room. You can now access investment opportunities.",
       });
 
-      navigate('/investor-portal');
+      // Route based on user role
+      const dashboardRoute = updatedProfile?.role ? getDashboardRoute(updatedProfile.role) : getFallbackDashboardRoute();
+      navigate(dashboardRoute);
     } catch (error) {
       console.error('Error saving onboarding data:', error);
       toast({
