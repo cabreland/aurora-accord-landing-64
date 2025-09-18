@@ -6,8 +6,6 @@ import InvestorInvitationsTable from '@/components/admin/InvestorInvitationsTabl
 import DashboardLayout from '@/components/investor/DashboardLayout';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { useUserProfile } from '@/hooks/useUserProfile';
-import { Navigate } from 'react-router-dom';
 
 interface Deal {
   id: string;
@@ -21,12 +19,6 @@ const InvestorInvitations = () => {
   const [loading, setLoading] = useState(true);
   const [refreshKey, setRefreshKey] = useState(0);
   const { toast } = useToast();
-  const { profile, loading: profileLoading, canManageUsers } = useUserProfile();
-
-  // Check if user has permission to access this page
-  if (!profileLoading && profile?.email !== 'cabreland@gmail.com' && !canManageUsers()) {
-    return <Navigate to="/dashboard" replace />;
-  }
 
   useEffect(() => {
     fetchDeals();
@@ -62,11 +54,13 @@ const InvestorInvitations = () => {
     setRefreshKey(prev => prev + 1);
   };
 
-  if (profileLoading || loading) {
+  if (loading) {
     return (
-      <div className="container mx-auto p-6">
-        <div className="text-center">Loading...</div>
-      </div>
+      <DashboardLayout activeTab="investor-invitations">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">Loading deals...</div>
+        </div>
+      </DashboardLayout>
     );
   }
 

@@ -24,8 +24,15 @@ export const useUserProfile = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!user) {
+    if (!user?.id) {
       setProfile(null);
+      setLoading(false);
+      setError(null);
+      return;
+    }
+
+    // Prevent duplicate requests
+    if (profile && profile.user_id === user.id) {
       setLoading(false);
       return;
     }
@@ -33,6 +40,8 @@ export const useUserProfile = () => {
     const fetchProfile = async () => {
       try {
         setLoading(true);
+        setError(null);
+        
         const { data, error } = await supabase
           .from('profiles')
           .select('*')
@@ -46,16 +55,16 @@ export const useUserProfile = () => {
         }
 
         setProfile(data);
-      } catch (err) {
+      } catch (err: any) {
         console.error('Error fetching profile:', err);
-        setError('Failed to fetch profile');
+        setError(err?.message || 'Failed to fetch profile');
       } finally {
         setLoading(false);
       }
     };
 
     fetchProfile();
-  }, [user]);
+  }, [user?.id]); // Use user.id instead of user object to prevent unnecessary re-renders
 
   const getDisplayName = () => {
     if (!profile) return user?.email || 'User';
