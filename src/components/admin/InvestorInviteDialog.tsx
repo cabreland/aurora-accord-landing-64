@@ -317,9 +317,9 @@ const InvestorInviteDialog: React.FC<InvestorInviteDialogProps> = ({
                       </FormControl>
                       <SelectContent>
                         {deals.length === 0 ? (
-                          <SelectItem value="" disabled>
+                          <div className="px-2 py-1.5 text-sm text-muted-foreground">
                             No deals available
-                          </SelectItem>
+                          </div>
                         ) : (
                           deals.map((deal) => (
                             <SelectItem key={deal.id} value={deal.id}>
