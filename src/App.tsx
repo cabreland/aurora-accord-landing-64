@@ -26,6 +26,7 @@ const Documents = lazy(() => import("./pages/Documents"));
 const Settings = lazy(() => import("./pages/Settings"));
 const Activity = lazy(() => import("./pages/Activity"));
 const InvestorInvitations = lazy(() => import("./pages/InvestorInvitations"));
+const InvestorRegistration = lazy(() => import("./pages/InvestorRegistration"));
 
 // Wrap protected components with authentication
 const ProtectedDashboard = withAuth('investor')(Dashboard);
@@ -80,6 +81,7 @@ const App = () => (
               <Route path="/activity" element={<ProtectedActivity />} />
               <Route path="/onboarding" element={<ProtectedOnboarding />} />
               <Route path="/investor-invitations" element={<ProtectedInvestorInvitations />} />
+              <Route path="/investor-registration" element={<InvestorRegistration />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>
