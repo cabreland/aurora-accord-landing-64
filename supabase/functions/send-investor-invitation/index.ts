@@ -107,7 +107,7 @@ const handler = async (req: Request): Promise<Response> => {
     });
 
     const emailResponse = await resend.emails.send({
-      from: "Data Room <onboarding@resend.dev>",
+      from: "Data Room <noreply@christopherbreland.com>",
       to: [email],
       subject: `${isResend ? '[Resent] ' : ''}Investment Opportunity${accessType === 'single' && dealInfo ? `: ${dealInfo.title}` : 's'}`,
       html: `
