@@ -16,6 +16,8 @@ import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 export type RegistrationStep = 'validating' | 'invalid' | 'registration' | 'nda' | 'success';
 
 const InvestorRegistration = () => {
+  console.log('InvestorRegistration component mounted');
+  
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -25,6 +27,8 @@ const InvestorRegistration = () => {
   const [registrationData, setRegistrationData] = useState<any>(null);
   
   const invitationCode = searchParams.get('code');
+  console.log('Invitation code from URL:', invitationCode);
+  
   const { invitation, loading, error, validateInvitation } = useInvitationValidation();
 
   // SUPER ADMIN & ADMIN BYPASS: Check if current user is admin for development access
