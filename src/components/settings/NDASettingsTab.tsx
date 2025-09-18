@@ -8,10 +8,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { Eye, Save, FileText, Info } from 'lucide-react';
-import { useRegistrationSettings } from '@/hooks/useRegistrationSettings';
+import { useRegistrationSettingsUnified } from '@/hooks/useRegistrationSettingsUnified';
 
 export const NDASettingsTab: React.FC = () => {
-  const { settings, loading, saving, updateSetting, getSetting } = useRegistrationSettings('nda');
+  const { loading, saving, updateSetting, getSetting } = useRegistrationSettingsUnified();
   const [activeTab, setActiveTab] = useState('master');
   const [previewMode, setPreviewMode] = useState(false);
 
@@ -21,13 +21,13 @@ export const NDASettingsTab: React.FC = () => {
   const [singleContent, setSingleContent] = useState('');
 
   React.useEffect(() => {
-    if (!loading && settings.length > 0) {
+    if (!loading) {
       setMasterTitle(getSetting('nda_master_title', 'Master Non-Disclosure Agreement'));
       setMasterContent(getSetting('nda_master_content', ''));
       setSingleTitle(getSetting('nda_single_title', 'Non-Disclosure Agreement'));
       setSingleContent(getSetting('nda_single_content', ''));
     }
-  }, [settings, loading]);
+  }, [loading]);
 
   const handleSave = async () => {
     await Promise.all([

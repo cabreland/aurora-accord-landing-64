@@ -27,8 +27,8 @@ const InvestorRegistration = () => {
   const invitationCode = searchParams.get('code');
   const { invitation, loading, error, validateInvitation } = useInvitationValidation();
 
-  // ADMIN BYPASS: Check if current user is admin for development access
-  const isAdminUser = profile?.role === 'admin';
+  // SUPER ADMIN & ADMIN BYPASS: Check if current user is admin for development access
+  const isAdminUser = profile?.role === 'super_admin' || profile?.role === 'admin';
   const isDevMode = isAdminUser && user;
 
   useEffect(() => {

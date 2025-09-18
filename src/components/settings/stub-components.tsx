@@ -1,5 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { NDASettingsTab } from './NDASettingsTab';
+import { CompanySettingsTab } from './CompanySettingsTab';
+import { FormFieldsTab } from './FormFieldsTab';
+import { EmailTemplatesTab } from './EmailTemplatesTab';
+import { ValidationRulesTab } from './ValidationRulesTab';
 
 // Placeholder components for missing settings tabs
 export const RolePermissionsTab: React.FC = () => (
@@ -15,18 +21,50 @@ export const RolePermissionsTab: React.FC = () => (
   </Card>
 );
 
-export const RegistrationConfigTab: React.FC = () => (
-  <Card>
-    <CardHeader>
-      <CardTitle>Registration Configuration</CardTitle>
-    </CardHeader>
-    <CardContent>
-      <div className="text-center py-8 text-muted-foreground">
-        Registration configuration interface coming soon.
+export const RegistrationConfigTab: React.FC = () => {
+  const [activeTab, setActiveTab] = useState('nda');
+
+  return (
+    <div className="space-y-6">
+      <div className="text-center">
+        <h2 className="text-2xl font-bold mb-2">Registration Configuration</h2>
+        <p className="text-muted-foreground">
+          Configure all aspects of the investor registration process
+        </p>
       </div>
-    </CardContent>
-  </Card>
-);
+
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="grid w-full grid-cols-5">
+          <TabsTrigger value="nda">NDA Content</TabsTrigger>
+          <TabsTrigger value="company">Company Info</TabsTrigger>
+          <TabsTrigger value="form">Form Fields</TabsTrigger>
+          <TabsTrigger value="email">Email Templates</TabsTrigger>
+          <TabsTrigger value="validation">Validation</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="nda">
+          <NDASettingsTab />
+        </TabsContent>
+
+        <TabsContent value="company">
+          <CompanySettingsTab />
+        </TabsContent>
+
+        <TabsContent value="form">
+          <FormFieldsTab />
+        </TabsContent>
+
+        <TabsContent value="email">
+          <EmailTemplatesTab />
+        </TabsContent>
+
+        <TabsContent value="validation">
+          <ValidationRulesTab />
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+};
 
 export const AuthenticationTab: React.FC = () => (
   <Card>

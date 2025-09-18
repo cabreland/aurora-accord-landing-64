@@ -7,21 +7,21 @@ import { Textarea } from '@/components/ui/textarea';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { Save, Mail, Eye, Info } from 'lucide-react';
-import { useRegistrationSettings } from '@/hooks/useRegistrationSettings';
+import { useRegistrationSettingsUnified } from '@/hooks/useRegistrationSettingsUnified';
 
 export const EmailTemplatesTab: React.FC = () => {
-  const { settings, loading, saving, updateSetting, getSetting } = useRegistrationSettings('email');
+  const { loading, saving, updateSetting, getSetting } = useRegistrationSettingsUnified();
   
   const [welcomeSubject, setWelcomeSubject] = useState('');
   const [welcomeContent, setWelcomeContent] = useState('');
   const [previewMode, setPreviewMode] = useState(false);
 
   useEffect(() => {
-    if (!loading && settings.length > 0) {
+    if (!loading) {
       setWelcomeSubject(getSetting('welcome_email_subject', 'Welcome to the Investor Portal'));
       setWelcomeContent(getSetting('welcome_email_content', ''));
     }
-  }, [settings, loading]);
+  }, [loading]);
 
   const handleSave = async () => {
     await Promise.all([

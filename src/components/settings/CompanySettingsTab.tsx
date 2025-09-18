@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { Save, Building, MapPin, Phone, Mail, Globe, Info } from 'lucide-react';
-import { useRegistrationSettings } from '@/hooks/useRegistrationSettings';
+import { useRegistrationSettingsUnified } from '@/hooks/useRegistrationSettingsUnified';
 
 interface CompanyAddress {
   street: string;
@@ -23,7 +23,7 @@ interface CompanyContact {
 }
 
 export const CompanySettingsTab: React.FC = () => {
-  const { settings, loading, saving, updateSetting, getSetting } = useRegistrationSettings('company');
+  const { loading, saving, updateSetting, getSetting } = useRegistrationSettingsUnified();
   
   const [companyName, setCompanyName] = useState('');
   const [address, setAddress] = useState<CompanyAddress>({
@@ -40,7 +40,7 @@ export const CompanySettingsTab: React.FC = () => {
   });
 
   useEffect(() => {
-    if (!loading && settings.length > 0) {
+    if (!loading) {
       setCompanyName(getSetting('company_name', 'Exclusive Business Brokers, Inc.'));
       
       const addressData = getSetting('company_address', {
@@ -59,7 +59,7 @@ export const CompanySettingsTab: React.FC = () => {
       });
       setContact(contactData);
     }
-  }, [settings, loading]);
+  }, [loading]);
 
   const handleSave = async () => {
     await Promise.all([

@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { Save, Plus, X, Info, Move, Settings } from 'lucide-react';
-import { useRegistrationSettings } from '@/hooks/useRegistrationSettings';
+import { useRegistrationSettingsUnified } from '@/hooks/useRegistrationSettingsUnified';
 
 interface InvestorType {
   value: string;
@@ -13,7 +13,7 @@ interface InvestorType {
 }
 
 export const FormFieldsTab: React.FC = () => {
-  const { settings, loading, saving, updateSetting, getSetting } = useRegistrationSettings('form');
+  const { loading, saving, updateSetting, getSetting } = useRegistrationSettingsUnified();
   
   const [requiredFields, setRequiredFields] = useState<string[]>([]);
   const [optionalFields, setOptionalFields] = useState<string[]>([]);
@@ -30,7 +30,7 @@ export const FormFieldsTab: React.FC = () => {
   ];
 
   useEffect(() => {
-    if (!loading && settings.length > 0) {
+    if (!loading) {
       setRequiredFields(getSetting('required_fields', ['email', 'password', 'firstName', 'lastName', 'investorType']));
       setOptionalFields(getSetting('optional_fields', ['companyName', 'phoneNumber']));
       setInvestorTypes(getSetting('investor_types', [
@@ -41,7 +41,7 @@ export const FormFieldsTab: React.FC = () => {
         { value: 'other', label: 'Other' }
       ]));
     }
-  }, [settings, loading]);
+  }, [loading]);
 
   const handleSave = async () => {
     await Promise.all([

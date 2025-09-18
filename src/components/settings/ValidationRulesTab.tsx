@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { Save, Shield, Info } from 'lucide-react';
-import { useRegistrationSettings } from '@/hooks/useRegistrationSettings';
+import { useRegistrationSettingsUnified } from '@/hooks/useRegistrationSettingsUnified';
 
 interface PasswordRequirements {
   minLength: number;
@@ -18,7 +18,7 @@ interface PasswordRequirements {
 }
 
 export const ValidationRulesTab: React.FC = () => {
-  const { settings, loading, saving, updateSetting, getSetting } = useRegistrationSettings('validation');
+  const { loading, saving, updateSetting, getSetting } = useRegistrationSettingsUnified();
   
   const [passwordReqs, setPasswordReqs] = useState<PasswordRequirements>({
     minLength: 8,
@@ -29,7 +29,7 @@ export const ValidationRulesTab: React.FC = () => {
   });
 
   useEffect(() => {
-    if (!loading && settings.length > 0) {
+    if (!loading) {
       const requirements = getSetting('password_requirements', {
         minLength: 8,
         requireUppercase: true,
@@ -39,7 +39,7 @@ export const ValidationRulesTab: React.FC = () => {
       });
       setPasswordReqs(requirements);
     }
-  }, [settings, loading]);
+  }, [loading]);
 
   const handleSave = async () => {
     await updateSetting('password_requirements', passwordReqs);
