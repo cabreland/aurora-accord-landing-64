@@ -11,7 +11,8 @@ import {
   Shield,
   Filter,
   ArrowLeft,
-  Users
+  Users,
+  Mail
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -65,6 +66,7 @@ const DashboardLayout = ({ children, activeTab = 'dashboard', onTabChange }: Das
     // Admin/Staff only items
     const adminItems = [
       { id: 'documents', label: 'Documents', icon: FileText, path: '/documents' },
+      { id: 'investor-invitations', label: 'Investor Relations', icon: Mail, path: '/investor-invitations' },
       { id: 'users', label: 'Users', icon: Users, path: '/users' },
       { id: 'settings', label: 'Settings', icon: Settings, path: '/settings' },
       { id: 'activity', label: 'Activity', icon: Shield, path: '/activity' },
