@@ -106,4 +106,4 @@ const RegistrationSettings: React.FC = () => {
   );
 };
 
-export default withAuth('admin')(RegistrationSettings);
+export default RegistrationSettings;
