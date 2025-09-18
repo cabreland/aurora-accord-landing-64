@@ -10,6 +10,7 @@ import { useUserProfile } from '@/hooks/useUserProfile';
 import { supabase } from '@/integrations/supabase/client';
 import { InvitationDetails } from '@/hooks/useInvitationValidation';
 import { ESignature, SignatureData } from './ESignature';
+import { useRegistrationSettings } from '@/hooks/useRegistrationSettings';
 
 interface NDAAcceptanceFormProps {
   invitation: InvitationDetails;
@@ -27,6 +28,7 @@ export const NDAAcceptanceForm: React.FC<NDAAcceptanceFormProps> = ({
   const { toast } = useToast();
   const { user } = useAuth();
   const { profile } = useUserProfile();
+  const { getSetting } = useRegistrationSettings('nda');
   
   // Check if this is admin dev mode
   const isDevMode = profile?.role === 'admin' && invitation.id === 'dev-mode';
@@ -183,87 +185,20 @@ export const NDAAcceptanceForm: React.FC<NDAAcceptanceFormProps> = ({
   };
 
   const getNDAContent = () => {
+    const masterTitle = getSetting('nda_master_title', 'Master Non-Disclosure Agreement');
+    const masterContent = getSetting('nda_master_content', 'Default Master NDA content...');
+    const singleTitle = getSetting('nda_single_title', 'Non-Disclosure Agreement');
+    const singleContent = getSetting('nda_single_content', 'Default Single NDA content...');
+
     if (invitation.access_type === 'portfolio' || invitation.master_nda_signed) {
       return {
-        title: 'Master Non-Disclosure Agreement',
-        content: `EXCLUSIVE BUSINESS BROKERS, INC.
-MASTER NON-DISCLOSURE AGREEMENT
-
-This Master Non-Disclosure Agreement ("Agreement") is entered into between Exclusive Business Brokers, Inc. ("Disclosing Party") and the undersigned ("Receiving Party") to facilitate the evaluation of confidential business information across multiple investment opportunities.
-
-1. CONFIDENTIAL INFORMATION
-"Confidential Information" includes all financial statements, business plans, customer lists, supplier information, operational data, proprietary processes, marketing strategies, and any other business information disclosed by the Disclosing Party or its clients.
-
-2. OBLIGATIONS OF RECEIVING PARTY
-The Receiving Party agrees to:
-• Hold all Confidential Information in strict confidence
-• Use Confidential Information solely for the purpose of evaluating potential investment opportunities
-• Not disclose Confidential Information to any third party without prior written consent
-• Limit access to Confidential Information to authorized personnel with a legitimate need to know
-• Return or destroy all Confidential Information upon request
-
-3. PERMITTED DISCLOSURES
-Confidential Information may be disclosed if required by law, court order, or government regulation, provided the Receiving Party gives prompt written notice to allow the Disclosing Party to seek protective measures.
-
-4. TERM AND SURVIVAL
-This Agreement remains in effect indefinitely. The obligations of confidentiality shall survive termination of this Agreement and continue in perpetuity.
-
-5. REMEDIES
-The Receiving Party acknowledges that breach of this Agreement would cause irreparable harm and agrees that the Disclosing Party shall be entitled to injunctive relief and monetary damages.
-
-6. GOVERNING LAW
-This Agreement shall be governed by the laws of the jurisdiction where Exclusive Business Brokers, Inc. is domiciled.
-
-By signing below, the Receiving Party acknowledges reading, understanding, and agreeing to be bound by all terms of this Agreement.`,
+        title: masterTitle,
+        content: masterContent,
       };
     } else {
       return {
-        title: 'Non-Disclosure Agreement',
-        content: `EXCLUSIVE BUSINESS BROKERS, INC.
-NON-DISCLOSURE AGREEMENT
-
-This Non-Disclosure Agreement ("Agreement") is entered into between Exclusive Business Brokers, Inc. ("Disclosing Party") and the undersigned ("Receiving Party") regarding confidential information related to a specific business opportunity.
-
-1. PURPOSE
-The Disclosing Party wishes to disclose certain confidential information to the Receiving Party for the sole purpose of evaluating a potential business acquisition or investment opportunity.
-
-2. CONFIDENTIAL INFORMATION
-"Confidential Information" includes, but is not limited to:
-• Financial statements, tax returns, and accounting records
-• Business plans, forecasts, and projections
-• Customer and supplier lists and contracts
-• Employee information and compensation data
-• Proprietary processes, systems, and trade secrets
-• Marketing strategies and competitive information
-• Any other information marked or identified as confidential
-
-3. RECEIVING PARTY OBLIGATIONS
-The Receiving Party covenants and agrees to:
-• Maintain the confidentiality of all Confidential Information
-• Use Confidential Information solely for evaluation purposes
-• Not disclose Confidential Information to any unauthorized person
-• Limit access to Confidential Information to authorized representatives
-• Exercise the same degree of care as with their own confidential information
-• Not make copies of any materials without written permission
-• Return or destroy all Confidential Information upon request
-
-4. EXCEPTIONS
-The obligations of confidentiality shall not apply to information that:
-• Is or becomes publicly available through no breach of this Agreement
-• Was known to the Receiving Party prior to disclosure
-• Is independently developed without use of Confidential Information
-• Is required to be disclosed by law or court order
-
-5. TERM
-This Agreement shall remain in effect indefinitely unless terminated by mutual written consent.
-
-6. REMEDIES
-The Receiving Party acknowledges that any breach of this Agreement would cause irreparable harm to the Disclosing Party and agrees that the Disclosing Party shall be entitled to seek injunctive relief and monetary damages.
-
-7. GOVERNING LAW
-This Agreement shall be governed by and construed in accordance with applicable state and federal laws.
-
-The Receiving Party acknowledges that they have read, understood, and agree to be bound by all terms and conditions of this Agreement.`,
+        title: singleTitle,
+        content: singleContent,
       };
     }
   };
