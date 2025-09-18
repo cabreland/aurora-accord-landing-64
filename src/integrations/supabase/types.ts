@@ -891,7 +891,7 @@ export type Database = {
       invitation_status: "pending" | "accepted" | "expired" | "revoked"
       priority_level: "low" | "medium" | "high"
       referral_source: "referral" | "social_media" | "search" | "other"
-      user_role: "admin" | "editor" | "viewer"
+      user_role: "admin" | "editor" | "viewer" | "super_admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1040,7 +1040,7 @@ export const Constants = {
       invitation_status: ["pending", "accepted", "expired", "revoked"],
       priority_level: ["low", "medium", "high"],
       referral_source: ["referral", "social_media", "search", "other"],
-      user_role: ["admin", "editor", "viewer"],
+      user_role: ["admin", "editor", "viewer", "super_admin"],
     },
   },
 } as const
