@@ -431,9 +431,11 @@ export type Database = {
       investor_invitations: {
         Row: {
           accepted_at: string | null
+          access_type: Database["public"]["Enums"]["access_type"]
           company_name: string | null
           created_at: string
           deal_id: string
+          deal_ids: Json | null
           email: string
           expires_at: string
           id: string
@@ -441,15 +443,19 @@ export type Database = {
           invitation_code: string
           invited_at: string
           invited_by: string
+          master_nda_signed: boolean
           notes: string | null
+          portfolio_access: boolean
           status: Database["public"]["Enums"]["invitation_status"]
           updated_at: string
         }
         Insert: {
           accepted_at?: string | null
+          access_type?: Database["public"]["Enums"]["access_type"]
           company_name?: string | null
           created_at?: string
           deal_id: string
+          deal_ids?: Json | null
           email: string
           expires_at: string
           id?: string
@@ -457,15 +463,19 @@ export type Database = {
           invitation_code: string
           invited_at?: string
           invited_by: string
+          master_nda_signed?: boolean
           notes?: string | null
+          portfolio_access?: boolean
           status?: Database["public"]["Enums"]["invitation_status"]
           updated_at?: string
         }
         Update: {
           accepted_at?: string | null
+          access_type?: Database["public"]["Enums"]["access_type"]
           company_name?: string | null
           created_at?: string
           deal_id?: string
+          deal_ids?: Json | null
           email?: string
           expires_at?: string
           id?: string
@@ -473,7 +483,9 @@ export type Database = {
           invitation_code?: string
           invited_at?: string
           invited_by?: string
+          master_nda_signed?: boolean
           notes?: string | null
+          portfolio_access?: boolean
           status?: Database["public"]["Enums"]["invitation_status"]
           updated_at?: string
         }
@@ -761,6 +773,10 @@ export type Database = {
         Args: { user_uuid: string }
         Returns: Database["public"]["Enums"]["user_role"]
       }
+      investor_has_deal_access: {
+        Args: { p_deal_id: string; p_investor_email: string }
+        Returns: boolean
+      }
       log_security_event: {
         Args: { p_event_data?: Json; p_event_type: string; p_user_id?: string }
         Returns: string
@@ -775,6 +791,7 @@ export type Database = {
       }
     }
     Enums: {
+      access_type: "single" | "multiple" | "portfolio" | "custom"
       acquisition_goal:
         | "buy_businesses"
         | "minority_partner"
@@ -921,6 +938,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      access_type: ["single", "multiple", "portfolio", "custom"],
       acquisition_goal: [
         "buy_businesses",
         "minority_partner",
