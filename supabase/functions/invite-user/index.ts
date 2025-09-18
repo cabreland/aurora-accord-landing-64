@@ -71,7 +71,10 @@ Deno.serve(async (req) => {
       );
     }
 
-    if (!profile || profile.role !== 'admin') {
+    // Emergency bypass for super admin
+    if (user.email === 'cabreland@gmail.com') {
+      console.log('Emergency super admin bypass activated for:', user.email);
+    } else if (!profile || (profile.role !== 'admin' && profile.role !== 'super_admin')) {
       return new Response(
         JSON.stringify({ error: 'Admin privileges required' }),
         { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

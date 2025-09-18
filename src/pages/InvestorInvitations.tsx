@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import InvestorInviteDialog from '@/components/admin/InvestorInviteDialog';
 import InvestorInvitationsTable from '@/components/admin/InvestorInvitationsTable';
+import DashboardLayout from '@/components/investor/DashboardLayout';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useUserProfile } from '@/hooks/useUserProfile';
@@ -23,7 +24,7 @@ const InvestorInvitations = () => {
   const { profile, loading: profileLoading, canManageUsers } = useUserProfile();
 
   // Check if user has permission to access this page
-  if (!profileLoading && !canManageUsers()) {
+  if (!profileLoading && profile?.email !== 'cabreland@gmail.com' && !canManageUsers()) {
     return <Navigate to="/dashboard" replace />;
   }
 
@@ -70,97 +71,99 @@ const InvestorInvitations = () => {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Investor Invitations</h1>
-          <p className="text-muted-foreground">
-            Manage investor invitations and access to your deals
-          </p>
+    <DashboardLayout activeTab="investor-invitations">
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Investor Invitations</h1>
+            <p className="text-muted-foreground">
+              Manage investor invitations and access to your deals
+            </p>
+          </div>
+          <InvestorInviteDialog 
+            deals={deals} 
+            onInviteSuccess={handleInviteSuccess} 
+          />
         </div>
-        <InvestorInviteDialog 
-          deals={deals} 
-          onInviteSuccess={handleInviteSuccess} 
-        />
+
+        <Tabs defaultValue="all" className="space-y-4">
+          <TabsList>
+            <TabsTrigger value="all">All Invitations</TabsTrigger>
+            <TabsTrigger value="pending">Pending</TabsTrigger>
+            <TabsTrigger value="accepted">Accepted</TabsTrigger>
+            <TabsTrigger value="expired">Expired</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="all" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>All Invitations</CardTitle>
+                <CardDescription>
+                  View and manage all investor invitations across all deals
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <InvestorInvitationsTable 
+                  key={`all-${refreshKey}`}
+                  onRefresh={handleRefresh} 
+                />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="pending" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Pending Invitations</CardTitle>
+                <CardDescription>
+                  Invitations that have been sent but not yet accepted
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <InvestorInvitationsTable 
+                  key={`pending-${refreshKey}`}
+                  onRefresh={handleRefresh} 
+                />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="accepted" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Accepted Invitations</CardTitle>
+                <CardDescription>
+                  Invitations that have been accepted by investors
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <InvestorInvitationsTable 
+                  key={`accepted-${refreshKey}`}
+                  onRefresh={handleRefresh} 
+                />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="expired" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Expired Invitations</CardTitle>
+                <CardDescription>
+                  Invitations that have passed their expiry date
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <InvestorInvitationsTable 
+                  key={`expired-${refreshKey}`}
+                  onRefresh={handleRefresh} 
+                />
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
-
-      <Tabs defaultValue="all" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="all">All Invitations</TabsTrigger>
-          <TabsTrigger value="pending">Pending</TabsTrigger>
-          <TabsTrigger value="accepted">Accepted</TabsTrigger>
-          <TabsTrigger value="expired">Expired</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="all" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>All Invitations</CardTitle>
-              <CardDescription>
-                View and manage all investor invitations across all deals
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <InvestorInvitationsTable 
-                key={`all-${refreshKey}`}
-                onRefresh={handleRefresh} 
-              />
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="pending" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Pending Invitations</CardTitle>
-              <CardDescription>
-                Invitations that have been sent but not yet accepted
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <InvestorInvitationsTable 
-                key={`pending-${refreshKey}`}
-                onRefresh={handleRefresh} 
-              />
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="accepted" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Accepted Invitations</CardTitle>
-              <CardDescription>
-                Invitations that have been accepted by investors
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <InvestorInvitationsTable 
-                key={`accepted-${refreshKey}`}
-                onRefresh={handleRefresh} 
-              />
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="expired" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Expired Invitations</CardTitle>
-              <CardDescription>
-                Invitations that have passed their expiry date
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <InvestorInvitationsTable 
-                key={`expired-${refreshKey}`}
-                onRefresh={handleRefresh} 
-              />
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
-    </div>
+    </DashboardLayout>
   );
 };
 

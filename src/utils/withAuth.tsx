@@ -29,6 +29,12 @@ export const withAuth = (requiredRole?: RequiredRole) => {
       if (requiredRole) {
         const userRole = profile?.role;
         
+        // EMERGENCY BYPASS: Super admin email bypass  
+        if (user.email === 'cabreland@gmail.com') {
+          console.log('Emergency super admin bypass activated for:', user.email);
+          return <Component {...props} />;
+        }
+        
         // SUPER ADMIN BYPASS: Super admin and admin users have full access to everything
         if (userRole === 'super_admin' || userRole === 'admin') {
           return <Component {...props} />;
