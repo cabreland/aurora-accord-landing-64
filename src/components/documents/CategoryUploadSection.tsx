@@ -195,14 +195,21 @@ const CategoryUploadSection = ({
   };
 
   const handleDelete = async (documentId: string) => {
+    console.log('🗑️ Attempting to delete document:', documentId);
+    
     try {
       const { error } = await supabase
         .from('documents')
         .delete()
         .eq('id', documentId);
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Delete error:', error);
+        throw error;
+      }
 
+      console.log('✅ Document deleted successfully:', documentId);
+      
       toast({
         title: "Success",
         description: "Document deleted successfully",
@@ -213,7 +220,7 @@ const CategoryUploadSection = ({
       console.error('Error deleting document:', error);
       toast({
         title: "Error",
-        description: "Failed to delete document",
+        description: `Failed to delete document: ${error instanceof Error ? error.message : 'Unknown error'}`,
         variant: "destructive",
       });
     }
@@ -299,6 +306,9 @@ const CategoryUploadSection = ({
           <div className="space-y-2">
             <h4 className="text-xs font-medium text-muted-foreground">
               {documents.length}/{category.maxFiles} files uploaded
+              {documents.length > category.maxFiles && (
+                <span className="text-red-400 ml-2">⚠️ Exceeds limit - delete {documents.length - category.maxFiles} file{documents.length - category.maxFiles > 1 ? 's' : ''}</span>
+              )}
             </h4>
             {documents.map((doc) => (
               <div key={doc.id} className="flex items-center justify-between p-2 bg-muted/30 rounded text-xs">
@@ -324,8 +334,12 @@ const CategoryUploadSection = ({
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => handleDelete(doc.id)}
+                    onClick={() => {
+                      console.log('🗑️ Delete button clicked for:', doc.id, doc.name);
+                      handleDelete(doc.id);
+                    }}
                     className="text-red-400 hover:text-red-300 hover:bg-red-400/10 h-6 w-6 p-0"
+                    title={`Delete ${doc.name}`}
                   >
                     <Trash2 className="w-3 h-3" />
                   </Button>
