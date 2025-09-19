@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { useDropzone } from 'react-dropzone';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -55,6 +56,9 @@ const CategoryUploadSection = ({
   onDocumentDeleted 
 }: CategoryUploadSectionProps) => {
   const [showUploadArea, setShowUploadArea] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [documentToDelete, setDocumentToDelete] = useState<Document | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const { toast } = useToast();
   
   const documentUpload = useDocumentUpload({
@@ -194,35 +198,68 @@ const CategoryUploadSection = ({
     }
   };
 
-  const handleDelete = async (documentId: string) => {
-    console.log('🗑️ Attempting to delete document:', documentId);
+  const handleDeleteClick = (document: Document) => {
+    setDocumentToDelete(document);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!documentToDelete) return;
+    
+    setIsDeleting(true);
+    console.log('🗑️ Attempting to delete document:', documentToDelete.id, documentToDelete.name);
     
     try {
-      const { error } = await supabase
+      // First, delete from database
+      const { error: dbError } = await supabase
         .from('documents')
         .delete()
-        .eq('id', documentId);
+        .eq('id', documentToDelete.id);
 
-      if (error) {
-        console.error('❌ Delete error:', error);
-        throw error;
+      if (dbError) {
+        console.error('❌ Database delete error:', dbError);
+        throw new Error(`Database deletion failed: ${dbError.message}`);
       }
 
-      console.log('✅ Document deleted successfully:', documentId);
+      // Then, try to delete from storage (don't fail if file doesn't exist)
+      try {
+        const { error: storageError } = await supabase.storage
+          .from('deal-documents')
+          .remove([documentToDelete.file_path]);
+        
+        if (storageError) {
+          console.warn('⚠️ Storage delete warning:', storageError);
+          // Don't throw here - database deletion succeeded
+        } else {
+          console.log('✅ File deleted from storage:', documentToDelete.file_path);
+        }
+      } catch (storageErr) {
+        console.warn('⚠️ Storage cleanup failed (non-critical):', storageErr);
+      }
+
+      console.log('✅ Document deleted successfully:', documentToDelete.id);
       
       toast({
         title: "Success",
-        description: "Document deleted successfully",
+        description: `${documentToDelete.name} deleted successfully`,
       });
 
+      // Close dialog and clear state
+      setDeleteDialogOpen(false);
+      setDocumentToDelete(null);
+      
+      // Trigger parent refresh
       onDocumentDeleted();
+      
     } catch (error) {
-      console.error('Error deleting document:', error);
+      console.error('❌ Error deleting document:', error);
       toast({
-        title: "Error",
-        description: `Failed to delete document: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        title: "Delete Failed",
+        description: error instanceof Error ? error.message : 'Failed to delete document',
         variant: "destructive",
       });
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -334,12 +371,10 @@ const CategoryUploadSection = ({
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => {
-                      console.log('🗑️ Delete button clicked for:', doc.id, doc.name);
-                      handleDelete(doc.id);
-                    }}
+                    onClick={() => handleDeleteClick(doc)}
                     className="text-red-400 hover:text-red-300 hover:bg-red-400/10 h-6 w-6 p-0"
                     title={`Delete ${doc.name}`}
+                    disabled={isDeleting}
                   >
                     <Trash2 className="w-3 h-3" />
                   </Button>
@@ -455,6 +490,35 @@ const CategoryUploadSection = ({
             </Button>
           </div>
         )}
+
+        {/* Delete Confirmation Dialog */}
+        <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete Document</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to delete <strong>{documentToDelete?.name}</strong>?
+                <br /><br />
+                <div className="text-sm text-muted-foreground space-y-1">
+                  <div>Size: {documentToDelete?.file_size ? formatFileSize(documentToDelete.file_size) : 'Unknown'}</div>
+                  <div>Uploaded: {documentToDelete ? formatDate(documentToDelete.created_at) : ''}</div>
+                </div>
+                <br />
+                This action cannot be undone and will permanently remove the file from storage.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleConfirmDelete}
+                disabled={isDeleting}
+                className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
+              >
+                {isDeleting ? 'Deleting...' : 'Delete Document'}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </CardContent>
     </Card>
   );
