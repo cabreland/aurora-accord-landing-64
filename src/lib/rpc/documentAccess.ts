@@ -148,6 +148,81 @@ export const getSecureDocumentUrl = async (
 };
 
 /**
+ * Download document directly (for authenticated users)
+ */
+export const downloadDocument = async (documentId: string): Promise<DocumentAccessResult> => {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user?.email) {
+      return {
+        success: false,
+        message: 'Authentication required'
+      };
+    }
+
+    // Get document with file info
+    const { data: documentData } = await supabase
+      .from('documents')
+      .select('id, name, file_path, deal_id, file_type')
+      .eq('id', documentId)
+      .single();
+
+    if (!documentData) {
+      return {
+        success: false,
+        message: 'Document not found'
+      };
+    }
+
+    // Generate signed URL for download
+    const { data: signedUrl, error } = await supabase.storage
+      .from('deal-documents')
+      .createSignedUrl(documentData.file_path, 300); // 5 minutes for download
+
+    if (error || !signedUrl) {
+      return {
+        success: false,
+        message: 'Failed to generate download link'
+      };
+    }
+
+    // Download the file and trigger browser download
+    const response = await fetch(signedUrl.signedUrl);
+    if (!response.ok) {
+      throw new Error('Failed to download file');
+    }
+
+    const blob = await response.blob();
+    const downloadUrl = window.URL.createObjectURL(blob);
+    const downloadLink = window.document.createElement('a');
+    downloadLink.href = downloadUrl;
+    downloadLink.download = documentData.name;
+    window.document.body.appendChild(downloadLink);
+    downloadLink.click();
+    window.document.body.removeChild(downloadLink);
+    window.URL.revokeObjectURL(downloadUrl);
+
+    // Log download activity
+    await logInvestorActivity(user.email, 'document_downloaded', documentData.deal_id, {
+      document_id: documentId,
+      document_name: documentData.name,
+      file_path: documentData.file_path
+    });
+
+    return {
+      success: true,
+      message: 'Document downloaded successfully'
+    };
+  } catch (error) {
+    console.error('Error downloading document:', error);
+    return {
+      success: false,
+      message: 'Download failed'
+    };
+  }
+};
+
+/**
  * Get list of documents accessible to investor for a specific deal
  */
 export const getAccessibleDocuments = async (email: string, dealId: string) => {

@@ -243,30 +243,17 @@ export const DealDetailPanel: React.FC<DealDetailPanelProps> = ({
 
             <TabsContent value="documents" className="space-y-4">
               <div className="space-y-3">
-                <div className="flex items-center justify-between bg-muted/50 rounded-lg p-3">
-                  <div className="flex items-center gap-3">
-                    <FileText className="w-4 h-4 text-muted-foreground" />
-                    <div>
-                      <div className="text-sm font-medium">Financial Summary</div>
-                      <div className="text-xs text-muted-foreground">PDF • Updated recently</div>
-                    </div>
-                  </div>
-                  <Button size="sm" variant="outline">View</Button>
-                </div>
-                <div className="flex items-center justify-between bg-muted/50 rounded-lg p-3">
-                  <div className="flex items-center gap-3">
-                    <FileText className="w-4 h-4 text-muted-foreground" />
-                    <div>
-                      <div className="text-sm font-medium">Company Overview</div>
-                      <div className="text-xs text-muted-foreground">PDF • Updated recently</div>
-                    </div>
-                  </div>
-                  <Button size="sm" variant="outline">View</Button>
-                </div>
-                <Button variant="outline" className="w-full mt-3">
-                  <Upload className="w-4 h-4 mr-2" />
-                  Upload Document
+                <Button 
+                  className="w-full" 
+                  onClick={() => window.open(`/documents?deal=${deal.id}`, '_blank')}
+                >
+                  <FileText className="w-4 h-4 mr-2" />
+                  Open Document Manager
                 </Button>
+                
+                <div className="text-center text-sm text-muted-foreground">
+                  Click above to access the full document management interface for this deal
+                </div>
               </div>
             </TabsContent>
           </div>

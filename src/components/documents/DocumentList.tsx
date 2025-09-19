@@ -187,25 +187,33 @@ const DocumentList = ({ dealId, companyId, canDownload = true, canDelete = false
 
   const handleDownload = async (document: Document) => {
     if (!canDownload) return;
-    
-    // Simplified access check for Phase 3
-    if (!canDownload) return;
 
     try {
-      const { data, error } = await supabase.storage
+      // Generate signed URL and trigger download
+      const { data: signedUrl, error } = await supabase.storage
         .from('deal-documents')
-        .download(document.file_path);
+        .createSignedUrl(document.file_path, 300); // 5 minutes
 
       if (error) throw error;
 
-      const url = URL.createObjectURL(data);
-      const link = window.document.createElement('a');
-      link.href = url;
-      link.download = document.name;
-      window.document.body.appendChild(link);
-      link.click();
-      window.document.body.removeChild(link);
-      URL.revokeObjectURL(url);
+      // Download the file
+      const response = await fetch(signedUrl.signedUrl);
+      if (!response.ok) throw new Error('Download failed');
+
+      const blob = await response.blob();
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const downloadLink = window.document.createElement('a');
+      downloadLink.href = downloadUrl;
+      downloadLink.download = document.name;
+      window.document.body.appendChild(downloadLink);
+      downloadLink.click();
+      window.document.body.removeChild(downloadLink);
+      window.URL.revokeObjectURL(downloadUrl);
+
+      toast({
+        title: "Success",
+        description: `${document.name} downloaded successfully`,
+      });
     } catch (error) {
       console.error('Error downloading file:', error);
       toast({
@@ -214,6 +222,7 @@ const DocumentList = ({ dealId, companyId, canDownload = true, canDelete = false
         variant: "destructive",
       });
     }
+  };
   };
 
   const getFileIcon = (fileType: string | null) => {

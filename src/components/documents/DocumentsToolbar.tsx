@@ -5,15 +5,21 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Progress } from '@/components/ui/progress';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useDocumentExport } from '@/hooks/useDocumentExport';
 import { 
   Search, 
   Filter, 
   Download, 
   Trash2, 
   RefreshCw,
-  Building2
+  Building2,
+  FileArchive,
+  Eye,
+  Package
 } from 'lucide-react';
 
 interface Deal {
@@ -27,10 +33,30 @@ interface DocumentsToolbarProps {
   selectedDealId: string;
 }
 
+interface PreviewDocument {
+  id: string;
+  name: string;
+  file_type: string;
+  created_at: string;
+  tag: string;
+}
+
 const DocumentsToolbar = ({ onDealSelect, selectedDealId }: DocumentsToolbarProps) => {
   const [deals, setDeals] = useState<Deal[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
+  const [previewDocuments, setPreviewDocuments] = useState<PreviewDocument[]>([]);
   const { toast } = useToast();
+  
+  const { 
+    isExporting, 
+    progress, 
+    exportAllDocuments, 
+    previewAllDocuments, 
+    downloadZip 
+  } = useDocumentExport({ 
+    dealId: selectedDealId !== 'all' ? selectedDealId : undefined 
+  });
 
   useEffect(() => {
     fetchDeals();
@@ -61,6 +87,12 @@ const DocumentsToolbar = ({ onDealSelect, selectedDealId }: DocumentsToolbarProp
   const handleRefresh = () => {
     fetchDeals();
     window.location.reload();
+  };
+
+  const handlePreviewAll = async () => {
+    const documents = await previewAllDocuments();
+    setPreviewDocuments(documents);
+    setShowPreview(true);
   };
 
   return (
@@ -98,6 +130,60 @@ const DocumentsToolbar = ({ onDealSelect, selectedDealId }: DocumentsToolbarProp
             <Button
               variant="outline"
               size="sm"
+              onClick={exportAllDocuments}
+              disabled={isExporting}
+              className="border-border hover:bg-muted"
+            >
+              <Download className="w-4 h-4 mr-1" />
+              Export All
+            </Button>
+
+            <Dialog open={showPreview} onOpenChange={setShowPreview}>
+              <DialogTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handlePreviewAll}
+                  className="border-border hover:bg-muted"
+                >
+                  <Eye className="w-4 h-4 mr-1" />
+                  Preview All
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-4xl max-h-[80vh] overflow-auto">
+                <DialogHeader>
+                  <DialogTitle>Document Preview</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-2">
+                  {previewDocuments.map((doc) => (
+                    <div key={doc.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                      <div>
+                        <div className="font-medium">{doc.name}</div>
+                        <div className="text-sm text-muted-foreground">
+                          {doc.tag} • {doc.file_type} • {new Date(doc.created_at).toLocaleDateString()}
+                        </div>
+                      </div>
+                      <Badge variant="outline">{doc.tag}</Badge>
+                    </div>
+                  ))}
+                </div>
+              </DialogContent>
+            </Dialog>
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={downloadZip}
+              disabled={isExporting}
+              className="border-border hover:bg-muted"
+            >
+              <FileArchive className="w-4 h-4 mr-1" />
+              Download ZIP
+            </Button>
+
+            <Button
+              variant="outline"
+              size="sm"
               onClick={handleRefresh}
               disabled={isLoading}
               className="border-border hover:bg-muted"
@@ -106,6 +192,20 @@ const DocumentsToolbar = ({ onDealSelect, selectedDealId }: DocumentsToolbarProp
             </Button>
           </div>
         </div>
+
+        {/* Export Progress */}
+        {progress && (
+          <div className="mt-4 space-y-2">
+            <div className="flex items-center justify-between text-sm">
+              <span>{progress.message}</span>
+              <span>{progress.current}/{progress.total}</span>
+            </div>
+            <Progress 
+              value={progress.total > 0 ? (progress.current / progress.total) * 100 : 0} 
+              className="h-2"
+            />
+          </div>
+        )}
       </CardContent>
     </Card>
   );
