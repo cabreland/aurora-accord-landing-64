@@ -185,26 +185,63 @@ const DocumentList = ({ dealId, companyId, canDownload = true, canDelete = false
     }
   };
 
+  const checkFileExists = async (filePath: string): Promise<boolean> => {
+    try {
+      const { data, error } = await supabase.storage
+        .from('deal-documents')
+        .list(filePath.substring(0, filePath.lastIndexOf('/')), {
+          search: filePath.substring(filePath.lastIndexOf('/') + 1)
+        });
+      
+      if (error) return false;
+      return data && data.length > 0;
+    } catch {
+      return false;
+    }
+  };
+
   const handleDownload = async (document: Document) => {
     if (!canDownload) return;
 
     try {
+      // First check if file exists in storage
+      const fileExists = await checkFileExists(document.file_path);
+      
+      if (!fileExists) {
+        toast({
+          title: "File Not Found",
+          description: `${document.name} is not available in storage. The file may have been moved or deleted.`,
+          variant: "destructive",
+        });
+        return;
+      }
+
       // Generate signed URL and trigger download
       const { data: signedUrl, error } = await supabase.storage
         .from('deal-documents')
         .createSignedUrl(document.file_path, 300); // 5 minutes
 
-      if (error) throw error;
+      if (error) {
+        console.error('Signed URL error:', error);
+        throw new Error(`Failed to generate download link: ${error.message}`);
+      }
+
+      if (!signedUrl?.signedUrl) {
+        throw new Error('No signed URL returned');
+      }
 
       // Download the file
       const response = await fetch(signedUrl.signedUrl);
-      if (!response.ok) throw new Error('Download failed');
+      if (!response.ok) {
+        throw new Error(`Download failed with status: ${response.status}`);
+      }
 
       const blob = await response.blob();
       const downloadUrl = window.URL.createObjectURL(blob);
       const downloadLink = window.document.createElement('a');
       downloadLink.href = downloadUrl;
       downloadLink.download = document.name;
+      downloadLink.style.display = 'none';
       window.document.body.appendChild(downloadLink);
       downloadLink.click();
       window.document.body.removeChild(downloadLink);
@@ -217,8 +254,8 @@ const DocumentList = ({ dealId, companyId, canDownload = true, canDelete = false
     } catch (error) {
       console.error('Error downloading file:', error);
       toast({
-        title: "Error",
-        description: "Failed to download file",
+        title: "Download Failed",
+        description: error instanceof Error ? error.message : "Failed to download file",
         variant: "destructive",
       });
     }

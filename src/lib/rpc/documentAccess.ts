@@ -163,7 +163,7 @@ export const downloadDocument = async (documentId: string): Promise<DocumentAcce
     // Get document with file info
     const { data: documentData } = await supabase
       .from('documents')
-      .select('id, name, file_path, deal_id, file_type')
+      .select('id, name, file_path, deal_id, file_type, file_size')
       .eq('id', documentId)
       .single();
 
@@ -174,22 +174,55 @@ export const downloadDocument = async (documentId: string): Promise<DocumentAcce
       };
     }
 
+    // Check if file exists in storage before attempting download
+    try {
+      const filePath = documentData.file_path;
+      const folderPath = filePath.substring(0, filePath.lastIndexOf('/'));
+      const fileName = filePath.substring(filePath.lastIndexOf('/') + 1);
+      
+      const { data: fileList, error: listError } = await supabase.storage
+        .from('deal-documents')
+        .list(folderPath, { search: fileName });
+      
+      if (listError || !fileList || fileList.length === 0) {
+        console.error('File not found in storage:', filePath);
+        return {
+          success: false,
+          message: 'File not available in storage'
+        };
+      }
+    } catch (checkError) {
+      console.error('Error checking file existence:', checkError);
+      return {
+        success: false,
+        message: 'Unable to verify file availability'
+      };
+    }
+
     // Generate signed URL for download
     const { data: signedUrl, error } = await supabase.storage
       .from('deal-documents')
       .createSignedUrl(documentData.file_path, 300); // 5 minutes for download
 
-    if (error || !signedUrl) {
+    if (error) {
+      console.error('Signed URL error:', error);
       return {
         success: false,
-        message: 'Failed to generate download link'
+        message: `Failed to generate download link: ${error.message}`
+      };
+    }
+
+    if (!signedUrl?.signedUrl) {
+      return {
+        success: false,
+        message: 'No download URL generated'
       };
     }
 
     // Download the file and trigger browser download
     const response = await fetch(signedUrl.signedUrl);
     if (!response.ok) {
-      throw new Error('Failed to download file');
+      throw new Error(`Download failed with status: ${response.status}`);
     }
 
     const blob = await response.blob();
@@ -197,6 +230,7 @@ export const downloadDocument = async (documentId: string): Promise<DocumentAcce
     const downloadLink = window.document.createElement('a');
     downloadLink.href = downloadUrl;
     downloadLink.download = documentData.name;
+    downloadLink.style.display = 'none';
     window.document.body.appendChild(downloadLink);
     downloadLink.click();
     window.document.body.removeChild(downloadLink);
@@ -206,7 +240,8 @@ export const downloadDocument = async (documentId: string): Promise<DocumentAcce
     await logInvestorActivity(user.email, 'document_downloaded', documentData.deal_id, {
       document_id: documentId,
       document_name: documentData.name,
-      file_path: documentData.file_path
+      file_path: documentData.file_path,
+      file_size: documentData.file_size
     });
 
     return {
@@ -217,7 +252,7 @@ export const downloadDocument = async (documentId: string): Promise<DocumentAcce
     console.error('Error downloading document:', error);
     return {
       success: false,
-      message: 'Download failed'
+      message: error instanceof Error ? error.message : 'Download failed'
     };
   }
 };
