@@ -6,6 +6,7 @@ import { Progress } from '@/components/ui/progress';
 import { useDropzone } from 'react-dropzone';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useDocumentUpload } from '@/hooks/useDocumentUpload';
 import { 
   Upload, 
   File, 
@@ -44,12 +45,7 @@ interface CategoryUploadSectionProps {
   onDocumentDeleted: () => void;
 }
 
-interface UploadFile {
-  file: File;
-  progress: number;
-  status: 'pending' | 'uploading' | 'success' | 'error';
-  id: string;
-}
+// UploadFile interface now imported from useDocumentUpload hook
 
 const CategoryUploadSection = ({ 
   category, 
@@ -58,13 +54,23 @@ const CategoryUploadSection = ({
   onUploadComplete,
   onDocumentDeleted 
 }: CategoryUploadSectionProps) => {
-  const [uploadFiles, setUploadFiles] = useState<UploadFile[]>([]);
-  const [isUploading, setIsUploading] = useState(false);
   const [showUploadArea, setShowUploadArea] = useState(false);
   const { toast } = useToast();
+  
+  const documentUpload = useDocumentUpload({
+    dealId,
+    category: category.key,
+    onUploadComplete: () => {
+      onUploadComplete();
+      setShowUploadArea(false);
+    },
+    onUploadError: (error) => {
+      console.error('Upload error:', error);
+    }
+  });
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
-    const remainingSlots = category.maxFiles - documents.length - uploadFiles.length;
+    const remainingSlots = category.maxFiles - documents.length - documentUpload.files.length;
     
     if (remainingSlots <= 0) {
       toast({
@@ -76,15 +82,8 @@ const CategoryUploadSection = ({
     }
 
     const filesToAdd = acceptedFiles.slice(0, remainingSlots);
-    const newFiles: UploadFile[] = filesToAdd.map(file => ({
-      file,
-      progress: 0,
-      status: 'pending' as const,
-      id: Math.random().toString(36).substr(2, 9)
-    }));
-
-    setUploadFiles(prev => [...prev, ...newFiles]);
-  }, [category.maxFiles, documents.length, uploadFiles.length, category.label, toast]);
+    documentUpload.addFiles(filesToAdd);
+  }, [category.maxFiles, documents.length, documentUpload.files.length, category.label, toast, documentUpload]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -102,87 +101,8 @@ const CategoryUploadSection = ({
     maxSize: 50 * 1024 * 1024 // 50MB
   });
 
-  const removeUploadFile = (fileId: string) => {
-    setUploadFiles(prev => prev.filter(f => f.id !== fileId));
-  };
-
-  const updateFileStatus = (fileId: string, updates: Partial<UploadFile>) => {
-    setUploadFiles(prev => prev.map(f => 
-      f.id === fileId ? { ...f, ...updates } : f
-    ));
-  };
-
   const handleUpload = async () => {
-    const filesToUpload = uploadFiles.filter(f => f.status === 'pending');
-    if (filesToUpload.length === 0) return;
-
-    setIsUploading(true);
-
-    for (const uploadFile of filesToUpload) {
-      try {
-        updateFileStatus(uploadFile.id, { status: 'uploading', progress: 10 });
-
-        // Upload to Supabase Storage
-        const fileExt = uploadFile.file.name.split('.').pop();
-        const fileName = `${dealId}/${category.key}/${Date.now()}-${uploadFile.file.name}`;
-
-        const { data: storageData, error: storageError } = await supabase.storage
-          .from('deal-documents')
-          .upload(fileName, uploadFile.file);
-
-        if (storageError) throw storageError;
-
-        updateFileStatus(uploadFile.id, { progress: 70 });
-
-        // Get current user
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) throw new Error('User not authenticated');
-
-        // Save to database - fix RLS policy issue
-        const { error: dbError } = await supabase
-          .from('documents')
-          .insert({
-            deal_id: dealId,
-            name: uploadFile.file.name,
-            file_path: fileName,
-            file_size: uploadFile.file.size,
-            file_type: uploadFile.file.type,
-            tag: category.key as any,
-            uploaded_by: user.id
-          });
-
-        if (dbError) throw dbError;
-
-        updateFileStatus(uploadFile.id, { status: 'success', progress: 100 });
-
-      } catch (error: any) {
-        console.error('Upload error:', error);
-        updateFileStatus(uploadFile.id, { status: 'error' });
-        toast({
-          title: "Upload failed",
-          description: `Failed to upload ${uploadFile.file.name}: ${error.message}`,
-          variant: "destructive",
-        });
-      }
-    }
-
-    setIsUploading(false);
-    
-    const successfulUploads = uploadFiles.filter(f => f.status === 'success').length;
-    if (successfulUploads > 0) {
-      toast({
-        title: "Upload complete",
-        description: `${successfulUploads} document(s) uploaded successfully.`,
-      });
-      
-      // Add small delay to ensure database consistency before refresh
-      setTimeout(() => {
-        onUploadComplete();
-      }, 500);
-      
-      setUploadFiles([]);
-      setShowUploadArea(false);
-    }
+    await documentUpload.upload();
   };
 
   const handleDownload = async (document: Document) => {
@@ -380,10 +300,10 @@ const CategoryUploadSection = ({
             </div>
 
             {/* Compact Upload Queue */}
-            {uploadFiles.length > 0 && (
+            {documentUpload.files.length > 0 && (
               <div className="space-y-2">
                 <h4 className="text-xs font-medium text-muted-foreground">Files to Upload</h4>
-                {uploadFiles.map((uploadFile) => (
+                {documentUpload.files.map((uploadFile) => (
                   <div key={uploadFile.id} className="flex items-center justify-between p-2 bg-muted/30 rounded text-xs">
                     <div className="flex items-center gap-2 flex-1 min-w-0">
                       {getStatusIcon(uploadFile.status)}
@@ -404,7 +324,7 @@ const CategoryUploadSection = ({
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => removeUploadFile(uploadFile.id)}
+                        onClick={() => documentUpload.removeFile(uploadFile.id)}
                         disabled={uploadFile.status === 'uploading'}
                         className="h-6 w-6 p-0"
                       >
@@ -419,10 +339,10 @@ const CategoryUploadSection = ({
                     variant="outline"
                     size="sm"
                     onClick={() => {
-                      setUploadFiles([]);
+                      documentUpload.clearFiles();
                       setShowUploadArea(false);
                     }}
-                    disabled={isUploading}
+                    disabled={documentUpload.isUploading}
                     className="h-7 px-2 text-xs"
                   >
                     Cancel
@@ -430,10 +350,10 @@ const CategoryUploadSection = ({
                   <Button
                     size="sm"
                     onClick={handleUpload}
-                    disabled={isUploading || uploadFiles.filter(f => f.status === 'pending').length === 0}
+                    disabled={documentUpload.isUploading || documentUpload.files.filter(f => f.status === 'pending').length === 0}
                     className="h-7 px-2 text-xs"
                   >
-                    {isUploading ? 'Uploading...' : `Upload ${uploadFiles.filter(f => f.status === 'pending').length}`}
+                    {documentUpload.isUploading ? 'Uploading...' : `Upload ${documentUpload.files.filter(f => f.status === 'pending').length}`}
                   </Button>
                 </div>
               </div>

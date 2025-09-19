@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -104,6 +104,29 @@ const DocumentStatusPanel = ({ companyId, companyName }: DocumentStatusPanelProp
   useEffect(() => {
     if (companyId) {
       fetchDocuments();
+      
+      // Subscribe to real-time document changes
+      const channel = supabase
+        .channel('document-changes')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'documents',
+            filter: `deal_id=eq.${companyId}`
+          },
+          (payload) => {
+            console.log('Document changed:', payload);
+            // Refresh documents when any change occurs
+            fetchDocuments(true);
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
     }
   }, [companyId]);
 

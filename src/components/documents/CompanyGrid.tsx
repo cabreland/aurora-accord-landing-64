@@ -50,6 +50,28 @@ const CompanyGrid = ({ searchQuery, selectedCompanyId, onCompanySelect, refreshT
 
   useEffect(() => {
     fetchDeals();
+    
+    // Subscribe to real-time document changes
+    const channel = supabase
+      .channel('company-grid-document-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'documents'
+        },
+        (payload) => {
+          console.log('CompanyGrid: Document change detected:', payload);
+          // Refresh deals when any document changes
+          fetchDeals();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [refreshTrigger]);
 
   const fetchDeals = async () => {

@@ -25,6 +25,28 @@ export const useDashboardMetrics = () => {
 
   useEffect(() => {
     fetchMetrics();
+    
+    // Subscribe to real-time document changes to update metrics
+    const channel = supabase
+      .channel('metrics-document-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'documents'
+        },
+        (payload) => {
+          console.log('Document change detected for metrics:', payload);
+          // Refresh metrics when documents change
+          fetchMetrics();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const fetchMetrics = async () => {
