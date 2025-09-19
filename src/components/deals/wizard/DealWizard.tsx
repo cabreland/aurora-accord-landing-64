@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { ChevronLeft, ChevronRight, Check } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 
 import { BasicInfoStep } from './BasicInfoStep';
@@ -92,6 +93,7 @@ export const DealWizard: React.FC<DealWizardProps> = ({
 }) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [loading, setLoading] = useState(false);
+  const { user } = useAuth();
   const [formData, setFormData] = useState<DealFormData>({
     title: '',
     company_name: '',
@@ -192,7 +194,6 @@ export const DealWizard: React.FC<DealWizardProps> = ({
     try {
       setLoading(true);
       
-      const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('User not authenticated');
 
       // Create the deal with comprehensive data
