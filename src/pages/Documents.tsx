@@ -4,14 +4,16 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import DocumentsToolbar from '@/components/documents/DocumentsToolbar';
 import DocumentCategoriesView from '@/components/documents/DocumentCategoriesView';
+import StorageDebugger from '@/components/debug/StorageDebugger';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
-import { ArrowLeft, Building2 } from 'lucide-react';
+import { ArrowLeft, Building2, Bug } from 'lucide-react';
 
 const Documents = () => {
   const [selectedDealId, setSelectedDealId] = useState<string>('all');
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [dealInfo, setDealInfo] = useState<{ title: string; company_name: string } | null>(null);
+  const [showDebugger, setShowDebugger] = useState(false);
   const { user } = useAuth();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -80,12 +82,30 @@ const Documents = () => {
               )}
             </div>
           </div>
+          
+          {/* Debug Button - Only show for specific deal */}
+          {selectedDealId !== 'all' && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowDebugger(!showDebugger)}
+              className="gap-2"
+            >
+              <Bug className="w-4 h-4" />
+              {showDebugger ? 'Hide' : 'Debug Storage'}
+            </Button>
+          )}
         </div>
         
         <DocumentsToolbar 
           onDealSelect={setSelectedDealId}
           selectedDealId={selectedDealId}
         />
+        
+        {/* Storage Debugger - Only show when enabled and for specific deal */}
+        {showDebugger && selectedDealId !== 'all' && (
+          <StorageDebugger dealId={selectedDealId} />
+        )}
         
         <DocumentCategoriesView 
           dealId={selectedDealId}
