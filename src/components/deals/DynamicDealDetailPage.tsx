@@ -32,17 +32,21 @@ interface DynamicDealDetailPageProps {
 }
 
 export const DynamicDealDetailPage = ({ dealId }: DynamicDealDetailPageProps) => {
+  // ALL HOOKS MUST BE AT THE TOP LEVEL - React Rules of Hooks
   const navigate = useNavigate();
   const { isAdmin, isEditor, getDisplayName, getRoleDisplayName, loading: profileLoading } = useUserProfile();
   const [deal, setDeal] = useState<MyDeal | null>(null);
   const [loading, setLoading] = useState(true);
   const [ndaAccepted, setNdaAccepted] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [documents, setDocuments] = useState<any[]>([]);
   const { toast } = useToast();
 
+  // Effects after all hook declarations
   useEffect(() => {
     if (dealId) {
       fetchDeal();
+      loadDealDocuments();
     }
   }, [dealId]);
 
@@ -71,6 +75,25 @@ export const DynamicDealDetailPage = ({ dealId }: DynamicDealDetailPageProps) =>
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadDealDocuments = async () => {
+    try {
+      if (!dealId) return;
+      
+      const { data, error } = await supabase
+        .from('documents')
+        .select('*')
+        .eq('deal_id', dealId)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setDocuments(data || []);
+    } catch (error) {
+      console.error('Error loading documents:', error);
+      // Fallback to empty array for new deals
+      setDocuments([]);
     }
   };
 
@@ -118,6 +141,16 @@ export const DynamicDealDetailPage = ({ dealId }: DynamicDealDetailPageProps) =>
     return Math.min(score, 100);
   };
 
+  // Parse growth opportunities from deal data
+  const growthOpportunities = deal?.growth_opportunities 
+    ? (Array.isArray(deal.growth_opportunities) ? deal.growth_opportunities : [])
+    : [
+      'Market expansion opportunities',
+      'Product development initiatives',
+      'Strategic partnerships',
+      'Operational efficiency improvements'
+    ];
+
   if (loading) {
     return (
       <div className="min-h-screen bg-[#0A0F0F]">
@@ -158,42 +191,6 @@ export const DynamicDealDetailPage = ({ dealId }: DynamicDealDetailPageProps) =>
       </div>
     );
   }
-
-  // Parse growth opportunities from deal data
-  const growthOpportunities = deal.growth_opportunities 
-    ? (Array.isArray(deal.growth_opportunities) ? deal.growth_opportunities : [])
-    : [
-      'Market expansion opportunities',
-      'Product development initiatives',
-      'Strategic partnerships',
-      'Operational efficiency improvements'
-    ];
-
-  const [documents, setDocuments] = useState<any[]>([]);
-
-  // Load actual documents for this deal
-  useEffect(() => {
-    if (dealId) {
-      loadDealDocuments();
-    }
-  }, [dealId]);
-
-  const loadDealDocuments = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('documents')
-        .select('*')
-        .eq('deal_id', dealId)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setDocuments(data || []);
-    } catch (error) {
-      console.error('Error loading documents:', error);
-      // Fallback to empty array for new deals
-      setDocuments([]);
-    }
-  };
 
   const progress = calculateProgress();
   const fitScore = calculateFitScore();
@@ -458,24 +455,47 @@ export const DynamicDealDetailPage = ({ dealId }: DynamicDealDetailPageProps) =>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="bg-[#0A0F0F]/50 rounded-lg p-4">
-                  <div className="text-[#F4E4BC]/60 text-sm mb-1">Annual Revenue</div>
-                  <div className="text-2xl font-bold text-[#FAFAFA]">{deal.revenue || 'TBD'}</div>
+                  <div className="text-[#F4E4BC]/60 text-sm mb-2">Annual Revenue</div>
+                  <div className="text-2xl font-bold text-[#FAFAFA]">
+                    {deal.revenue || 'Confidential'}
+                  </div>
                 </div>
+
                 <div className="bg-[#0A0F0F]/50 rounded-lg p-4">
-                  <div className="text-[#F4E4BC]/60 text-sm mb-1">EBITDA</div>
-                  <div className="text-2xl font-bold text-[#FAFAFA]">{deal.ebitda || 'TBD'}</div>
+                  <div className="text-[#F4E4BC]/60 text-sm mb-2">EBITDA</div>
+                  <div className="text-2xl font-bold text-[#FAFAFA]">
+                    {deal.ebitda || 'Confidential'}
+                  </div>
                 </div>
+
                 <div className="bg-[#0A0F0F]/50 rounded-lg p-4">
-                  <div className="text-[#F4E4BC]/60 text-sm mb-1">Asking Price</div>
-                  <div className="text-2xl font-bold text-[#22C55E]">{(deal as any).asking_price || 'TBD'}</div>
+                  <div className="text-[#F4E4BC]/60 text-sm mb-2">Asking Price</div>
+                  <div className="text-2xl font-bold text-[#D4AF37]">
+                    {(deal as any).asking_price || 'Contact for Pricing'}
+                  </div>
                 </div>
-                <div className="bg-[#0A0F0F]/50 rounded-lg p-4">
-                  <div className="text-[#F4E4BC]/60 text-sm mb-1">Customer Count</div>
-                  <div className="text-2xl font-bold text-[#FAFAFA]">{(deal as any).customer_count || 'TBD'}</div>
-                </div>
-                <div className="bg-[#0A0F0F]/50 rounded-lg p-4">
-                  <div className="text-[#F4E4BC]/60 text-sm mb-1">Recurring Revenue</div>
-                  <div className="text-2xl font-bold text-[#22C55E]">{(deal as any).recurring_revenue || 'TBD'}</div>
+
+                {/* Financial Highlights */}
+                <div className="mt-6">
+                  <h4 className="text-[#D4AF37] font-semibold mb-3">Financial Highlights</h4>
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-[#F4E4BC]/80">Growth Rate</span>
+                      <span className="text-[#FAFAFA] font-medium">{(deal as any).growth_rate || 'N/A'}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-[#F4E4BC]/80">Profit Margin</span>
+                      <span className="text-[#FAFAFA] font-medium">{(deal as any).profit_margin || 'N/A'}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-[#F4E4BC]/80">Customer Count</span>
+                      <span className="text-[#FAFAFA] font-medium">{(deal as any).customer_count || 'N/A'}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-[#F4E4BC]/80">Recurring Revenue</span>
+                      <span className="text-[#FAFAFA] font-medium">{(deal as any).recurring_revenue || 'N/A'}</span>
+                    </div>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -488,50 +508,73 @@ export const DynamicDealDetailPage = ({ dealId }: DynamicDealDetailPageProps) =>
                   Deal Progress
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-6">
+              <CardContent className="space-y-4">
                 <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-[#F4E4BC]/60 text-sm capitalize">{deal.status} Status</span>
-                    <span className="text-[#FAFAFA] font-bold">{progress}%</span>
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-[#F4E4BC]/80">Completion</span>
+                    <span className="text-[#FAFAFA] font-medium">{progress}%</span>
                   </div>
-                  <div className="w-full bg-[#1A1F2E] rounded-full h-3">
-                    <div 
-                      className="h-full bg-gradient-to-r from-[#D4AF37] to-[#F4E4BC] rounded-full transition-all duration-300"
-                      style={{ width: `${progress}%` }}
-                    />
-                  </div>
+                  <Progress value={progress} className="h-2" />
                 </div>
-                
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Star className="w-5 h-5 text-[#D4AF37]" />
-                    <span className="text-[#F4E4BC] font-medium">Fit Score</span>
+
+                <div>
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-[#F4E4BC]/80">Investment Fit Score</span>
+                    <span className="text-[#FAFAFA] font-medium">{fitScore}%</span>
                   </div>
-                  <Badge className="bg-[#22C55E] text-[#0A0F0F] font-bold">
-                    {fitScore}%
-                  </Badge>
+                  <Progress value={fitScore} className="h-2" />
+                </div>
+
+                <div className="bg-[#0A0F0F]/50 rounded-lg p-4 mt-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Star className="w-4 h-4 text-[#D4AF37]" />
+                    <span className="text-[#D4AF37] font-medium">Deal Status</span>
+                  </div>
+                  <span className="text-[#FAFAFA] capitalize">{deal.status}</span>
                 </div>
               </CardContent>
             </Card>
 
-            {/* Action Buttons */}
-            <div className="space-y-4">
-              <Button className="w-full bg-[#D4AF37] hover:bg-[#F4E4BC] text-[#0A0F0F] font-bold py-4 text-lg">
-                <Phone className="w-5 h-5 mr-3" />
-                Schedule Buyer-Seller Call
-              </Button>
-              <Button className="w-full bg-[#F28C38] hover:bg-[#F28C38]/80 text-[#0A0F0F] font-bold py-4 text-lg">
-                <Download className="w-5 h-5 mr-3" />
-                Download Full Packet
-              </Button>
-              <Button 
-                variant="outline"
-                className="w-full border-[#D4AF37] text-[#D4AF37] hover:bg-[#D4AF37] hover:text-[#0A0F0F] font-bold py-4 text-lg"
-              >
-                <FolderOpen className="w-5 h-5 mr-3" />
-                Request Additional Information
-              </Button>
-            </div>
+            {/* Contact & Actions */}
+            <Card className="bg-gradient-to-br from-[#2A2F3A] to-[#1A1F2E] border-[#D4AF37]/20">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-3 text-[#FAFAFA]">
+                  <Phone className="w-6 h-6 text-[#D4AF37]" />
+                  Next Steps
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Button 
+                  className="w-full bg-[#D4AF37] hover:bg-[#F4E4BC] text-[#0A0F0F] font-semibold"
+                  onClick={() => {
+                    // Handle express interest
+                  }}
+                >
+                  Express Interest
+                </Button>
+                
+                <Button 
+                  variant="outline" 
+                  className="w-full border-[#D4AF37] text-[#D4AF37] hover:bg-[#D4AF37] hover:text-[#0A0F0F]"
+                  onClick={() => {
+                    // Handle schedule call
+                  }}
+                >
+                  Schedule Call
+                </Button>
+
+                <Button 
+                  variant="ghost" 
+                  className="w-full text-[#F4E4BC] hover:bg-[#D4AF37]/10 hover:text-[#D4AF37]"
+                  onClick={() => {
+                    // Handle request more info
+                  }}
+                >
+                  <FolderOpen className="w-5 h-5 mr-3" />
+                  Request Additional Information
+                </Button>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>
