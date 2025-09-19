@@ -65,8 +65,7 @@ const DealManagement: React.FC = () => {
     setSearchParams(newParams);
   };
 
-  const isAdmin = profile?.role === 'admin';
-  const canCreateDeals = isAdmin || profile?.role === 'editor';
+  const canCreateDeals = profile?.role === 'super_admin' || profile?.role === 'admin' || profile?.role === 'editor';
 
   const renderMainContent = () => {
     switch (currentView) {
