@@ -103,6 +103,7 @@ const DOCUMENT_CATEGORIES = {
 const DocumentCategoriesView = ({ dealId, onRefresh }: DocumentCategoriesViewProps) => {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [refreshCounter, setRefreshCounter] = useState(0);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -149,8 +150,14 @@ const DocumentCategoriesView = ({ dealId, onRefresh }: DocumentCategoriesViewPro
   };
 
   const handleDocumentChange = () => {
-    fetchDocuments(true); // Force refresh after changes
-    onRefresh?.();
+    console.log('🔄 handleDocumentChange called - refreshing documents');
+    
+    // Add a small delay to ensure database consistency
+    setTimeout(() => {
+      fetchDocuments(true); // Force refresh after changes
+      setRefreshCounter(prev => prev + 1); // Force re-render
+      onRefresh?.();
+    }, 100);
   };
 
   const getCategoryDocuments = (categoryKey: string) => {
@@ -226,7 +233,7 @@ const DocumentCategoriesView = ({ dealId, onRefresh }: DocumentCategoriesViewPro
           
           return (
             <CategoryUploadSection
-              key={category.key}
+              key={`${category.key}-${refreshCounter}`} // Force re-render
               category={category}
               documents={categoryDocs}
               dealId={dealId}
