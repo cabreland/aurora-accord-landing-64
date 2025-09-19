@@ -32,6 +32,7 @@ interface Document {
 interface DocumentCategoriesViewProps {
   dealId: string;
   onRefresh?: () => void;
+  refreshTrigger?: number;
 }
 
 const DOCUMENT_CATEGORIES = {
@@ -100,7 +101,7 @@ const DOCUMENT_CATEGORIES = {
   }
 };
 
-const DocumentCategoriesView = ({ dealId, onRefresh }: DocumentCategoriesViewProps) => {
+const DocumentCategoriesView = ({ dealId, onRefresh, refreshTrigger }: DocumentCategoriesViewProps) => {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [refreshCounter, setRefreshCounter] = useState(0);
@@ -113,7 +114,7 @@ const DocumentCategoriesView = ({ dealId, onRefresh }: DocumentCategoriesViewPro
       setDocuments([]);
       setIsLoading(false);
     }
-  }, [dealId]);
+  }, [dealId, refreshTrigger]);
 
   const fetchDocuments = async (forceRefresh = false) => {
     try {

@@ -112,6 +112,7 @@ const Documents = () => {
         
         <DocumentCategoriesView 
           dealId={selectedDealId}
+          refreshTrigger={refreshTrigger}
           onRefresh={() => setRefreshTrigger(prev => prev + 1)}
         />
       </div>
