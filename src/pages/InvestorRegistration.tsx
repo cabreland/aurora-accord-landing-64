@@ -125,8 +125,8 @@ const InvestorRegistration = () => {
               </AlertDescription>
             </Alert>
             <div className="flex flex-col gap-2">
-              <Button onClick={() => navigate('/')} variant="outline">
-                Return to Home
+              <Button onClick={() => window.history.back()} variant="outline">
+                Go Back
               </Button>
               <Button onClick={() => navigate('/auth')} variant="default">
                 Sign In Instead

@@ -18,6 +18,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useUserProfile } from '@/hooks/useUserProfile';
+import { getDashboardRoute } from '@/lib/auth-utils';
 import UserMenuDropdown from '@/components/ui/UserMenuDropdown';
 
 interface DashboardLayoutProps {
@@ -30,7 +31,7 @@ const DashboardLayout = ({ children, activeTab = 'dashboard', onTabChange }: Das
   const [internalActiveTab, setInternalActiveTab] = useState(activeTab);
   const navigate = useNavigate();
   const location = useLocation();
-  const { getDisplayName, getRoleDisplayName, loading, canManageUsers, isAdmin } = useUserProfile();
+  const { profile, getDisplayName, getRoleDisplayName, loading, canManageUsers, isAdmin } = useUserProfile();
 
   const isDemo = location.pathname === '/demo';
   const currentActiveTab = onTabChange ? activeTab : internalActiveTab;
@@ -93,13 +94,13 @@ const DashboardLayout = ({ children, activeTab = 'dashboard', onTabChange }: Das
       {/* Sidebar */}
       <div className="w-64 bg-gradient-to-b from-[#0A0F0F] to-[#1A1F2E] border-r border-[#D4AF37]/30 hidden lg:block">
         <div className="p-6">
-          {/* Back to Home Button */}
+          {/* Back to Dashboard Button */}
           <Button 
-            onClick={() => navigate('/')}
+            onClick={() => navigate(profile?.role ? getDashboardRoute(profile.role) : '/dashboard')}
             className="w-full mb-6 bg-[#2A2F3A] border border-[#D4AF37] text-[#D4AF37] hover:bg-[#D4AF37] hover:text-[#0A0F0F] transition-all duration-300"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Home
+            Back to Dashboard
           </Button>
 
           {/* Logo Area */}

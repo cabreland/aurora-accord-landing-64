@@ -22,6 +22,7 @@ import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useNavigate } from 'react-router-dom';
 import { useUserProfile } from '@/hooks/useUserProfile';
+import { getDashboardRoute } from '@/lib/auth-utils';
 import { supabase } from '@/integrations/supabase/client';
 import { MyDeal } from '@/hooks/useMyDeals';
 import { useToast } from '@/hooks/use-toast';
@@ -34,7 +35,7 @@ interface DynamicDealDetailPageProps {
 export const DynamicDealDetailPage = ({ dealId }: DynamicDealDetailPageProps) => {
   // ALL HOOKS MUST BE AT THE TOP LEVEL - React Rules of Hooks
   const navigate = useNavigate();
-  const { isAdmin, isEditor, getDisplayName, getRoleDisplayName, loading: profileLoading } = useUserProfile();
+  const { profile, isAdmin, isEditor, getDisplayName, getRoleDisplayName, loading: profileLoading } = useUserProfile();
   const [deal, setDeal] = useState<MyDeal | null>(null);
   const [loading, setLoading] = useState(true);
   const [ndaAccepted, setNdaAccepted] = useState(false);
@@ -200,13 +201,13 @@ export const DynamicDealDetailPage = ({ dealId }: DynamicDealDetailPageProps) =>
       {/* Sidebar */}
       <div className="fixed left-0 top-0 w-64 h-full bg-gradient-to-b from-[#0A0F0F] to-[#1A1F2E] border-r border-[#D4AF37]/30 z-10">
         <div className="p-6">
-          {/* Back to Home Button */}
+          {/* Back to Dashboard Button */}
           <Button 
-            onClick={() => navigate('/')}
+            onClick={() => navigate(profile?.role ? getDashboardRoute(profile.role) : '/dashboard')}
             className="w-full mb-6 bg-transparent border border-[#D4AF37] text-[#D4AF37] hover:bg-[#D4AF37] hover:text-[#0A0F0F] transition-all duration-300"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Home
+            Back to Dashboard
           </Button>
 
           {/* Logo Area */}

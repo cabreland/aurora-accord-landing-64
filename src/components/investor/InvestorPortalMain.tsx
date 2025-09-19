@@ -25,6 +25,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useUserProfile } from '@/hooks/useUserProfile';
+import { getDashboardRoute } from '@/lib/auth-utils';
 import { useInvestorContext } from '@/hooks/useInvestorContext';
 import { useInvestorDeals } from '@/hooks/useInvestorDeals';
 import UserMenuDropdown from '@/components/ui/UserMenuDropdown';
@@ -120,7 +121,7 @@ const sampleDeals = [
 const InvestorPortalMain = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { isAdmin, isEditor, getDisplayName, getRoleDisplayName, loading: profileLoading } = useUserProfile();
+  const { profile, isAdmin, isEditor, getDisplayName, getRoleDisplayName, loading: profileLoading } = useUserProfile();
   const { metrics, investorInfo, loading: contextLoading } = useInvestorContext();
   const { filteredDeals, loading: dealsLoading, handleDealClick } = useInvestorDeals();
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
@@ -199,13 +200,13 @@ const InvestorPortalMain = () => {
       {/* Sidebar */}
       <div className="w-64 bg-gradient-to-b from-[#0A0F0F] to-[#1A1F2E] border-r border-[#D4AF37]/30 flex-shrink-0">
         <div className="p-6">
-          {/* Back to Home Button */}
+          {/* Back to Dashboard Button */}
           <Button 
-            onClick={() => navigate('/')}
+            onClick={() => navigate(profile?.role ? getDashboardRoute(profile.role) : '/dashboard')}
             className="w-full mb-6 bg-transparent border border-[#D4AF37] text-[#D4AF37] hover:bg-[#D4AF37] hover:text-[#0A0F0F] transition-all duration-300"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Home
+            Back to Dashboard
           </Button>
 
           {/* Logo Area */}

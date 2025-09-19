@@ -20,6 +20,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useNavigate } from 'react-router-dom';
 import { useUserProfile } from '@/hooks/useUserProfile';
+import { getDashboardRoute } from '@/lib/auth-utils';
 
 interface DealDetailPageProps {
   dealId?: string;
@@ -27,7 +28,7 @@ interface DealDetailPageProps {
 
 const DealDetailPage = ({ dealId }: DealDetailPageProps) => {
   const navigate = useNavigate();
-  const { isAdmin, isEditor, getDisplayName, getRoleDisplayName, loading } = useUserProfile();
+  const { profile, isAdmin, isEditor, getDisplayName, getRoleDisplayName, loading } = useUserProfile();
   const [ndaAccepted, setNdaAccepted] = useState(true); // For demo, set to true to show documents
 
   // Sample data - this would come from props or API call in real implementation
@@ -77,13 +78,13 @@ const DealDetailPage = ({ dealId }: DealDetailPageProps) => {
       {/* Sidebar */}
       <div className="fixed left-0 top-0 w-64 h-full bg-gradient-to-b from-[#0A0F0F] to-[#1A1F2E] border-r border-[#D4AF37]/30 z-10">
         <div className="p-6">
-          {/* Back to Home Button */}
+          {/* Back to Dashboard Button */}
           <Button 
-            onClick={() => navigate('/')}
+            onClick={() => navigate(profile?.role ? getDashboardRoute(profile.role) : '/dashboard')}
             className="w-full mb-6 bg-transparent border border-[#D4AF37] text-[#D4AF37] hover:bg-[#D4AF37] hover:text-[#0A0F0F] transition-all duration-300"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Home
+            Back to Dashboard
           </Button>
 
           {/* Logo Area */}
