@@ -44,7 +44,7 @@ const DealManagement: React.FC = () => {
 
   useEffect(() => {
     updateFilters({ search: searchQuery });
-  }, [searchQuery, updateFilters]);
+  }, [searchQuery]); // Remove updateFilters from deps to prevent infinite re-render
 
   const handleViewChange = (view: ViewType) => {
     const newParams = new URLSearchParams(searchParams);

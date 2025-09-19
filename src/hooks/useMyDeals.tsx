@@ -18,6 +18,25 @@ export interface MyDeal {
   priority?: string;
   created_at: string;
   updated_at: string;
+  // Additional dynamic fields that may be present
+  description?: string;
+  asking_price?: string;
+  founded_year?: number;
+  team_size?: string;
+  reason_for_sale?: string;
+  founders_message?: string;
+  founder_name?: string;
+  founder_title?: string;
+  ideal_buyer_profile?: string;
+  rollup_potential?: string;
+  market_trends_alignment?: string;
+  profit_margin?: string;
+  customer_count?: string;
+  recurring_revenue?: string;
+  cac_ltv_ratio?: string;
+  growth_opportunities?: any; // Can be array, string, or JSON from database
+  company_overview?: string;
+  growth_rate?: string;
 }
 
 export type DealView = 'grid' | 'list';
@@ -61,7 +80,7 @@ export const useMyDeals = () => {
       const { data, error } = await query;
 
       if (error) throw error;
-      setDeals(data || []);
+      setDeals((data || []) as MyDeal[]);
     } catch (error: any) {
       console.error('Error fetching deals:', error);
       toast({

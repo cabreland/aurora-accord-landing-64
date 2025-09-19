@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, FileText, Settings, Upload, MoreVertical, ExternalLink } from 'lucide-react';
+import { X, FileText, Upload, MoreVertical, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -8,6 +8,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/integrations/supabase/client';
 import { MyDeal } from '@/hooks/useMyDeals';
 import { useToast } from '@/hooks/use-toast';
+import { DealEditModal } from './DealEditModal';
 
 interface DealDetailPanelProps {
   dealId: string;
@@ -22,6 +23,7 @@ export const DealDetailPanel: React.FC<DealDetailPanelProps> = ({
 }) => {
   const [deal, setDeal] = useState<MyDeal | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showEditModal, setShowEditModal] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -38,7 +40,7 @@ export const DealDetailPanel: React.FC<DealDetailPanelProps> = ({
         .single();
 
       if (error) throw error;
-      setDeal(data);
+      setDeal(data as MyDeal);
     } catch (error: any) {
       console.error('Error fetching deal:', error);
       toast({
@@ -136,15 +138,11 @@ export const DealDetailPanel: React.FC<DealDetailPanelProps> = ({
       <div className="flex-1 overflow-auto">
         <Tabs defaultValue="overview" className="w-full">
           <div className="px-4 pt-4">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="documents">
                 <FileText className="w-4 h-4 mr-1" />
                 Docs
-              </TabsTrigger>
-              <TabsTrigger value="settings">
-                <Settings className="w-4 h-4 mr-1" />
-                Settings
               </TabsTrigger>
             </TabsList>
           </div>
@@ -213,34 +211,62 @@ export const DealDetailPanel: React.FC<DealDetailPanelProps> = ({
 
               {/* Actions */}
               <div className="space-y-2">
-                <Button className="w-full">
+                <Button 
+                  className="w-full" 
+                  onClick={() => setShowEditModal(true)}
+                >
                   Edit Deal
                 </Button>
-                <Button variant="outline" className="w-full">
-                  View Company Profile
+                <Button 
+                  variant="outline" 
+                  className="w-full"
+                  onClick={() => window.open(`/deal/${deal.id}`, '_blank')}
+                >
+                  View Deal Details
                 </Button>
               </div>
+
+              {/* Edit Modal */}
+              {showEditModal && deal && (
+                <DealEditModal
+                  deal={deal}
+                  open={showEditModal}
+                  onClose={() => setShowEditModal(false)}
+                  onSaved={() => {
+                    setShowEditModal(false);
+                    fetchDeal();
+                    onDealUpdated();
+                  }}
+                />
+              )}
             </TabsContent>
 
             <TabsContent value="documents" className="space-y-4">
-              <div className="text-center py-8">
-                <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
-                <p className="text-sm text-muted-foreground">
-                  Document management coming soon
-                </p>
-                <Button variant="outline" className="mt-3">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between bg-muted/50 rounded-lg p-3">
+                  <div className="flex items-center gap-3">
+                    <FileText className="w-4 h-4 text-muted-foreground" />
+                    <div>
+                      <div className="text-sm font-medium">Financial Summary</div>
+                      <div className="text-xs text-muted-foreground">PDF • Updated recently</div>
+                    </div>
+                  </div>
+                  <Button size="sm" variant="outline">View</Button>
+                </div>
+                <div className="flex items-center justify-between bg-muted/50 rounded-lg p-3">
+                  <div className="flex items-center gap-3">
+                    <FileText className="w-4 h-4 text-muted-foreground" />
+                    <div>
+                      <div className="text-sm font-medium">Company Overview</div>
+                      <div className="text-xs text-muted-foreground">PDF • Updated recently</div>
+                    </div>
+                  </div>
+                  <Button size="sm" variant="outline">View</Button>
+                </div>
+                <Button variant="outline" className="w-full mt-3">
                   <Upload className="w-4 h-4 mr-2" />
                   Upload Document
                 </Button>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="settings" className="space-y-4">
-              <div className="text-center py-8">
-                <Settings className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
-                <p className="text-sm text-muted-foreground">
-                  Deal settings coming soon
-                </p>
               </div>
             </TabsContent>
           </div>
