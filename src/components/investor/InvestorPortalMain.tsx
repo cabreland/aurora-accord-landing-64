@@ -25,6 +25,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useUserProfile } from '@/hooks/useUserProfile';
+import { useInvestorContext } from '@/hooks/useInvestorContext';
+import { useInvestorDeals } from '@/hooks/useInvestorDeals';
 import UserMenuDropdown from '@/components/ui/UserMenuDropdown';
 
 // Sample data for deals
@@ -118,11 +120,16 @@ const sampleDeals = [
 const InvestorPortalMain = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { isAdmin, isEditor, getDisplayName, getRoleDisplayName, loading } = useUserProfile();
+  const { isAdmin, isEditor, getDisplayName, getRoleDisplayName, loading: profileLoading } = useUserProfile();
+  const { metrics, investorInfo, loading: contextLoading } = useInvestorContext();
+  const { filteredDeals, loading: dealsLoading, handleDealClick } = useInvestorDeals();
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
 
-  const handleDealClick = (dealId: string) => {
+  const loading = profileLoading || contextLoading || dealsLoading;
+
+  const handleDealCardClick = (dealId: string) => {
+    handleDealClick(dealId); // Log activity via hook
     navigate(`/deal/${dealId}`);
   };
 
@@ -215,10 +222,10 @@ const InvestorPortalMain = () => {
               </div>
               <div>
                 <div className="text-[#FAFAFA] font-medium">
-                  {loading ? 'Loading…' : getDisplayName()}
+                  {loading ? 'Loading…' : (investorInfo?.name || getDisplayName())}
                 </div>
                 <div className="text-[#F4E4BC]/60 text-sm">
-                  {loading ? '' : getRoleDisplayName()}
+                  {loading ? '' : (investorInfo?.company || getRoleDisplayName())}
                 </div>
               </div>
             </div>
@@ -284,8 +291,10 @@ const InvestorPortalMain = () => {
                 <TrendingUp className="w-8 h-8 text-[#D4AF37]" />
                 <div className="w-2 h-2 bg-[#22C55E] rounded-full"></div>
               </div>
-              <div className="space-y-1">
-                <div className="text-2xl font-bold text-[#FAFAFA]">$182.5M</div>
+               <div className="space-y-1">
+                <div className="text-2xl font-bold text-[#FAFAFA]">
+                  {loading ? 'Loading...' : (metrics?.totalPipeline || '$0M')}
+                </div>
                 <div className="text-sm text-[#F4E4BC]/60">Total Pipeline</div>
                 <div className="text-xs text-[#F4E4BC]/40">Combined revenue</div>
               </div>
@@ -299,7 +308,9 @@ const InvestorPortalMain = () => {
                 <div className="w-2 h-2 bg-[#F28C38] rounded-full"></div>
               </div>
               <div className="space-y-1">
-                <div className="text-2xl font-bold text-[#FAFAFA]">6</div>
+                <div className="text-2xl font-bold text-[#FAFAFA]">
+                  {loading ? '...' : (metrics?.activeDeals || 0)}
+                </div>
                 <div className="text-sm text-[#F4E4BC]/60">Active Deals</div>
                 <div className="text-xs text-[#F4E4BC]/40">In pipeline</div>
               </div>
@@ -313,7 +324,9 @@ const InvestorPortalMain = () => {
                 <div className="w-2 h-2 bg-[#F28C38] rounded-full"></div>
               </div>
               <div className="space-y-1">
-                <div className="text-2xl font-bold text-[#FAFAFA]">3</div>
+                <div className="text-2xl font-bold text-[#FAFAFA]">
+                  {loading ? '...' : (metrics?.highPriorityDeals || 0)}
+                </div>
                 <div className="text-sm text-[#F4E4BC]/60">High Priority</div>
                 <div className="text-xs text-[#F4E4BC]/40">Urgent deals</div>
               </div>
@@ -327,7 +340,9 @@ const InvestorPortalMain = () => {
                 <div className="w-2 h-2 bg-[#22C55E] rounded-full"></div>
               </div>
               <div className="space-y-1">
-                <div className="text-2xl font-bold text-[#FAFAFA]">2</div>
+                <div className="text-2xl font-bold text-[#FAFAFA]">
+                  {loading ? '...' : (metrics?.ndaSignedDeals || 0)}
+                </div>
                 <div className="text-sm text-[#F4E4BC]/60">NDA Signed</div>
                 <div className="text-xs text-[#F4E4BC]/40">Ready for review</div>
               </div>
@@ -395,11 +410,29 @@ const InvestorPortalMain = () => {
 
         {/* Deal Cards Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-          {sampleDeals.map((deal) => (
+          {loading ? (
+            // Loading skeleton
+            Array.from({ length: 6 }).map((_, i) => (
+              <Card key={i} className="bg-gradient-to-br from-[#2A2F3A] to-[#1A1F2E] border-[#D4AF37]/20">
+                <CardContent className="p-6">
+                  <div className="animate-pulse">
+                    <div className="h-6 bg-[#D4AF37]/20 rounded mb-4"></div>
+                    <div className="h-4 bg-[#F4E4BC]/20 rounded mb-2"></div>
+                    <div className="h-4 bg-[#F4E4BC]/20 rounded w-3/4"></div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))
+          ) : filteredDeals.length === 0 ? (
+            <div className="col-span-full text-center py-12">
+              <p className="text-[#F4E4BC]/60 text-lg">No deals available with your current permissions.</p>
+            </div>
+          ) : (
+            filteredDeals.map((deal) => (
             <Card 
               key={deal.id}
               className="bg-gradient-to-br from-[#2A2F3A] to-[#1A1F2E] border-[#D4AF37]/20 hover:border-[#D4AF37] hover:shadow-xl hover:shadow-[#D4AF37]/20 transition-all duration-300 cursor-pointer group"
-              onClick={() => handleDealClick(deal.id)}
+              onClick={() => handleDealCardClick(deal.id)}
             >
               <CardContent className="p-6">
                 {/* Header */}
@@ -407,7 +440,7 @@ const InvestorPortalMain = () => {
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
                       <h3 className="text-xl font-bold text-[#FAFAFA] group-hover:text-[#D4AF37] transition-colors">
-                        {deal.name}
+                        {deal.companyName}
                       </h3>
                       <Badge className={`text-xs ${getPriorityColor(deal.priority)}`}>
                         {deal.priority}
@@ -426,14 +459,14 @@ const InvestorPortalMain = () => {
 
                 {/* Metrics */}
                 <div className="grid grid-cols-2 gap-4 mb-4">
-                  <div className="bg-[#0A0F0F]/50 rounded-lg p-3">
-                    <div className="text-[#F4E4BC]/60 text-xs mb-1">Revenue</div>
-                    <div className="text-lg font-bold text-[#FAFAFA]">{deal.revenue}</div>
-                  </div>
-                  <div className="bg-[#0A0F0F]/50 rounded-lg p-3">
-                    <div className="text-[#F4E4BC]/60 text-xs mb-1">EBITDA</div>
-                    <div className="text-lg font-bold text-[#FAFAFA]">{deal.ebitda}</div>
-                  </div>
+                    <div className="bg-[#0A0F0F]/50 rounded-lg p-3">
+                      <div className="text-[#F4E4BC]/60 text-xs mb-1">Revenue</div>
+                      <div className="text-lg font-bold text-[#FAFAFA]">{deal.revenue}</div>
+                    </div>
+                    <div className="bg-[#0A0F0F]/50 rounded-lg p-3">
+                      <div className="text-[#F4E4BC]/60 text-xs mb-1">EBITDA</div>
+                      <div className="text-lg font-bold text-[#FAFAFA]">{deal.ebitda}</div>
+                    </div>
                 </div>
 
                 {/* Stage */}
@@ -494,7 +527,8 @@ const InvestorPortalMain = () => {
                 </div>
               </CardContent>
             </Card>
-          ))}
+            ))
+          )}
         </div>
       </div>
     </div>

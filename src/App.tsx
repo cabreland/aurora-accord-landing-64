@@ -10,7 +10,7 @@ import React, { Suspense, lazy } from "react";
 
 import Index from "./pages/Index";
 import Demo from "./pages/Demo";
-import InvestorDashboard from "./pages/InvestorDashboard";
+import InvestorPortal from "./pages/InvestorPortal";
 
 // Lazy-load remaining pages to reduce initial bundle size
 const IndexV2 = lazy(() => import("./pages/IndexV2"));
@@ -30,7 +30,7 @@ const InvestorRegistration = lazy(() => import("./pages/InvestorRegistration"));
 const TestRegistration = lazy(() => import("./pages/TestRegistration"));
 // Wrap protected components with authentication
 const ProtectedDashboard = withAuth('investor')(Dashboard);
-const ProtectedInvestorDashboard = withAuth('investor')(InvestorDashboard);
+const ProtectedInvestorPortal = withAuth('investor')(InvestorPortal);
 const ProtectedDealManagement = withAuth('investor')(DealManagement);
 const ProtectedDealDetail = withAuth('investor')(DealDetail);
 const ProtectedDocuments = withAuth('staff')(Documents);
@@ -72,7 +72,7 @@ const App = () => (
               <Route path="/auth/accept" element={<AuthAccept />} />
               <Route path="/demo" element={<Demo />} />
               <Route path="/dashboard" element={<ProtectedDashboard />} />
-              <Route path="/investor-portal" element={<ProtectedInvestorDashboard />} />
+              <Route path="/investor-portal" element={<ProtectedInvestorPortal />} />
               <Route path="/deals" element={<ProtectedDealManagement />} />
               <Route path="/deal/:id" element={<ProtectedDealDetail />} />
               <Route path="/documents" element={<ProtectedDocuments />} />

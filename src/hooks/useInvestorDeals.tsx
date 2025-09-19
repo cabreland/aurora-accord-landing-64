@@ -1,7 +1,8 @@
-
 import { useState, useEffect } from 'react';
 import { getPublishedTeasers, TeaserData } from '@/lib/data/teasers';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
+import { getAccessibleDeals, AccessibleDeal, logInvestorActivity } from '@/lib/rpc/investorDealAccess';
 
 export interface InvestorDeal {
   id: string;
@@ -47,6 +48,7 @@ interface FilterCriteria {
 }
 
 export const useInvestorDeals = () => {
+  const { user } = useAuth();
   const [allDeals, setAllDeals] = useState<InvestorDeal[]>([]);
   const [filteredDeals, setFilteredDeals] = useState<InvestorDeal[]>([]);
   const [selectedDeal, setSelectedDeal] = useState<string | null>(null);
@@ -61,10 +63,39 @@ export const useInvestorDeals = () => {
   const fetchDeals = async () => {
     setLoading(true);
     try {
-      const teasers = await getPublishedTeasers();
-      const deals = teasers.map(convertTeaserToDeal);
+      if (!user?.email) {
+        console.warn('No user email, using fallback teaser data');
+        // Fallback to published teasers if no user context
+        const teasers = await getPublishedTeasers();
+        const deals = teasers.map(convertTeaserToDeal);
+        setAllDeals(deals);
+        setFilteredDeals(deals);
+        return;
+      }
+
+      // Get permission-based accessible deals
+      const accessibleDeals = await getAccessibleDeals(user.email);
+      
+      if (accessibleDeals.length === 0) {
+        console.warn('No accessible deals found, using fallback teaser data');
+        // Fallback to published teasers if no accessible deals
+        const teasers = await getPublishedTeasers();
+        const deals = teasers.map(convertTeaserToDeal);
+        setAllDeals(deals);
+        setFilteredDeals(deals);
+        return;
+      }
+
+      // Convert accessible deals to investor deal format
+      const deals = accessibleDeals.map(convertAccessibleDealToInvestorDeal);
       setAllDeals(deals);
       setFilteredDeals(deals);
+
+      // Log activity
+      await logInvestorActivity(user.email, 'deals_viewed', undefined, {
+        deal_count: deals.length,
+        access_type: 'permission_based'
+      });
     } catch (error) {
       console.error('Error fetching deals:', error);
       toast({
@@ -102,10 +133,17 @@ export const useInvestorDeals = () => {
     setFilteredDeals(filtered);
   };
 
-  const handleDealClick = (dealId: string | number) => {
+  const handleDealClick = async (dealId: string | number) => {
     const stringId = typeof dealId === 'number' ? dealId.toString() : dealId;
     setSelectedDeal(stringId);
     setViewMode('detail');
+
+    // Log deal view activity
+    if (user?.email) {
+      await logInvestorActivity(user.email, 'deal_viewed', stringId, {
+        deal_name: allDeals.find(d => d.id === stringId)?.companyName
+      });
+    }
   };
 
   const handleBackToDashboard = () => {
@@ -173,12 +211,49 @@ const convertTeaserToDeal = (teaser: TeaserData): InvestorDeal => {
   };
 };
 
+// Convert AccessibleDeal to InvestorDeal format
+const convertAccessibleDealToInvestorDeal = (deal: AccessibleDeal): InvestorDeal => {
+  return {
+    id: deal.id || '',
+    companyName: deal.company_name || 'Unnamed Company',
+    industry: deal.industry || 'Not specified',
+    revenue: deal.revenue || 'Not disclosed',
+    ebitda: deal.ebitda || 'Not disclosed',
+    stage: mapStageToDisplay(deal.status),
+    progress: calculateProgress(deal.status),
+    priority: capitalizeFirst(deal.priority || 'medium'),
+    location: deal.location || 'Not specified',
+    fitScore: 85, // Default fit score for permission-based deals
+    lastUpdated: formatDate(deal.updated_at),
+    description: deal.description || 'No description available',
+    foundedYear: 'Not specified',
+    teamSize: 'Not specified',
+    reasonForSale: 'Not specified',
+    growthOpportunities: [],
+    foundersMessage: '',
+    founderName: 'Not specified',
+    idealBuyerProfile: '',
+    rollupPotential: '',
+    marketTrends: '',
+    profitMargin: 'Not disclosed',
+    customerCount: 'Not disclosed',
+    recurringRevenue: 'Not disclosed',
+    cacLtvRatio: 'Not disclosed',
+    highlights: [],
+    risks: [],
+    documents: []
+  };
+};
+
 const mapStageToDisplay = (stage?: string) => {
   switch (stage) {
     case 'teaser': return 'Initial Review';
     case 'discovery': return 'NDA Signed';
     case 'dd': return 'Due Diligence';
     case 'closing': return 'Closing';
+    case 'active': return 'Active Deal';
+    case 'draft': return 'Draft';
+    case 'archived': return 'Archived';
     default: return 'Initial Review';
   }
 };
@@ -189,6 +264,9 @@ const calculateProgress = (stage?: string) => {
     case 'discovery': return 50;
     case 'dd': return 75;
     case 'closing': return 90;
+    case 'active': return 60;
+    case 'draft': return 10;
+    case 'archived': return 100;
     default: return 25;
   }
 };
