@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import DocumentsToolbar from '@/components/documents/DocumentsToolbar';
 import DocumentCategoriesView from '@/components/documents/DocumentCategoriesView';
 import StorageDebugger from '@/components/debug/StorageDebugger';
+import UploadDebugger from '@/components/debug/UploadDebugger';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { ArrowLeft, Building2, Bug } from 'lucide-react';
@@ -96,15 +97,17 @@ const Documents = () => {
             </Button>
           )}
         </div>
-        
         <DocumentsToolbar 
           onDealSelect={setSelectedDealId}
           selectedDealId={selectedDealId}
         />
         
-        {/* Storage Debugger - Only show when enabled and for specific deal */}
+        {/* Upload System Test - Only show when enabled and for specific deal */}
         {showDebugger && selectedDealId !== 'all' && (
-          <StorageDebugger dealId={selectedDealId} />
+          <div className="space-y-4">
+            <StorageDebugger dealId={selectedDealId} />
+            <UploadDebugger dealId={selectedDealId} />
+          </div>
         )}
         
         <DocumentCategoriesView 

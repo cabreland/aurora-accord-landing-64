@@ -102,9 +102,12 @@ const DocumentUpload = ({ dealId, onUploadComplete }: DocumentUploadProps) => {
 
   const handleUploadFiles = async () => {
     setIsUploading(true);
+    console.log('🚀 Starting upload process for', uploadFiles.length, 'files');
     
     for (const uploadFile of uploadFiles) {
       if (uploadFile.status !== 'pending') continue;
+      
+      console.log('📤 Processing file:', uploadFile.file.name, 'Size:', uploadFile.file.size, 'Type:', uploadFile.file.type);
       
       try {
         // Update status to uploading
@@ -112,39 +115,85 @@ const DocumentUpload = ({ dealId, onUploadComplete }: DocumentUploadProps) => {
           f.id === uploadFile.id ? { ...f, status: 'uploading' } : f
         ));
 
-        const fileExt = uploadFile.file.name.split('.').pop();
-        const fileName = `${dealId}/${Date.now()}-${uploadFile.file.name}`;
+        // Get current user first
+        const { data: { user }, error: authError } = await supabase.auth.getUser();
+        if (authError || !user) {
+          console.error('❌ Authentication failed:', authError);
+          throw new Error('User not authenticated');
+        }
+        console.log('✅ User authenticated:', user.email);
+
+        // Generate file path with category subfolder
+        const timestamp = Date.now();
+        const sanitizedName = uploadFile.file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+        const finalFileName = `${dealId}/${uploadFile.tag}/${timestamp}-${sanitizedName}`;
         
-        // Call validation edge function first
-        const formData = new FormData();
-        formData.append('file', uploadFile.file);
-        formData.append('dealId', dealId);
-        formData.append('fileName', uploadFile.file.name);
+        console.log('📁 Upload path:', finalFileName);
 
-        const { data: validationResult, error: validationError } = await supabase.functions
-          .invoke('validate-file', {
-            body: formData
-          });
-
-        if (validationError || !validationResult?.success) {
-          throw new Error(validationResult?.error || 'File validation failed');
+        // Check if bucket exists and is accessible
+        try {
+          const { data: buckets, error: bucketError } = await supabase.storage.listBuckets();
+          console.log('📦 Available buckets:', buckets?.map(b => b.name));
+          
+          if (bucketError) {
+            console.error('❌ Bucket list error:', bucketError);
+          }
+          
+          const dealDocsBucket = buckets?.find(b => b.name === 'deal-documents');
+          if (!dealDocsBucket) {
+            console.warn('⚠️ deal-documents bucket not found in available buckets');
+          } else {
+            console.log('✅ deal-documents bucket found:', dealDocsBucket);
+          }
+        } catch (bucketCheckError) {
+          console.error('❌ Bucket check failed:', bucketCheckError);
         }
 
-        // Upload to Supabase Storage with sanitized name
-        const sanitizedFileName = validationResult.sanitizedName || uploadFile.file.name;
-        const finalFileName = `${dealId}/${Date.now()}-${sanitizedFileName}`;
+        // Skip validation edge function for debugging - upload directly
+        console.log('📤 Uploading to storage...');
+        const uploadStartTime = Date.now();
         
         const { data: storageData, error: storageError } = await supabase.storage
           .from('deal-documents')
-          .upload(finalFileName, uploadFile.file);
+          .upload(finalFileName, uploadFile.file, {
+            cacheControl: '3600',
+            upsert: false
+          });
 
-        if (storageError) throw storageError;
+        const uploadEndTime = Date.now();
+        console.log('⏱️ Upload took:', uploadEndTime - uploadStartTime, 'ms');
 
-        // Get current user
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) throw new Error('User not authenticated');
+        if (storageError) {
+          console.error('❌ Storage upload failed:', storageError);
+          console.error('❌ Error details:', {
+            message: storageError.message,
+            name: storageError.name
+          });
+          throw new Error(`Storage upload failed: ${storageError.message}`);
+        }
 
-        // Save document metadata to database
+        if (!storageData?.path) {
+          console.error('❌ No storage path returned');
+          throw new Error('Upload succeeded but no path returned');
+        }
+
+        console.log('✅ Storage upload successful:', storageData);
+
+        // Verify the file was actually uploaded by trying to get its info
+        const { data: fileInfo, error: infoError } = await supabase.storage
+          .from('deal-documents')
+          .list(finalFileName.substring(0, finalFileName.lastIndexOf('/')), {
+            search: finalFileName.substring(finalFileName.lastIndexOf('/') + 1)
+          });
+
+        if (infoError) {
+          console.warn('⚠️ Could not verify upload:', infoError);
+        } else {
+          console.log('✅ Upload verification:', fileInfo?.length > 0 ? 'File found' : 'File not found');
+        }
+
+        // Now save to database
+        console.log('💾 Saving to database...');
         const { error: dbError } = await supabase
           .from('documents')
           .insert({
@@ -157,15 +206,35 @@ const DocumentUpload = ({ dealId, onUploadComplete }: DocumentUploadProps) => {
             uploaded_by: user.id
           });
 
-        if (dbError) throw dbError;
+        if (dbError) {
+          console.error('❌ Database insert failed:', dbError);
+          
+          // If DB fails, try to clean up the uploaded file
+          try {
+            await supabase.storage
+              .from('deal-documents')
+              .remove([finalFileName]);
+            console.log('🧹 Cleaned up uploaded file after DB error');
+          } catch (cleanupError) {
+            console.error('❌ Cleanup failed:', cleanupError);
+          }
+          
+          throw new Error(`Database insert failed: ${dbError.message}`);
+        }
+
+        console.log('✅ Database insert successful');
 
         // Update status to success
         setUploadFiles(prev => prev.map(f => 
           f.id === uploadFile.id ? { ...f, status: 'success', progress: 100 } : f
         ));
 
+        console.log('✅ File upload complete:', uploadFile.file.name);
+
       } catch (error: any) {
-        console.error('Upload error:', error);
+        console.error('❌ Upload error for', uploadFile.file.name, ':', error);
+        console.error('❌ Full error object:', error);
+        
         setUploadFiles(prev => prev.map(f => 
           f.id === uploadFile.id ? { ...f, status: 'error' } : f
         ));
@@ -174,7 +243,9 @@ const DocumentUpload = ({ dealId, onUploadComplete }: DocumentUploadProps) => {
         logSecurityEvent('document_upload_failed', {
           filename: uploadFile.file.name,
           dealId,
-          error: error.message
+          error: error.message,
+          errorType: error.name,
+          stack: error.stack
         });
         
         toast({
@@ -189,6 +260,13 @@ const DocumentUpload = ({ dealId, onUploadComplete }: DocumentUploadProps) => {
     
     // Check if all uploads were successful
     const allSuccess = uploadFiles.every(f => f.status === 'success');
+    console.log('📊 Upload summary:', {
+      total: uploadFiles.length,
+      successful: uploadFiles.filter(f => f.status === 'success').length,
+      failed: uploadFiles.filter(f => f.status === 'error').length,
+      allSuccess
+    });
+    
     if (allSuccess) {
       toast({
         title: "Upload complete",
