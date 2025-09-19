@@ -28,13 +28,15 @@ const UserManagement = () => {
   const fetchUsers = async () => {
     try {
       setLoading(true);
+      console.log('UserManagement: Fetching users...');
+      
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('Error fetching users:', error);
+        console.error('UserManagement: Error fetching users:', error);
         toast({
           title: 'Error',
           description: 'Failed to fetch users',
@@ -44,9 +46,11 @@ const UserManagement = () => {
         return;
       }
 
+      console.log('UserManagement: Successfully fetched users:', data?.length || 0, 'users');
+      console.log('UserManagement: Users data:', data);
       setUsers(data || []);
     } catch (error) {
-      console.error('Error fetching users:', error);
+      console.error('UserManagement: Unexpected error fetching users:', error);
       toast({
         title: 'Error',
         description: 'Failed to fetch users',

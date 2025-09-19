@@ -71,7 +71,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    if (!profile || profile.role !== 'admin') {
+    if (!profile || !['admin', 'super_admin'].includes(profile.role)) {
       return new Response(
         JSON.stringify({ error: 'Admin privileges required' }),
         { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -165,24 +165,88 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Always delete profile rows (by user_id or email)
-    let profileDeletedCount = 0;
+    // Clean up all associated data before deleting profile
+    let cleanupResults = {
+      profiles: 0,
+      user_sessions: 0,
+      user_activity_log: 0,
+      investor_invitations: 0,
+      deal_assignments: 0,
+      nda_signatures: 0,
+      company_nda_acceptances: 0
+    };
+
+    // Delete user_sessions
+    if (targetUserId) {
+      const { count } = await supabaseServiceRole
+        .from('user_sessions')
+        .delete({ count: 'exact' })
+        .eq('user_id', targetUserId);
+      cleanupResults.user_sessions += (count || 0);
+    }
+
+    // Delete user_activity_log
+    if (targetUserId) {
+      const { count } = await supabaseServiceRole
+        .from('user_activity_log')
+        .delete({ count: 'exact' })
+        .eq('user_id', targetUserId);
+      cleanupResults.user_activity_log += (count || 0);
+    }
+
+    // Delete investor_invitations (by email)
+    if (targetEmail) {
+      const { count } = await supabaseServiceRole
+        .from('investor_invitations')
+        .delete({ count: 'exact' })
+        .eq('email', targetEmail);
+      cleanupResults.investor_invitations += (count || 0);
+    }
+
+    // Delete deal_assignments
+    if (targetUserId) {
+      const { count } = await supabaseServiceRole
+        .from('deal_assignments')
+        .delete({ count: 'exact' })
+        .eq('user_id', targetUserId);
+      cleanupResults.deal_assignments += (count || 0);
+    }
+
+    // Delete nda_signatures
+    if (targetUserId) {
+      const { count } = await supabaseServiceRole
+        .from('nda_signatures')
+        .delete({ count: 'exact' })
+        .eq('user_id', targetUserId);
+      cleanupResults.nda_signatures += (count || 0);
+    }
+
+    // Delete company_nda_acceptances
+    if (targetUserId) {
+      const { count } = await supabaseServiceRole
+        .from('company_nda_acceptances')
+        .delete({ count: 'exact' })
+        .eq('user_id', targetUserId);
+      cleanupResults.company_nda_acceptances += (count || 0);
+    }
+
+    // Finally delete profile rows (by user_id and email)
     if (targetUserId) {
       const { error: profDelErr, count } = await supabaseServiceRole
         .from('profiles')
         .delete({ count: 'exact' })
         .eq('user_id', targetUserId);
-      if (!profDelErr) profileDeletedCount += (count || 0);
+      if (!profDelErr) cleanupResults.profiles += (count || 0);
     }
     if (targetEmail) {
       const { error: profDelByEmailErr, count } = await supabaseServiceRole
         .from('profiles')
         .delete({ count: 'exact' })
         .eq('email', targetEmail);
-      if (!profDelByEmailErr) profileDeletedCount += (count || 0);
+      if (!profDelByEmailErr) cleanupResults.profiles += (count || 0);
     }
 
-    // Log security event
+    // Log security event with detailed cleanup results
     await supabaseServiceRole.rpc('log_security_event', {
       p_event_type: 'user_deleted',
       p_event_data: {
@@ -190,23 +254,25 @@ Deno.serve(async (req) => {
         deleted_email: targetProfile?.email || targetEmail || null,
         deleted_name: targetProfile ? `${targetProfile.first_name || ''} ${targetProfile.last_name || ''}`.trim() : null,
         auth_deleted: authDeleted,
-        profiles_removed: profileDeletedCount
+        cleanup_results: cleanupResults
       },
       p_user_id: user.id
     });
 
-    if (!authDeleted && profileDeletedCount === 0) {
+    if (!authDeleted && cleanupResults.profiles === 0) {
       return new Response(
         JSON.stringify({ error: 'User not found in auth or profiles' }),
         { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
+    const totalRecordsDeleted = Object.values(cleanupResults).reduce((sum, count) => sum + count, 0);
+
     return new Response(
       JSON.stringify({
         success: true,
-        message: 'User removed from authentication system and/or profiles',
-        details: { authDeleted, profileDeletedCount }
+        message: `User and all associated data removed from system (${totalRecordsDeleted} records deleted)`,
+        details: { authDeleted, cleanupResults }
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
