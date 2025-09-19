@@ -31,7 +31,7 @@ const TestRegistration = lazy(() => import("./pages/TestRegistration"));
 // Wrap protected components with authentication
 const ProtectedDashboard = withAuth('investor')(Dashboard);
 const ProtectedInvestorPortal = withAuth('investor')(InvestorPortal);
-const ProtectedDealManagement = withAuth('investor')(DealManagement);
+const ProtectedDealManagement = withAuth('admin')(DealManagement);
 const ProtectedDealDetail = withAuth('investor')(DealDetail);
 const ProtectedDocuments = withAuth('staff')(Documents);
 const ProtectedUserManagement = withAuth('admin')(UserManagement);
