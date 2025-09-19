@@ -41,9 +41,18 @@ export const NDAAcceptanceForm: React.FC<NDAAcceptanceFormProps> = ({
     }
 
     setIsLoading(true);
+    console.log('🚀 Starting account creation process...');
 
     try {
+      // 0. Check if user already exists first
+      console.log('🔍 Checking if user already exists...');
+      const { data: existingUser } = await supabase.auth.getUser();
+      if (existingUser?.user?.email === registrationData.email) {
+        throw new Error('You are already signed in with this email. Please sign out first or use a different email.');
+      }
+
       // 1. Create Supabase auth account
+      console.log('📧 Creating account for:', registrationData.email);
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: registrationData.email,
         password: registrationData.password,
@@ -59,29 +68,46 @@ export const NDAAcceptanceForm: React.FC<NDAAcceptanceFormProps> = ({
         },
       });
 
+      console.log('🔐 Auth result:', { authData, authError });
+
       if (authError) {
+        console.error('❌ Auth error:', authError);
+        
+        // Handle specific error cases
+        if (authError.message?.includes('already registered') || authError.message?.includes('already been registered')) {
+          throw new Error('An account with this email already exists. Please use the sign in page instead.');
+        }
+        
         throw new Error(authError.message);
       }
 
       if (!authData.user) {
+        console.error('❌ No user data returned');
         throw new Error('Failed to create user account');
       }
 
+      console.log('✅ User created:', authData.user.id);
+
       // 2. Wait a moment for the trigger to create the profile
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      console.log('⏳ Waiting for profile trigger...');
+      await new Promise(resolve => setTimeout(resolve, 2000));
 
       // 3. Update the profile with additional investor information
-      const { error: profileError } = await supabase
+      console.log('👤 Updating profile for user:', authData.user.id);
+      const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .update({
           first_name: registrationData.firstName,
           last_name: registrationData.lastName,
           role: 'viewer', // Investors are viewers by default
         })
-        .eq('user_id', authData.user.id);
+        .eq('user_id', authData.user.id)
+        .select();
+
+      console.log('👤 Profile update result:', { profileData, profileError });
 
       if (profileError) {
-        console.error('Profile update error:', profileError);
+        console.error('❌ Profile update error:', profileError);
         // Don't throw here as it's not critical for the flow
       }
 
@@ -99,7 +125,8 @@ export const NDAAcceptanceForm: React.FC<NDAAcceptanceFormProps> = ({
       }
 
       // Store the e-signature
-      const { error: signatureError } = await supabase
+      console.log('✍️ Storing NDA signature...');
+      const { data: signatureInsertData, error: signatureError } = await supabase
         .from('nda_signatures')
         .insert({
           user_id: authData.user.id,
@@ -110,10 +137,13 @@ export const NDAAcceptanceForm: React.FC<NDAAcceptanceFormProps> = ({
           user_agent: signatureData.userAgent,
           full_name: signatureData.fullName,
           email: registrationData.email,
-        });
+        })
+        .select();
+
+      console.log('✍️ Signature storage result:', { signatureInsertData, signatureError });
 
       if (signatureError) {
-        console.error('Signature storage error:', signatureError);
+        console.error('❌ Signature storage error:', signatureError);
         // Don't throw here as the account is created
       }
 
@@ -125,17 +155,22 @@ export const NDAAcceptanceForm: React.FC<NDAAcceptanceFormProps> = ({
       }
 
       // 6. Mark invitation as accepted
-      const { error: invitationError } = await supabase
+      console.log('📧 Updating invitation status for ID:', invitation.id);
+      const { data: invitationUpdateData, error: invitationError } = await supabase
         .from('investor_invitations')
         .update({
           status: 'accepted',
           accepted_at: new Date().toISOString(),
         })
-        .eq('id', invitation.id);
+        .eq('id', invitation.id)
+        .select();
+
+      console.log('📧 Invitation update result:', { invitationUpdateData, invitationError });
 
       if (invitationError) {
-        console.error('Invitation update error:', invitationError);
-        // Don't throw here as the account is created
+        console.error('❌ Invitation update error:', invitationError);
+        // This is critical - throw the error
+        throw new Error(`Failed to update invitation status: ${invitationError.message}`);
       }
 
       // 7. Log the successful registration
