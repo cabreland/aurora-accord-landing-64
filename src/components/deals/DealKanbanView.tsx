@@ -10,13 +10,15 @@ interface DealKanbanViewProps {
   loading: boolean;
   onDealSelect: (dealId: string | null) => void;
   selectedDealId: string | null;
+  onCreateDeal?: (status: 'draft' | 'active' | 'archived') => void;
 }
 
 export const DealKanbanView: React.FC<DealKanbanViewProps> = ({
   deals,
   loading,
   onDealSelect,
-  selectedDealId
+  selectedDealId,
+  onCreateDeal
 }) => {
   const columns = [
     {
@@ -158,9 +160,7 @@ export const DealKanbanView: React.FC<DealKanbanViewProps> = ({
               <Button 
                 variant="ghost" 
                 className="w-full h-12 border-2 border-dashed border-muted-foreground/25 hover:border-muted-foreground/50 hover:bg-muted/50"
-                onClick={() => {
-                  // Handle creating new deal with this status
-                }}
+                onClick={() => onCreateDeal?.(column.id as 'draft' | 'active' | 'archived')}
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Add {column.title} Deal

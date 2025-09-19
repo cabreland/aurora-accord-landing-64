@@ -25,7 +25,7 @@ import { useUserProfile } from '@/hooks/useUserProfile';
 import { supabase } from '@/integrations/supabase/client';
 import { MyDeal } from '@/hooks/useMyDeals';
 import { useToast } from '@/hooks/use-toast';
-import { DealEditModal } from './DealEditModal';
+import { ExpandedDealEditModal } from './ExpandedDealEditModal';
 
 interface DynamicDealDetailPageProps {
   dealId?: string;
@@ -49,11 +49,16 @@ export const DynamicDealDetailPage = ({ dealId }: DynamicDealDetailPageProps) =>
   const fetchDeal = async () => {
     try {
       setLoading(true);
+      
+      if (!dealId) {
+        throw new Error('Deal ID is required');
+      }
+      
       const { data, error } = await supabase
         .from('deals')
         .select('*')
         .eq('id', dealId)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       setDeal(data as MyDeal);
@@ -164,14 +169,31 @@ export const DynamicDealDetailPage = ({ dealId }: DynamicDealDetailPageProps) =>
       'Operational efficiency improvements'
     ];
 
-  // Mock documents for now - would be loaded from database in full implementation
-  const documents = [
-    { name: 'Confidential Information Memorandum', type: 'PDF', size: '2.4 MB', updated: '2 days ago' },
-    { name: 'Financial Statements (3 Years)', type: 'XLSX', size: '1.2 MB', updated: '1 week ago' },
-    { name: 'Asset List & Inventory', type: 'PDF', size: '856 KB', updated: '3 days ago' },
-    { name: 'Customer Contracts', type: 'ZIP', size: '4.1 MB', updated: '1 week ago' },
-    { name: 'Legal Documentation', type: 'PDF', size: '3.2 MB', updated: '5 days ago' }
-  ];
+  const [documents, setDocuments] = useState<any[]>([]);
+
+  // Load actual documents for this deal
+  useEffect(() => {
+    if (dealId) {
+      loadDealDocuments();
+    }
+  }, [dealId]);
+
+  const loadDealDocuments = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('documents')
+        .select('*')
+        .eq('deal_id', dealId)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setDocuments(data || []);
+    } catch (error) {
+      console.error('Error loading documents:', error);
+      // Fallback to empty array for new deals
+      setDocuments([]);
+    }
+  };
 
   const progress = calculateProgress();
   const fitScore = calculateFitScore();
@@ -379,25 +401,34 @@ export const DynamicDealDetailPage = ({ dealId }: DynamicDealDetailPageProps) =>
               <CardContent>
                 {ndaAccepted ? (
                   <div className="space-y-3">
-                    {documents.map((doc, index) => (
-                      <div key={index} className="flex items-center justify-between bg-[#0A0F0F]/50 rounded-lg p-4">
-                        <div className="flex items-center gap-3">
-                          <FileText className="w-5 h-5 text-[#D4AF37]" />
-                          <div>
-                            <div className="text-[#FAFAFA] font-medium">{doc.name}</div>
-                            <div className="text-[#F4E4BC]/60 text-sm">
-                              {doc.type} • {doc.size} • Updated {doc.updated}
+                    {documents.length > 0 ? (
+                      documents.map((doc, index) => (
+                        <div key={doc.id || index} className="flex items-center justify-between bg-[#0A0F0F]/50 rounded-lg p-4">
+                          <div className="flex items-center gap-3">
+                            <FileText className="w-5 h-5 text-[#D4AF37]" />
+                            <div>
+                              <div className="text-[#FAFAFA] font-medium">{doc.name}</div>
+                              <div className="text-[#F4E4BC]/60 text-sm">
+                                {doc.file_type || 'Document'} • {doc.file_size ? `${Math.round(doc.file_size / 1024)}KB` : 'Unknown size'} • 
+                                {doc.created_at ? ` Uploaded ${new Date(doc.created_at).toLocaleDateString()}` : ' Recently uploaded'}
+                              </div>
                             </div>
                           </div>
+                          <Button
+                            size="sm"
+                            className="bg-[#D4AF37] hover:bg-[#F4E4BC] text-[#0A0F0F]"
+                          >
+                            <Download className="w-4 h-4" />
+                          </Button>
                         </div>
-                        <Button
-                          size="sm"
-                          className="bg-[#D4AF37] hover:bg-[#F4E4BC] text-[#0A0F0F]"
-                        >
-                          <Download className="w-4 h-4" />
-                        </Button>
+                      ))
+                    ) : (
+                      <div className="text-center py-8">
+                        <FolderOpen className="w-12 h-12 text-[#F28C38]/50 mx-auto mb-3" />
+                        <p className="text-[#F4E4BC]/60">No documents uploaded yet</p>
+                        <p className="text-[#F4E4BC]/40 text-sm mt-1">Documents will appear here once uploaded</p>
                       </div>
-                    ))}
+                    )}
                   </div>
                 ) : (
                   <div className="text-center py-12">
@@ -507,7 +538,7 @@ export const DynamicDealDetailPage = ({ dealId }: DynamicDealDetailPageProps) =>
 
       {/* Edit Modal */}
       {showEditModal && deal && (
-        <DealEditModal
+        <ExpandedDealEditModal
           deal={deal}
           open={showEditModal}
           onClose={() => setShowEditModal(false)}

@@ -85,6 +85,10 @@ const DealManagement: React.FC = () => {
             loading={loading} 
             onDealSelect={handleDealSelect}
             selectedDealId={selectedDealId}
+            onCreateDeal={(status) => {
+              // Open creation wizard with default status
+              setShowCreateDialog(true);
+            }}
           />
         );
       default:
