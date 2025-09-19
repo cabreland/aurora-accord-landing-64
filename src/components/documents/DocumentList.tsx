@@ -223,7 +223,6 @@ const DocumentList = ({ dealId, companyId, canDownload = true, canDelete = false
       });
     }
   };
-  };
 
   const getFileIcon = (fileType: string | null) => {
     if (!fileType) return <File className="w-4 h-4" />;
