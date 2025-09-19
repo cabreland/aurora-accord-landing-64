@@ -107,13 +107,19 @@ const CategoryUploadSection = ({
 
   const handleDownload = async (document: Document) => {
     try {
-      const { data, error } = await supabase.storage
+      // Generate signed URL for secure download
+      const { data: signedUrl, error } = await supabase.storage
         .from('deal-documents')
-        .download(document.file_path);
+        .createSignedUrl(document.file_path, 300); // 5 minutes
 
       if (error) throw error;
 
-      const url = URL.createObjectURL(data);
+      // Download the file
+      const response = await fetch(signedUrl.signedUrl);
+      if (!response.ok) throw new Error('Download failed');
+
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
       const link = window.document.createElement('a');
       link.href = url;
       link.download = document.name;
@@ -121,6 +127,11 @@ const CategoryUploadSection = ({
       link.click();
       window.document.body.removeChild(link);
       URL.revokeObjectURL(url);
+
+      toast({
+        title: "Success",
+        description: `${document.name} downloaded successfully`,
+      });
     } catch (error) {
       console.error('Error downloading file:', error);
       toast({
