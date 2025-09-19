@@ -176,16 +176,37 @@ export const downloadDocument = async (documentId: string): Promise<DocumentAcce
 
     // Check if file exists in storage before attempting download
     try {
-      const filePath = documentData.file_path;
-      const folderPath = filePath.substring(0, filePath.lastIndexOf('/'));
-      const fileName = filePath.substring(filePath.lastIndexOf('/') + 1);
+      // For files stored directly in bucket root with folder structure
+      // filePath format: "dealId/category/timestamp-filename.ext"
+      const pathParts = documentData.file_path.split('/');
+      if (pathParts.length < 2) {
+        return {
+          success: false,
+          message: 'Invalid file path format'
+        };
+      }
+      
+      // Get the folder path and filename
+      const fileName = pathParts[pathParts.length - 1];
+      const folderPath = pathParts.slice(0, -1).join('/');
       
       const { data: fileList, error: listError } = await supabase.storage
         .from('deal-documents')
-        .list(folderPath, { search: fileName });
+        .list(folderPath, {
+          limit: 100,
+          search: fileName
+        });
       
-      if (listError || !fileList || fileList.length === 0) {
-        console.error('File not found in storage:', filePath);
+      if (listError) {
+        console.error('Storage list error:', listError);
+        return {
+          success: false,
+          message: `Unable to verify file: ${listError.message}`
+        };
+      }
+      
+      if (!fileList || !fileList.some(file => file.name === fileName)) {
+        console.error('File not found in storage:', documentData.file_path);
         return {
           success: false,
           message: 'File not available in storage'

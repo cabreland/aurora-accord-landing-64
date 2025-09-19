@@ -107,15 +107,30 @@ const CategoryUploadSection = ({
 
   const checkFileExists = async (filePath: string): Promise<boolean> => {
     try {
+      // For files stored directly in bucket root with folder structure
+      // filePath format: "dealId/category/timestamp-filename.ext"
+      const pathParts = filePath.split('/');
+      if (pathParts.length < 2) return false;
+      
+      // Get the folder path and filename
+      const fileName = pathParts[pathParts.length - 1];
+      const folderPath = pathParts.slice(0, -1).join('/');
+      
       const { data, error } = await supabase.storage
         .from('deal-documents')
-        .list(filePath.substring(0, filePath.lastIndexOf('/')), {
-          search: filePath.substring(filePath.lastIndexOf('/') + 1)
+        .list(folderPath, {
+          limit: 100,
+          search: fileName
         });
       
-      if (error) return false;
-      return data && data.length > 0;
-    } catch {
+      if (error) {
+        console.error('Storage list error:', error);
+        return false;
+      }
+      
+      return data && data.some(file => file.name === fileName);
+    } catch (error) {
+      console.error('Error checking file existence:', error);
       return false;
     }
   };
