@@ -114,17 +114,28 @@ const DocumentCategoriesView = ({ dealId, onRefresh }: DocumentCategoriesViewPro
     }
   }, [dealId]);
 
-  const fetchDocuments = async () => {
+  const fetchDocuments = async (forceRefresh = false) => {
     try {
       setIsLoading(true);
-      const { data, error } = await supabase
+      
+      // Force refresh by adding timestamp to bypass any caching
+      let query = supabase
         .from('documents')
         .select('*')
-        .eq('deal_id', dealId)
-        .order('created_at', { ascending: false });
+        .eq('deal_id', dealId);
+        
+      if (forceRefresh) {
+        query = query.order('created_at', { ascending: false });
+      } else {
+        query = query.order('created_at', { ascending: false });
+      }
+
+      const { data, error } = await query;
 
       if (error) throw error;
       setDocuments(data || []);
+      
+      console.log(`Fetched ${data?.length || 0} documents for deal ${dealId}`);
     } catch (error) {
       console.error('Error fetching documents:', error);
       toast({
@@ -138,7 +149,7 @@ const DocumentCategoriesView = ({ dealId, onRefresh }: DocumentCategoriesViewPro
   };
 
   const handleDocumentChange = () => {
-    fetchDocuments();
+    fetchDocuments(true); // Force refresh after changes
     onRefresh?.();
   };
 

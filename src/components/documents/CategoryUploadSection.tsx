@@ -174,7 +174,12 @@ const CategoryUploadSection = ({
         title: "Upload complete",
         description: `${successfulUploads} document(s) uploaded successfully.`,
       });
-      onUploadComplete();
+      
+      // Add small delay to ensure database consistency before refresh
+      setTimeout(() => {
+        onUploadComplete();
+      }, 500);
+      
       setUploadFiles([]);
       setShowUploadArea(false);
     }
