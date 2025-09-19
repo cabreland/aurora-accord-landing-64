@@ -113,7 +113,10 @@ const Documents = () => {
         <DocumentCategoriesView 
           dealId={selectedDealId}
           refreshTrigger={refreshTrigger}
-          onRefresh={() => setRefreshTrigger(prev => prev + 1)}
+          onRefresh={() => {
+            console.log('🔄 Documents.tsx onRefresh called - incrementing refreshTrigger from', refreshTrigger, 'to', refreshTrigger + 1);
+            setRefreshTrigger(prev => prev + 1);
+          }}
         />
       </div>
     </div>

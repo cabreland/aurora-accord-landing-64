@@ -108,9 +108,15 @@ const DocumentCategoriesView = ({ dealId, onRefresh, refreshTrigger }: DocumentC
   const { toast } = useToast();
 
   useEffect(() => {
+    console.log('📊 DocumentCategoriesView useEffect triggered');
+    console.log('📊 dealId:', dealId);
+    console.log('📊 refreshTrigger:', refreshTrigger);
+    
     if (dealId && dealId !== 'all') {
+      console.log('📊 Fetching documents for dealId:', dealId);
       fetchDocuments();
     } else {
+      console.log('📊 Clearing documents (dealId is "all" or empty)');
       setDocuments([]);
       setIsLoading(false);
     }
@@ -152,12 +158,24 @@ const DocumentCategoriesView = ({ dealId, onRefresh, refreshTrigger }: DocumentC
 
   const handleDocumentChange = () => {
     console.log('🔄 handleDocumentChange called - refreshing documents');
+    console.log('🔄 Current dealId:', dealId);
+    console.log('🔄 Current refreshTrigger:', refreshTrigger);
     
     // Add a small delay to ensure database consistency
     setTimeout(() => {
+      console.log('🔄 About to fetch documents and call onRefresh');
       fetchDocuments(true); // Force refresh after changes
-      setRefreshCounter(prev => prev + 1); // Force re-render
-      onRefresh?.();
+      setRefreshCounter(prev => {
+        console.log('🔄 Incrementing refreshCounter from', prev, 'to', prev + 1);
+        return prev + 1;
+      }); // Force re-render
+      
+      if (onRefresh) {
+        console.log('🔄 Calling onRefresh to increment refreshTrigger');
+        onRefresh();
+      } else {
+        console.log('⚠️ onRefresh is not defined');
+      }
     }, 100);
   };
 
