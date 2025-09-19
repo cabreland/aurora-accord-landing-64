@@ -16,13 +16,13 @@ import { useAuth } from '@/hooks/useAuth';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { useToast } from '@/hooks/use-toast';
 
-const UserMenuDropdown = () => {
+const UserMenuDropdown = React.memo(() => {
   const { signOut } = useAuth();
   const { getDisplayName, getRoleDisplayName, profile, loading } = useUserProfile();
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const handleSignOut = async () => {
+  const handleSignOut = React.useCallback(async () => {
     try {
       await signOut();
       toast({
@@ -37,24 +37,24 @@ const UserMenuDropdown = () => {
         variant: "destructive",
       });
     }
-  };
+  }, [signOut, toast, navigate]);
 
-  const handleProfileClick = () => {
+  const handleProfileClick = React.useCallback(() => {
     // Navigate to profile/settings page when available
     toast({
       title: "Profile settings",
       description: "Profile settings coming soon.",
     });
-  };
+  }, [toast]);
 
-  const getInitials = () => {
+  const getInitials = React.useMemo(() => {
     const name = getDisplayName();
     const parts = name.split(' ');
     if (parts.length >= 2) {
       return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
     }
     return name.substring(0, 2).toUpperCase();
-  };
+  }, [getDisplayName]);
 
   if (loading) {
     return (
@@ -68,7 +68,7 @@ const UserMenuDropdown = () => {
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-8 w-8">
             <AvatarFallback className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground text-xs font-medium">
-              {getInitials()}
+              {getInitials}
             </AvatarFallback>
           </Avatar>
         </Button>
@@ -104,6 +104,6 @@ const UserMenuDropdown = () => {
       </DropdownMenuContent>
     </DropdownMenu>
   );
-};
+});
 
 export default UserMenuDropdown;

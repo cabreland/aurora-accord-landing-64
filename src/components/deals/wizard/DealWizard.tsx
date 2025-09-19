@@ -12,7 +12,7 @@ import { FinancialsStep } from './FinancialsStep';
 import { GrowthStrategyStep } from './GrowthStrategyStep';
 import { FounderTeamStep } from './FounderTeamStep';
 import { StrategicAnalysisStep } from './StrategicAnalysisStep';
-import { DocumentsStep } from './DocumentsStep';
+import { EnhancedDocumentsStep } from './EnhancedDocumentsStep';
 import { PublishingStep } from './PublishingStep';
 
 interface DealWizardProps {
@@ -81,7 +81,7 @@ const steps = [
   { id: 'growth', title: 'Growth & Strategy', component: GrowthStrategyStep },
   { id: 'founder', title: 'Founder & Team', component: FounderTeamStep },
   { id: 'strategic', title: 'Strategic Analysis', component: StrategicAnalysisStep },
-  { id: 'documents', title: 'Documents', component: DocumentsStep },
+  { id: 'documents', title: 'Documents', component: EnhancedDocumentsStep },
   { id: 'publishing', title: 'Status & Publishing', component: PublishingStep },
 ];
 
@@ -328,14 +328,14 @@ export const DealWizard: React.FC<DealWizardProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[98vw] max-w-4xl h-[98vh] overflow-hidden p-0" aria-describedby="deal-wizard-description">
+      <DialogContent className="w-[95vw] max-w-6xl h-[95vh] overflow-hidden p-0">
         <div className="flex flex-col h-full">
           {/* Header */}
           <div className="border-b border-border p-3 sm:p-4 shrink-0 bg-background">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-3 gap-2">
               <div className="min-w-0">
                 <h2 className="text-lg sm:text-xl font-semibold text-foreground truncate">Create New Deal</h2>
-                <p id="deal-wizard-description" className="text-xs sm:text-sm text-muted-foreground">
+                <p className="text-xs sm:text-sm text-muted-foreground">
                   Step {currentStep + 1} of {steps.length}: {steps[currentStep].title}
                 </p>
               </div>
@@ -408,25 +408,25 @@ export const DealWizard: React.FC<DealWizardProps> = ({
 
           {/* Footer - Sticky at Bottom */}
           <div className="border-t border-border p-3 sm:p-4 shrink-0 bg-background sticky bottom-0 z-10">
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
               <Button
                 type="button"
                 variant="outline"
                 onClick={handlePrevious}
                 disabled={currentStep === 0}
-                className="flex items-center justify-center h-9 order-2 sm:order-1"
+                className="flex items-center justify-center h-9 order-2 sm:order-1 min-w-[100px]"
                 size="sm"
               >
                 <ChevronLeft className="w-4 h-4 mr-1" />
                 Previous
               </Button>
 
-              <div className="flex items-center gap-2 order-1 sm:order-2">
+              <div className="flex items-center gap-2 order-1 sm:order-2 flex-1 sm:flex-none">
                 <Button
                   type="button"
                   variant="outline"
                   onClick={() => onOpenChange(false)}
-                  className="flex-1 sm:flex-none h-9"
+                  className="flex-1 sm:flex-none h-9 min-w-[80px]"
                   size="sm"
                 >
                   Cancel
@@ -436,7 +436,7 @@ export const DealWizard: React.FC<DealWizardProps> = ({
                   <Button
                     onClick={handleSubmit}
                     disabled={loading}
-                    className="flex items-center justify-center flex-1 sm:flex-none h-9"
+                    className="flex items-center justify-center flex-1 sm:flex-none h-9 min-w-[120px]"
                     size="sm"
                   >
                     {loading ? 'Creating...' : 'Create Deal'}
@@ -445,7 +445,7 @@ export const DealWizard: React.FC<DealWizardProps> = ({
                 ) : (
                   <Button
                     onClick={handleNext}
-                    className="flex items-center justify-center flex-1 sm:flex-none h-9"
+                    className="flex items-center justify-center flex-1 sm:flex-none h-9 min-w-[80px]"
                     size="sm"
                   >
                     Next
