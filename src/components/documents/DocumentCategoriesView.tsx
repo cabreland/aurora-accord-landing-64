@@ -188,50 +188,34 @@ const DocumentCategoriesView = ({ dealId, onRefresh }: DocumentCategoriesViewPro
   const stats = getCompletionStats();
 
   return (
-    <div className="space-y-6">
-      {/* Progress Overview */}
-      <Card className="bg-card border-border">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-foreground">Document Completion Overview</CardTitle>
-            <Badge variant="outline" className={
-              stats.percentage === 100 
-                ? 'bg-green-500/20 text-green-400 border-green-500/30'
-                : stats.percentage >= 75 
-                ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30'
-                : 'bg-red-500/20 text-red-400 border-red-500/30'
-            }>
-              {stats.percentage}% Complete
-            </Badge>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <Progress value={stats.percentage} className="h-3 mb-4" />
-          <div className="grid grid-cols-3 gap-4 text-center">
-            <div>
-              <div className="text-2xl font-bold text-green-400">
-                {stats.completed}
-              </div>
-              <div className="text-sm text-muted-foreground">Required Complete</div>
-            </div>
-            <div>
-              <div className="text-2xl font-bold text-red-400">
-                {stats.total - stats.completed}
-              </div>
-              <div className="text-sm text-muted-foreground">Required Missing</div>
-            </div>
-            <div>
-              <div className="text-2xl font-bold text-foreground">
-                {documents.length}
-              </div>
-              <div className="text-sm text-muted-foreground">Total Documents</div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+    <div className="space-y-4">
+      {/* Compact Progress Overview */}
+      <div className="flex items-center gap-4 p-3 bg-card border border-border rounded-lg">
+        <div className="flex items-center gap-2">
+          <CheckCircle className="w-4 h-4 text-primary" />
+          <span className="text-sm font-medium text-foreground">Progress:</span>
+        </div>
+        <div className="flex-1 max-w-xs">
+          <Progress value={stats.percentage} className="h-2" />
+        </div>
+        <div className="flex items-center gap-4 text-sm">
+          <span className="text-green-400 font-medium">{stats.completed} Complete</span>
+          <span className="text-red-400 font-medium">{stats.total - stats.completed} Missing</span>
+          <span className="text-foreground font-medium">{documents.length} Total</span>
+        </div>
+        <Badge variant="outline" className={`text-xs ${
+          stats.percentage === 100 
+            ? 'bg-green-500/20 text-green-400 border-green-500/30'
+            : stats.percentage >= 75 
+            ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30'
+            : 'bg-red-500/20 text-red-400 border-red-500/30'
+        }`}>
+          {stats.percentage}%
+        </Badge>
+      </div>
 
-      {/* Document Categories */}
-      <div className="grid gap-6">
+      {/* Compact Document Categories */}
+      <div className="grid gap-3">
         {Object.values(DOCUMENT_CATEGORIES).map((category) => {
           const categoryDocs = getCategoryDocuments(category.key);
           

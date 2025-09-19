@@ -16,16 +16,11 @@ const DocumentsPage = () => {
 
   return (
     <DashboardLayout activeTab="documents">
-      <div className="space-y-6">
-        {/* Page Header */}
-        <div className="flex items-center gap-3">
-          <FileText className="w-8 h-8 text-primary" />
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">Document Management</h1>
-            <p className="text-muted-foreground">
-              Organize and manage documents by company with compliance tracking
-            </p>
-          </div>
+      <div className="space-y-4">
+        {/* Compact Header */}
+        <div className="flex items-center gap-2 mb-4">
+          <FileText className="w-5 h-5 text-primary" />
+          <h1 className="text-xl font-semibold text-foreground">Document Management</h1>
         </div>
 
         {/* Company Selector */}

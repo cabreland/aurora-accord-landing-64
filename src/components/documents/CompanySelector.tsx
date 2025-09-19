@@ -86,82 +86,62 @@ const CompanySelector = ({ selectedDealId, onDealSelect }: CompanySelectorProps)
   const selectedDeal = deals.find(deal => deal.id === selectedDealId);
 
   return (
-    <Card className="bg-card border-border">
-      <CardContent className="p-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4 flex-1">
-            <div className="flex items-center gap-2">
-              <Building2 className="w-5 h-5 text-primary" />
-              <h3 className="font-semibold text-foreground">Select Company</h3>
-            </div>
-            
-            <div className="flex-1 max-w-md">
-              <Select value={selectedDealId} onValueChange={onDealSelect}>
-                <SelectTrigger className="bg-background border-border">
-                  <SelectValue placeholder="Choose a company to manage documents..." />
-                </SelectTrigger>
-                <SelectContent className="bg-background border-border shadow-lg z-50">
-                  <SelectItem value="all" className="hover:bg-muted">
-                    <div className="flex items-center gap-2">
-                      <FileText className="w-4 h-4 text-muted-foreground" />
-                      <span>All Documents</span>
-                    </div>
-                  </SelectItem>
-                  {deals.map((deal) => (
-                    <SelectItem key={deal.id} value={deal.id} className="hover:bg-muted">
-                      <div className="flex items-center justify-between w-full">
-                        <div>
-                          <div className="font-medium text-foreground">{deal.company_name}</div>
-                          <div className="text-xs text-muted-foreground">{deal.title}</div>
-                        </div>
-                        <div className="flex items-center gap-2 text-xs">
-                          <Badge variant="outline" className={getStatusColor(deal.status)}>
-                            {deal.status.toUpperCase()}
-                          </Badge>
-                          <span className="text-muted-foreground">
-                            {deal.document_count || 0} docs
-                          </span>
-                        </div>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={fetchDeals}
-            disabled={isLoading}
-            className="border-border hover:bg-muted"
-          >
-            <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
-          </Button>
-        </div>
-
-        {selectedDeal && selectedDealId !== 'all' && (
-          <div className="mt-4 p-3 bg-muted/30 rounded-lg">
-            <div className="flex items-center justify-between">
-              <div>
-                <h4 className="font-medium text-foreground">{selectedDeal.company_name}</h4>
-                <p className="text-sm text-muted-foreground">{selectedDeal.title}</p>
+    <div className="flex items-center gap-4 p-3 bg-card border border-border rounded-lg">
+      <div className="flex items-center gap-2">
+        <Building2 className="w-4 h-4 text-primary" />
+        <span className="text-sm font-medium text-foreground">Company:</span>
+      </div>
+      
+      <div className="flex-1 max-w-sm">
+        <Select value={selectedDealId} onValueChange={onDealSelect}>
+          <SelectTrigger className="h-8 bg-background border-border text-sm">
+            <SelectValue placeholder="Select company..." />
+          </SelectTrigger>
+          <SelectContent className="bg-background border-border shadow-lg z-50">
+            <SelectItem value="all" className="hover:bg-muted text-sm">
+              <div className="flex items-center gap-2">
+                <FileText className="w-3 h-3 text-muted-foreground" />
+                <span>All Documents</span>
               </div>
-              <div className="flex items-center gap-4 text-sm">
-                <Badge variant="outline" className={getStatusColor(selectedDeal.status)}>
-                  {selectedDeal.status.toUpperCase()}
-                </Badge>
-                <div className="flex items-center gap-1 text-muted-foreground">
-                  <FileText className="w-4 h-4" />
-                  <span>{selectedDeal.document_count || 0} documents</span>
+            </SelectItem>
+            {deals.map((deal) => (
+              <SelectItem key={deal.id} value={deal.id} className="hover:bg-muted text-sm">
+                <div className="flex items-center justify-between w-full">
+                  <span className="font-medium text-foreground">{deal.company_name}</span>
+                  <div className="flex items-center gap-2 ml-2">
+                    <Badge variant="outline" className={`${getStatusColor(deal.status)} text-xs px-1 py-0`}>
+                      {deal.status === 'draft' ? 'Draft' : 'Active'}
+                    </Badge>
+                    <span className="text-xs text-muted-foreground">
+                      {deal.document_count || 0}
+                    </span>
+                  </div>
                 </div>
-              </div>
-            </div>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {selectedDeal && selectedDealId !== 'all' && (
+        <div className="flex items-center gap-3 text-xs text-muted-foreground">
+          <Badge variant="outline" className={`${getStatusColor(selectedDeal.status)} text-xs px-1 py-0`}>
+            {selectedDeal.status === 'draft' ? 'Draft' : 'Active'}
+          </Badge>
+          <span>{selectedDeal.document_count || 0} docs</span>
+        </div>
+      )}
+
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={fetchDeals}
+        disabled={isLoading}
+        className="h-8 w-8 p-0"
+      >
+        <RefreshCw className={`w-3 h-3 ${isLoading ? 'animate-spin' : ''}`} />
+      </Button>
+    </div>
   );
 };
 
