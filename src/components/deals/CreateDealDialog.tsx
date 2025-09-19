@@ -97,7 +97,7 @@ export const CreateDealDialog: React.FC<CreateDealDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md" aria-describedby="create-deal-description">
+      <DialogContent className="w-[95vw] max-w-2xl max-h-[90vh] overflow-y-auto" aria-describedby="create-deal-description">
         <DialogHeader>
           <DialogTitle>Create New Deal</DialogTitle>
           <p id="create-deal-description" className="text-sm text-muted-foreground">
@@ -106,7 +106,7 @@ export const CreateDealDialog: React.FC<CreateDealDialogProps> = ({
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="title">Deal Title *</Label>
               <Input
@@ -141,7 +141,7 @@ export const CreateDealDialog: React.FC<CreateDealDialogProps> = ({
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="industry">Industry</Label>
               <Select value={formData.industry} onValueChange={(value) => handleInputChange('industry', value)}>
@@ -170,7 +170,7 @@ export const CreateDealDialog: React.FC<CreateDealDialogProps> = ({
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="revenue">Annual Revenue</Label>
               <Input
@@ -192,7 +192,7 @@ export const CreateDealDialog: React.FC<CreateDealDialogProps> = ({
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="status">Status</Label>
               <Select value={formData.status} onValueChange={(value: any) => handleInputChange('status', value)}>
@@ -222,11 +222,11 @@ export const CreateDealDialog: React.FC<CreateDealDialogProps> = ({
             </div>
           </div>
 
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+          <DialogFooter className="flex-col sm:flex-row gap-2">
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="w-full sm:w-auto">
               Cancel
             </Button>
-            <Button type="submit" disabled={loading}>
+            <Button type="submit" disabled={loading} className="w-full sm:w-auto">
               {loading ? 'Creating...' : 'Create Deal'}
             </Button>
           </DialogFooter>

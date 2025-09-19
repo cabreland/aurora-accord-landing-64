@@ -328,18 +328,18 @@ export const DealWizard: React.FC<DealWizardProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden" aria-describedby="deal-wizard-description">
+      <DialogContent className="w-[95vw] max-w-6xl h-[95vh] max-h-[800px] overflow-hidden p-0" aria-describedby="deal-wizard-description">
         <div className="flex flex-col h-full">
           {/* Header */}
-          <div className="border-b border-border p-6 pb-4">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h2 className="text-2xl font-semibold text-foreground">Create New Deal</h2>
+          <div className="border-b border-border p-4 sm:p-6 pb-4 shrink-0">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-2">
+              <div className="min-w-0">
+                <h2 className="text-xl sm:text-2xl font-semibold text-foreground truncate">Create New Deal</h2>
                 <p id="deal-wizard-description" className="text-sm text-muted-foreground">
                   Step {currentStep + 1} of {steps.length}: {steps[currentStep].title}
                 </p>
               </div>
-              <div className="text-sm text-muted-foreground">
+              <div className="text-sm text-muted-foreground whitespace-nowrap">
                 {Math.round(progress)}% Complete
               </div>
             </div>
@@ -347,12 +347,12 @@ export const DealWizard: React.FC<DealWizardProps> = ({
             {/* Progress Bar */}
             <Progress value={progress} className="mb-4" />
             
-            {/* Step Indicators */}
-            <div className="flex items-center justify-between">
+            {/* Step Indicators - Responsive */}
+            <div className="hidden lg:flex items-center justify-between">
               {steps.map((step, index) => (
                 <div key={step.id} className="flex items-center">
                   <div className={`
-                    w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium
+                    w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium shrink-0
                     ${index < currentStep 
                       ? 'bg-primary text-primary-foreground' 
                       : index === currentStep 
@@ -362,45 +362,72 @@ export const DealWizard: React.FC<DealWizardProps> = ({
                   `}>
                     {index < currentStep ? <Check className="w-4 h-4" /> : index + 1}
                   </div>
-                  <span className={`ml-2 text-xs ${index === currentStep ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>
+                  <span className={`ml-2 text-xs ${index === currentStep ? 'text-foreground font-medium' : 'text-muted-foreground'} hidden xl:inline`}>
                     {step.title}
                   </span>
                   {index < steps.length - 1 && (
-                    <div className={`mx-3 h-px w-8 ${index < currentStep ? 'bg-primary' : 'bg-muted'}`} />
+                    <div className={`mx-3 h-px w-4 xl:w-8 ${index < currentStep ? 'bg-primary' : 'bg-muted'}`} />
                   )}
                 </div>
               ))}
             </div>
+
+            {/* Mobile Step Indicators - Horizontal Scroll */}
+            <div className="lg:hidden overflow-x-auto">
+              <div className="flex items-center space-x-4 min-w-max pb-2">
+                {steps.map((step, index) => (
+                  <div key={step.id} className="flex items-center shrink-0">
+                    <div className={`
+                      w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium
+                      ${index < currentStep 
+                        ? 'bg-primary text-primary-foreground' 
+                        : index === currentStep 
+                          ? 'bg-primary/20 text-primary border-2 border-primary' 
+                          : 'bg-muted text-muted-foreground'
+                      }
+                    `}>
+                      {index < currentStep ? <Check className="w-4 h-4" /> : index + 1}
+                    </div>
+                    <span className={`ml-2 text-xs ${index === currentStep ? 'text-foreground font-medium' : 'text-muted-foreground'} whitespace-nowrap`}>
+                      {step.title}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
 
-          {/* Step Content */}
-          <div className="flex-1 overflow-auto p-6">
-            <CurrentStepComponent 
-              data={formData}
-              onChange={updateFormData}
-              isValid={validateStep(currentStep)}
-            />
+          {/* Step Content - Scrollable */}
+          <div className="flex-1 overflow-auto p-4 sm:p-6">
+            <div className="max-w-4xl mx-auto">
+              <CurrentStepComponent 
+                data={formData}
+                onChange={updateFormData}
+                isValid={validateStep(currentStep)}
+              />
+            </div>
           </div>
 
           {/* Footer */}
-          <div className="border-t border-border p-6 pt-4">
-            <div className="flex items-center justify-between">
+          <div className="border-t border-border p-4 sm:p-6 pt-4 shrink-0">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
               <Button
                 type="button"
                 variant="outline"
                 onClick={handlePrevious}
                 disabled={currentStep === 0}
-                className="flex items-center"
+                className="flex items-center justify-center order-2 sm:order-1"
               >
                 <ChevronLeft className="w-4 h-4 mr-2" />
                 Previous
               </Button>
 
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 order-1 sm:order-2">
                 <Button
                   type="button"
                   variant="outline"
                   onClick={() => onOpenChange(false)}
+                  className="flex-1 sm:flex-none"
                 >
                   Cancel
                 </Button>
@@ -409,7 +436,7 @@ export const DealWizard: React.FC<DealWizardProps> = ({
                   <Button
                     onClick={handleSubmit}
                     disabled={loading}
-                    className="flex items-center"
+                    className="flex items-center justify-center flex-1 sm:flex-none"
                   >
                     {loading ? 'Creating...' : 'Create Deal'}
                     <Check className="w-4 h-4 ml-2" />
@@ -417,7 +444,7 @@ export const DealWizard: React.FC<DealWizardProps> = ({
                 ) : (
                   <Button
                     onClick={handleNext}
-                    className="flex items-center"
+                    className="flex items-center justify-center flex-1 sm:flex-none"
                   >
                     Next
                     <ChevronRight className="w-4 h-4 ml-2" />
