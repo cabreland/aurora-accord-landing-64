@@ -233,6 +233,53 @@ export const DealWizard: React.FC<DealWizardProps> = ({
 
       if (dealError) throw dealError;
 
+      // Upload documents if any exist
+      if (formData.documents.length > 0) {
+        console.log(`Uploading ${formData.documents.length} documents for deal ${deal.id}`);
+        
+        for (const file of formData.documents) {
+          try {
+            // Generate unique filename
+            const fileExt = file.name.split('.').pop();
+            const fileName = `${deal.id}/${Date.now()}-${file.name}`;
+            
+            // Upload to Supabase Storage
+            const { data: storageData, error: storageError } = await supabase.storage
+              .from('deal-documents')
+              .upload(fileName, file);
+
+            if (storageError) {
+              console.error('Storage upload error for', file.name, ':', storageError);
+              continue; // Skip this file but continue with others
+            }
+
+            // Save document metadata to database
+            const { error: docError } = await supabase
+              .from('documents')
+              .insert({
+                deal_id: deal.id,
+                name: file.name,
+                file_path: fileName,
+                file_size: file.size,
+                file_type: file.type,
+                tag: 'other', // Default tag, can be enhanced later
+                uploaded_by: user.id
+              });
+
+            if (docError) {
+              console.error('Document metadata save error for', file.name, ':', docError);
+              // Continue with other files even if one fails
+            } else {
+              console.log('Successfully uploaded document:', file.name);
+            }
+
+          } catch (error) {
+            console.error('Error processing document:', file.name, error);
+            // Continue with other files
+          }
+        }
+      }
+
       // Create associated company record with full details
       const { error: companyError } = await supabase
         .from('companies')
@@ -267,7 +314,7 @@ export const DealWizard: React.FC<DealWizardProps> = ({
 
       toast({
         title: "Success",
-        description: "Deal created successfully with comprehensive details",
+        description: `Deal created successfully with ${formData.documents.length} documents uploaded`,
       });
 
       // Reset form and close
