@@ -1,0 +1,18 @@
+-- Add comprehensive deal fields to deals table
+ALTER TABLE deals ADD COLUMN IF NOT EXISTS company_overview TEXT;
+ALTER TABLE deals ADD COLUMN IF NOT EXISTS founded_year INTEGER;
+ALTER TABLE deals ADD COLUMN IF NOT EXISTS team_size TEXT;
+ALTER TABLE deals ADD COLUMN IF NOT EXISTS reason_for_sale TEXT;
+ALTER TABLE deals ADD COLUMN IF NOT EXISTS growth_opportunities JSONB DEFAULT '[]'::jsonb;
+ALTER TABLE deals ADD COLUMN IF NOT EXISTS founders_message TEXT;
+ALTER TABLE deals ADD COLUMN IF NOT EXISTS founder_name TEXT;
+ALTER TABLE deals ADD COLUMN IF NOT EXISTS founder_title TEXT;
+ALTER TABLE deals ADD COLUMN IF NOT EXISTS ideal_buyer_profile TEXT;
+ALTER TABLE deals ADD COLUMN IF NOT EXISTS rollup_potential TEXT;
+ALTER TABLE deals ADD COLUMN IF NOT EXISTS market_trends_alignment TEXT;
+ALTER TABLE deals ADD COLUMN IF NOT EXISTS profit_margin TEXT;
+ALTER TABLE deals ADD COLUMN IF NOT EXISTS customer_count TEXT;
+ALTER TABLE deals ADD COLUMN IF NOT EXISTS recurring_revenue TEXT;
+ALTER TABLE deals ADD COLUMN IF NOT EXISTS cac_ltv_ratio TEXT;
+ALTER TABLE deals ADD COLUMN IF NOT EXISTS asking_price TEXT;
+ALTER TABLE deals ADD COLUMN IF NOT EXISTS growth_rate TEXT;

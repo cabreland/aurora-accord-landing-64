@@ -7,9 +7,11 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
 import { BasicInfoStep } from './BasicInfoStep';
+import { CompanyDetailsStep } from './CompanyDetailsStep';
 import { FinancialsStep } from './FinancialsStep';
 import { GrowthStrategyStep } from './GrowthStrategyStep';
 import { FounderTeamStep } from './FounderTeamStep';
+import { StrategicAnalysisStep } from './StrategicAnalysisStep';
 import { DocumentsStep } from './DocumentsStep';
 import { PublishingStep } from './PublishingStep';
 
@@ -27,11 +29,20 @@ export interface DealFormData {
   location: string;
   description: string;
   
+  // Company Details
+  company_overview: string;
+  founded_year: number | null;
+  team_size: string;
+  reason_for_sale: string;
+  
   // Financials
   revenue: string;
   ebitda: string;
   asking_price: string;
   profit_margin: string;
+  customer_count: string;
+  recurring_revenue: string;
+  cac_ltv_ratio: string;
   growth_rate: string;
   
   // Growth & Strategy
@@ -41,10 +52,16 @@ export interface DealFormData {
   strategic_fit: string;
   
   // Founder & Team
-  founder_message: string;
-  team_size: string;
+  founders_message: string;
+  founder_name: string;
+  founder_title: string;
   key_personnel: string;
   management_experience: string;
+  
+  // Strategic Analysis
+  ideal_buyer_profile: string;
+  rollup_potential: string;
+  market_trends_alignment: string;
   
   // Documents
   documents: File[];
@@ -59,11 +76,13 @@ export interface DealFormData {
 
 const steps = [
   { id: 'basic', title: 'Basic Info', component: BasicInfoStep },
-  { id: 'financials', title: 'Financials', component: FinancialsStep },
+  { id: 'company', title: 'Company Details', component: CompanyDetailsStep },
+  { id: 'financials', title: 'Financial Metrics', component: FinancialsStep },
   { id: 'growth', title: 'Growth & Strategy', component: GrowthStrategyStep },
   { id: 'founder', title: 'Founder & Team', component: FounderTeamStep },
+  { id: 'strategic', title: 'Strategic Analysis', component: StrategicAnalysisStep },
   { id: 'documents', title: 'Documents', component: DocumentsStep },
-  { id: 'publishing', title: 'Publishing', component: PublishingStep },
+  { id: 'publishing', title: 'Status & Publishing', component: PublishingStep },
 ];
 
 export const DealWizard: React.FC<DealWizardProps> = ({
@@ -79,19 +98,30 @@ export const DealWizard: React.FC<DealWizardProps> = ({
     industry: '',
     location: '',
     description: '',
+    company_overview: '',
+    founded_year: null,
+    team_size: '',
+    reason_for_sale: '',
     revenue: '',
     ebitda: '',
     asking_price: '',
     profit_margin: '',
+    customer_count: '',
+    recurring_revenue: '',
+    cac_ltv_ratio: '',
     growth_rate: '',
     growth_opportunities: [],
     market_position: '',
     competitive_advantages: '',
     strategic_fit: '',
-    founder_message: '',
-    team_size: '',
+    founders_message: '',
+    founder_name: '',
+    founder_title: '',
     key_personnel: '',
     management_experience: '',
+    ideal_buyer_profile: '',
+    rollup_potential: '',
+    market_trends_alignment: '',
     documents: [],
     document_categories: [],
     status: 'draft',
@@ -109,15 +139,19 @@ export const DealWizard: React.FC<DealWizardProps> = ({
     switch (stepIndex) {
       case 0: // Basic Info
         return !!(formData.title && formData.company_name);
-      case 1: // Financials
+      case 1: // Company Details
+        return true; // Optional step
+      case 2: // Financial Metrics
         return !!(formData.revenue || formData.ebitda);
-      case 2: // Growth & Strategy
+      case 3: // Growth & Strategy
         return true; // Optional step
-      case 3: // Founder & Team
+      case 4: // Founder & Team
         return true; // Optional step
-      case 4: // Documents
+      case 5: // Strategic Analysis
         return true; // Optional step
-      case 5: // Publishing
+      case 6: // Documents
+        return true; // Optional step
+      case 7: // Status & Publishing
         return true; // Always valid
       default:
         return true;
@@ -170,8 +204,25 @@ export const DealWizard: React.FC<DealWizardProps> = ({
           industry: formData.industry,
           location: formData.location,
           description: formData.description,
+          company_overview: formData.company_overview,
+          founded_year: formData.founded_year,
+          team_size: formData.team_size,
+          reason_for_sale: formData.reason_for_sale,
           revenue: formData.revenue,
           ebitda: formData.ebitda,
+          asking_price: formData.asking_price,
+          profit_margin: formData.profit_margin,
+          customer_count: formData.customer_count,
+          recurring_revenue: formData.recurring_revenue,
+          cac_ltv_ratio: formData.cac_ltv_ratio,
+          growth_rate: formData.growth_rate,
+          growth_opportunities: formData.growth_opportunities,
+          founders_message: formData.founders_message,
+          founder_name: formData.founder_name,
+          founder_title: formData.founder_title,
+          ideal_buyer_profile: formData.ideal_buyer_profile,
+          rollup_potential: formData.rollup_potential,
+          market_trends_alignment: formData.market_trends_alignment,
           status: formData.status,
           priority: formData.priority,
           created_by: user.id
@@ -194,18 +245,18 @@ export const DealWizard: React.FC<DealWizardProps> = ({
           asking_price: formData.asking_price,
           owner_id: user.id,
           is_draft: formData.status === 'draft',
-          teaser_payload: {
-            growth_opportunities: formData.growth_opportunities,
-            market_position: formData.market_position,
-            competitive_advantages: formData.competitive_advantages,
-            strategic_fit: formData.strategic_fit,
-            founder_message: formData.founder_message,
-            team_size: formData.team_size,
-            key_personnel: formData.key_personnel,
-            management_experience: formData.management_experience,
-            profit_margin: formData.profit_margin,
-            growth_rate: formData.growth_rate
-          }
+            teaser_payload: {
+              growth_opportunities: formData.growth_opportunities,
+              market_position: formData.market_position,
+              competitive_advantages: formData.competitive_advantages,
+              strategic_fit: formData.strategic_fit,
+              founders_message: formData.founders_message,
+              team_size: formData.team_size,
+              key_personnel: formData.key_personnel,
+              management_experience: formData.management_experience,
+              profit_margin: formData.profit_margin,
+              growth_rate: formData.growth_rate
+            }
         });
 
       if (companyError) {
@@ -225,19 +276,30 @@ export const DealWizard: React.FC<DealWizardProps> = ({
         industry: '',
         location: '',
         description: '',
+        company_overview: '',
+        founded_year: null,
+        team_size: '',
+        reason_for_sale: '',
         revenue: '',
         ebitda: '',
         asking_price: '',
         profit_margin: '',
+        customer_count: '',
+        recurring_revenue: '',
+        cac_ltv_ratio: '',
         growth_rate: '',
         growth_opportunities: [],
         market_position: '',
         competitive_advantages: '',
         strategic_fit: '',
-        founder_message: '',
-        team_size: '',
+        founders_message: '',
+        founder_name: '',
+        founder_title: '',
         key_personnel: '',
         management_experience: '',
+        ideal_buyer_profile: '',
+        rollup_potential: '',
+        market_trends_alignment: '',
         documents: [],
         document_categories: [],
         status: 'draft',

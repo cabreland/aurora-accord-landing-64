@@ -287,50 +287,101 @@ export type Database = {
       }
       deals: {
         Row: {
+          asking_price: string | null
+          cac_ltv_ratio: string | null
           company_id: string | null
           company_name: string
+          company_overview: string | null
           created_at: string
           created_by: string
+          customer_count: string | null
           description: string | null
           ebitda: string | null
+          founded_year: number | null
+          founder_name: string | null
+          founder_title: string | null
+          founders_message: string | null
+          growth_opportunities: Json | null
+          growth_rate: string | null
           id: string
+          ideal_buyer_profile: string | null
           industry: string | null
           location: string | null
+          market_trends_alignment: string | null
           priority: string
+          profit_margin: string | null
+          reason_for_sale: string | null
+          recurring_revenue: string | null
           revenue: string | null
+          rollup_potential: string | null
           status: Database["public"]["Enums"]["deal_status"]
+          team_size: string | null
           title: string
           updated_at: string
         }
         Insert: {
+          asking_price?: string | null
+          cac_ltv_ratio?: string | null
           company_id?: string | null
           company_name: string
+          company_overview?: string | null
           created_at?: string
           created_by: string
+          customer_count?: string | null
           description?: string | null
           ebitda?: string | null
+          founded_year?: number | null
+          founder_name?: string | null
+          founder_title?: string | null
+          founders_message?: string | null
+          growth_opportunities?: Json | null
+          growth_rate?: string | null
           id?: string
+          ideal_buyer_profile?: string | null
           industry?: string | null
           location?: string | null
+          market_trends_alignment?: string | null
           priority?: string
+          profit_margin?: string | null
+          reason_for_sale?: string | null
+          recurring_revenue?: string | null
           revenue?: string | null
+          rollup_potential?: string | null
           status?: Database["public"]["Enums"]["deal_status"]
+          team_size?: string | null
           title: string
           updated_at?: string
         }
         Update: {
+          asking_price?: string | null
+          cac_ltv_ratio?: string | null
           company_id?: string | null
           company_name?: string
+          company_overview?: string | null
           created_at?: string
           created_by?: string
+          customer_count?: string | null
           description?: string | null
           ebitda?: string | null
+          founded_year?: number | null
+          founder_name?: string | null
+          founder_title?: string | null
+          founders_message?: string | null
+          growth_opportunities?: Json | null
+          growth_rate?: string | null
           id?: string
+          ideal_buyer_profile?: string | null
           industry?: string | null
           location?: string | null
+          market_trends_alignment?: string | null
           priority?: string
+          profit_margin?: string | null
+          reason_for_sale?: string | null
+          recurring_revenue?: string | null
           revenue?: string | null
+          rollup_potential?: string | null
           status?: Database["public"]["Enums"]["deal_status"]
+          team_size?: string | null
           title?: string
           updated_at?: string
         }
