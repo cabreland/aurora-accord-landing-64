@@ -14,18 +14,23 @@ import {
   Shield,
   DollarSign,
   Scale,
-  Users
+  Users,
+  Plus
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import CategoryUploadSection from './CategoryUploadSection';
 
 interface Document {
   id: string;
   name: string;
   tag: string;
+  file_path: string;
   file_size: number | null;
+  file_type: string | null;
   created_at: string;
   uploaded_by: string;
+  version: number;
 }
 
 interface DocumentStatusPanelProps {
@@ -40,7 +45,8 @@ const DOCUMENT_CATEGORIES = {
     description: 'Confidential Information Memorandum',
     icon: Shield,
     required: true,
-    color: 'bg-blue-500/20 text-blue-400 border-blue-500/30'
+    color: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
+    maxFiles: 1
   },
   financials: {
     key: 'financials',
@@ -48,7 +54,8 @@ const DOCUMENT_CATEGORIES = {
     description: 'Financial Statements & Reports',
     icon: DollarSign,
     required: true,
-    color: 'bg-green-500/20 text-green-400 border-green-500/30'
+    color: 'bg-green-500/20 text-green-400 border-green-500/30',
+    maxFiles: 10
   },
   legal: {
     key: 'legal',
@@ -56,7 +63,8 @@ const DOCUMENT_CATEGORIES = {
     description: 'Legal Documentation',
     icon: Scale,
     required: true,
-    color: 'bg-red-500/20 text-red-400 border-red-500/30'
+    color: 'bg-red-500/20 text-red-400 border-red-500/30',
+    maxFiles: 20
   },
   due_diligence: {
     key: 'due_diligence',
@@ -64,7 +72,8 @@ const DOCUMENT_CATEGORIES = {
     description: 'DD Package & Operational Details',
     icon: FileText,
     required: true,
-    color: 'bg-purple-500/20 text-purple-400 border-purple-500/30'
+    color: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
+    maxFiles: 15
   },
   nda: {
     key: 'nda',
@@ -72,7 +81,8 @@ const DOCUMENT_CATEGORIES = {
     description: 'Non-Disclosure Agreements',
     icon: Shield,
     required: false,
-    color: 'bg-orange-500/20 text-orange-400 border-orange-500/30'
+    color: 'bg-orange-500/20 text-orange-400 border-orange-500/30',
+    maxFiles: 5
   },
   buyer_notes: {
     key: 'buyer_notes',
@@ -80,13 +90,15 @@ const DOCUMENT_CATEGORIES = {
     description: 'Buyer Profiles & Communications',
     icon: Users,
     required: false,
-    color: 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30'
+    color: 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30',
+    maxFiles: 10
   }
 };
 
 const DocumentStatusPanel = ({ companyId, companyName }: DocumentStatusPanelProps) => {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -95,7 +107,7 @@ const DocumentStatusPanel = ({ companyId, companyName }: DocumentStatusPanelProp
     }
   }, [companyId]);
 
-  const fetchDocuments = async () => {
+  const fetchDocuments = async (forceRefresh = false) => {
     try {
       setIsLoading(true);
       const { data, error } = await supabase
@@ -106,6 +118,8 @@ const DocumentStatusPanel = ({ companyId, companyName }: DocumentStatusPanelProp
 
       if (error) throw error;
       setDocuments(data || []);
+      
+      console.log(`Fetched ${data?.length || 0} documents for company ${companyId}`);
     } catch (error) {
       console.error('Error fetching documents:', error);
       toast({
@@ -116,6 +130,11 @@ const DocumentStatusPanel = ({ companyId, companyName }: DocumentStatusPanelProp
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleDocumentChange = () => {
+    // Force refresh after document changes
+    fetchDocuments(true);
   };
 
   const getCategoryDocuments = (categoryKey: string) => {
@@ -139,6 +158,22 @@ const DocumentStatusPanel = ({ companyId, companyName }: DocumentStatusPanelProp
     if (!bytes) return 'Unknown';
     const mb = bytes / (1024 * 1024);
     return mb < 1 ? `${Math.round(bytes / 1024)}KB` : `${mb.toFixed(1)}MB`;
+  };
+
+  const handleExportAll = async () => {
+    // TODO: Implement export functionality
+    toast({
+      title: "Export Started",
+      description: "Preparing documents for download...",
+    });
+  };
+
+  const handleDownloadZip = async () => {
+    // TODO: Implement ZIP download functionality
+    toast({
+      title: "Download Started",
+      description: "Creating ZIP file...",
+    });
   };
 
   const stats = getCompletionStats();
@@ -174,13 +209,14 @@ const DocumentStatusPanel = ({ companyId, companyName }: DocumentStatusPanelProp
             </div>
             
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" className="border-border">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="border-border"
+                onClick={handleExportAll}
+              >
                 <Download className="w-4 h-4 mr-2" />
                 Export All
-              </Button>
-              <Button size="sm" className="bg-primary hover:bg-primary/90">
-                <Upload className="w-4 h-4 mr-2" />
-                Upload
               </Button>
             </div>
           </div>
@@ -218,75 +254,100 @@ const DocumentStatusPanel = ({ companyId, companyName }: DocumentStatusPanelProp
           const categoryDocs = getCategoryDocuments(category.key);
           const hasDocuments = categoryDocs.length > 0;
           const IconComponent = category.icon;
+          const isExpanded = expandedCategory === category.key;
           
           return (
             <Card key={category.key} className="bg-card border-border">
               <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className={`p-2 rounded-lg ${category.color}`}>
-                      <IconComponent className="w-4 h-4" />
-                    </div>
-                    
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-medium text-foreground">
-                          {category.label}
-                        </h3>
-                        {category.required && (
-                          <Badge variant="outline" className="text-xs px-1 py-0 bg-red-500/20 text-red-400 border-red-500/30">
-                            Required
-                          </Badge>
-                        )}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className={`p-2 rounded-lg ${category.color}`}>
+                        <IconComponent className="w-4 h-4" />
                       </div>
-                      <p className="text-xs text-muted-foreground">
-                        {category.description}
-                      </p>
                       
-                      {categoryDocs.length > 0 && (
-                        <div className="mt-1 space-y-1">
-                          {categoryDocs.slice(0, 2).map((doc) => (
-                            <div key={doc.id} className="flex items-center gap-2 text-xs">
-                              <FileText className="w-3 h-3 text-muted-foreground" />
-                              <span className="text-foreground truncate max-w-[200px]">
-                                {doc.name}
-                              </span>
-                              <span className="text-muted-foreground">
-                                ({formatFileSize(doc.file_size)})
-                              </span>
-                            </div>
-                          ))}
-                          {categoryDocs.length > 2 && (
-                            <p className="text-xs text-muted-foreground">
-                              +{categoryDocs.length - 2} more files
-                            </p>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-medium text-foreground">
+                            {category.label}
+                          </h3>
+                          {category.required && (
+                            <Badge variant="outline" className="text-xs px-1 py-0 bg-red-500/20 text-red-400 border-red-500/30">
+                              Required
+                            </Badge>
                           )}
                         </div>
+                        <p className="text-xs text-muted-foreground">
+                          {category.description}
+                        </p>
+                        
+                        {categoryDocs.length > 0 && (
+                          <div className="mt-1 space-y-1">
+                            {categoryDocs.slice(0, 2).map((doc) => (
+                              <div key={doc.id} className="flex items-center gap-2 text-xs">
+                                <FileText className="w-3 h-3 text-muted-foreground" />
+                                <span className="text-foreground truncate max-w-[200px]">
+                                  {doc.name}
+                                </span>
+                                <span className="text-muted-foreground">
+                                  ({formatFileSize(doc.file_size)})
+                                </span>
+                              </div>
+                            ))}
+                            {categoryDocs.length > 2 && (
+                              <p className="text-xs text-muted-foreground">
+                                +{categoryDocs.length - 2} more files
+                              </p>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-2">
+                      {hasDocuments ? (
+                        <>
+                          <CheckCircle2 className="w-5 h-5 text-green-500" />
+                          <Badge variant="outline" className="bg-green-500/20 text-green-400 border-green-500/30 text-xs">
+                            {categoryDocs.length} file{categoryDocs.length !== 1 ? 's' : ''}
+                          </Badge>
+                        </>
+                      ) : (
+                        <>
+                          {category.required ? (
+                            <AlertTriangle className="w-5 h-5 text-red-500" />
+                          ) : (
+                            <Clock className="w-5 h-5 text-muted-foreground" />
+                          )}
+                          <Badge variant="outline" className="text-xs px-2 py-1 text-muted-foreground">
+                            {category.required ? 'Missing' : 'Optional'}
+                          </Badge>
+                        </>
                       )}
+                      
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 w-6 p-0"
+                        onClick={() => setExpandedCategory(isExpanded ? null : category.key)}
+                      >
+                        <Plus className={`w-3 h-3 transition-transform ${isExpanded ? 'rotate-45' : ''}`} />
+                      </Button>
                     </div>
                   </div>
-                  
-                  <div className="flex items-center gap-2">
-                    {hasDocuments ? (
-                      <>
-                        <CheckCircle2 className="w-5 h-5 text-green-500" />
-                        <Badge variant="outline" className="bg-green-500/20 text-green-400 border-green-500/30 text-xs">
-                          {categoryDocs.length} file{categoryDocs.length !== 1 ? 's' : ''}
-                        </Badge>
-                      </>
-                    ) : (
-                      <>
-                        {category.required ? (
-                          <AlertTriangle className="w-5 h-5 text-red-500" />
-                        ) : (
-                          <Clock className="w-5 h-5 text-muted-foreground" />
-                        )}
-                        <Badge variant="outline" className="text-xs px-2 py-1 text-muted-foreground">
-                          {category.required ? 'Missing' : 'Optional'}
-                        </Badge>
-                      </>
-                    )}
-                  </div>
+
+                  {/* Upload Section */}
+                  {isExpanded && (
+                    <div className="border-t border-border pt-3">
+                      <CategoryUploadSection
+                        category={category}
+                        documents={categoryDocs}
+                        dealId={companyId}
+                        onUploadComplete={handleDocumentChange}
+                        onDocumentDeleted={handleDocumentChange}
+                      />
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -304,7 +365,12 @@ const DocumentStatusPanel = ({ companyId, companyName }: DocumentStatusPanelProp
                 <Eye className="w-4 h-4 mr-2" />
                 Preview All
               </Button>
-              <Button variant="outline" size="sm" className="border-border">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="border-border"
+                onClick={handleDownloadZip}
+              >
                 <Download className="w-4 h-4 mr-2" />
                 Download ZIP
               </Button>

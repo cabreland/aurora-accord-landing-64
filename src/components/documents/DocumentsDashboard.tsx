@@ -13,14 +13,21 @@ import {
   TrendingUp,
   Clock,
   AlertCircle,
-  CheckCircle2
+  CheckCircle2,
+  X
 } from 'lucide-react';
+import { useDashboardMetrics } from '@/hooks/useDashboardMetrics';
 
 interface DocumentsDashboardProps {
   selectedCompanyId: string | null;
   onCompanySelect: (companyId: string | null) => void;
   onSearchChange: (query: string) => void;
   onFilterChange: (filters: any) => void;
+}
+
+interface FilterState {
+  status: string[];
+  completion: string[];
 }
 
 const DocumentsDashboard = ({ 
@@ -30,18 +37,42 @@ const DocumentsDashboard = ({
   onFilterChange 
 }: DocumentsDashboardProps) => {
   const [searchQuery, setSearchQuery] = useState('');
-
-  // Mock data - replace with real data from hooks
-  const dashboardMetrics = {
-    totalDeals: 47,
-    pendingDocuments: 23,
-    completionRate: 78,
-    storageUsed: '2.4 GB'
-  };
+  const [filters, setFilters] = useState<FilterState>({
+    status: ['active'],
+    completion: ['<100']
+  });
+  const [showFilters, setShowFilters] = useState(false);
+  
+  const { metrics, isLoading } = useDashboardMetrics();
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
     onSearchChange(e.target.value);
+  };
+
+  const removeFilter = (filterType: keyof FilterState, value: string) => {
+    const newFilters = {
+      ...filters,
+      [filterType]: filters[filterType].filter(f => f !== value)
+    };
+    setFilters(newFilters);
+    onFilterChange(newFilters);
+  };
+
+  const clearAllFilters = () => {
+    const emptyFilters = { status: [], completion: [] };
+    setFilters(emptyFilters);
+    onFilterChange(emptyFilters);
+  };
+
+  const handleBulkUpload = () => {
+    // TODO: Implement bulk upload functionality
+    console.log('Bulk upload clicked');
+  };
+
+  const handleExport = async () => {
+    // TODO: Implement export functionality
+    console.log('Export clicked');
   };
 
   return (
@@ -58,10 +89,12 @@ const DocumentsDashboard = ({
             </div>
           </CardHeader>
           <CardContent className="pt-0">
-            <div className="text-2xl font-bold text-foreground">{dashboardMetrics.totalDeals}</div>
+            <div className="text-2xl font-bold text-foreground">
+              {isLoading ? '...' : metrics.activeDeals}
+            </div>
             <p className="text-xs text-muted-foreground">
               <TrendingUp className="w-3 h-3 inline mr-1" />
-              +12% from last month
+              {metrics.totalDeals} total deals
             </p>
           </CardContent>
         </Card>
@@ -76,10 +109,12 @@ const DocumentsDashboard = ({
             </div>
           </CardHeader>
           <CardContent className="pt-0">
-            <div className="text-2xl font-bold text-foreground">{dashboardMetrics.pendingDocuments}</div>
+            <div className="text-2xl font-bold text-foreground">
+              {isLoading ? '...' : metrics.pendingDocuments}
+            </div>
             <p className="text-xs text-muted-foreground">
               <AlertCircle className="w-3 h-3 inline mr-1" />
-              8 urgent items
+              {metrics.urgentItems} urgent items
             </p>
           </CardContent>
         </Card>
@@ -94,10 +129,12 @@ const DocumentsDashboard = ({
             </div>
           </CardHeader>
           <CardContent className="pt-0">
-            <div className="text-2xl font-bold text-foreground">{dashboardMetrics.completionRate}%</div>
+            <div className="text-2xl font-bold text-foreground">
+              {isLoading ? '...' : `${metrics.completionRate}%`}
+            </div>
             <p className="text-xs text-muted-foreground">
               <TrendingUp className="w-3 h-3 inline mr-1" />
-              +5% this week
+              Across all deals
             </p>
           </CardContent>
         </Card>
@@ -112,9 +149,11 @@ const DocumentsDashboard = ({
             </div>
           </CardHeader>
           <CardContent className="pt-0">
-            <div className="text-2xl font-bold text-foreground">{dashboardMetrics.storageUsed}</div>
+            <div className="text-2xl font-bold text-foreground">
+              {isLoading ? '...' : metrics.storageUsed}
+            </div>
             <p className="text-xs text-muted-foreground">
-              of 10 GB plan
+              Document storage
             </p>
           </CardContent>
         </Card>
@@ -135,18 +174,32 @@ const DocumentsDashboard = ({
                 />
               </div>
               
-              <Button variant="outline" size="sm" className="border-border">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="border-border"
+                onClick={() => setShowFilters(!showFilters)}
+              >
                 <Filter className="w-4 h-4 mr-2" />
                 Filters
               </Button>
             </div>
 
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" className="border-border">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="border-border"
+                onClick={handleExport}
+              >
                 <Download className="w-4 h-4 mr-2" />
                 Export
               </Button>
-              <Button size="sm" className="bg-primary hover:bg-primary/90">
+              <Button 
+                size="sm" 
+                className="bg-primary hover:bg-primary/90"
+                onClick={handleBulkUpload}
+              >
                 <Upload className="w-4 h-4 mr-2" />
                 Bulk Upload
               </Button>
@@ -156,20 +209,44 @@ const DocumentsDashboard = ({
       </Card>
 
       {/* Filter Tags */}
-      <div className="flex items-center gap-2">
-        <span className="text-sm text-muted-foreground">Active filters:</span>
-        <Badge variant="secondary" className="bg-muted text-muted-foreground">
-          Status: Active
-          <button className="ml-1 hover:text-foreground">×</button>
-        </Badge>
-        <Badge variant="secondary" className="bg-muted text-muted-foreground">
-          Completion: &lt;100%
-          <button className="ml-1 hover:text-foreground">×</button>
-        </Badge>
-        <Button variant="ghost" size="sm" className="text-xs text-muted-foreground hover:text-foreground">
-          Clear all
-        </Button>
-      </div>
+      {(filters.status.length > 0 || filters.completion.length > 0) && (
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-sm text-muted-foreground">Active filters:</span>
+          
+          {filters.status.map((status) => (
+            <Badge key={`status-${status}`} variant="secondary" className="bg-muted text-muted-foreground">
+              Status: {status}
+              <button 
+                className="ml-1 hover:text-foreground"
+                onClick={() => removeFilter('status', status)}
+              >
+                <X className="w-3 h-3" />
+              </button>
+            </Badge>
+          ))}
+          
+          {filters.completion.map((completion) => (
+            <Badge key={`completion-${completion}`} variant="secondary" className="bg-muted text-muted-foreground">
+              Completion: {completion}%
+              <button 
+                className="ml-1 hover:text-foreground"
+                onClick={() => removeFilter('completion', completion)}
+              >
+                <X className="w-3 h-3" />
+              </button>
+            </Badge>
+          ))}
+          
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="text-xs text-muted-foreground hover:text-foreground"
+            onClick={clearAllFilters}
+          >
+            Clear all
+          </Button>
+        </div>
+      )}
     </div>
   );
 };

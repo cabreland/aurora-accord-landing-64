@@ -40,16 +40,17 @@ interface CompanyGridProps {
   searchQuery: string;
   selectedCompanyId: string | null;
   onCompanySelect: (companyId: string) => void;
+  refreshTrigger?: number;
 }
 
-const CompanyGrid = ({ searchQuery, selectedCompanyId, onCompanySelect }: CompanyGridProps) => {
+const CompanyGrid = ({ searchQuery, selectedCompanyId, onCompanySelect, refreshTrigger }: CompanyGridProps) => {
   const [deals, setDeals] = useState<Deal[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
     fetchDeals();
-  }, []);
+  }, [refreshTrigger]);
 
   const fetchDeals = async () => {
     try {
@@ -113,11 +114,14 @@ const CompanyGrid = ({ searchQuery, selectedCompanyId, onCompanySelect }: Compan
     }
   };
 
-  // Filter deals based on search query
-  const filteredDeals = deals.filter(deal => 
-    deal.company_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    deal.title.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Filter deals based on search query and apply filters
+  const filteredDeals = deals.filter(deal => {
+    // Search filter
+    const matchesSearch = deal.company_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         deal.title.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    return matchesSearch;
+  });
 
   const getStatusColor = (status: string) => {
     const colors: Record<string, string> = {

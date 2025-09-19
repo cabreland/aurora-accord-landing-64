@@ -8,12 +8,16 @@ import DocumentStatusPanel from '@/components/documents/DocumentStatusPanel';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { useDashboardMetrics } from '@/hooks/useDashboardMetrics';
 
 const DocumentsPage = () => {
   const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null);
   const [selectedCompanyName, setSelectedCompanyName] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState({});
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+  
+  const { refreshMetrics } = useDashboardMetrics();
 
   // Fetch company name when company is selected
   useEffect(() => {
@@ -21,6 +25,32 @@ const DocumentsPage = () => {
       fetchCompanyName();
     }
   }, [selectedCompanyId]);
+
+  // Set up real-time listener for document changes
+  useEffect(() => {
+    const channel = supabase
+      .channel('document_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'documents'
+        },
+        (payload) => {
+          console.log('Document change detected:', payload);
+          // Refresh metrics when documents change
+          refreshMetrics();
+          // Trigger refresh of company grid
+          setRefreshTrigger(prev => prev + 1);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [refreshMetrics]);
 
   const fetchCompanyName = async () => {
     if (!selectedCompanyId) return;
@@ -97,6 +127,7 @@ const DocumentsPage = () => {
               searchQuery={searchQuery}
               selectedCompanyId={selectedCompanyId}
               onCompanySelect={handleCompanySelect}
+              refreshTrigger={refreshTrigger}
             />
           </>
         ) : (
