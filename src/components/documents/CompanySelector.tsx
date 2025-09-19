@@ -108,14 +108,9 @@ const CompanySelector = ({ selectedDealId, onDealSelect }: CompanySelectorProps)
               <SelectItem key={deal.id} value={deal.id} className="hover:bg-muted text-sm">
                 <div className="flex items-center justify-between w-full">
                   <span className="font-medium text-foreground">{deal.company_name}</span>
-                  <div className="flex items-center gap-2 ml-2">
-                    <Badge variant="outline" className={`${getStatusColor(deal.status)} text-xs px-1 py-0`}>
-                      {deal.status === 'draft' ? 'Draft' : 'Active'}
-                    </Badge>
-                    <span className="text-xs text-muted-foreground">
-                      {deal.document_count || 0}
-                    </span>
-                  </div>
+                  <Badge variant="outline" className={`${getStatusColor(deal.status)} text-xs px-1 py-0`}>
+                    {deal.status === 'draft' ? 'Draft' : 'Active'}
+                  </Badge>
                 </div>
               </SelectItem>
             ))}
@@ -124,12 +119,9 @@ const CompanySelector = ({ selectedDealId, onDealSelect }: CompanySelectorProps)
       </div>
 
       {selectedDeal && selectedDealId !== 'all' && (
-        <div className="flex items-center gap-3 text-xs text-muted-foreground">
-          <Badge variant="outline" className={`${getStatusColor(selectedDeal.status)} text-xs px-1 py-0`}>
-            {selectedDeal.status === 'draft' ? 'Draft' : 'Active'}
-          </Badge>
-          <span>{selectedDeal.document_count || 0} docs</span>
-        </div>
+        <Badge variant="outline" className={`${getStatusColor(selectedDeal.status)} text-xs px-1 py-0`}>
+          {selectedDeal.status === 'draft' ? 'Draft' : 'Active'}
+        </Badge>
       )}
 
       <Button

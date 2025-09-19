@@ -189,29 +189,23 @@ const DocumentCategoriesView = ({ dealId, onRefresh }: DocumentCategoriesViewPro
 
   return (
     <div className="space-y-4">
-      {/* Compact Progress Overview */}
+      {/* Simplified Progress Overview */}
       <div className="flex items-center gap-4 p-3 bg-card border border-border rounded-lg">
         <div className="flex items-center gap-2">
           <CheckCircle className="w-4 h-4 text-primary" />
-          <span className="text-sm font-medium text-foreground">Progress:</span>
+          <span className="text-sm font-medium text-foreground">
+            {stats.total - stats.completed > 0 
+              ? `${stats.total - stats.completed} documents required`
+              : 'All required documents complete'
+            }
+          </span>
         </div>
         <div className="flex-1 max-w-xs">
           <Progress value={stats.percentage} className="h-2" />
         </div>
-        <div className="flex items-center gap-4 text-sm">
-          <span className="text-green-400 font-medium">{stats.completed} Complete</span>
-          <span className="text-red-400 font-medium">{stats.total - stats.completed} Missing</span>
-          <span className="text-foreground font-medium">{documents.length} Total</span>
-        </div>
-        <Badge variant="outline" className={`text-xs ${
-          stats.percentage === 100 
-            ? 'bg-green-500/20 text-green-400 border-green-500/30'
-            : stats.percentage >= 75 
-            ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30'
-            : 'bg-red-500/20 text-red-400 border-red-500/30'
-        }`}>
-          {stats.percentage}%
-        </Badge>
+        {stats.percentage < 100 && (
+          <span className="text-sm text-muted-foreground">{stats.completed}/{stats.total}</span>
+        )}
       </div>
 
       {/* Compact Document Categories */}
