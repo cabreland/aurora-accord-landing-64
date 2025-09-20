@@ -44,9 +44,9 @@ export const usePipelineStats = () => {
       const stageMap = new Map<string, { count: number; totalValue: number }>();
       
       const stageConfigs = [
-        { key: 'teaser', display: 'Teaser', color: '#F4E4BC' },
-        { key: 'discovery', display: 'Discovery', color: '#D4AF37' },
-        { key: 'dd', display: 'Due Diligence', color: '#F28C38' },
+        { key: 'teaser', display: 'Teaser', color: '#3B82F6' },
+        { key: 'discovery', display: 'Discovery', color: '#F59E0B' },
+        { key: 'dd', display: 'Due Diligence', color: '#EF4444' },
         { key: 'closing', display: 'Closing', color: '#22C55E' }
       ];
 

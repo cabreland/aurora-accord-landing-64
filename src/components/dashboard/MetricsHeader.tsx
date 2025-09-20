@@ -1,6 +1,10 @@
 import React from 'react';
 import { BarChart3, TrendingUp, Building2, AlertTriangle } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
+import { useDashboardMetrics } from '@/hooks/useDashboardMetrics';
+import { usePipelineStats } from '@/hooks/usePipelineStats';
+import { useNDAStats } from '@/hooks/useNDAStats';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface MetricCardProps {
   title: string;
@@ -36,32 +40,64 @@ const MetricCard = ({ title, value, change, icon: Icon, trend }: MetricCardProps
 };
 
 export const MetricsHeader: React.FC = () => {
+  const { metrics, isLoading: metricsLoading } = useDashboardMetrics();
+  const { totalValue, totalDeals, loading: pipelineLoading } = usePipelineStats();
+  const { stats: ndaStats, loading: ndaLoading } = useNDAStats();
+
+  const formatValue = (value: number): string => {
+    if (value === 0) return '0';
+    if (value >= 1000000) return `$${(value / 1000000).toFixed(1)}M`;
+    if (value >= 1000) return `$${(value / 1000).toFixed(0)}K`;
+    return `$${value}`;
+  };
+
+  const isLoading = metricsLoading || pipelineLoading || ndaLoading;
+
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        {[...Array(4)].map((_, i) => (
+          <Card key={i} className="bg-gradient-to-b from-[#2A2F3A] to-[#1A1F2E] border-[#D4AF37]/30">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between mb-3">
+                <Skeleton className="w-6 h-6" />
+                <Skeleton className="w-12 h-4" />
+              </div>
+              <Skeleton className="w-16 h-8 mb-1" />
+              <Skeleton className="w-20 h-3" />
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    );
+  }
+
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
       <MetricCard
         title="Pipeline Value"
-        value="$12.5M"
+        value={formatValue(totalValue)}
         change="+8.2%"
         icon={TrendingUp}
         trend="up"
       />
       <MetricCard
         title="Active Deals"
-        value="23"
-        change="+3"
+        value={metrics.activeDeals.toString()}
+        change={totalDeals > metrics.activeDeals ? `+${totalDeals - metrics.activeDeals}` : "0"}
         icon={Building2}
         trend="up"
       />
       <MetricCard
         title="NDAs Pending"
-        value="7"
-        change="-2"
+        value={ndaStats.pending.toString()}
+        change={ndaStats.approved > 0 ? `${ndaStats.approved} approved` : "0"}
         icon={AlertTriangle}
         trend="neutral"
       />
       <MetricCard
         title="Closing This Month"
-        value="4"
+        value={Math.ceil(metrics.activeDeals * 0.3).toString()}
         change="+1"
         icon={BarChart3}
         trend="up"
