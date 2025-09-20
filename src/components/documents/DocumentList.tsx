@@ -169,11 +169,16 @@ const DocumentList = ({ dealId, companyId, canDownload = true, canDelete = false
 
       if (error) throw error;
 
+      // Optimistically update UI immediately
+      setDocuments(prev => prev.filter(d => d.id !== documentId));
+      setFilteredDocuments(prev => prev.filter(d => d.id !== documentId));
+
       toast({
         title: "Success",
         description: "Document deleted successfully",
       });
 
+      // Re-fetch to ensure consistency with server state
       fetchDocuments();
     } catch (error) {
       console.error('Error deleting document:', error);
