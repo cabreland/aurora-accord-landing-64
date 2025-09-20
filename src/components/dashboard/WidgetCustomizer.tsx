@@ -4,7 +4,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useDashboardLayout, DashboardWidget } from '@/hooks/useDashboardLayout';
+import { LayoutManager } from './core/LayoutManager';
+import { useWidgetRegistry } from './core/WidgetRegistry';
 
 const widgetIcons = {
   metrics: BarChart3,
@@ -15,8 +16,15 @@ const widgetIcons = {
   nda: FileText
 };
 
-export const WidgetCustomizer = () => {
-  const { layout, toggleWidgetVisibility, resetLayout } = useDashboardLayout();
+interface WidgetCustomizerProps {
+  layoutManager: LayoutManager;
+}
+
+export const WidgetCustomizer: React.FC<WidgetCustomizerProps> = ({ layoutManager }) => {
+  const { getAllWidgets } = useWidgetRegistry();
+  const { layout, toggleWidgetVisibility, resetLayout } = layoutManager;
+
+  const availableWidgetTypes = getAllWidgets();
 
   return (
     <Dialog>
@@ -42,19 +50,23 @@ export const WidgetCustomizer = () => {
           <div>
             <h3 className="text-lg font-semibold text-[#F4E4BC] mb-4">Widget Visibility</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {layout.map((widget) => (
-                <WidgetToggleCard 
-                  key={widget.id} 
-                  widget={widget} 
-                  onToggle={() => toggleWidgetVisibility(widget.id)}
-                />
-              ))}
+              {layout.widgets.map((widget) => {
+                const widgetConfig = availableWidgetTypes.find(w => w.id === widget.type);
+                return (
+                  <WidgetToggleCard 
+                    key={widget.id} 
+                    widget={widget}
+                    widgetConfig={widgetConfig}
+                    onToggle={() => toggleWidgetVisibility(widget.id)}
+                  />
+                );
+              })}
             </div>
           </div>
           
           <div className="flex items-center justify-between pt-4 border-t border-[#D4AF37]/20">
             <div className="text-sm text-[#F4E4BC]/60">
-              {layout.filter(w => w.visible).length} of {layout.length} widgets visible
+              {layout.widgets.filter(w => w.visible).length} of {layout.widgets.length} widgets visible
             </div>
             <Button
               variant="outline"
@@ -72,12 +84,15 @@ export const WidgetCustomizer = () => {
 };
 
 interface WidgetToggleCardProps {
-  widget: DashboardWidget;
+  widget: any;
+  widgetConfig: any;
   onToggle: () => void;
 }
 
-const WidgetToggleCard = ({ widget, onToggle }: WidgetToggleCardProps) => {
-  const IconComponent = widgetIcons[widget.id as keyof typeof widgetIcons];
+const WidgetToggleCard = ({ widget, widgetConfig, onToggle }: WidgetToggleCardProps) => {
+  const IconComponent = widgetIcons[widget.type as keyof typeof widgetIcons] || Settings;
+  const title = widgetConfig?.meta?.title || widget.type;
+  const description = widgetConfig?.meta?.description || 'Widget description';
   
   return (
     <Card className={`
@@ -104,7 +119,7 @@ const WidgetToggleCard = ({ widget, onToggle }: WidgetToggleCardProps) => {
                 text-sm font-semibold 
                 ${widget.visible ? 'text-[#FAFAFA]' : 'text-[#F4E4BC]/40'}
               `}>
-                {widget.title}
+                {title}
               </CardTitle>
             </div>
           </div>
@@ -126,7 +141,7 @@ const WidgetToggleCard = ({ widget, onToggle }: WidgetToggleCardProps) => {
           text-xs 
           ${widget.visible ? 'text-[#F4E4BC]/60' : 'text-[#F4E4BC]/30'}
         `}>
-          {widget.description}
+          {description}
         </p>
       </CardContent>
     </Card>
