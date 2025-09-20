@@ -14,15 +14,7 @@ const widgetIcons = {
   nda: FileText
 };
 
-interface DashboardWidget {
-  id: string;
-  type: 'metrics' | 'deals' | 'pipeline' | 'actions' | 'activity' | 'nda';
-  title: string;
-  description: string;
-  visible: boolean;
-  position: { x: number; y: number; width: number; height: number };
-  locked?: boolean;
-}
+import { DashboardWidget } from '@/types/dashboard';
 
 interface WidgetCustomizerProps {
   widgets: DashboardWidget[];

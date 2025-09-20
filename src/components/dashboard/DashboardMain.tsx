@@ -7,21 +7,15 @@ import { ActivityFeedWidget } from './widgets/ActivityFeedWidget';
 import { MetricsWidget } from './widgets/MetricsWidget';
 import { NDAWidget } from './widgets/NDAWidget';
 import { WidgetCustomizer } from './WidgetCustomizer';
+import { LayoutController } from './LayoutController';
+import { AdaptiveGrid } from './AdaptiveGrid';
 import { RotateCcw } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { DashboardWidget, LayoutConfig, LAYOUT_PRESETS } from '@/types/dashboard';
 
-interface DashboardWidget {
-  id: string;
-  type: 'metrics' | 'deals' | 'pipeline' | 'actions' | 'activity' | 'nda';
-  title: string;
-  description: string;
-  visible: boolean;
-  position: { x: number; y: number; width: number; height: number };
-  locked?: boolean;
-}
-
-const STORAGE_KEY = 'dashboard-layout-simple';
+const STORAGE_KEY = 'dashboard-layout-v2';
+const LAYOUT_STORAGE_KEY = 'dashboard-layout-config';
 
 const defaultWidgets: DashboardWidget[] = [
   { 
@@ -30,7 +24,8 @@ const defaultWidgets: DashboardWidget[] = [
     title: 'Key Metrics',
     description: 'Pipeline value, active deals, and performance KPIs',
     visible: true,
-    position: { x: 0, y: 0, width: 4, height: 1 },
+    size: 'full',
+    order: 1,
     locked: true
   },
   { 
@@ -39,7 +34,8 @@ const defaultWidgets: DashboardWidget[] = [
     title: 'My Deals',
     description: 'Recent and active deal listings',
     visible: true,
-    position: { x: 0, y: 1, width: 2, height: 2 }
+    size: 'medium',
+    order: 2
   },
   { 
     id: 'pipeline-widget', 
@@ -47,7 +43,8 @@ const defaultWidgets: DashboardWidget[] = [
     title: 'Pipeline Analytics',
     description: 'Deal pipeline and conversion stats',
     visible: true,
-    position: { x: 2, y: 1, width: 2, height: 2 }
+    size: 'medium',
+    order: 3
   },
   { 
     id: 'actions-widget', 
@@ -55,7 +52,8 @@ const defaultWidgets: DashboardWidget[] = [
     title: 'Quick Actions',
     description: 'Common tasks and shortcuts',
     visible: true,
-    position: { x: 0, y: 3, width: 2, height: 1 }
+    size: 'small',
+    order: 4
   },
   { 
     id: 'activity-widget', 
@@ -63,7 +61,8 @@ const defaultWidgets: DashboardWidget[] = [
     title: 'Recent Activity',
     description: 'Latest actions and updates',
     visible: true,
-    position: { x: 2, y: 3, width: 2, height: 1 }
+    size: 'small',
+    order: 5
   },
   { 
     id: 'nda-widget', 
@@ -71,12 +70,14 @@ const defaultWidgets: DashboardWidget[] = [
     title: 'NDA Management',
     description: 'Non-disclosure agreement tracking',
     visible: true,
-    position: { x: 0, y: 4, width: 2, height: 1 }
+    size: 'medium',
+    order: 6
   }
 ];
 
 const DashboardMain = () => {
   const [widgets, setWidgets] = React.useState<DashboardWidget[]>(defaultWidgets);
+  const [layout, setLayout] = React.useState<LayoutConfig>(LAYOUT_PRESETS['auto-grid']);
   const [dragState, setDragState] = React.useState<{
     isDragging: boolean;
     draggedWidget: DashboardWidget | null;
@@ -88,10 +89,14 @@ const DashboardMain = () => {
   // Load layout from localStorage on mount
   React.useEffect(() => {
     try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        const savedWidgets = JSON.parse(saved);
-        setWidgets(savedWidgets);
+      const savedWidgets = localStorage.getItem(STORAGE_KEY);
+      const savedLayout = localStorage.getItem(LAYOUT_STORAGE_KEY);
+      
+      if (savedWidgets) {
+        setWidgets(JSON.parse(savedWidgets));
+      }
+      if (savedLayout) {
+        setLayout(JSON.parse(savedLayout));
       }
     } catch (error) {
       console.error('Failed to load dashboard layout:', error);
@@ -99,9 +104,12 @@ const DashboardMain = () => {
   }, []);
 
   // Save layout to localStorage
-  const saveLayout = React.useCallback((newWidgets: DashboardWidget[]) => {
+  const saveLayout = React.useCallback((newWidgets: DashboardWidget[], newLayout?: LayoutConfig) => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(newWidgets));
+      if (newLayout) {
+        localStorage.setItem(LAYOUT_STORAGE_KEY, JSON.stringify(newLayout));
+      }
     } catch (error) {
       console.error('Failed to save dashboard layout:', error);
     }
@@ -119,9 +127,16 @@ const DashboardMain = () => {
     });
   }, [saveLayout]);
 
+  const handleLayoutChange = React.useCallback((newLayout: LayoutConfig) => {
+    setLayout(newLayout);
+    saveLayout(widgets, newLayout);
+  }, [widgets, saveLayout]);
+
   const resetLayout = React.useCallback(() => {
     setWidgets(defaultWidgets);
+    setLayout(LAYOUT_PRESETS['auto-grid']);
     localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(LAYOUT_STORAGE_KEY);
   }, []);
 
   const handleDragStart = React.useCallback((widget: DashboardWidget, event: React.DragEvent) => {
@@ -138,14 +153,14 @@ const DashboardMain = () => {
     event.preventDefault();
     if (!dragState.draggedWidget || dragState.draggedWidget.id === targetWidget.id) return;
 
-    // Swap positions
+    // Swap order instead of positions
     setWidgets(prev => {
       const updated = prev.map(widget => {
         if (widget.id === dragState.draggedWidget!.id) {
-          return { ...widget, position: targetWidget.position };
+          return { ...widget, order: targetWidget.order };
         }
         if (widget.id === targetWidget.id) {
-          return { ...widget, position: dragState.draggedWidget!.position };
+          return { ...widget, order: dragState.draggedWidget!.order };
         }
         return widget;
       });
@@ -156,8 +171,8 @@ const DashboardMain = () => {
     setDragState({ isDragging: false, draggedWidget: null });
   }, [dragState.draggedWidget, saveLayout]);
 
-  const getWidgetComponent = (type: DashboardWidget['type']) => {
-    switch (type) {
+  const getWidgetComponent = (widget: DashboardWidget) => {
+    switch (widget.type) {
       case 'metrics': return <MetricsWidget />;
       case 'deals': return <MyDealsWidget />;
       case 'pipeline': return <PipelineWidget />;
@@ -167,8 +182,6 @@ const DashboardMain = () => {
       default: return <div>Unknown widget</div>;
     }
   };
-
-  const visibleWidgets = widgets.filter(w => w.visible);
 
   return (
     <DashboardLayout activeTab="dashboard">
@@ -186,6 +199,10 @@ const DashboardMain = () => {
                 </p>
               </div>
               <div className="flex items-center gap-3">
+                <LayoutController
+                  currentLayout={layout}
+                  onLayoutChange={handleLayoutChange}
+                />
                 <WidgetCustomizer 
                   widgets={widgets}
                   onToggleVisibility={toggleWidgetVisibility}
@@ -208,40 +225,17 @@ const DashboardMain = () => {
           </div>
         </div>
 
-        {/* Grid Layout */}
-        {visibleWidgets.length > 0 ? (
-          <div className="grid grid-cols-4 gap-6 auto-rows-[200px]">
-            {visibleWidgets.map((widget) => (
-              <div
-                key={widget.id}
-                draggable={!widget.locked}
-                onDragStart={(e) => handleDragStart(widget, e)}
-                onDragEnd={handleDragEnd}
-                onDragOver={(e) => e.preventDefault()}
-                onDrop={(e) => handleDrop(widget, e)}
-                className={`
-                  relative transition-all duration-200 group
-                  ${dragState.draggedWidget?.id === widget.id ? 'opacity-50 scale-95' : ''}
-                  ${!widget.locked ? 'cursor-move hover:shadow-lg' : ''}
-                `}
-                style={{
-                  gridColumn: `${widget.position.x + 1} / span ${widget.position.width}`,
-                  gridRow: `${widget.position.y + 1} / span ${widget.position.height}`
-                }}
-              >
-                {/* Drag handle */}
-                {!widget.locked && (
-                  <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <div className="w-6 h-6 bg-muted/80 rounded flex items-center justify-center">
-                      <div className="w-3 h-3 bg-muted-foreground rounded-sm opacity-60" />
-                    </div>
-                  </div>
-                )}
-
-                {getWidgetComponent(widget.type)}
-              </div>
-            ))}
-          </div>
+        {/* Adaptive Grid Layout */}
+        {widgets.filter(w => w.visible).length > 0 ? (
+          <AdaptiveGrid
+            widgets={widgets}
+            layout={layout}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+            onDrop={handleDrop}
+            renderWidget={getWidgetComponent}
+            dragState={dragState}
+          />
         ) : (
           <div className="text-center py-12">
             <Card className="bg-gradient-to-b from-[#2A2F3A] to-[#1A1F2E] border-[#D4AF37]/30 max-w-md mx-auto">
