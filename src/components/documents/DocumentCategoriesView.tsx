@@ -156,10 +156,15 @@ const DocumentCategoriesView = ({ dealId, onRefresh, refreshTrigger }: DocumentC
     }
   };
 
-  const handleDocumentChange = () => {
+  const handleDocumentChange = (deletedId?: string) => {
     console.log('🔄 handleDocumentChange called - refreshing documents');
     console.log('🔄 Current dealId:', dealId);
     console.log('🔄 Current refreshTrigger:', refreshTrigger);
+
+    // Optimistically update local state if we know which doc was deleted
+    if (deletedId) {
+      setDocuments(prev => prev.filter(doc => doc.id !== deletedId));
+    }
     
     // Add a small delay to ensure database consistency
     setTimeout(() => {
@@ -256,8 +261,8 @@ const DocumentCategoriesView = ({ dealId, onRefresh, refreshTrigger }: DocumentC
               category={category}
               documents={categoryDocs}
               dealId={dealId}
-              onUploadComplete={handleDocumentChange}
-              onDocumentDeleted={handleDocumentChange}
+              onUploadComplete={() => handleDocumentChange()}
+              onDocumentDeleted={(id) => handleDocumentChange(id)}
             />
           );
         })}

@@ -366,8 +366,8 @@ const DocumentStatusPanel = ({ companyId, companyName }: DocumentStatusPanelProp
                         category={category}
                         documents={categoryDocs}
                         dealId={companyId}
-                        onUploadComplete={handleDocumentChange}
-                        onDocumentDeleted={handleDocumentChange}
+                        onUploadComplete={() => handleDocumentChange()}
+                        onDocumentDeleted={(_id) => handleDocumentChange()}
                       />
                     </div>
                   )}

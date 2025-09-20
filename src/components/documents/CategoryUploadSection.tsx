@@ -43,7 +43,7 @@ interface CategoryUploadSectionProps {
   documents: Document[];
   dealId: string;
   onUploadComplete: () => void;
-  onDocumentDeleted: () => void;
+  onDocumentDeleted: (deletedId: string) => void;
 }
 
 // UploadFile interface now imported from useDocumentUpload hook
@@ -249,7 +249,7 @@ const CategoryUploadSection = ({
       setDocumentToDelete(null);
       
       // Trigger parent refresh
-      onDocumentDeleted();
+      onDocumentDeleted(documentToDelete.id);
       
     } catch (error) {
       console.error('❌ Error deleting document:', error);
