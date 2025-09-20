@@ -93,13 +93,30 @@ const DashboardMain = () => {
       const savedLayout = localStorage.getItem(LAYOUT_STORAGE_KEY);
       
       if (savedWidgets) {
-        setWidgets(JSON.parse(savedWidgets));
+        const parsedWidgets = JSON.parse(savedWidgets);
+        // Validate that parsedWidgets is an array
+        if (Array.isArray(parsedWidgets)) {
+          setWidgets(parsedWidgets);
+        } else {
+          console.warn('Invalid widgets data in localStorage, using defaults');
+          localStorage.removeItem(STORAGE_KEY);
+        }
       }
       if (savedLayout) {
-        setLayout(JSON.parse(savedLayout));
+        const parsedLayout = JSON.parse(savedLayout);
+        // Validate layout structure
+        if (parsedLayout && typeof parsedLayout === 'object' && parsedLayout.type) {
+          setLayout(parsedLayout);
+        } else {
+          console.warn('Invalid layout data in localStorage, using defaults');
+          localStorage.removeItem(LAYOUT_STORAGE_KEY);
+        }
       }
     } catch (error) {
       console.error('Failed to load dashboard layout:', error);
+      // Clear corrupted data
+      localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(LAYOUT_STORAGE_KEY);
     }
   }, []);
 
@@ -117,6 +134,11 @@ const DashboardMain = () => {
 
   const toggleWidgetVisibility = React.useCallback((widgetId: string) => {
     setWidgets(prev => {
+      // Ensure prev is always an array
+      if (!Array.isArray(prev)) {
+        console.warn('Widgets state is not an array, resetting to defaults');
+        return defaultWidgets;
+      }
       const updated = prev.map(widget =>
         widget.id === widgetId 
           ? { ...widget, visible: !widget.visible }
@@ -226,7 +248,7 @@ const DashboardMain = () => {
         </div>
 
         {/* Adaptive Grid Layout */}
-        {widgets.filter(w => w.visible).length > 0 ? (
+        {Array.isArray(widgets) && widgets.filter(w => w.visible).length > 0 ? (
           <AdaptiveGrid
             widgets={widgets}
             layout={layout}

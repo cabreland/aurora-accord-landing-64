@@ -26,6 +26,6 @@ export const WIDGET_SIZES = {
 export const LAYOUT_PRESETS: Record<string, LayoutConfig> = {
   'auto-grid': { type: 'grid', columns: 4, gap: 6, responsive: true },
   'compact-grid': { type: 'grid', columns: 6, gap: 4, responsive: true },
-  'masonry': { type: 'masonry', columns: 3, gap: 6, responsive: true },
+  'masonry': { type: 'masonry', columns: 4, gap: 6, responsive: true },
   'list': { type: 'list', columns: 1, gap: 4, responsive: false }
 };

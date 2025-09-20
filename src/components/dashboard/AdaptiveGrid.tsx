@@ -29,13 +29,13 @@ export const AdaptiveGrid: React.FC<AdaptiveGridProps> = ({
     
     switch (layout.type) {
       case 'grid':
-        return `grid ${baseClasses} grid-cols-1 md:grid-cols-2 lg:grid-cols-${layout.columns} auto-rows-[minmax(200px,auto)]`;
+        return `grid ${baseClasses} grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-${layout.columns} xl:grid-cols-${Math.min(layout.columns + 1, 6)} 2xl:grid-cols-${Math.min(layout.columns + 2, 8)} auto-rows-[minmax(200px,auto)]`;
       case 'masonry':
-        return `columns-1 md:columns-2 lg:columns-${layout.columns} ${baseClasses}`;
+        return `columns-1 sm:columns-2 md:columns-3 lg:columns-${layout.columns} xl:columns-${Math.min(layout.columns + 1, 5)} 2xl:columns-${Math.min(layout.columns + 2, 6)} ${baseClasses}`;
       case 'list':
         return `flex flex-col ${baseClasses}`;
       default:
-        return `grid ${baseClasses} grid-cols-1 md:grid-cols-2 lg:grid-cols-4 auto-rows-[minmax(200px,auto)]`;
+        return `grid ${baseClasses} grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 auto-rows-[minmax(200px,auto)]`;
     }
   };
 
