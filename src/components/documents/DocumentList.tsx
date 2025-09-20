@@ -178,8 +178,10 @@ const DocumentList = ({ dealId, companyId, canDownload = true, canDelete = false
         description: "Document deleted successfully",
       });
 
-      // Re-fetch to ensure consistency with server state
-      fetchDocuments();
+      // Re-fetch after a short delay to avoid race conditions with replication/caches
+      setTimeout(() => {
+        fetchDocuments();
+      }, 400);
     } catch (error) {
       console.error('Error deleting document:', error);
       toast({
