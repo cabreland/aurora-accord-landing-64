@@ -27,39 +27,20 @@ export const usePipelineStats = () => {
     try {
       setLoading(true);
       
-      // Get both companies and deals data for comprehensive pipeline analysis
-      const [companiesData, dealsData] = await Promise.all([
-        // Companies query
-        (() => {
-          let query = supabase
-            .from('companies')
-            .select('stage, asking_price, revenue, ebitda, created_at, is_published');
-          
-          if (profile?.role !== 'admin') {
-            query = query.eq('owner_id', user?.id);
-          }
-          
-          return query;
-        })(),
-        
-        // Deals query
-        (() => {
-          let query = supabase
-            .from('deals')
-            .select('status, asking_price, revenue, ebitda, created_at');
-          
-          if (profile?.role !== 'admin') {
-            query = query.eq('created_by', user?.id);
-          }
-          
-          return query;
-        })()
-      ]);
+      // Query deals data only for clean pipeline analytics
+      let query = supabase
+        .from('deals')
+        .select('status, asking_price, revenue, ebitda, created_at');
+      
+      if (profile?.role !== 'admin') {
+        query = query.eq('created_by', user?.id);
+      }
+      
+      const { data: dealsData, error } = await query;
 
-      if (companiesData.error) throw companiesData.error;
-      if (dealsData.error) throw dealsData.error;
+      if (error) throw error;
 
-      // Process pipeline data with better stage mapping
+      // Process pipeline data with clean stage mapping
       const stageMap = new Map<string, { count: number; totalValue: number }>();
       
       const stageConfigs = [
@@ -74,22 +55,8 @@ export const usePipelineStats = () => {
         stageMap.set(config.key, { count: 0, totalValue: 0 });
       });
 
-      // Map company stages (existing logic)
-      companiesData.data?.forEach(company => {
-        const stage = company.stage || 'teaser';
-        const current = stageMap.get(stage) || { count: 0, totalValue: 0 };
-        
-        const askingPrice = parseFloat(company.asking_price?.replace(/[^0-9.]/g, '') || '0');
-        
-        stageMap.set(stage, {
-          count: current.count + 1,
-          totalValue: current.totalValue + (askingPrice * 1000000)
-        });
-      });
-
-      // Map deal statuses to pipeline stages
-      dealsData.data?.forEach(deal => {
-        // Map deal status to pipeline stage
+      // Map deal statuses to pipeline stages - only real data
+      dealsData?.forEach(deal => {
         let stage = 'teaser';
         switch (deal.status) {
           case 'draft':
