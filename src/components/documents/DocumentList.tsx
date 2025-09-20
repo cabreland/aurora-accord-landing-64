@@ -4,6 +4,16 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { 
+  AlertDialog, 
+  AlertDialogAction, 
+  AlertDialogCancel, 
+  AlertDialogContent, 
+  AlertDialogDescription, 
+  AlertDialogFooter, 
+  AlertDialogHeader, 
+  AlertDialogTitle 
+} from '@/components/ui/alert-dialog';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useDocumentAccess } from '@/hooks/useDocumentAccess';
@@ -73,6 +83,8 @@ const DocumentList = ({ dealId, companyId, canDownload = true, canDelete = false
   const [sortBy, setSortBy] = useState<'name' | 'date' | 'size'>('date');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [previewDocument, setPreviewDocument] = useState<Document | null>(null);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [documentToDelete, setDocumentToDelete] = useState<string | null>(null);
   const { toast } = useToast();
   
   // Use document access control for NDA gating
@@ -194,20 +206,25 @@ const DocumentList = ({ dealId, companyId, canDownload = true, canDelete = false
     setFilteredDocuments(filtered);
   };
 
-  const handleDelete = async (documentId: string) => {
-    if (!canDelete) return;
+  const handleDeleteClick = (documentId: string) => {
+    setDocumentToDelete(documentId);
+    setShowDeleteDialog(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!canDelete || !documentToDelete) return;
 
     try {
       const { error } = await supabase
         .from('documents')
         .delete()
-        .eq('id', documentId);
+        .eq('id', documentToDelete);
 
       if (error) throw error;
 
       // Optimistically update UI immediately
-      setDocuments(prev => prev.filter(d => d.id !== documentId));
-      setFilteredDocuments(prev => prev.filter(d => d.id !== documentId));
+      setDocuments(prev => prev.filter(d => d.id !== documentToDelete));
+      setFilteredDocuments(prev => prev.filter(d => d.id !== documentToDelete));
 
       toast({
         title: "Success",
@@ -225,6 +242,9 @@ const DocumentList = ({ dealId, companyId, canDownload = true, canDelete = false
         description: "Failed to delete document",
         variant: "destructive",
       });
+    } finally {
+      setShowDeleteDialog(false);
+      setDocumentToDelete(null);
     }
   };
 
@@ -547,7 +567,7 @@ const DocumentList = ({ dealId, companyId, canDownload = true, canDelete = false
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => handleDelete(document.id)}
+                            onClick={() => handleDeleteClick(document.id)}
                             className="text-red-400 hover:text-red-300 hover:bg-red-400/10"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -572,6 +592,29 @@ const DocumentList = ({ dealId, companyId, canDownload = true, canDelete = false
           canDownload={canDownload}
         />
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Document</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this document? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setShowDeleteDialog(false)}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDeleteConfirm}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 };
