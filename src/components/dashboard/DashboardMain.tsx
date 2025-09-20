@@ -5,13 +5,14 @@ import { PipelineWidget } from './widgets/PipelineWidget';
 import { QuickActionsWidget } from './widgets/QuickActionsWidget';
 import { ActivityFeedWidget } from './widgets/ActivityFeedWidget';
 import { DragDropGrid } from './DragDropGrid';
+import { WidgetCustomizer } from './WidgetCustomizer';
 import { useDashboardLayout } from '@/hooks/useDashboardLayout';
 import { BarChart3, TrendingUp, Building2, AlertTriangle, RotateCcw } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 
 const DashboardMain = () => {
-  const { layout, updateLayout, resetLayout } = useDashboardLayout();
+  const { layout, updateLayout, resetLayout, getVisibleWidgets } = useDashboardLayout();
 
   // Create widget components mapping
   const widgetComponents = {
@@ -71,8 +72,9 @@ const DashboardMain = () => {
     )
   };
 
-  // Map layout to grid items with components
-  const gridItems = layout.map(widget => ({
+  // Map visible widgets to grid items with components
+  const visibleWidgets = getVisibleWidgets();
+  const gridItems = visibleWidgets.map(widget => ({
     ...widget,
     component: widgetComponents[widget.id as keyof typeof widgetComponents]
   }));
@@ -93,6 +95,7 @@ const DashboardMain = () => {
                 </p>
               </div>
               <div className="flex items-center gap-3">
+                <WidgetCustomizer />
                 <Button
                   variant="outline"
                   size="sm"
@@ -116,6 +119,19 @@ const DashboardMain = () => {
           onLayoutChange={updateLayout}
           className="min-h-[600px]"
         />
+        
+        {visibleWidgets.length === 0 && (
+          <div className="text-center py-12">
+            <Card className="bg-gradient-to-b from-[#2A2F3A] to-[#1A1F2E] border-[#D4AF37]/30 max-w-md mx-auto">
+              <CardContent className="p-8">
+                <div className="text-[#F4E4BC]/60 mb-4">
+                  No widgets are currently visible
+                </div>
+                <WidgetCustomizer />
+              </CardContent>
+            </Card>
+          </div>
+        )}
       </div>
     </DashboardLayout>
   );

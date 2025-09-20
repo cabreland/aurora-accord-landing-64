@@ -5,17 +5,68 @@ export interface DashboardWidget {
   component: React.ReactNode;
   gridArea: string;
   draggable?: boolean;
+  visible?: boolean;
+  title?: string;
+  description?: string;
 }
 
 const STORAGE_KEY = 'dashboard-layout';
 
 const defaultLayout: DashboardWidget[] = [
-  { id: 'metrics', component: null, gridArea: 'metrics', draggable: false },
-  { id: 'deals', component: null, gridArea: 'deals', draggable: true },
-  { id: 'pipeline', component: null, gridArea: 'pipeline', draggable: true },
-  { id: 'actions', component: null, gridArea: 'actions', draggable: true },
-  { id: 'activity', component: null, gridArea: 'activity', draggable: true },
-  { id: 'nda', component: null, gridArea: 'nda', draggable: true }
+  { 
+    id: 'metrics', 
+    component: null, 
+    gridArea: 'metrics', 
+    draggable: false, 
+    visible: true,
+    title: 'Key Metrics',
+    description: 'Pipeline value, active deals, and KPIs'
+  },
+  { 
+    id: 'deals', 
+    component: null, 
+    gridArea: 'deals', 
+    draggable: true, 
+    visible: true,
+    title: 'My Deals',
+    description: 'Recent and active deal listings'
+  },
+  { 
+    id: 'pipeline', 
+    component: null, 
+    gridArea: 'pipeline', 
+    draggable: true, 
+    visible: true,
+    title: 'Pipeline Analytics',
+    description: 'Deal pipeline and conversion stats'
+  },
+  { 
+    id: 'actions', 
+    component: null, 
+    gridArea: 'actions', 
+    draggable: true, 
+    visible: true,
+    title: 'Quick Actions',
+    description: 'Common tasks and shortcuts'
+  },
+  { 
+    id: 'activity', 
+    component: null, 
+    gridArea: 'activity', 
+    draggable: true, 
+    visible: true,
+    title: 'Recent Activity',
+    description: 'Latest actions and updates'
+  },
+  { 
+    id: 'nda', 
+    component: null, 
+    gridArea: 'nda', 
+    draggable: true, 
+    visible: true,
+    title: 'NDA Management',
+    description: 'Non-disclosure agreement tracking'
+  }
 ];
 
 export const useDashboardLayout = () => {
@@ -55,9 +106,22 @@ export const useDashboardLayout = () => {
     localStorage.removeItem(STORAGE_KEY);
   };
 
+  const toggleWidgetVisibility = (widgetId: string) => {
+    const newLayout = layout.map(widget => 
+      widget.id === widgetId 
+        ? { ...widget, visible: !widget.visible }
+        : widget
+    );
+    updateLayout(newLayout);
+  };
+
+  const getVisibleWidgets = () => layout.filter(widget => widget.visible);
+
   return {
     layout,
     updateLayout,
-    resetLayout
+    resetLayout,
+    toggleWidgetVisibility,
+    getVisibleWidgets
   };
 };

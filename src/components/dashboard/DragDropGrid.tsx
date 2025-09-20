@@ -19,10 +19,15 @@ export const DragDropGrid = ({ items, className, onLayoutChange }: DragDropGridP
   const [gridItems, setGridItems] = useState<GridItem[]>(items);
   const [draggedItem, setDraggedItem] = useState<GridItem | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+  const [dragOverArea, setDragOverArea] = useState<string | null>(null);
   const gridRef = useRef<HTMLDivElement>(null);
 
+  // Define all possible grid areas for drop zones
+  const gridAreas = ['metrics', 'deals', 'pipeline', 'actions', 'activity', 'nda'];
+  const visibleItems = items.filter(item => item.id !== 'invisible'); // Filter out hidden widgets
+
   useEffect(() => {
-    setGridItems(items);
+    setGridItems(visibleItems);
   }, [items]);
 
   const handleDragStart = (e: React.DragEvent, item: GridItem) => {
@@ -31,39 +36,48 @@ export const DragDropGrid = ({ items, className, onLayoutChange }: DragDropGridP
     e.dataTransfer.effectAllowed = 'move';
   };
 
-  const handleDragOver = (e: React.DragEvent, index: number) => {
+  const handleDragOver = (e: React.DragEvent, index?: number, area?: string) => {
     e.preventDefault();
     if (!draggedItem) return;
-    setDragOverIndex(index);
+    
+    if (index !== undefined) {
+      setDragOverIndex(index);
+      setDragOverArea(null);
+    } else if (area) {
+      setDragOverArea(area);
+      setDragOverIndex(null);
+    }
+    
     e.dataTransfer.dropEffect = 'move';
   };
 
-  const handleDrop = (e: React.DragEvent, dropIndex: number) => {
+  const handleDrop = (e: React.DragEvent, dropIndex?: number, dropArea?: string) => {
     e.preventDefault();
     if (!draggedItem) return;
 
     const dragIndex = gridItems.findIndex(item => item.id === draggedItem.id);
-    if (dragIndex === -1 || dragIndex === dropIndex) return;
+    if (dragIndex === -1) return;
 
-    console.log('Drop detected:', { dragIndex, dropIndex, draggedItem: draggedItem.id });
+    console.log('Drop detected:', { dragIndex, dropIndex, dropArea, draggedItem: draggedItem.id });
 
-    // Instead of reordering array, swap the gridArea values
     const newItems = [...gridItems];
-    const draggedGridArea = newItems[dragIndex].gridArea;
-    const targetGridArea = newItems[dropIndex].gridArea;
-
-    // Swap grid areas to actually change positions
-    newItems[dragIndex] = { ...newItems[dragIndex], gridArea: targetGridArea };
-    newItems[dropIndex] = { ...newItems[dropIndex], gridArea: draggedGridArea };
-
-    console.log('Grid areas swapped:', { 
-      [newItems[dragIndex].id]: targetGridArea,
-      [newItems[dropIndex].id]: draggedGridArea 
-    });
+    
+    if (dropIndex !== undefined && dragIndex !== dropIndex) {
+      // Dropping on existing widget - swap grid areas
+      const draggedGridArea = newItems[dragIndex].gridArea;
+      const targetGridArea = newItems[dropIndex].gridArea;
+      
+      newItems[dragIndex] = { ...newItems[dragIndex], gridArea: targetGridArea };
+      newItems[dropIndex] = { ...newItems[dropIndex], gridArea: draggedGridArea };
+    } else if (dropArea && newItems[dragIndex].gridArea !== dropArea) {
+      // Dropping on empty area - move to that area
+      newItems[dragIndex] = { ...newItems[dragIndex], gridArea: dropArea };
+    }
 
     setGridItems(newItems);
     setDraggedItem(null);
     setDragOverIndex(null);
+    setDragOverArea(null);
     
     onLayoutChange?.(newItems);
   };
@@ -71,13 +85,18 @@ export const DragDropGrid = ({ items, className, onLayoutChange }: DragDropGridP
   const handleDragEnd = () => {
     setDraggedItem(null);
     setDragOverIndex(null);
+    setDragOverArea(null);
   };
+
+  // Get occupied grid areas
+  const occupiedAreas = gridItems.map(item => item.gridArea);
+  const emptyAreas = gridAreas.filter(area => !occupiedAreas.includes(area));
 
   return (
     <div 
       ref={gridRef}
       className={cn(
-        "grid gap-6 w-full",
+        "grid gap-6 w-full relative",
         "grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4",
         "auto-rows-min",
         className
@@ -91,6 +110,7 @@ export const DragDropGrid = ({ items, className, onLayoutChange }: DragDropGridP
         `
       }}
     >
+      {/* Render visible widgets */}
       {gridItems.map((item, index) => (
         <DraggableWidget
           key={item.id}
@@ -104,6 +124,17 @@ export const DragDropGrid = ({ items, className, onLayoutChange }: DragDropGridP
           onDragEnd={handleDragEnd}
         />
       ))}
+      
+      {/* Render empty drop zones */}
+      {draggedItem && emptyAreas.map((area) => (
+        <EmptyDropZone
+          key={`empty-${area}`}
+          area={area}
+          isDragOver={dragOverArea === area}
+          onDragOver={handleDragOver}
+          onDrop={handleDrop}
+        />
+      ))}
     </div>
   );
 };
@@ -114,8 +145,8 @@ interface DraggableWidgetProps {
   isDragging: boolean;
   isDragOver: boolean;
   onDragStart: (e: React.DragEvent, item: GridItem) => void;
-  onDragOver: (e: React.DragEvent, index: number) => void;
-  onDrop: (e: React.DragEvent, index: number) => void;
+  onDragOver: (e: React.DragEvent, index?: number, area?: string) => void;
+  onDrop: (e: React.DragEvent, dropIndex?: number, dropArea?: string) => void;
   onDragEnd: () => void;
 }
 
@@ -154,6 +185,37 @@ const DraggableWidget = ({
       )}
       <div className="group h-full">
         {item.component}
+      </div>
+    </div>
+  );
+};
+
+// Empty drop zone component for unused grid areas
+interface EmptyDropZoneProps {
+  area: string;
+  isDragOver: boolean;
+  onDragOver: (e: React.DragEvent, index?: number, area?: string) => void;
+  onDrop: (e: React.DragEvent, dropIndex?: number, dropArea?: string) => void;
+}
+
+const EmptyDropZone = ({ area, isDragOver, onDragOver, onDrop }: EmptyDropZoneProps) => {
+  return (
+    <div
+      onDragOver={(e) => onDragOver(e, undefined, area)}
+      onDrop={(e) => onDrop(e, undefined, area)}
+      className={cn(
+        "min-h-[200px] border-2 border-dashed transition-all duration-200",
+        "flex items-center justify-center rounded-lg",
+        `[grid-area:${area}]`,
+        isDragOver 
+          ? "border-primary bg-primary/10 border-solid" 
+          : "border-muted-foreground/20 hover:border-muted-foreground/40"
+      )}
+      style={{ gridArea: area }}
+    >
+      <div className="text-center text-muted-foreground">
+        <div className="text-sm font-medium mb-1">Drop Zone</div>
+        <div className="text-xs opacity-60">{area} area</div>
       </div>
     </div>
   );
