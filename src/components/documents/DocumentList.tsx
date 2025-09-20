@@ -87,6 +87,42 @@ const DocumentList = ({ dealId, companyId, canDownload = true, canDelete = false
     fetchDocuments();
   }, [dealId, refreshTrigger]);
 
+  // Realtime updates to keep UI in sync with deletions/insertions
+  useEffect(() => {
+    const channel = supabase
+      .channel(`documents-${isGlobalView ? 'all' : dealId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'documents',
+          ...(isGlobalView ? {} : { filter: `deal_id=eq.${dealId}` }),
+        },
+        (payload) => {
+          try {
+            if ((payload as any).eventType === 'DELETE') {
+              const deletedId = (payload as any).old?.id as string | undefined;
+              if (deletedId) {
+                setDocuments(prev => prev.filter(d => d.id !== deletedId));
+                setFilteredDocuments(prev => prev.filter(d => d.id !== deletedId));
+              }
+            } else {
+              // For inserts/updates, refresh the list
+              fetchDocuments();
+            }
+          } catch (e) {
+            console.error('Realtime update handling error:', e);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [dealId, isGlobalView]);
+
   useEffect(() => {
     filterAndSortDocuments();
   }, [documents, debouncedSearchTerm, selectedTag, sortBy, sortOrder]);
