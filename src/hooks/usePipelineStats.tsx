@@ -73,11 +73,25 @@ export const usePipelineStats = () => {
         }
         
         const current = stageMap.get(stage) || { count: 0, totalValue: 0 };
-        const askingPrice = parseFloat(deal.asking_price?.replace(/[^0-9.]/g, '') || '0');
+        
+        // Parse asking price properly - handle values like "300k", "1.5M", or plain numbers
+        let askingPrice = 0;
+        if (deal.asking_price) {
+          const priceStr = deal.asking_price.toLowerCase();
+          const numValue = parseFloat(priceStr.replace(/[^0-9.]/g, ''));
+          
+          if (priceStr.includes('m')) {
+            askingPrice = numValue * 1000000; // Convert millions to actual value
+          } else if (priceStr.includes('k')) {
+            askingPrice = numValue * 1000; // Convert thousands to actual value  
+          } else {
+            askingPrice = numValue * 1000; // Assume plain numbers are in thousands
+          }
+        }
         
         stageMap.set(stage, {
           count: current.count + 1,
-          totalValue: current.totalValue + (askingPrice * 1000000)
+          totalValue: current.totalValue + askingPrice
         });
       });
 
