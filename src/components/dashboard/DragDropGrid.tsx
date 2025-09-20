@@ -45,9 +45,21 @@ export const DragDropGrid = ({ items, className, onLayoutChange }: DragDropGridP
     const dragIndex = gridItems.findIndex(item => item.id === draggedItem.id);
     if (dragIndex === -1 || dragIndex === dropIndex) return;
 
+    console.log('Drop detected:', { dragIndex, dropIndex, draggedItem: draggedItem.id });
+
+    // Instead of reordering array, swap the gridArea values
     const newItems = [...gridItems];
-    const [removed] = newItems.splice(dragIndex, 1);
-    newItems.splice(dropIndex, 0, removed);
+    const draggedGridArea = newItems[dragIndex].gridArea;
+    const targetGridArea = newItems[dropIndex].gridArea;
+
+    // Swap grid areas to actually change positions
+    newItems[dragIndex] = { ...newItems[dragIndex], gridArea: targetGridArea };
+    newItems[dropIndex] = { ...newItems[dropIndex], gridArea: draggedGridArea };
+
+    console.log('Grid areas swapped:', { 
+      [newItems[dragIndex].id]: targetGridArea,
+      [newItems[dropIndex].id]: draggedGridArea 
+    });
 
     setGridItems(newItems);
     setDraggedItem(null);
