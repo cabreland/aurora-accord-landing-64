@@ -4,38 +4,25 @@ import { MyDealsWidget } from './widgets/MyDealsWidget';
 import { PipelineWidget } from './widgets/PipelineWidget';
 import { QuickActionsWidget } from './widgets/QuickActionsWidget';
 import { ActivityFeedWidget } from './widgets/ActivityFeedWidget';
-import { MetricsWidget } from './widgets/MetricsWidget';
 import { NDAWidget } from './widgets/NDAWidget';
+import { MetricsHeader } from './MetricsHeader';
+import { SimpleGrid } from './SimpleGrid';
 import { WidgetCustomizer } from './WidgetCustomizer';
-import { LayoutController } from './LayoutController';
-import { AdaptiveGrid } from './AdaptiveGrid';
 import { RotateCcw } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { DashboardWidget, LayoutConfig, LAYOUT_PRESETS } from '@/types/dashboard';
+import { DashboardWidget } from '@/types/dashboard';
 
-const STORAGE_KEY = 'dashboard-layout-v2';
-const LAYOUT_STORAGE_KEY = 'dashboard-layout-config';
+const STORAGE_KEY = 'dashboard-widgets-v3';
 
 const defaultWidgets: DashboardWidget[] = [
-  { 
-    id: 'metrics-widget', 
-    type: 'metrics',
-    title: 'Key Metrics',
-    description: 'Pipeline value, active deals, and performance KPIs',
-    visible: true,
-    size: 'full',
-    order: 1,
-    locked: true
-  },
   { 
     id: 'deals-widget', 
     type: 'deals',
     title: 'My Deals',
     description: 'Recent and active deal listings',
     visible: true,
-    size: 'medium',
-    order: 2
+    order: 1
   },
   { 
     id: 'pipeline-widget', 
@@ -43,8 +30,7 @@ const defaultWidgets: DashboardWidget[] = [
     title: 'Pipeline Analytics',
     description: 'Deal pipeline and conversion stats',
     visible: true,
-    size: 'medium',
-    order: 3
+    order: 2
   },
   { 
     id: 'actions-widget', 
@@ -52,8 +38,7 @@ const defaultWidgets: DashboardWidget[] = [
     title: 'Quick Actions',
     description: 'Common tasks and shortcuts',
     visible: true,
-    size: 'small',
-    order: 4
+    order: 3
   },
   { 
     id: 'activity-widget', 
@@ -61,8 +46,7 @@ const defaultWidgets: DashboardWidget[] = [
     title: 'Recent Activity',
     description: 'Latest actions and updates',
     visible: true,
-    size: 'small',
-    order: 5
+    order: 4
   },
   { 
     id: 'nda-widget', 
@@ -70,14 +54,12 @@ const defaultWidgets: DashboardWidget[] = [
     title: 'NDA Management',
     description: 'Non-disclosure agreement tracking',
     visible: true,
-    size: 'medium',
-    order: 6
+    order: 5
   }
 ];
 
 const DashboardMain = () => {
   const [widgets, setWidgets] = React.useState<DashboardWidget[]>(defaultWidgets);
-  const [layout, setLayout] = React.useState<LayoutConfig>(LAYOUT_PRESETS['auto-grid']);
   const [dragState, setDragState] = React.useState<{
     isDragging: boolean;
     draggedWidget: DashboardWidget | null;
@@ -86,11 +68,10 @@ const DashboardMain = () => {
     draggedWidget: null
   });
 
-  // Load layout from localStorage on mount
+  // Load widgets from localStorage on mount
   React.useEffect(() => {
     try {
       const savedWidgets = localStorage.getItem(STORAGE_KEY);
-      const savedLayout = localStorage.getItem(LAYOUT_STORAGE_KEY);
       
       if (savedWidgets) {
         const parsedWidgets = JSON.parse(savedWidgets);
@@ -102,33 +83,19 @@ const DashboardMain = () => {
           localStorage.removeItem(STORAGE_KEY);
         }
       }
-      if (savedLayout) {
-        const parsedLayout = JSON.parse(savedLayout);
-        // Validate layout structure
-        if (parsedLayout && typeof parsedLayout === 'object' && parsedLayout.type) {
-          setLayout(parsedLayout);
-        } else {
-          console.warn('Invalid layout data in localStorage, using defaults');
-          localStorage.removeItem(LAYOUT_STORAGE_KEY);
-        }
-      }
     } catch (error) {
-      console.error('Failed to load dashboard layout:', error);
+      console.error('Failed to load dashboard widgets:', error);
       // Clear corrupted data
       localStorage.removeItem(STORAGE_KEY);
-      localStorage.removeItem(LAYOUT_STORAGE_KEY);
     }
   }, []);
 
-  // Save layout to localStorage
-  const saveLayout = React.useCallback((newWidgets: DashboardWidget[], newLayout?: LayoutConfig) => {
+  // Save widgets to localStorage
+  const saveWidgets = React.useCallback((newWidgets: DashboardWidget[]) => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(newWidgets));
-      if (newLayout) {
-        localStorage.setItem(LAYOUT_STORAGE_KEY, JSON.stringify(newLayout));
-      }
     } catch (error) {
-      console.error('Failed to save dashboard layout:', error);
+      console.error('Failed to save dashboard widgets:', error);
     }
   }, []);
 
@@ -144,21 +111,14 @@ const DashboardMain = () => {
           ? { ...widget, visible: !widget.visible }
           : widget
       );
-      saveLayout(updated);
+      saveWidgets(updated);
       return updated;
     });
-  }, [saveLayout]);
-
-  const handleLayoutChange = React.useCallback((newLayout: LayoutConfig) => {
-    setLayout(newLayout);
-    saveLayout(widgets, newLayout);
-  }, [widgets, saveLayout]);
+  }, [saveWidgets]);
 
   const resetLayout = React.useCallback(() => {
     setWidgets(defaultWidgets);
-    setLayout(LAYOUT_PRESETS['auto-grid']);
     localStorage.removeItem(STORAGE_KEY);
-    localStorage.removeItem(LAYOUT_STORAGE_KEY);
   }, []);
 
   const handleDragStart = React.useCallback((widget: DashboardWidget, event: React.DragEvent) => {
@@ -186,16 +146,15 @@ const DashboardMain = () => {
         }
         return widget;
       });
-      saveLayout(updated);
+      saveWidgets(updated);
       return updated;
     });
 
     setDragState({ isDragging: false, draggedWidget: null });
-  }, [dragState.draggedWidget, saveLayout]);
+  }, [dragState.draggedWidget, saveWidgets]);
 
   const getWidgetComponent = (widget: DashboardWidget) => {
     switch (widget.type) {
-      case 'metrics': return <MetricsWidget />;
       case 'deals': return <MyDealsWidget />;
       case 'pipeline': return <PipelineWidget />;
       case 'actions': return <QuickActionsWidget />;
@@ -221,10 +180,6 @@ const DashboardMain = () => {
                 </p>
               </div>
               <div className="flex items-center gap-3">
-                <LayoutController
-                  currentLayout={layout}
-                  onLayoutChange={handleLayoutChange}
-                />
                 <WidgetCustomizer 
                   widgets={widgets}
                   onToggleVisibility={toggleWidgetVisibility}
@@ -247,11 +202,13 @@ const DashboardMain = () => {
           </div>
         </div>
 
-        {/* Adaptive Grid Layout */}
+        {/* Fixed Metrics Header */}
+        <MetricsHeader />
+
+        {/* Simple Widget Grid */}
         {Array.isArray(widgets) && widgets.filter(w => w.visible).length > 0 ? (
-          <AdaptiveGrid
+          <SimpleGrid
             widgets={widgets}
-            layout={layout}
             onDragStart={handleDragStart}
             onDragEnd={handleDragEnd}
             onDrop={handleDrop}

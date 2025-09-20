@@ -19,25 +19,25 @@ const MetricCard = ({ title, value, change, icon: Icon, trend }: MetricCardProps
 
   return (
     <Card className="bg-gradient-to-b from-[#2A2F3A] to-[#1A1F2E] border-[#D4AF37]/30 hover:border-[#D4AF37]/50 transition-colors">
-      <CardContent className="p-6">
-        <div className="flex items-center justify-between mb-4">
-          <Icon className="w-8 h-8 text-[#D4AF37]" />
-          <span className={`text-sm font-medium ${trendColors[trend]}`}>
+      <CardContent className="p-4">
+        <div className="flex items-center justify-between mb-3">
+          <Icon className="w-6 h-6 text-[#D4AF37]" />
+          <span className={`text-xs font-medium ${trendColors[trend]}`}>
             {change}
           </span>
         </div>
         <div>
-          <div className="text-3xl font-bold text-[#FAFAFA] mb-1">{value}</div>
-          <p className="text-sm text-[#F4E4BC]/60">{title}</p>
+          <div className="text-2xl font-bold text-[#FAFAFA] mb-1">{value}</div>
+          <p className="text-xs text-[#F4E4BC]/60">{title}</p>
         </div>
       </CardContent>
     </Card>
   );
 };
 
-export const MetricsWidget: React.FC = () => {
+export const MetricsHeader: React.FC = () => {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 h-full">
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
       <MetricCard
         title="Pipeline Value"
         value="$12.5M"

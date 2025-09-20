@@ -1,12 +1,11 @@
 import React from 'react';
-import { Settings, Eye, EyeOff, BarChart3, Building2, Activity, PieChart, Zap, FileText } from 'lucide-react';
+import { Settings, Eye, EyeOff, Building2, Activity, PieChart, Zap, FileText } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 const widgetIcons = {
-  metrics: BarChart3,
   deals: Building2,
   activity: Activity,
   pipeline: PieChart,
