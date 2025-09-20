@@ -1,171 +1,103 @@
 import React from 'react';
 import DashboardLayout from '@/components/investor/DashboardLayout';
-import { DashboardGrid, GridWidget } from './DashboardGrid';
 import { MyDealsWidget } from './widgets/MyDealsWidget';
 import { PipelineWidget } from './widgets/PipelineWidget';
 import { QuickActionsWidget } from './widgets/QuickActionsWidget';
 import { ActivityFeedWidget } from './widgets/ActivityFeedWidget';
-import { PlaceholderWidget, ChartPlaceholder, MetricPlaceholder } from './widgets/PlaceholderWidget';
-import { BarChart3, TrendingUp, Building2, AlertTriangle, Calendar, Users, FileText, Target } from 'lucide-react';
+import { BarChart3, TrendingUp, Building2, AlertTriangle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 const DashboardMain = () => {
-  // Define dashboard widgets with their grid properties
-  const dashboardWidgets: GridWidget[] = [
-    {
-      id: 'pipeline-value',
-      title: 'Pipeline Value',
-      defaultLayout: { w: 3, h: 3, x: 0, y: 0, minW: 2, minH: 2 },
-      component: (
-        <MetricPlaceholder
-          icon={TrendingUp}
-          title="$12.5M"
-          description="Total pipeline value (+8.2%)"
-        />
-      )
-    },
-    {
-      id: 'active-deals',
-      title: 'Active Deals',
-      defaultLayout: { w: 3, h: 3, x: 3, y: 0, minW: 2, minH: 2 },
-      component: (
-        <MetricPlaceholder
-          icon={Building2}
-          title="23"
-          description="Active deals (+3 this week)"
-        />
-      )
-    },
-    {
-      id: 'ndas-pending',
-      title: 'NDAs Pending',
-      defaultLayout: { w: 3, h: 3, x: 6, y: 0, minW: 2, minH: 2 },
-      component: (
-        <MetricPlaceholder
-          icon={AlertTriangle}
-          title="7"
-          description="Pending NDA approvals"
-        />
-      )
-    },
-    {
-      id: 'closing-month',
-      title: 'Closing This Month',
-      defaultLayout: { w: 3, h: 3, x: 9, y: 0, minW: 2, minH: 2 },
-      component: (
-        <MetricPlaceholder
-          icon={BarChart3}
-          title="4"
-          description="Deals closing this month"
-        />
-      )
-    },
-    {
-      id: 'my-deals',
-      title: 'My Deals',
-      defaultLayout: { w: 8, h: 6, x: 0, y: 3, minW: 6, minH: 4 },
-      component: <MyDealsWidget />
-    },
-    {
-      id: 'pipeline-overview',
-      title: 'Pipeline Overview',
-      defaultLayout: { w: 4, h: 6, x: 8, y: 3, minW: 3, minH: 4 },
-      component: <PipelineWidget />
-    },
-    {
-      id: 'quick-actions',
-      title: 'Quick Actions',
-      defaultLayout: { w: 4, h: 4, x: 8, y: 9, minW: 3, minH: 3 },
-      component: <QuickActionsWidget />
-    },
-    {
-      id: 'activity-feed',
-      title: 'Recent Activity',
-      defaultLayout: { w: 8, h: 6, x: 0, y: 9, minW: 6, minH: 4 },
-      component: <ActivityFeedWidget />
-    },
-    {
-      id: 'calendar-widget',
-      title: 'Upcoming Events',
-      defaultLayout: { w: 6, h: 5, x: 0, y: 15, minW: 4, minH: 4 },
-      component: (
-        <PlaceholderWidget
-          icon={Calendar}
-          title="Calendar Integration"
-          description="Upcoming meetings and deadlines will appear here"
-        />
-      )
-    },
-    {
-      id: 'team-performance',
-      title: 'Team Performance',
-      defaultLayout: { w: 6, h: 5, x: 6, y: 15, minW: 4, minH: 4 },
-      component: (
-        <ChartPlaceholder
-          icon={Users}
-          title="Team Metrics"
-          description="Team performance analytics and KPIs"
-        />
-      )
-    },
-    {
-      id: 'document-tracker',
-      title: 'Document Tracker',
-      defaultLayout: { w: 4, h: 4, x: 0, y: 20, minW: 3, minH: 3 },
-      component: (
-        <PlaceholderWidget
-          icon={FileText}
-          title="Document Status"
-          description="Track document reviews and approvals"
-        />
-      )
-    },
-    {
-      id: 'targets-goals',
-      title: 'Targets & Goals',
-      defaultLayout: { w: 4, h: 4, x: 4, y: 20, minW: 3, minH: 3 },
-      component: (
-        <PlaceholderWidget
-          icon={Target}
-          title="Monthly Targets"
-          description="Progress towards monthly and quarterly goals"
-        />
-      )
-    }
-  ];
-
-  const handleLayoutChange = (layouts: { [key: string]: any[] }) => {
-    console.log('Layout changed:', layouts);
-  };
-
   return (
     <DashboardLayout activeTab="dashboard">
-      <div className="p-6">
+      <div className="space-y-6">
         {/* Header */}
         <div className="mb-8">
-          <div className="bg-gradient-to-r from-background to-muted/20 border border-border rounded-xl p-6">
+          <div className="bg-gradient-to-r from-[#0A0F0F] to-[#1A1F2E] border border-[#D4AF37]/30 rounded-xl p-6">
             <div className="flex justify-between items-start">
               <div>
-                <h1 className="text-4xl font-bold text-foreground mb-2">
+                <h1 className="text-4xl font-bold text-[#FAFAFA] mb-2">
                   Broker Dashboard
                 </h1>
-                <p className="text-xl text-muted-foreground">
+                <p className="text-xl text-[#F4E4BC]">
                   Comprehensive deal management and analytics for M&A professionals
                 </p>
               </div>
-              <div className="bg-primary text-primary-foreground px-4 py-2 rounded-lg">
-                <span className="font-semibold text-sm">Live Dashboard</span>
+              <div className="bg-gradient-to-r from-[#D4AF37] to-[#F4E4BC] px-4 py-2 rounded-lg">
+                <span className="text-[#0A0F0F] font-semibold text-sm">Live Dashboard</span>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Drag & Drop Grid */}
-        <DashboardGrid 
-          widgets={dashboardWidgets}
-          onLayoutChange={handleLayoutChange}
-          className="min-h-screen"
-        />
+        {/* Key Metrics Row */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <MetricCard
+            title="Pipeline Value"
+            value="$12.5M"
+            change="+8.2%"
+            icon={TrendingUp}
+            trend="up"
+          />
+          <MetricCard
+            title="Active Deals"
+            value="23"
+            change="+3"
+            icon={Building2}
+            trend="up"
+          />
+          <MetricCard
+            title="NDAs Pending"
+            value="7"
+            change="-2"
+            icon={AlertTriangle}
+            trend="neutral"
+          />
+          <MetricCard
+            title="Closing This Month"
+            value="4"
+            change="+1"
+            icon={BarChart3}
+            trend="up"
+          />
+        </div>
+
+        {/* Main Widgets Grid */}
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+          {/* My Deals Widget - Takes 2 columns on xl screens */}
+          <div className="xl:col-span-2">
+            <MyDealsWidget />
+          </div>
+          
+          {/* Right Column Widgets */}
+          <div className="space-y-6">
+            <PipelineWidget />
+            <QuickActionsWidget />
+          </div>
+        </div>
+
+        {/* Bottom Row */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <ActivityFeedWidget />
+          
+          {/* Placeholder for future widgets */}
+          <Card className="bg-gradient-to-b from-[#2A2F3A] to-[#1A1F2E] border-[#D4AF37]/30">
+            <CardHeader>
+              <CardTitle className="text-[#FAFAFA] flex items-center gap-3">
+                <BarChart3 className="w-5 h-5 text-[#D4AF37]" />
+                NDA Management
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center py-8">
+                <p className="text-[#F4E4BC]/60 mb-4">
+                  NDA tracking and management widget coming soon
+                </p>
+                <div className="text-sm text-[#D4AF37]">Widget in development</div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </DashboardLayout>
   );
