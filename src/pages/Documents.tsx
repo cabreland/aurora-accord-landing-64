@@ -64,7 +64,7 @@ const Documents = () => {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => navigate('/deal-management')}
+              onClick={() => navigate('/deals')}
               className="gap-2"
             >
               <ArrowLeft className="w-4 h-4" />
