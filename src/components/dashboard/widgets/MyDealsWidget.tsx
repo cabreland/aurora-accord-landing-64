@@ -1,23 +1,14 @@
 import React from 'react';
-import { WidgetContainer } from '../shared/WidgetContainer';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useMyDeals, DealView } from '@/hooks/useMyDeals';
-import { 
-  BarChart3, 
-  Grid3X3, 
-  List, 
-  Search, 
-  Plus,
-  Building2,
-  MapPin,
-  Clock,
-  TrendingUp
-} from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { WidgetContainer } from '@/components/dashboard/shared/WidgetContainer';
+import { useMyDeals } from '@/hooks/useMyDeals';
+import { UnifiedDealCard } from '@/components/common/UnifiedDealCard';
+import { Building2, MapPin, Grid3X3, List, Search, Plus, BarChart3 } from 'lucide-react';
 
 export const MyDealsWidget = () => {
   const { 
@@ -158,45 +149,35 @@ export const MyDealsWidget = () => {
   );
 };
 
-const DealCard = ({ deal }: { deal: any }) => (
-  <div className="bg-[#1A1F2E] border border-[#D4AF37]/20 rounded-lg p-4 hover:border-[#D4AF37]/40 transition-colors">
-    <div className="flex justify-between items-start mb-2">
-      <h4 className="font-medium text-[#FAFAFA] truncate">{deal.title}</h4>
-      <Badge 
-        variant="outline" 
-        className={`text-xs ${
-          deal.status === 'active' ? 'bg-[#22C55E]/20 text-[#22C55E] border-[#22C55E]/50' :
-          deal.status === 'draft' ? 'bg-[#F28C38]/20 text-[#F28C38] border-[#F28C38]/50' :
-          'bg-[#6B7280]/20 text-[#6B7280] border-[#6B7280]/50'
-        }`}
-      >
-        {deal.status}
-      </Badge>
-    </div>
-    <p className="text-sm text-[#F4E4BC] mb-2">{deal.company_name}</p>
-    <div className="flex items-center gap-4 text-xs text-[#F4E4BC]/60 mb-3">
-      <span className="flex items-center gap-1">
-        <Building2 className="w-3 h-3" />
-        {deal.industry || 'N/A'}
-      </span>
-      <span className="flex items-center gap-1">
-        <MapPin className="w-3 h-3" />
-        {deal.location || 'N/A'}
-      </span>
-    </div>
-    <div className="flex justify-between items-center">
-      <span className="text-sm font-medium text-[#D4AF37]">
-        {deal.revenue || 'Revenue TBD'}
-      </span>
-      <Link 
-        to={`/deal/${deal.id}`}
-        className="text-xs text-[#F4E4BC] hover:text-[#D4AF37] transition-colors"
-      >
-        View Details →
-      </Link>
-    </div>
-  </div>
-);
+const DealCard = ({ deal }: { deal: any }) => {
+  const navigate = useNavigate();
+  
+  const handleClick = () => {
+    navigate(`/deal/${deal.id}`);
+  };
+
+  const unifiedDeal = {
+    id: deal.id,
+    title: deal.title,
+    company_name: deal.company_name,
+    industry: deal.industry,
+    revenue: deal.revenue,
+    ebitda: deal.ebitda,
+    location: deal.location,
+    status: deal.status,
+    priority: deal.priority,
+    updated_at: deal.updated_at
+  };
+
+  return (
+    <UnifiedDealCard
+      deal={unifiedDeal}
+      variant="dashboard"
+      onClick={handleClick}
+      showActions={false}
+    />
+  );
+};
 
 const DealListItem = ({ deal }: { deal: any }) => (
   <div className="flex items-center justify-between p-3 bg-[#1A1F2E] border border-[#D4AF37]/20 rounded-lg hover:border-[#D4AF37]/40 transition-colors">

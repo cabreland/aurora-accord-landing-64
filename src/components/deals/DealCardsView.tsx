@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { MoreVertical, Building2, MapPin, DollarSign, TrendingUp } from 'lucide-react';
 import { MyDeal } from '@/hooks/useMyDeals';
 import { Skeleton } from '@/components/ui/skeleton';
+import { UnifiedDealCard, UnifiedDealData } from '@/components/common/UnifiedDealCard';
 
 interface DealCardsViewProps {
   deals: MyDeal[];
@@ -82,85 +83,36 @@ export const DealCardsView: React.FC<DealCardsViewProps> = ({
   return (
     <div className="p-6">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {deals.map((deal) => (
-          <Card 
-            key={deal.id} 
-            className={`cursor-pointer transition-all hover:shadow-md ${
-              selectedDealId === deal.id ? 'ring-2 ring-primary' : ''
-            }`}
-            onClick={() => onDealSelect(deal.id)}
-          >
-            <CardHeader className="pb-3">
-              <div className="flex items-start justify-between">
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-foreground truncate" title={deal.title}>
-                    {deal.title}
-                  </h3>
-                  <div className="flex items-center gap-2 mt-1">
-                    <Building2 className="w-3 h-3 text-muted-foreground" />
-                    <span className="text-sm text-muted-foreground truncate">
-                      {deal.company_name}
-                    </span>
-                  </div>
-                </div>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                  <MoreVertical className="w-4 h-4" />
-                </Button>
-              </div>
-            </CardHeader>
+        {deals.map((deal) => {
+          const unifiedDeal: UnifiedDealData = {
+            id: deal.id,
+            title: deal.title,
+            company_name: deal.company_name,
+            industry: deal.industry,
+            revenue: deal.revenue,
+            ebitda: deal.ebitda,
+            asking_price: deal.asking_price,
+            location: deal.location,
+            status: deal.status,
+            priority: deal.priority as any,
+            created_at: deal.created_at,
+            updated_at: deal.updated_at,
+            description: deal.description,
+            // Digital business metrics
+            growth_rate: deal.growth_rate
+          };
 
-            <CardContent className="space-y-3">
-              <div className="flex items-center justify-between">
-                <Badge variant={getStatusVariant(deal.status)}>
-                  {deal.status}
-                </Badge>
-                {deal.priority && (
-                  <Badge variant="outline" className={getPriorityColor(deal.priority)}>
-                    {deal.priority}
-                  </Badge>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                {deal.industry && (
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <TrendingUp className="w-3 h-3" />
-                    <span>{deal.industry}</span>
-                  </div>
-                )}
-                
-                {deal.location && (
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <MapPin className="w-3 h-3" />
-                    <span>{deal.location}</span>
-                  </div>
-                )}
-
-                <div className="grid grid-cols-2 gap-2 text-sm">
-                  {deal.revenue && (
-                    <div className="flex items-center gap-1">
-                      <DollarSign className="w-3 h-3 text-muted-foreground" />
-                      <span className="text-muted-foreground truncate" title={`Revenue: ${deal.revenue}`}>
-                        {deal.revenue}
-                      </span>
-                    </div>
-                  )}
-                  {deal.ebitda && (
-                    <div className="text-xs text-muted-foreground truncate" title={`EBITDA: ${deal.ebitda}`}>
-                      EBITDA: {deal.ebitda}
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="pt-2 border-t border-border">
-                <p className="text-xs text-muted-foreground">
-                  Updated {new Date(deal.updated_at).toLocaleDateString()}
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+          return (
+            <UnifiedDealCard
+              key={deal.id}
+              deal={unifiedDeal}
+              variant="management"
+              isSelected={selectedDealId === deal.id}
+              onClick={() => onDealSelect(deal.id)}
+              showActions={true}
+            />
+          );
+        })}
       </div>
     </div>
   );
