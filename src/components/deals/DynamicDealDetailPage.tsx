@@ -27,6 +27,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { MyDeal } from '@/hooks/useMyDeals';
 import { useToast } from '@/hooks/use-toast';
 import { ExpandedDealEditModal } from './ExpandedDealEditModal';
+import { resolveDealRoute } from '@/lib/data/dealRouting';
 
 interface DynamicDealDetailPageProps {
   dealId?: string;
@@ -46,23 +47,34 @@ export const DynamicDealDetailPage = ({ dealId }: DynamicDealDetailPageProps) =>
   // Effects after all hook declarations
   useEffect(() => {
     if (dealId) {
-      fetchDeal();
-      loadDealDocuments();
+      // Resolve the ID first (could be company or deal ID)
+      resolveDealRoute(dealId).then(info => {
+        if (info.dealId) {
+          // Use the resolved deal ID for fetching
+          fetchDeal(info.dealId);
+          loadDealDocuments(info.dealId);
+        } else {
+          // Fallback to original ID
+          fetchDeal();
+          loadDealDocuments();
+        }
+      });
     }
   }, [dealId]);
 
-  const fetchDeal = async () => {
+  const fetchDeal = async (resolvedDealId?: string) => {
     try {
       setLoading(true);
       
-      if (!dealId) {
+      const idToUse = resolvedDealId || dealId;
+      if (!idToUse) {
         throw new Error('Deal ID is required');
       }
       
       const { data, error } = await supabase
         .from('deals')
         .select('*')
-        .eq('id', dealId)
+        .eq('id', idToUse)
         .maybeSingle();
 
       if (error) throw error;
@@ -79,14 +91,15 @@ export const DynamicDealDetailPage = ({ dealId }: DynamicDealDetailPageProps) =>
     }
   };
 
-  const loadDealDocuments = async () => {
+  const loadDealDocuments = async (resolvedDealId?: string) => {
     try {
-      if (!dealId) return;
+      const idToUse = resolvedDealId || dealId;
+      if (!idToUse) return;
       
       const { data, error } = await supabase
         .from('documents')
         .select('*')
-        .eq('deal_id', dealId)
+        .eq('deal_id', idToUse)
         .order('created_at', { ascending: false });
 
       if (error) throw error;

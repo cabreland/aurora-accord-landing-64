@@ -4,6 +4,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { getAccessibleDeals, AccessibleDeal, logInvestorActivity } from '@/lib/rpc/investorDealAccess';
 import { supabase } from '@/integrations/supabase/client';
+import { getDealIdFromCompanyId } from '@/lib/data/dealRouting';
 
 export interface InvestorDeal {
   id: string;
@@ -215,9 +216,10 @@ export const useInvestorDeals = () => {
 };
 
 // Convert teaser data to deal format for investor view
+// Note: teaser.id is the company ID - we'll need to resolve to deal ID for routing
 const convertTeaserToDeal = (teaser: TeaserData): InvestorDeal => {
   return {
-    id: teaser.id,
+    id: teaser.id, // This is company ID - routing will resolve to deal ID
     companyName: teaser.name || 'Unnamed Company',
     industry: teaser.industry || 'Not specified',
     revenue: teaser.revenue || 'Not disclosed',

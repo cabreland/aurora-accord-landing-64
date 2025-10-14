@@ -25,6 +25,7 @@ import { useInvestorContext } from '@/hooks/useInvestorContext';
 import { useInvestorDeals } from '@/hooks/useInvestorDeals';
 import UserMenuDropdown from '@/components/ui/UserMenuDropdown';
 import DealCard from '@/components/investor/DealCard';
+import { getDealDetailRoute } from '@/lib/data/dealRouting';
 
 
 const InvestorPortalMain = () => {
@@ -44,9 +45,12 @@ const InvestorPortalMain = () => {
 
   const loading = profileLoading || contextLoading || dealsLoading;
 
-  const handleDealCardClick = (dealId: string) => {
-    handleDealClick(dealId); // Log activity via hook
-    navigate(`/deal/${dealId}`);
+  const handleDealCardClick = async (id: string) => {
+    handleDealClick(id); // Log activity via hook
+    
+    // Resolve the correct route (handles both company and deal IDs)
+    const route = await getDealDetailRoute(id);
+    navigate(route);
   };
 
   const toggleFilter = (filter: string) => {
