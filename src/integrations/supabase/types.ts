@@ -306,10 +306,17 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "deal_watchlist_deal_id_fkey"
+            foreignKeyName: "deal_watchlist_company_id_fkey"
             columns: ["deal_id"]
             isOneToOne: false
-            referencedRelation: "deals"
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deal_watchlist_company_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "public_company_teasers"
             referencedColumns: ["id"]
           },
         ]
