@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { withAuth } from "@/utils/withAuth";
 import React, { Suspense, lazy } from "react";
+import { FloatingChatWidget } from "@/components/chat/FloatingChatWidget";
 
 import Index from "./pages/Index";
 import Demo from "./pages/Demo";
@@ -69,6 +70,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          <FloatingChatWidget />
           <Suspense
             fallback={
               <div className="min-h-screen bg-[#1C2526] flex items-center justify-center">

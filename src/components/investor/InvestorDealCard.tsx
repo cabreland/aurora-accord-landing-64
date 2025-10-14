@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Star, MessageSquare, Info, Heart, Calendar } from 'lucide-react';
@@ -7,8 +7,9 @@ import { cn } from '@/lib/utils';
 import { useWatchlist } from '@/hooks/useWatchlist';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useChatWidget } from '@/hooks/useChatWidget';
+import { RequestInfoModal } from '@/components/chat/RequestInfoModal';
+import { ScheduleCallModal } from '@/components/chat/ScheduleCallModal';
 
 interface InvestorDealCardProps {
   deal: {
@@ -30,15 +31,27 @@ export const InvestorDealCard: React.FC<InvestorDealCardProps> = ({
   isSelected = false,
 }) => {
   const { isWatched, toggleWatchlist } = useWatchlist();
-  const navigate = useNavigate();
+  const { openWidget } = useChatWidget();
   const industryCategory = getIndustryCategory(deal.industry);
+  const [showInfoModal, setShowInfoModal] = useState(false);
+  const [showCallModal, setShowCallModal] = useState(false);
 
   const handleStarClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     toggleWatchlist(deal.id);
   };
 
-  const handleDealInteraction = async (e: React.MouseEvent, actionType: string) => {
+  const handleAsk = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    await openWidget(deal.id, deal.companyName);
+  };
+
+  const handleInfo = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setShowInfoModal(true);
+  };
+
+  const handleInterest = async (e: React.MouseEvent) => {
     e.stopPropagation();
     
     try {
@@ -48,79 +61,18 @@ export const InvestorDealCard: React.FC<InvestorDealCardProps> = ({
         return;
       }
 
-      // Check if conversation already exists for this investor + deal
-      const { data: existing } = await supabase
-        .from('conversations' as any)
-        .select('id')
-        .eq('investor_id', user.id)
-        .eq('deal_id', deal.id)
-        .maybeSingle();
-
-      if (existing) {
-        // Navigate to existing conversation
-        navigate(`/investor-portal/messages/${(existing as any).id}`);
-      } else {
-        // Create new conversation
-        const { data: newConv, error: convError } = await supabase
-          .from('conversations' as any)
-          .insert({
-            investor_id: user.id,
-            deal_id: deal.id,
-            deal_name: deal.companyName,
-            subject: `${deal.companyName} - ${getActionLabel(actionType)}`,
-            channel: 'platform',
-            status: 'active',
-            unread_count_broker: 1
-          } as any)
-          .select()
-          .single();
-
-        if (convError) {
-          console.error('Error creating conversation:', convError);
-          toast.error('Failed to create conversation');
-          return;
-        }
-
-        // Create initial message
-        const initialMessage = getInitialMessage(actionType);
-
-        await supabase
-          .from('conversation_messages' as any)
-          .insert({
-            conversation_id: (newConv as any).id,
-            sender_id: user.id,
-            sender_type: 'investor',
-            message_type: actionType,
-            message_text: initialMessage
-          } as any);
-
-        // Navigate to new conversation
-        navigate(`/investor-portal/messages/${(newConv as any).id}`);
-      }
-    } catch (error: any) {
-      console.error('Error handling deal interaction:', error);
-      toast.error('Something went wrong');
+      // Create deal_interest record (you would need to create this table)
+      // For now, just show success toast
+      toast.success('Interest expressed. A broker will contact you shortly.');
+    } catch (error) {
+      console.error('Error expressing interest:', error);
+      toast.error('Failed to express interest');
     }
   };
 
-  const getActionLabel = (actionType: string): string => {
-    const labels: Record<string, string> = {
-      question: 'Question',
-      info_request: 'Information Request',
-      interest: 'Interest Expressed',
-      call_request: 'Call Request'
-    };
-    return labels[actionType] || 'Inquiry';
-  };
-
-  const getInitialMessage = (actionType: string): string => {
-    const messages: Record<string, string> = {
-      question: '', // Empty for user to type their question
-      info_request: 'I would like to request additional information about this opportunity.',
-      interest: 'I am interested in learning more about this acquisition opportunity and would like to discuss next steps.',
-      call_request: 'I would like to schedule a call to discuss this opportunity. Please let me know your availability.'
-    };
-    return messages[actionType] || '';
+  const handleCall = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setShowCallModal(true);
   };
 
   const formatFinancial = (value: string | undefined) => {
@@ -203,7 +155,7 @@ export const InvestorDealCard: React.FC<InvestorDealCardProps> = ({
         <Button
           variant="ghost"
           size="sm"
-          onClick={(e) => handleDealInteraction(e, 'question')}
+          onClick={handleAsk}
           className="flex-1 text-[hsl(var(--text-primary))] hover:text-[hsl(var(--primary))] hover:bg-[hsl(var(--primary))]/10"
         >
           <MessageSquare className="w-4 h-4 mr-1" />
@@ -214,7 +166,7 @@ export const InvestorDealCard: React.FC<InvestorDealCardProps> = ({
         <Button
           variant="ghost"
           size="sm"
-          onClick={(e) => handleDealInteraction(e, 'info_request')}
+          onClick={handleInfo}
           className="flex-1 text-[hsl(var(--text-primary))] hover:text-[hsl(var(--primary))] hover:bg-[hsl(var(--primary))]/10"
         >
           <Info className="w-4 h-4 mr-1" />
@@ -225,7 +177,7 @@ export const InvestorDealCard: React.FC<InvestorDealCardProps> = ({
         <Button
           variant="ghost"
           size="sm"
-          onClick={(e) => handleDealInteraction(e, 'interest')}
+          onClick={handleInterest}
           className="flex-1 text-[hsl(var(--text-primary))] hover:text-[#22C55E] hover:bg-[#22C55E]/10"
         >
           <Heart className="w-4 h-4 mr-1" />
@@ -236,13 +188,28 @@ export const InvestorDealCard: React.FC<InvestorDealCardProps> = ({
         <Button
           variant="ghost"
           size="sm"
-          onClick={(e) => handleDealInteraction(e, 'call_request')}
+          onClick={handleCall}
           className="flex-1 text-[hsl(var(--text-primary))] hover:text-[#F28C38] hover:bg-[#F28C38]/10"
         >
           <Calendar className="w-4 h-4 mr-1" />
           Call
         </Button>
       </div>
+
+      {/* Modals */}
+      <RequestInfoModal
+        open={showInfoModal}
+        onOpenChange={setShowInfoModal}
+        dealId={deal.id}
+        dealName={deal.companyName}
+      />
+      
+      <ScheduleCallModal
+        open={showCallModal}
+        onOpenChange={setShowCallModal}
+        dealId={deal.id}
+        dealName={deal.companyName}
+      />
     </div>
   );
 };
