@@ -10,6 +10,7 @@ import { CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { supabase } from '@/integrations/supabase/client';
 
 interface ScheduleCallModalProps {
   open: boolean;
@@ -27,6 +28,7 @@ export const ScheduleCallModal: React.FC<ScheduleCallModalProps> = ({
   const [selectedDate, setSelectedDate] = useState<Date>();
   const [selectedTime, setSelectedTime] = useState<string>('');
   const [alternativeTimes, setAlternativeTimes] = useState('');
+  const [additionalMessage, setAdditionalMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const timeSlots = [
@@ -42,8 +44,25 @@ export const ScheduleCallModal: React.FC<ScheduleCallModalProps> = ({
 
     setIsSubmitting(true);
     try {
-      // Here you would create a call_request record in the database
-      await new Promise(resolve => setTimeout(resolve, 500));
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        toast.error('Please log in to submit a request');
+        return;
+      }
+
+      const { error } = await supabase
+        .from('call_requests' as any)
+        .insert({
+          deal_id: dealId,
+          investor_id: user.id,
+          preferred_date: format(selectedDate, 'yyyy-MM-dd'),
+          preferred_time: selectedTime,
+          alternative_times: alternativeTimes.trim() || null,
+          additional_message: additionalMessage.trim() || null
+        } as any);
+
+      if (error) throw error;
       
       toast.success('Call request sent. A broker will contact you shortly.');
       onOpenChange(false);
@@ -52,7 +71,9 @@ export const ScheduleCallModal: React.FC<ScheduleCallModalProps> = ({
       setSelectedDate(undefined);
       setSelectedTime('');
       setAlternativeTimes('');
+      setAdditionalMessage('');
     } catch (error) {
+      console.error('Error submitting call request:', error);
       toast.error('Failed to send call request');
     } finally {
       setIsSubmitting(false);
@@ -121,6 +142,17 @@ export const ScheduleCallModal: React.FC<ScheduleCallModalProps> = ({
               onChange={(e) => setAlternativeTimes(e.target.value)}
               placeholder="List other times that work for you..."
               className="min-h-[80px]"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="message">Additional Message (Optional)</Label>
+            <Textarea
+              id="message"
+              value={additionalMessage}
+              onChange={(e) => setAdditionalMessage(e.target.value)}
+              placeholder="Any specific topics you'd like to discuss..."
+              className="min-h-[60px]"
             />
           </div>
         </div>

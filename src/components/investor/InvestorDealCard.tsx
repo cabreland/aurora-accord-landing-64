@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Star, MessageSquare, Info, Heart, Calendar } from 'lucide-react';
@@ -8,6 +8,7 @@ import { useWatchlist } from '@/hooks/useWatchlist';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useChatWidget } from '@/hooks/useChatWidget';
+import { useWidgetSettings } from '@/hooks/useWidgetSettings';
 import { RequestInfoModal } from '@/components/chat/RequestInfoModal';
 import { ScheduleCallModal } from '@/components/chat/ScheduleCallModal';
 
@@ -31,10 +32,28 @@ export const InvestorDealCard: React.FC<InvestorDealCardProps> = ({
   isSelected = false,
 }) => {
   const { isWatched, toggleWatchlist } = useWatchlist();
-  const { openWidget } = useChatWidget();
+  const { openWidget, setDealContext } = useChatWidget();
+  const { settings } = useWidgetSettings();
   const industryCategory = getIndustryCategory(deal.industry);
   const [showInfoModal, setShowInfoModal] = useState(false);
   const [showCallModal, setShowCallModal] = useState(false);
+  const [buttonLabels, setButtonLabels] = useState({
+    ask: 'Ask',
+    info: 'Info',
+    interest: 'Interest',
+    call: 'Call'
+  });
+
+  useEffect(() => {
+    if (settings) {
+      setButtonLabels({
+        ask: settings.ask_button_label,
+        info: settings.info_button_label,
+        interest: settings.interest_button_label,
+        call: settings.call_button_label
+      });
+    }
+  }, [settings]);
 
   const handleStarClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -43,6 +62,7 @@ export const InvestorDealCard: React.FC<InvestorDealCardProps> = ({
 
   const handleAsk = async (e: React.MouseEvent) => {
     e.stopPropagation();
+    setDealContext({ id: deal.id, name: deal.companyName });
     await openWidget(deal.id, deal.companyName);
   };
 
@@ -61,9 +81,22 @@ export const InvestorDealCard: React.FC<InvestorDealCardProps> = ({
         return;
       }
 
-      // Create deal_interest record (you would need to create this table)
-      // For now, just show success toast
-      toast.success('Interest expressed. A broker will contact you shortly.');
+      const { error } = await supabase
+        .from('deal_interests' as any)
+        .insert({
+          deal_id: deal.id,
+          investor_id: user.id
+        } as any);
+
+      if (error) {
+        if (error.code === '23505') { // Unique violation
+          toast.info('You have already expressed interest in this deal');
+        } else {
+          throw error;
+        }
+      } else {
+        toast.success('Interest expressed. A broker will contact you shortly.');
+      }
     } catch (error) {
       console.error('Error expressing interest:', error);
       toast.error('Failed to express interest');
@@ -82,7 +115,7 @@ export const InvestorDealCard: React.FC<InvestorDealCardProps> = ({
   };
 
   const truncateDescription = (text: string, lines: number = 3) => {
-    const maxLength = lines * 60; // Approximate 60 chars per line
+    const maxLength = lines * 60;
     if (text.length <= maxLength) return text;
     return text.substring(0, maxLength) + '...';
   };
@@ -152,7 +185,6 @@ export const InvestorDealCard: React.FC<InvestorDealCardProps> = ({
 
       {/* Action Buttons */}
       <div className="flex items-center gap-2">
-        {/* Ask Question Button */}
         <Button
           variant="ghost"
           size="sm"
@@ -160,10 +192,9 @@ export const InvestorDealCard: React.FC<InvestorDealCardProps> = ({
           className="flex-1 text-[hsl(var(--text-primary))] hover:text-[hsl(var(--primary))] hover:bg-[hsl(var(--primary))]/10"
         >
           <MessageSquare className="w-4 h-4 mr-1" />
-          Ask
+          {buttonLabels.ask}
         </Button>
 
-        {/* Request Info */}
         <Button
           variant="ghost"
           size="sm"
@@ -171,10 +202,9 @@ export const InvestorDealCard: React.FC<InvestorDealCardProps> = ({
           className="flex-1 text-[hsl(var(--text-primary))] hover:text-[hsl(var(--primary))] hover:bg-[hsl(var(--primary))]/10"
         >
           <Info className="w-4 h-4 mr-1" />
-          Info
+          {buttonLabels.info}
         </Button>
 
-        {/* Express Interest */}
         <Button
           variant="ghost"
           size="sm"
@@ -182,10 +212,9 @@ export const InvestorDealCard: React.FC<InvestorDealCardProps> = ({
           className="flex-1 text-[hsl(var(--text-primary))] hover:text-[#22C55E] hover:bg-[#22C55E]/10"
         >
           <Heart className="w-4 h-4 mr-1" />
-          Interest
+          {buttonLabels.interest}
         </Button>
 
-        {/* Schedule Call */}
         <Button
           variant="ghost"
           size="sm"
@@ -193,7 +222,7 @@ export const InvestorDealCard: React.FC<InvestorDealCardProps> = ({
           className="flex-1 text-[hsl(var(--text-primary))] hover:text-[#F28C38] hover:bg-[#F28C38]/10"
         >
           <Calendar className="w-4 h-4 mr-1" />
-          Call
+          {buttonLabels.call}
         </Button>
       </div>
       </div>

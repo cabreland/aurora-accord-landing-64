@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useLocation } from 'react-router-dom';
 import { toast } from 'sonner';
+import { WidgetSettings } from './useWidgetSettings';
 
 interface Message {
   id: string;
@@ -32,6 +33,10 @@ export const useChatWidget = () => {
   const [currentConversation, setCurrentConversation] = useState<Conversation | null>(null);
   const [currentDealContext, setCurrentDealContext] = useState<{ id: string; name: string } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
+  const [settings, setSettings] = useState<WidgetSettings | null>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const hasAutoOpened = useRef(false);
 
   // Auto-detect deal context from URL
   useEffect(() => {
@@ -225,6 +230,35 @@ export const useChatWidget = () => {
     }
   };
 
+  // Load widget settings
+  useEffect(() => {
+    const loadSettings = async () => {
+      const { data } = await supabase
+        .from('widget_settings' as any)
+        .select('*')
+        .maybeSingle();
+      
+      if (data) {
+        setSettings(data as any);
+      }
+    };
+    loadSettings();
+  }, []);
+
+  // Auto-open widget if enabled
+  useEffect(() => {
+    if (settings && settings.auto_open_enabled && !hasAutoOpened.current) {
+      const hasClosedBefore = sessionStorage.getItem('chat-widget-closed');
+      
+      if (!hasClosedBefore) {
+        setTimeout(() => {
+          setIsOpen(true);
+          hasAutoOpened.current = true;
+        }, settings.auto_open_delay);
+      }
+    }
+  }, [settings]);
+
   // Initialize
   useEffect(() => {
     if (user) {
@@ -262,16 +296,33 @@ export const useChatWidget = () => {
     };
   }, [user, currentConversation, isOpen]);
 
+  const closeWidget = () => {
+    setIsOpen(false);
+    sessionStorage.setItem('chat-widget-closed', 'true');
+  };
+
+  const focusInput = () => {
+    setTimeout(() => {
+      inputRef.current?.focus();
+    }, 100);
+  };
+
   return {
     isOpen,
     toggleWidget,
     openWidget,
+    closeWidget,
     messages,
     unreadCount,
     currentDealContext,
+    setDealContext: setCurrentDealContext,
     currentConversation,
     sendMessage,
     markAsRead,
-    isLoading
+    isLoading,
+    isTyping,
+    settings,
+    inputRef,
+    focusInput
   };
 };

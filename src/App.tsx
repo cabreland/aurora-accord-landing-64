@@ -25,6 +25,7 @@ const DealManagement = lazy(() => import("./pages/DealManagement"));
 const DealDetail = lazy(() => import("./pages/DealDetail"));
 const Documents = lazy(() => import("./pages/Documents"));
 const Settings = lazy(() => import("./pages/Settings"));
+const ChatWidgetSettings = lazy(() => import("./pages/ChatWidgetSettings"));
 const Activity = lazy(() => import("./pages/Activity"));
 const InvestorInvitations = lazy(() => import("./pages/InvestorInvitations"));
 const InvestorRegistration = lazy(() => import("./pages/InvestorRegistration"));
@@ -43,6 +44,7 @@ const ProtectedDealDetail = withAuth('investor')(DealDetail);
 const ProtectedDocuments = withAuth('staff')(Documents);
 const ProtectedUserManagement = withAuth('admin')(UserManagement);
 const ProtectedSettings = withAuth('staff')(Settings);
+const ProtectedChatWidgetSettings = withAuth('admin')(ChatWidgetSettings);
 const ProtectedActivity = withAuth('staff')(Activity);
 const ProtectedOnboarding = withAuth('investor')(Onboarding);
 const ProtectedInvestorInvitations = withAuth('admin')(InvestorInvitations);
@@ -91,6 +93,7 @@ const App = () => (
               <Route path="/documents" element={<ProtectedDocuments />} />
               <Route path="/users" element={<ProtectedUserManagement />} />
         <Route path="/settings" element={<ProtectedSettings />} />
+        <Route path="/settings/chat-widget" element={<ProtectedChatWidgetSettings />} />
               <Route path="/activity" element={<ProtectedActivity />} />
               <Route path="/onboarding" element={<ProtectedOnboarding />} />
               <Route path="/investor-invitations" element={<ProtectedInvestorInvitations />} />

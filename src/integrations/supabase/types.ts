@@ -14,6 +14,56 @@ export type Database = {
   }
   public: {
     Tables: {
+      call_requests: {
+        Row: {
+          additional_message: string | null
+          alternative_times: string | null
+          created_at: string | null
+          deal_id: string | null
+          id: string
+          investor_id: string | null
+          preferred_date: string | null
+          preferred_time: string | null
+          scheduled_at: string | null
+          scheduled_by: string | null
+          status: string | null
+        }
+        Insert: {
+          additional_message?: string | null
+          alternative_times?: string | null
+          created_at?: string | null
+          deal_id?: string | null
+          id?: string
+          investor_id?: string | null
+          preferred_date?: string | null
+          preferred_time?: string | null
+          scheduled_at?: string | null
+          scheduled_by?: string | null
+          status?: string | null
+        }
+        Update: {
+          additional_message?: string | null
+          alternative_times?: string | null
+          created_at?: string | null
+          deal_id?: string | null
+          id?: string
+          investor_id?: string | null
+          preferred_date?: string | null
+          preferred_time?: string | null
+          scheduled_at?: string | null
+          scheduled_by?: string | null
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "call_requests_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       companies: {
         Row: {
           asking_price: string | null
@@ -241,6 +291,110 @@ export type Database = {
           },
         ]
       }
+      conversation_messages: {
+        Row: {
+          conversation_id: string
+          created_at: string | null
+          id: string
+          message_text: string
+          message_type: string | null
+          metadata: Json | null
+          read_at: string | null
+          sender_id: string
+          sender_type: string
+        }
+        Insert: {
+          conversation_id: string
+          created_at?: string | null
+          id?: string
+          message_text: string
+          message_type?: string | null
+          metadata?: Json | null
+          read_at?: string | null
+          sender_id: string
+          sender_type: string
+        }
+        Update: {
+          conversation_id?: string
+          created_at?: string | null
+          id?: string
+          message_text?: string
+          message_type?: string | null
+          metadata?: Json | null
+          read_at?: string | null
+          sender_id?: string
+          sender_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversation_messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      conversations: {
+        Row: {
+          channel: string | null
+          created_at: string | null
+          deal_id: string | null
+          deal_name: string | null
+          id: string
+          investor_id: string
+          last_message_at: string | null
+          status: string | null
+          subject: string
+          unread_count_broker: number | null
+          unread_count_investor: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          channel?: string | null
+          created_at?: string | null
+          deal_id?: string | null
+          deal_name?: string | null
+          id?: string
+          investor_id: string
+          last_message_at?: string | null
+          status?: string | null
+          subject: string
+          unread_count_broker?: number | null
+          unread_count_investor?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          channel?: string | null
+          created_at?: string | null
+          deal_id?: string | null
+          deal_name?: string | null
+          id?: string
+          investor_id?: string
+          last_message_at?: string | null
+          status?: string | null
+          subject?: string
+          unread_count_broker?: number | null
+          unread_count_investor?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversations_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "public_company_teasers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       deal_assignments: {
         Row: {
           assigned_by: string
@@ -278,6 +432,38 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "deal_assignments_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      deal_interests: {
+        Row: {
+          created_at: string | null
+          deal_id: string | null
+          id: string
+          investor_id: string | null
+          notes: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          deal_id?: string | null
+          id?: string
+          investor_id?: string | null
+          notes?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          deal_id?: string | null
+          id?: string
+          investor_id?: string | null
+          notes?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deal_interests_deal_id_fkey"
             columns: ["deal_id"]
             isOneToOne: false
             referencedRelation: "deals"
@@ -514,6 +700,50 @@ export type Database = {
           title?: string
         }
         Relationships: []
+      }
+      info_requests: {
+        Row: {
+          additional_notes: string | null
+          created_at: string | null
+          deal_id: string | null
+          fulfilled_at: string | null
+          fulfilled_by: string | null
+          id: string
+          investor_id: string | null
+          requested_items: string[]
+          status: string | null
+        }
+        Insert: {
+          additional_notes?: string | null
+          created_at?: string | null
+          deal_id?: string | null
+          fulfilled_at?: string | null
+          fulfilled_by?: string | null
+          id?: string
+          investor_id?: string | null
+          requested_items: string[]
+          status?: string | null
+        }
+        Update: {
+          additional_notes?: string | null
+          created_at?: string | null
+          deal_id?: string | null
+          fulfilled_at?: string | null
+          fulfilled_by?: string | null
+          id?: string
+          investor_id?: string | null
+          requested_items?: string[]
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "info_requests_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       investor_invitations: {
         Row: {
@@ -1099,6 +1329,99 @@ export type Database = {
             referencedColumns: ["user_id"]
           },
         ]
+      }
+      widget_settings: {
+        Row: {
+          ask_button_label: string | null
+          auto_open_delay: number | null
+          auto_open_enabled: boolean | null
+          away_message: string | null
+          broker_email_notifications: boolean | null
+          bubble_style: string | null
+          calendly_link: string | null
+          call_button_label: string | null
+          created_at: string | null
+          enable_emojis: boolean | null
+          enable_file_attachments: boolean | null
+          enable_manual_scheduling: boolean | null
+          enable_typing_indicators: boolean | null
+          id: string
+          info_button_label: string | null
+          info_request_options: Json | null
+          initial_greeting: string | null
+          interest_button_label: string | null
+          investor_email_notifications: boolean | null
+          minimized_tooltip: string | null
+          placeholder_text: string | null
+          primary_color: string | null
+          show_online_status: boolean | null
+          updated_at: string | null
+          updated_by: string | null
+          widget_position: string | null
+          widget_size: string | null
+          widget_title: string | null
+        }
+        Insert: {
+          ask_button_label?: string | null
+          auto_open_delay?: number | null
+          auto_open_enabled?: boolean | null
+          away_message?: string | null
+          broker_email_notifications?: boolean | null
+          bubble_style?: string | null
+          calendly_link?: string | null
+          call_button_label?: string | null
+          created_at?: string | null
+          enable_emojis?: boolean | null
+          enable_file_attachments?: boolean | null
+          enable_manual_scheduling?: boolean | null
+          enable_typing_indicators?: boolean | null
+          id?: string
+          info_button_label?: string | null
+          info_request_options?: Json | null
+          initial_greeting?: string | null
+          interest_button_label?: string | null
+          investor_email_notifications?: boolean | null
+          minimized_tooltip?: string | null
+          placeholder_text?: string | null
+          primary_color?: string | null
+          show_online_status?: boolean | null
+          updated_at?: string | null
+          updated_by?: string | null
+          widget_position?: string | null
+          widget_size?: string | null
+          widget_title?: string | null
+        }
+        Update: {
+          ask_button_label?: string | null
+          auto_open_delay?: number | null
+          auto_open_enabled?: boolean | null
+          away_message?: string | null
+          broker_email_notifications?: boolean | null
+          bubble_style?: string | null
+          calendly_link?: string | null
+          call_button_label?: string | null
+          created_at?: string | null
+          enable_emojis?: boolean | null
+          enable_file_attachments?: boolean | null
+          enable_manual_scheduling?: boolean | null
+          enable_typing_indicators?: boolean | null
+          id?: string
+          info_button_label?: string | null
+          info_request_options?: Json | null
+          initial_greeting?: string | null
+          interest_button_label?: string | null
+          investor_email_notifications?: boolean | null
+          minimized_tooltip?: string | null
+          placeholder_text?: string | null
+          primary_color?: string | null
+          show_online_status?: boolean | null
+          updated_at?: string | null
+          updated_by?: string | null
+          widget_position?: string | null
+          widget_size?: string | null
+          widget_title?: string | null
+        }
+        Relationships: []
       }
     }
     Views: {

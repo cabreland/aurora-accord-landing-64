@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
+import { useWidgetSettings } from '@/hooks/useWidgetSettings';
 
 interface RequestInfoModalProps {
   open: boolean;
@@ -13,28 +15,29 @@ interface RequestInfoModalProps {
   dealName: string;
 }
 
-const infoOptions = [
-  { id: 'financials', label: 'Financial Statements (last 3 years)' },
-  { id: 'customer_breakdown', label: 'Customer/Revenue breakdown' },
-  { id: 'operating_metrics', label: 'Operating metrics' },
-  { id: 'cap_table', label: 'Cap table and ownership' },
-];
-
 export const RequestInfoModal: React.FC<RequestInfoModalProps> = ({
   open,
   onOpenChange,
   dealId,
   dealName
 }) => {
+  const { settings } = useWidgetSettings();
   const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
   const [otherDetails, setOtherDetails] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [infoOptions, setInfoOptions] = useState<string[]>([]);
 
-  const handleToggle = (optionId: string) => {
+  useEffect(() => {
+    if (settings?.info_request_options) {
+      setInfoOptions(settings.info_request_options);
+    }
+  }, [settings]);
+
+  const handleToggle = (option: string) => {
     setSelectedOptions(prev =>
-      prev.includes(optionId)
-        ? prev.filter(id => id !== optionId)
-        : [...prev, optionId]
+      prev.includes(option)
+        ? prev.filter(o => o !== option)
+        : [...prev, option]
     );
   };
 
@@ -46,9 +49,28 @@ export const RequestInfoModal: React.FC<RequestInfoModalProps> = ({
 
     setIsSubmitting(true);
     try {
-      // Here you would create an info_request record in the database
-      // For now, just show success toast
-      await new Promise(resolve => setTimeout(resolve, 500));
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        toast.error('Please log in to submit a request');
+        return;
+      }
+
+      const requestedItems = [...selectedOptions];
+      if (otherDetails.trim()) {
+        requestedItems.push(`Other: ${otherDetails.trim()}`);
+      }
+
+      const { error } = await supabase
+        .from('info_requests' as any)
+        .insert({
+          deal_id: dealId,
+          investor_id: user.id,
+          requested_items: requestedItems,
+          additional_notes: otherDetails.trim() || null
+        } as any);
+
+      if (error) throw error;
       
       toast.success('Information request sent to broker team');
       onOpenChange(false);
@@ -57,6 +79,7 @@ export const RequestInfoModal: React.FC<RequestInfoModalProps> = ({
       setSelectedOptions([]);
       setOtherDetails('');
     } catch (error) {
+      console.error('Error submitting info request:', error);
       toast.error('Failed to send request');
     } finally {
       setIsSubmitting(false);
@@ -74,18 +97,18 @@ export const RequestInfoModal: React.FC<RequestInfoModalProps> = ({
         </DialogHeader>
 
         <div className="space-y-4 py-4">
-          {infoOptions.map(option => (
-            <div key={option.id} className="flex items-start space-x-3">
+          {infoOptions.map((option, index) => (
+            <div key={index} className="flex items-start space-x-3">
               <Checkbox
-                id={option.id}
-                checked={selectedOptions.includes(option.id)}
-                onCheckedChange={() => handleToggle(option.id)}
+                id={`option-${index}`}
+                checked={selectedOptions.includes(option)}
+                onCheckedChange={() => handleToggle(option)}
               />
               <Label
-                htmlFor={option.id}
+                htmlFor={`option-${index}`}
                 className="text-sm font-normal cursor-pointer"
               >
-                {option.label}
+                {option}
               </Label>
             </div>
           ))}
