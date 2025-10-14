@@ -3,6 +3,7 @@ import { getPublishedTeasers, TeaserData } from '@/lib/data/teasers';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { getAccessibleDeals, AccessibleDeal, logInvestorActivity } from '@/lib/rpc/investorDealAccess';
+import { supabase } from '@/integrations/supabase/client';
 
 export interface InvestorDeal {
   id: string;
@@ -16,6 +17,7 @@ export interface InvestorDeal {
   location: string;
   fitScore: number;
   lastUpdated: string;
+  createdAt: string; // Add actual date for filtering
   description: string;
   foundedYear: string;
   teamSize: string;
@@ -45,6 +47,9 @@ interface FilterCriteria {
   stage?: string;
   priority?: string;
   minRevenue?: number;
+  watchlistOnly?: boolean;
+  ndaOnly?: boolean;
+  newThisWeek?: boolean;
 }
 
 export const useInvestorDeals = () => {
@@ -108,8 +113,41 @@ export const useInvestorDeals = () => {
     }
   };
 
-  const handleFilterChange = (filters: FilterCriteria) => {
+  const handleFilterChange = async (filters: FilterCriteria) => {
     let filtered = allDeals;
+    
+    // Watchlist filter
+    if (filters.watchlistOnly && user?.id) {
+      const { data: watchlistData } = await supabase
+        .from('deal_watchlist')
+        .select('deal_id')
+        .eq('user_id', user.id);
+      
+      const watchlistIds = new Set(watchlistData?.map(w => w.deal_id) || []);
+      filtered = filtered.filter(deal => watchlistIds.has(deal.id));
+    }
+    
+    // NDA filter
+    if (filters.ndaOnly && user?.id) {
+      const { data: ndaData } = await supabase
+        .from('company_nda_acceptances')
+        .select('company_id')
+        .eq('user_id', user.id);
+      
+      const ndaCompanyIds = new Set(ndaData?.map(n => n.company_id) || []);
+      filtered = filtered.filter(deal => ndaCompanyIds.has(deal.id));
+    }
+    
+    // New this week filter
+    if (filters.newThisWeek) {
+      const oneWeekAgo = new Date();
+      oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+      
+      filtered = filtered.filter(deal => {
+        const dealDate = new Date(deal.createdAt);
+        return dealDate >= oneWeekAgo;
+      });
+    }
     
     if (filters.industry && filters.industry !== 'all') {
       filtered = filtered.filter(deal => deal.industry.toLowerCase() === filters.industry!.toLowerCase());
@@ -190,6 +228,7 @@ const convertTeaserToDeal = (teaser: TeaserData): InvestorDeal => {
     location: teaser.location || 'Not specified',
     fitScore: teaser.fit_score || 50,
     lastUpdated: formatDate(teaser.updated_at),
+    createdAt: teaser.created_at || new Date().toISOString(),
     description: teaser.summary || 'No description available',
     // Extended fields - using fallbacks since they're teaser-only
     foundedYear: 'Not specified',
@@ -225,6 +264,7 @@ const convertAccessibleDealToInvestorDeal = (deal: AccessibleDeal): InvestorDeal
     location: deal.location || 'Not specified',
     fitScore: 85, // Default fit score for permission-based deals
     lastUpdated: formatDate(deal.updated_at),
+    createdAt: deal.created_at || new Date().toISOString(),
     description: deal.description || 'No description available',
     foundedYear: 'Not specified',
     teamSize: 'Not specified',

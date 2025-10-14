@@ -10,10 +10,10 @@ import {
 } from '@/lib/rpc/investorDealAccess';
 
 interface InvestorMetrics {
-  totalPipeline: string;
-  activeDeals: number;
-  highPriorityDeals: number;
-  ndaSignedDeals: number;
+  watchlistCount: number;
+  ndaDealsCount: number;
+  newThisWeekCount: number;
+  unreadMessagesCount: number;
   accessibleDealsCount: number;
 }
 
@@ -100,11 +100,44 @@ export const InvestorContextProvider = ({ children }: InvestorContextProviderPro
   };
 
   const refreshMetrics = async () => {
-    if (!user?.email) return;
+    if (!user?.email || !user?.id) return;
 
     try {
-      const investorMetrics = await calculateInvestorMetrics(user.email);
-      setMetrics(investorMetrics);
+      // Fetch watchlist count
+      const { count: watchlistCount } = await supabase
+        .from('deal_watchlist')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id);
+
+      // Fetch NDA deals count
+      const { data: ndaAcceptances } = await supabase
+        .from('company_nda_acceptances')
+        .select('company_id')
+        .eq('user_id', user.id);
+
+      // Fetch unread messages count
+      const { count: unreadCount } = await supabase
+        .from('investor_messages')
+        .select('*', { count: 'exact', head: true })
+        .eq('recipient_id', user.id)
+        .is('read_at', null);
+
+      // Fetch new deals this week
+      const oneWeekAgo = new Date();
+      oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+      const { count: newDealsCount } = await supabase
+        .from('companies')
+        .select('*', { count: 'exact', head: true })
+        .eq('is_published', true)
+        .gte('created_at', oneWeekAgo.toISOString());
+
+      setMetrics({
+        watchlistCount: watchlistCount || 0,
+        ndaDealsCount: ndaAcceptances?.length || 0,
+        newThisWeekCount: newDealsCount || 0,
+        unreadMessagesCount: unreadCount || 0,
+        accessibleDealsCount: 0
+      });
     } catch (error) {
       console.error('Error refreshing metrics:', error);
     }

@@ -5,6 +5,7 @@ import { InvestorDeal } from '@/hooks/useInvestorDeals';
 import { createDealFromCompany, getDealByCompanyId } from '@/lib/data/deals';
 import { toast } from 'sonner';
 import { UnifiedDealCard, UnifiedDealData } from '@/components/common/UnifiedDealCard';
+import { DealCardActions } from './DealCardActions';
 
 interface DealCardProps {
   deal: InvestorDeal;
@@ -64,15 +65,18 @@ const DealCard = ({ deal, onClick, isSelected }: DealCardProps) => {
   };
 
   return (
-    <UnifiedDealCard
-      deal={unifiedDeal}
-      variant="investor"
-      isSelected={isSelected}
-      onClick={onClick}
-      onEdit={handleEditDeal}
-      onViewDocuments={handleViewDocuments}
-      showActions={true}
-    />
+    <div>
+      <UnifiedDealCard
+        deal={unifiedDeal}
+        variant="investor"
+        isSelected={isSelected}
+        onClick={onClick}
+        onEdit={handleEditDeal}
+        onViewDocuments={handleViewDocuments}
+        showActions={true}
+      />
+      <DealCardActions dealId={deal.id} companyName={deal.companyName} />
+    </div>
   );
 };
 

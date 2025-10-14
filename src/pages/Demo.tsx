@@ -27,7 +27,8 @@ const Demo = () => {
   // Convert mock deals to InvestorDeal format for the demo
   const convertedMockDeals = mockDeals.map(deal => ({
     ...deal,
-    id: deal.id
+    id: deal.id,
+    createdAt: new Date().toISOString()
   }));
 
   const renderDemoContent = () => {

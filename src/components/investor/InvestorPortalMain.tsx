@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { 
-  TrendingUp, 
-  Building2, 
-  AlertTriangle, 
-  CheckCircle2,
+  Star, 
+  ShieldCheck, 
+  Clock, 
+  MessageSquare,
   Filter,
   ArrowLeft,
   User,
@@ -58,8 +58,9 @@ const InvestorPortalMain = () => {
     
     // Apply filters to deals
     handleFilterChange({
-      priority: newFilters.includes('High Priority') ? 'high' : undefined,
-      stage: newFilters.includes('NDA Signed') ? 'NDA Signed' : undefined,
+      watchlistOnly: newFilters.includes('My Watchlist'),
+      ndaOnly: newFilters.includes('Under NDA'),
+      newThisWeek: newFilters.includes('New This Week'),
       minRevenue: newFilters.includes('$10M+ Revenue') ? 10000000 : undefined
     });
   };
@@ -84,7 +85,7 @@ const InvestorPortalMain = () => {
       { id: 'dashboard', label: 'Dashboard', icon: Home, path: dashboardPath, badge: null },
       { id: 'deals', label: 'Active Deals', icon: BarChart3, path: '/deals', badge: '4' },
       { id: 'documents', label: 'Documents', icon: FileText, path: '/documents', badge: null },
-      { id: 'analytics', label: 'Analytics', icon: TrendingUp, path: '/analytics', badge: null },
+      { id: 'analytics', label: 'Analytics', icon: BarChart3, path: '/analytics', badge: null },
       { id: 'compliance', label: 'Compliance', icon: Shield, path: '/compliance', badge: null },
       { id: 'settings', label: 'Settings', icon: Settings, path: '/settings', badge: null }
     ];
@@ -193,68 +194,74 @@ const InvestorPortalMain = () => {
           </CardContent>
         </Card>
 
-        {/* Metrics Cards */}
+        {/* Metrics Cards - Buyer Focused */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card className="bg-gradient-to-br from-[#2A2F3A] to-[#1A1F2E] border-[#D4AF37]/20 hover:border-[#D4AF37]/50 transition-all duration-300">
+          <Card className="bg-gradient-to-br from-[#2A2F3A] to-[#1A1F2E] border-[#D4AF37]/20 hover:border-[#D4AF37]/50 transition-all duration-300 cursor-pointer"
+                onClick={() => toggleFilter('My Watchlist')}>
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
-                <TrendingUp className="w-8 h-8 text-[#D4AF37]" />
-                <div className="w-2 h-2 bg-[#22C55E] rounded-full"></div>
-              </div>
-               <div className="space-y-1">
-                <div className="text-2xl font-bold text-[#FAFAFA]">
-                  {loading ? 'Loading...' : (metrics?.totalPipeline || '$0M')}
-                </div>
-                <div className="text-sm text-[#F4E4BC]/60">Total Pipeline</div>
-                <div className="text-xs text-[#F4E4BC]/40">Combined revenue</div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-gradient-to-br from-[#2A2F3A] to-[#1A1F2E] border-[#D4AF37]/20 hover:border-[#D4AF37]/50 transition-all duration-300">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <Building2 className="w-8 h-8 text-[#D4AF37]" />
+                <Star className="w-8 h-8 text-[#D4AF37]" />
                 <div className="w-2 h-2 bg-[#F28C38] rounded-full"></div>
               </div>
               <div className="space-y-1">
                 <div className="text-2xl font-bold text-[#FAFAFA]">
-                  {loading ? '...' : (metrics?.activeDeals || 0)}
+                  {loading ? '...' : (metrics?.watchlistCount || 0)}
                 </div>
-                <div className="text-sm text-[#F4E4BC]/60">Active Deals</div>
-                <div className="text-xs text-[#F4E4BC]/40">In pipeline</div>
+                <div className="text-sm text-[#F4E4BC]/60">My Watchlist</div>
+                <div className="text-xs text-[#F4E4BC]/40">Deals I'm tracking</div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-[#2A2F3A] to-[#1A1F2E] border-[#D4AF37]/20 hover:border-[#D4AF37]/50 transition-all duration-300">
+          <Card className="bg-gradient-to-br from-[#2A2F3A] to-[#1A1F2E] border-[#D4AF37]/20 hover:border-[#D4AF37]/50 transition-all duration-300 cursor-pointer"
+                onClick={() => toggleFilter('Under NDA')}>
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
-                <AlertTriangle className="w-8 h-8 text-[#D4AF37]" />
-                <div className="w-2 h-2 bg-[#F28C38] rounded-full"></div>
-              </div>
-              <div className="space-y-1">
-                <div className="text-2xl font-bold text-[#FAFAFA]">
-                  {loading ? '...' : (metrics?.highPriorityDeals || 0)}
-                </div>
-                <div className="text-sm text-[#F4E4BC]/60">High Priority</div>
-                <div className="text-xs text-[#F4E4BC]/40">Urgent deals</div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-gradient-to-br from-[#2A2F3A] to-[#1A1F2E] border-[#D4AF37]/20 hover:border-[#D4AF37]/50 transition-all duration-300">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <CheckCircle2 className="w-8 h-8 text-[#D4AF37]" />
+                <ShieldCheck className="w-8 h-8 text-[#D4AF37]" />
                 <div className="w-2 h-2 bg-[#22C55E] rounded-full"></div>
               </div>
               <div className="space-y-1">
                 <div className="text-2xl font-bold text-[#FAFAFA]">
-                  {loading ? '...' : (metrics?.ndaSignedDeals || 0)}
+                  {loading ? '...' : (metrics?.ndaDealsCount || 0)}
                 </div>
-                <div className="text-sm text-[#F4E4BC]/60">NDA Signed</div>
-                <div className="text-xs text-[#F4E4BC]/40">Ready for review</div>
+                <div className="text-sm text-[#F4E4BC]/60">Under NDA</div>
+                <div className="text-xs text-[#F4E4BC]/40">Full access granted</div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-[#2A2F3A] to-[#1A1F2E] border-[#D4AF37]/20 hover:border-[#D4AF37]/50 transition-all duration-300 cursor-pointer"
+                onClick={() => toggleFilter('New This Week')}>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <Clock className="w-8 h-8 text-[#D4AF37]" />
+                <div className="w-2 h-2 bg-[#F28C38] rounded-full"></div>
+              </div>
+              <div className="space-y-1">
+                <div className="text-2xl font-bold text-[#FAFAFA]">
+                  {loading ? '...' : (metrics?.newThisWeekCount || 0)}
+                </div>
+                <div className="text-sm text-[#F4E4BC]/60">New This Week</div>
+                <div className="text-xs text-[#F4E4BC]/40">Fresh opportunities</div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-[#2A2F3A] to-[#1A1F2E] border-[#D4AF37]/20 hover:border-[#D4AF37]/50 transition-all duration-300 cursor-pointer"
+                onClick={() => navigate('/messages')}>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <MessageSquare className="w-8 h-8 text-[#D4AF37]" />
+                {(metrics?.unreadMessagesCount || 0) > 0 && (
+                  <div className="w-2 h-2 bg-[#FF6B6B] rounded-full animate-pulse"></div>
+                )}
+              </div>
+              <div className="space-y-1">
+                <div className="text-2xl font-bold text-[#FAFAFA]">
+                  {loading ? '...' : (metrics?.unreadMessagesCount || 0)}
+                </div>
+                <div className="text-sm text-[#F4E4BC]/60">Messages</div>
+                <div className="text-xs text-[#F4E4BC]/40">Unread messages</div>
               </div>
             </CardContent>
           </Card>
@@ -282,26 +289,37 @@ const InvestorPortalMain = () => {
             
             <div className="flex gap-3 flex-wrap">
               <Button
-                variant={activeFilters.includes('High Priority') ? 'default' : 'outline'}
-                onClick={() => toggleFilter('High Priority')}
+                variant={activeFilters.includes('My Watchlist') ? 'default' : 'outline'}
+                onClick={() => toggleFilter('My Watchlist')}
                 className={`${
-                  activeFilters.includes('High Priority')
-                    ? 'bg-[#F28C38] text-[#0A0F0F] hover:bg-[#F28C38]/80'
-                    : 'border-[#F28C38] text-[#F28C38] hover:bg-[#F28C38]/10'
+                  activeFilters.includes('My Watchlist')
+                    ? 'bg-[#D4AF37] text-[#0A0F0F] hover:bg-[#D4AF37]/80'
+                    : 'border-[#D4AF37] text-[#D4AF37] hover:bg-[#D4AF37]/10'
                 }`}
               >
-                High Priority
+                My Watchlist
               </Button>
               <Button
-                variant={activeFilters.includes('NDA Signed') ? 'default' : 'outline'}
-                onClick={() => toggleFilter('NDA Signed')}
+                variant={activeFilters.includes('Under NDA') ? 'default' : 'outline'}
+                onClick={() => toggleFilter('Under NDA')}
                 className={`${
-                  activeFilters.includes('NDA Signed')
+                  activeFilters.includes('Under NDA')
                     ? 'bg-[#22C55E] text-[#0A0F0F] hover:bg-[#22C55E]/80'
                     : 'border-[#22C55E] text-[#22C55E] hover:bg-[#22C55E]/10'
                 }`}
               >
-                NDA Signed
+                Under NDA
+              </Button>
+              <Button
+                variant={activeFilters.includes('New This Week') ? 'default' : 'outline'}
+                onClick={() => toggleFilter('New This Week')}
+                className={`${
+                  activeFilters.includes('New This Week')
+                    ? 'bg-[#F28C38] text-[#0A0F0F] hover:bg-[#F28C38]/80'
+                    : 'border-[#F28C38] text-[#F28C38] hover:bg-[#F28C38]/10'
+                }`}
+              >
+                New This Week
               </Button>
               <Button
                 variant={activeFilters.includes('$10M+ Revenue') ? 'default' : 'outline'}
@@ -335,7 +353,13 @@ const InvestorPortalMain = () => {
             ))
           ) : filteredDeals.length === 0 ? (
             <div className="col-span-full text-center py-12">
-              <p className="text-[#F4E4BC]/60 text-lg">No deals available with your current permissions.</p>
+              <p className="text-[#F4E4BC]/60 text-lg mb-4">No deals match your filters.</p>
+              <Button 
+                onClick={() => setActiveFilters([])}
+                className="bg-[#D4AF37] text-[#0A0F0F] hover:bg-[#D4AF37]/80"
+              >
+                Clear filters to see all available opportunities
+              </Button>
             </div>
           ) : (
             filteredDeals.map((deal) => (
