@@ -109,31 +109,31 @@ export const InvestorDealCard: React.FC<InvestorDealCardProps> = ({
       </div>
 
       {/* Company Name */}
-      <h3 className="text-xl font-semibold text-[hsl(var(--foreground))] mb-3 pr-8">
+      <h3 className="text-xl font-semibold text-[hsl(var(--text-primary))] mb-3 pr-8">
         {deal.companyName}
       </h3>
 
       {/* Description */}
-      <p className="text-sm text-[hsl(var(--muted-foreground))] mb-6 leading-relaxed line-clamp-3">
+      <p className="text-sm text-[hsl(var(--text-primary))]/70 mb-6 leading-relaxed line-clamp-3">
         {truncateDescription(deal.description || 'No description available')}
       </p>
 
       {/* Financial Metrics Grid */}
       <div className="grid grid-cols-3 gap-4 mb-6 pb-6 border-b border-[hsl(var(--primary))]/20">
         <div>
-          <div className="text-xs text-[hsl(var(--muted-foreground))] mb-1">TTM Revenue</div>
-          <div className="text-sm font-semibold text-[hsl(var(--foreground))]">
+          <div className="text-xs text-[hsl(var(--text-primary))]/60 mb-1">TTM Revenue</div>
+          <div className="text-sm font-semibold text-[hsl(var(--text-primary))]">
             {formatFinancial(deal.revenue)}
           </div>
         </div>
         <div>
-          <div className="text-xs text-[hsl(var(--muted-foreground))] mb-1">TTM Profit</div>
-          <div className="text-sm font-semibold text-[hsl(var(--foreground))]">
+          <div className="text-xs text-[hsl(var(--text-primary))]/60 mb-1">TTM Profit</div>
+          <div className="text-sm font-semibold text-[hsl(var(--text-primary))]">
             {formatFinancial(deal.ebitda)}
           </div>
         </div>
         <div>
-          <div className="text-xs text-[hsl(var(--muted-foreground))] mb-1">Asking Price</div>
+          <div className="text-xs text-[hsl(var(--text-primary))]/60 mb-1">Asking Price</div>
           <div className="text-sm font-semibold text-[hsl(var(--primary))]">
             {formatFinancial(deal.asking_price)}
           </div>
@@ -149,7 +149,7 @@ export const InvestorDealCard: React.FC<InvestorDealCardProps> = ({
               variant="ghost"
               size="sm"
               onClick={(e) => e.stopPropagation()}
-              className="flex-1 text-[hsl(var(--foreground))] hover:text-[hsl(var(--primary))] hover:bg-[hsl(var(--primary))]/10"
+              className="flex-1 text-[hsl(var(--text-primary))] hover:text-[hsl(var(--primary))] hover:bg-[hsl(var(--primary))]/10"
             >
               <MessageSquare className="w-4 h-4 mr-1" />
               Ask
@@ -157,7 +157,7 @@ export const InvestorDealCard: React.FC<InvestorDealCardProps> = ({
           </DialogTrigger>
           <DialogContent className="bg-[hsl(var(--portal-dark))] border-[hsl(var(--primary))]/30">
             <DialogHeader>
-              <DialogTitle className="text-[hsl(var(--foreground))]">
+              <DialogTitle className="text-[hsl(var(--text-primary))]">
                 Ask About {deal.companyName}
               </DialogTitle>
             </DialogHeader>
@@ -166,7 +166,7 @@ export const InvestorDealCard: React.FC<InvestorDealCardProps> = ({
                 placeholder="What would you like to know?"
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
-                className="bg-[hsl(var(--portal-card))] border-[hsl(var(--primary))]/20 text-[hsl(var(--foreground))]"
+                className="bg-[hsl(var(--portal-card))] border-[hsl(var(--primary))]/20 text-[hsl(var(--text-primary))]"
                 rows={4}
               />
               <Button
@@ -184,7 +184,7 @@ export const InvestorDealCard: React.FC<InvestorDealCardProps> = ({
           variant="ghost"
           size="sm"
           onClick={handleRequestInfo}
-          className="flex-1 text-[hsl(var(--foreground))] hover:text-[hsl(var(--primary))] hover:bg-[hsl(var(--primary))]/10"
+          className="flex-1 text-[hsl(var(--text-primary))] hover:text-[hsl(var(--primary))] hover:bg-[hsl(var(--primary))]/10"
         >
           <Info className="w-4 h-4 mr-1" />
           Info
@@ -195,7 +195,7 @@ export const InvestorDealCard: React.FC<InvestorDealCardProps> = ({
           variant="ghost"
           size="sm"
           onClick={handleExpressInterest}
-          className="flex-1 text-[hsl(var(--foreground))] hover:text-[#22C55E] hover:bg-[#22C55E]/10"
+          className="flex-1 text-[hsl(var(--text-primary))] hover:text-[#22C55E] hover:bg-[#22C55E]/10"
         >
           <Heart className="w-4 h-4 mr-1" />
           Interest
@@ -206,7 +206,7 @@ export const InvestorDealCard: React.FC<InvestorDealCardProps> = ({
           variant="ghost"
           size="sm"
           onClick={handleScheduleCall}
-          className="flex-1 text-[hsl(var(--foreground))] hover:text-[#F28C38] hover:bg-[#F28C38]/10"
+          className="flex-1 text-[hsl(var(--text-primary))] hover:text-[#F28C38] hover:bg-[#F28C38]/10"
         >
           <Calendar className="w-4 h-4 mr-1" />
           Call
