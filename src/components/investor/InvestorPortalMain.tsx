@@ -13,119 +13,34 @@ import {
   Settings,
   Shield,
   Users,
-  DollarSign,
-  MapPin,
-  Clock,
-  Star,
   ChevronDown
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { getDashboardRoute } from '@/lib/auth-utils';
 import { useInvestorContext } from '@/hooks/useInvestorContext';
 import { useInvestorDeals } from '@/hooks/useInvestorDeals';
 import UserMenuDropdown from '@/components/ui/UserMenuDropdown';
+import DealCard from '@/components/investor/DealCard';
 
-// Sample data for deals
-const sampleDeals = [
-  {
-    id: '1',
-    name: 'TechFlow Solutions',
-    industry: 'SaaS',
-    description: 'B2B workflow automation platform with 500+ enterprise clients',
-    revenue: '$8.5M',
-    ebitda: '$2.1M',
-    stage: 'NDA Signed',
-    priority: 'High',
-    fitScore: 92,
-    location: 'Austin, TX',
-    lastUpdated: '2 hours ago',
-    progress: 75
-  },
-  {
-    id: '2',
-    name: 'Green Energy Corp',
-    industry: 'Clean Tech',
-    description: 'Solar panel manufacturing with proprietary efficiency technology',
-    revenue: '$12.3M',
-    ebitda: '$3.8M',
-    stage: 'Discovery Call',
-    priority: 'Medium',
-    fitScore: 87,
-    location: 'Denver, CO',
-    lastUpdated: '5 hours ago',
-    progress: 45
-  },
-  {
-    id: '3',
-    name: 'MedDevice Innovations',
-    industry: 'Healthcare',
-    description: 'FDA-approved medical devices for cardiac monitoring',
-    revenue: '$15.7M',
-    ebitda: '$4.2M',
-    stage: 'Due Diligence',
-    priority: 'High',
-    fitScore: 95,
-    location: 'Boston, MA',
-    lastUpdated: '1 hour ago',
-    progress: 85
-  },
-  {
-    id: '4',
-    name: 'RetailTech Systems',
-    industry: 'Retail',
-    description: 'Point-of-sale and inventory management for retail chains',
-    revenue: '$6.2M',
-    ebitda: '$1.5M',
-    stage: 'Qualified Lead',
-    priority: 'Medium',
-    fitScore: 78,
-    location: 'Miami, FL',
-    lastUpdated: '3 days ago',
-    progress: 25
-  },
-  {
-    id: '5',
-    name: 'DataSecure Analytics',
-    industry: 'Cybersecurity',
-    description: 'Enterprise data protection and analytics platform',
-    revenue: '$9.8M',
-    ebitda: '$2.7M',
-    stage: 'NDA Signed',
-    priority: 'High',
-    fitScore: 89,
-    location: 'Seattle, WA',
-    lastUpdated: '1 day ago',
-    progress: 60
-  },
-  {
-    id: '6',
-    name: 'LogiChain Solutions',
-    industry: 'Logistics',
-    description: 'Supply chain optimization software for manufacturing',
-    revenue: '$18.2M',
-    ebitda: '$5.1M',
-    stage: 'Discovery Call',
-    priority: 'Medium',
-    fitScore: 82,
-    location: 'Chicago, IL',
-    lastUpdated: '2 days ago',
-    progress: 30
-  }
-];
 
 const InvestorPortalMain = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { profile, isAdmin, isEditor, getDisplayName, getRoleDisplayName, loading: profileLoading } = useUserProfile();
   const { metrics, investorInfo, loading: contextLoading } = useInvestorContext();
-  const { filteredDeals, loading: dealsLoading, handleDealClick } = useInvestorDeals();
+  const { 
+    filteredDeals, 
+    loading: dealsLoading, 
+    handleDealClick,
+    handleFilterChange 
+  } = useInvestorDeals();
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [selectedDealId, setSelectedDealId] = useState<string | null>(null);
 
   const loading = profileLoading || contextLoading || dealsLoading;
 
@@ -135,11 +50,18 @@ const InvestorPortalMain = () => {
   };
 
   const toggleFilter = (filter: string) => {
-    setActiveFilters(prev => 
-      prev.includes(filter) 
-        ? prev.filter(f => f !== filter)
-        : [...prev, filter]
-    );
+    const newFilters = activeFilters.includes(filter) 
+      ? activeFilters.filter(f => f !== filter)
+      : [...activeFilters, filter];
+    
+    setActiveFilters(newFilters);
+    
+    // Apply filters to deals
+    handleFilterChange({
+      priority: newFilters.includes('High Priority') ? 'high' : undefined,
+      stage: newFilters.includes('NDA Signed') ? 'NDA Signed' : undefined,
+      minRevenue: newFilters.includes('$10M+ Revenue') ? 10000000 : undefined
+    });
   };
 
   // Helper function to determine if nav item is active
@@ -181,19 +103,6 @@ const InvestorPortalMain = () => {
   };
 
   const navigationItems = getNavigationItems();
-
-  const getPriorityColor = (priority: string) => {
-    return priority === 'High' ? 'bg-[#F28C38] text-[#0A0F0F]' : 'bg-[#3B82F6] text-white';
-  };
-
-  const getStageColor = (stage: string) => {
-    switch (stage) {
-      case 'NDA Signed': return 'text-[#22C55E]';
-      case 'Due Diligence': return 'text-[#D4AF37]';
-      case 'Discovery Call': return 'text-[#F28C38]';
-      default: return 'text-[#F4E4BC]';
-    }
-  };
 
   return (
     <div className="min-h-screen bg-[#1C2526] flex">
@@ -430,104 +339,12 @@ const InvestorPortalMain = () => {
             </div>
           ) : (
             filteredDeals.map((deal) => (
-            <Card 
-              key={deal.id}
-              className="bg-gradient-to-br from-[#2A2F3A] to-[#1A1F2E] border-[#D4AF37]/20 hover:border-[#D4AF37] hover:shadow-xl hover:shadow-[#D4AF37]/20 transition-all duration-300 cursor-pointer group"
-              onClick={() => handleDealCardClick(deal.id)}
-            >
-              <CardContent className="p-6">
-                {/* Header */}
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <h3 className="text-xl font-bold text-[#FAFAFA] group-hover:text-[#D4AF37] transition-colors">
-                        {deal.companyName}
-                      </h3>
-                      <Badge className={`text-xs ${getPriorityColor(deal.priority)}`}>
-                        {deal.priority}
-                      </Badge>
-                    </div>
-                    <Badge variant="outline" className="text-xs text-[#D4AF37] border-[#D4AF37]/40">
-                      {deal.industry}
-                    </Badge>
-                  </div>
-                </div>
-
-                {/* Description */}
-                <p className="text-sm text-[#F4E4BC]/80 mb-4 line-clamp-2">
-                  {deal.description}
-                </p>
-
-                {/* Metrics */}
-                <div className="grid grid-cols-2 gap-4 mb-4">
-                    <div className="bg-[#0A0F0F]/50 rounded-lg p-3">
-                      <div className="text-[#F4E4BC]/60 text-xs mb-1">Revenue</div>
-                      <div className="text-lg font-bold text-[#FAFAFA]">{deal.revenue}</div>
-                    </div>
-                    <div className="bg-[#0A0F0F]/50 rounded-lg p-3">
-                      <div className="text-[#F4E4BC]/60 text-xs mb-1">EBITDA</div>
-                      <div className="text-lg font-bold text-[#FAFAFA]">{deal.ebitda}</div>
-                    </div>
-                </div>
-
-                {/* Stage */}
-                <div className="mb-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-[#F4E4BC]/60 text-xs">Deal Stage</span>
-                    <span className={`text-sm font-medium ${getStageColor(deal.stage)}`}>
-                      {deal.stage}
-                    </span>
-                  </div>
-                  <Progress value={deal.progress} className="h-2 bg-[#1A1F2E]">
-                    <div 
-                      className="h-full bg-gradient-to-r from-[#D4AF37] to-[#F4E4BC] rounded-full transition-all"
-                      style={{ width: `${deal.progress}%` }}
-                    />
-                  </Progress>
-                </div>
-
-                {/* Fit Score */}
-                <div className="flex items-center gap-2 mb-4">
-                  <Star className="w-4 h-4 text-[#D4AF37]" />
-                  <span className="text-xs font-medium text-[#FAFAFA]">Fit Score</span>
-                  <Badge className="bg-[#D4AF37]/20 text-[#D4AF37] ml-auto">
-                    {deal.fitScore}%
-                  </Badge>
-                </div>
-
-                {/* Location and Time */}
-                <div className="flex items-center justify-between text-[#F4E4BC]/60 text-xs mb-6">
-                  <div className="flex items-center gap-1">
-                    <MapPin className="w-3 h-3" />
-                    <span>{deal.location}</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Clock className="w-3 h-3" />
-                    <span>{deal.lastUpdated}</span>
-                  </div>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex gap-2">
-                  <Button 
-                    className="flex-1 bg-[#D4AF37] hover:bg-[#F4E4BC] text-[#0A0F0F] font-bold"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDealClick(deal.id);
-                    }}
-                  >
-                    View Details
-                  </Button>
-                  <Button 
-                    variant="outline"
-                    className="border-[#F4E4BC] text-[#F4E4BC] hover:bg-[#F4E4BC] hover:text-[#0A0F0F]"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    Documents
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+              <DealCard 
+                key={deal.id}
+                deal={deal}
+                onClick={() => handleDealCardClick(deal.id)}
+                isSelected={selectedDealId === deal.id}
+              />
             ))
           )}
         </div>

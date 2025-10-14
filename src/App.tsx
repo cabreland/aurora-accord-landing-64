@@ -28,6 +28,8 @@ const Activity = lazy(() => import("./pages/Activity"));
 const InvestorInvitations = lazy(() => import("./pages/InvestorInvitations"));
 const InvestorRegistration = lazy(() => import("./pages/InvestorRegistration"));
 const TestRegistration = lazy(() => import("./pages/TestRegistration"));
+const Analytics = lazy(() => import("./pages/Analytics"));
+const Compliance = lazy(() => import("./pages/Compliance"));
 // Wrap protected components with authentication
 const ProtectedDashboard = withAuth('investor')(Dashboard);
 const ProtectedInvestorPortal = withAuth('investor')(InvestorPortal);
@@ -39,6 +41,8 @@ const ProtectedSettings = withAuth('staff')(Settings);
 const ProtectedActivity = withAuth('staff')(Activity);
 const ProtectedOnboarding = withAuth('investor')(Onboarding);
 const ProtectedInvestorInvitations = withAuth('admin')(InvestorInvitations);
+const ProtectedAnalytics = withAuth('investor')(Analytics);
+const ProtectedCompliance = withAuth('investor')(Compliance);
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -83,6 +87,8 @@ const App = () => (
               <Route path="/investor-invitations" element={<ProtectedInvestorInvitations />} />
               <Route path="/investor-registration" element={<InvestorRegistration />} />
               <Route path="/test-registration" element={<TestRegistration />} />
+              <Route path="/analytics" element={<ProtectedAnalytics />} />
+              <Route path="/compliance" element={<ProtectedCompliance />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>
