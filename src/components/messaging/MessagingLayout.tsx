@@ -52,7 +52,7 @@ export const MessagingLayout = ({ userType }: MessagingLayoutProps) => {
   const fetchConversations = async () => {
     try {
       let query = supabase
-        .from('conversations')
+        .from('conversations' as any)
         .select(`
           *,
           conversation_messages(message_text, created_at, message_type)
@@ -122,7 +122,7 @@ export const MessagingLayout = ({ userType }: MessagingLayoutProps) => {
   const fetchMessages = async (convId: string) => {
     try {
       const { data, error } = await supabase
-        .from('conversation_messages')
+        .from('conversation_messages' as any)
         .select('*')
         .eq('conversation_id', convId)
         .order('created_at', { ascending: true });
@@ -175,8 +175,8 @@ export const MessagingLayout = ({ userType }: MessagingLayoutProps) => {
       : 'unread_count_broker';
 
     await supabase
-      .from('conversations')
-      .update({ [updateField]: 0 })
+      .from('conversations' as any)
+      .update({ [updateField]: 0 } as any)
       .eq('id', convId);
   };
 
@@ -194,14 +194,14 @@ export const MessagingLayout = ({ userType }: MessagingLayoutProps) => {
       const senderType = profile?.role === 'viewer' ? 'investor' : 'broker';
 
       const { error } = await supabase
-        .from('conversation_messages')
+        .from('conversation_messages' as any)
         .insert({
           conversation_id: conversationId,
           sender_id: currentUserId,
           sender_type: senderType,
           message_text: content,
           message_type: 'reply'
-        });
+        } as any);
 
       if (error) throw error;
 
@@ -210,12 +210,17 @@ export const MessagingLayout = ({ userType }: MessagingLayoutProps) => {
         ? 'unread_count_broker' 
         : 'unread_count_investor';
 
+      const currentConv = conversations.find(c => c.id === conversationId);
+      const currentUnread = senderType === 'investor' 
+        ? (currentConv as any)?.unread_count_broker || 0
+        : (currentConv as any)?.unread_count_investor || 0;
+
       await supabase
-        .from('conversations')
+        .from('conversations' as any)
         .update({ 
           last_message_at: new Date().toISOString(),
-          [unreadField]: supabase.rpc('increment', { x: 1 })
-        })
+          [unreadField]: currentUnread + 1
+        } as any)
         .eq('id', conversationId);
 
       fetchMessages(conversationId);

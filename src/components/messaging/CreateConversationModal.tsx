@@ -48,21 +48,21 @@ export const CreateConversationModal = ({
       }
 
       const { data: conversation, error } = await supabase
-        .from('conversations')
+        .from('conversations' as any)
         .insert({
           investor_id: user.id,
           deal_id: dealId || null,
           deal_name: dealName,
           subject: subject.trim(),
           channel,
-        })
+        } as any)
         .select()
         .single();
 
       if (error) throw error;
 
       toast({ title: 'Conversation created successfully' });
-      onConversationCreated(conversation.id);
+      onConversationCreated((conversation as any).id);
       onClose();
       setSubject('');
       setDealId('');
