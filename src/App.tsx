@@ -31,6 +31,9 @@ const TestRegistration = lazy(() => import("./pages/TestRegistration"));
 const Analytics = lazy(() => import("./pages/Analytics"));
 const Compliance = lazy(() => import("./pages/Compliance"));
 const Messages = lazy(() => import("./pages/Messages"));
+const InvestorMessages = lazy(() => import("./pages/InvestorMessages"));
+const TeamConversations = lazy(() => import("./pages/TeamConversations"));
+
 // Wrap protected components with authentication
 const ProtectedDashboard = withAuth('investor')(Dashboard);
 const ProtectedInvestorPortal = withAuth('investor')(InvestorPortal);
@@ -45,6 +48,8 @@ const ProtectedInvestorInvitations = withAuth('admin')(InvestorInvitations);
 const ProtectedAnalytics = withAuth('investor')(Analytics);
 const ProtectedCompliance = withAuth('investor')(Compliance);
 const ProtectedMessages = withAuth('investor')(Messages);
+const ProtectedInvestorMessages = withAuth('investor')(InvestorMessages);
+const ProtectedTeamConversations = withAuth('staff')(TeamConversations);
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -92,6 +97,10 @@ const App = () => (
               <Route path="/analytics" element={<ProtectedAnalytics />} />
               <Route path="/compliance" element={<ProtectedCompliance />} />
               <Route path="/messages" element={<ProtectedMessages />} />
+              <Route path="/investor-portal/messages" element={<ProtectedInvestorMessages />} />
+              <Route path="/investor-portal/messages/:conversationId" element={<ProtectedInvestorMessages />} />
+              <Route path="/dashboard/conversations" element={<ProtectedTeamConversations />} />
+              <Route path="/dashboard/conversations/:conversationId" element={<ProtectedTeamConversations />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>

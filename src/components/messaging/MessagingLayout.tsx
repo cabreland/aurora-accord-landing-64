@@ -1,0 +1,280 @@
+import { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
+import { LeftPane } from './LeftPane';
+import { ConversationsList } from './ConversationsList';
+import { ChatPane } from './ChatPane';
+import { CreateConversationModal } from './CreateConversationModal';
+import { UserType, FilterType, ChannelType, ConversationType, MessageType } from './types';
+
+interface MessagingLayoutProps {
+  userType: UserType;
+}
+
+export const MessagingLayout = ({ userType }: MessagingLayoutProps) => {
+  const { conversationId } = useParams();
+  const navigate = useNavigate();
+  
+  const [conversations, setConversations] = useState<ConversationType[]>([]);
+  const [messages, setMessages] = useState<MessageType[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filter, setFilter] = useState<FilterType>('all');
+  const [channel, setChannel] = useState<ChannelType>('all');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSending, setIsSending] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<string>('');
+
+  useEffect(() => {
+    fetchCurrentUser();
+  }, []);
+
+  useEffect(() => {
+    if (currentUserId) {
+      fetchConversations();
+    }
+  }, [currentUserId, filter, channel, searchQuery]);
+
+  useEffect(() => {
+    if (conversationId && currentUserId) {
+      fetchMessages(conversationId);
+      markAsRead(conversationId);
+    }
+  }, [conversationId, currentUserId]);
+
+  const fetchCurrentUser = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      setCurrentUserId(user.id);
+    }
+  };
+
+  const fetchConversations = async () => {
+    try {
+      let query = supabase
+        .from('conversations')
+        .select(`
+          *,
+          conversation_messages(message_text, created_at, message_type)
+        `)
+        .order('last_message_at', { ascending: false });
+
+      if (channel !== 'all') {
+        query = query.eq('channel', channel);
+      }
+
+      if (filter === 'unread') {
+        query = query.or(`unread_count_investor.gt.0,unread_count_broker.gt.0`);
+      } else if (filter === 'deal-specific') {
+        query = query.not('deal_id', 'is', null);
+      } else if (filter === 'general') {
+        query = query.is('deal_id', null);
+      }
+
+      if (searchQuery) {
+        query = query.ilike('subject', `%${searchQuery}%`);
+      }
+
+      const { data, error } = await query;
+      if (error) throw error;
+
+      const formattedConversations: ConversationType[] = await Promise.all(
+        (data || []).map(async (conv: any) => {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('first_name, last_name, email')
+            .eq('user_id', conv.investor_id)
+            .single();
+
+          const lastMsg = conv.conversation_messages?.[0];
+          const unreadCount = userType === 'investor' 
+            ? conv.unread_count_investor 
+            : conv.unread_count_broker;
+
+          return {
+            id: conv.id,
+            subject: conv.subject,
+            dealId: conv.deal_id,
+            dealName: conv.deal_name,
+            investorId: conv.investor_id,
+            participants: [{
+              id: conv.investor_id,
+              name: profile ? `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || profile.email : 'Unknown',
+              avatar: null,
+              role: 'investor'
+            }],
+            lastMessage: lastMsg?.message_text || 'No messages yet',
+            lastMessageTime: lastMsg?.created_at || conv.created_at,
+            unread: unreadCount,
+            channel: conv.channel,
+            messageType: lastMsg?.message_type,
+            status: conv.status
+          };
+        })
+      );
+
+      setConversations(formattedConversations);
+    } catch (error: any) {
+      toast({ title: 'Failed to fetch conversations', description: error.message, variant: 'destructive' });
+    }
+  };
+
+  const fetchMessages = async (convId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('conversation_messages')
+        .select('*')
+        .eq('conversation_id', convId)
+        .order('created_at', { ascending: true });
+
+      if (error) throw error;
+
+      const formattedMessages: MessageType[] = await Promise.all(
+        (data || []).map(async (msg: any) => {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('first_name, last_name, email')
+            .eq('user_id', msg.sender_id)
+            .single();
+
+          const name = profile 
+            ? `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || profile.email 
+            : 'Unknown';
+          const initials = name.split(' ').map(n => n[0]).join('').toUpperCase() || 'U';
+
+          return {
+            id: msg.id,
+            conversationId: msg.conversation_id,
+            senderId: msg.sender_id,
+            senderType: msg.sender_type,
+            senderName: name,
+            senderInitials: initials,
+            content: msg.message_text,
+            timestamp: new Date(msg.created_at),
+            isMe: msg.sender_id === currentUserId,
+            messageType: msg.message_type
+          };
+        })
+      );
+
+      setMessages(formattedMessages);
+    } catch (error: any) {
+      toast({ title: 'Failed to fetch messages', description: error.message, variant: 'destructive' });
+    }
+  };
+
+  const markAsRead = async (convId: string) => {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('user_id', currentUserId)
+      .single();
+
+    const updateField = profile?.role === 'viewer' 
+      ? 'unread_count_investor' 
+      : 'unread_count_broker';
+
+    await supabase
+      .from('conversations')
+      .update({ [updateField]: 0 })
+      .eq('id', convId);
+  };
+
+  const handleSendMessage = async (content: string) => {
+    if (!conversationId) return;
+
+    setIsSending(true);
+    try {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('user_id', currentUserId)
+        .single();
+
+      const senderType = profile?.role === 'viewer' ? 'investor' : 'broker';
+
+      const { error } = await supabase
+        .from('conversation_messages')
+        .insert({
+          conversation_id: conversationId,
+          sender_id: currentUserId,
+          sender_type: senderType,
+          message_text: content,
+          message_type: 'reply'
+        });
+
+      if (error) throw error;
+
+      // Update conversation last_message_at and unread count
+      const unreadField = senderType === 'investor' 
+        ? 'unread_count_broker' 
+        : 'unread_count_investor';
+
+      await supabase
+        .from('conversations')
+        .update({ 
+          last_message_at: new Date().toISOString(),
+          [unreadField]: supabase.rpc('increment', { x: 1 })
+        })
+        .eq('id', conversationId);
+
+      fetchMessages(conversationId);
+      fetchConversations();
+    } catch (error: any) {
+      toast({ title: 'Failed to send message', description: error.message, variant: 'destructive' });
+    } finally {
+      setIsSending(false);
+    }
+  };
+
+  const handleConversationSelect = (id: string) => {
+    const basePath = userType === 'investor' ? '/investor-portal/messages' : '/dashboard/conversations';
+    navigate(`${basePath}/${id}`);
+  };
+
+  const handleConversationCreated = (id: string) => {
+    fetchConversations();
+    handleConversationSelect(id);
+  };
+
+  const activeConversation = conversations.find(c => c.id === conversationId) || null;
+
+  return (
+    <div className="h-screen flex flex-col">
+      <div className="flex-1 flex overflow-hidden">
+        <LeftPane
+          userType={userType}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          filter={filter}
+          onFilterChange={setFilter}
+          channel={channel}
+          onChannelChange={setChannel}
+          onNewConversation={() => setIsModalOpen(true)}
+        />
+        
+        <ConversationsList
+          conversations={conversations}
+          activeConversationId={conversationId || null}
+          onSelectConversation={handleConversationSelect}
+          userType={userType}
+        />
+        
+        <ChatPane
+          conversation={activeConversation}
+          messages={messages}
+          onSendMessage={handleSendMessage}
+          userType={userType}
+          isSending={isSending}
+        />
+      </div>
+
+      <CreateConversationModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        userType={userType}
+        onConversationCreated={handleConversationCreated}
+      />
+    </div>
+  );
+};

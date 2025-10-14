@@ -12,7 +12,8 @@ import {
   Filter,
   ArrowLeft,
   Users,
-  Mail
+  Mail,
+  MessageSquare
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -20,6 +21,7 @@ import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { getDashboardRoute } from '@/lib/auth-utils';
 import UserMenuDropdown from '@/components/ui/UserMenuDropdown';
+import { useUnreadCount } from '@/hooks/useUnreadCount';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -32,6 +34,7 @@ const DashboardLayout = ({ children, activeTab = 'dashboard', onTabChange }: Das
   const navigate = useNavigate();
   const location = useLocation();
   const { profile, getDisplayName, getRoleDisplayName, loading, canManageUsers, isAdmin } = useUserProfile();
+  const unreadCount = useUnreadCount();
 
   const isDemo = location.pathname === '/demo';
   const currentActiveTab = onTabChange ? activeTab : internalActiveTab;
@@ -61,17 +64,23 @@ const DashboardLayout = ({ children, activeTab = 'dashboard', onTabChange }: Das
   // Role-based navigation items
   const getNavigationItems = () => {
     const baseItems = [
-      { id: 'dashboard', label: 'Dashboard', icon: Home, path: '/dashboard' },
-      { id: 'deals', label: 'Deals', icon: BarChart3, path: '/deals' },
+      { id: 'dashboard', label: 'Dashboard', icon: Home, path: '/dashboard', badge: undefined as number | undefined },
+      { id: 'deals', label: 'Deals', icon: BarChart3, path: '/deals', badge: undefined as number | undefined },
+    ];
+
+    // Investor-specific items
+    const investorItems = [
+      { id: 'messages', label: 'Messages', icon: MessageSquare, path: '/investor-portal/messages', badge: unreadCount as number | undefined },
     ];
 
     // Admin/Staff only items - based on USER ROLE, not current route
     const adminItems = [
-      { id: 'documents', label: 'Documents', icon: FileText, path: '/documents' },
-      { id: 'investor-invitations', label: 'Investor Relations', icon: Mail, path: '/investor-invitations' },
-      { id: 'users', label: 'Users', icon: Users, path: '/users' },
-      { id: 'settings', label: 'Settings', icon: Settings, path: '/settings' },
-      { id: 'activity', label: 'Activity', icon: Shield, path: '/activity' },
+      { id: 'conversations', label: 'Conversations', icon: MessageSquare, path: '/dashboard/conversations', badge: unreadCount as number | undefined },
+      { id: 'documents', label: 'Documents', icon: FileText, path: '/documents', badge: undefined as number | undefined },
+      { id: 'investor-invitations', label: 'Investor Relations', icon: Mail, path: '/investor-invitations', badge: undefined as number | undefined },
+      { id: 'users', label: 'Users', icon: Users, path: '/users', badge: undefined as number | undefined },
+      { id: 'settings', label: 'Settings', icon: Settings, path: '/settings', badge: undefined as number | undefined },
+      { id: 'activity', label: 'Activity', icon: Shield, path: '/activity', badge: undefined as number | undefined },
     ];
 
     // Return appropriate items based on role (not demo status)
@@ -84,7 +93,7 @@ const DashboardLayout = ({ children, activeTab = 'dashboard', onTabChange }: Das
       return [...baseItems, ...adminItems]; // Users who can manage users see everything
     }
 
-    return baseItems; // Regular investors see basic items
+    return [...baseItems, ...investorItems]; // Regular investors see basic items + messages
   };
 
   const navigationItems = getNavigationItems();
@@ -148,6 +157,9 @@ const DashboardLayout = ({ children, activeTab = 'dashboard', onTabChange }: Das
                   <span className="font-medium">{item.label}</span>
                   {item.id === 'deals' && !isDemo && (
                     <Badge className="ml-auto bg-[#F28C38] text-[#0A0F0F] text-xs">4</Badge>
+                  )}
+                  {(item.id === 'messages' || item.id === 'conversations') && item.badge && item.badge > 0 && (
+                    <Badge className="ml-auto bg-destructive text-destructive-foreground text-xs">{item.badge}</Badge>
                   )}
                 </Link>
               );
