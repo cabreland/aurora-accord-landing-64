@@ -42,19 +42,38 @@ export const useUserProfile = () => {
         setLoading(true);
         setError(null);
         
-        const { data, error } = await supabase
+        // Fetch profile data
+        const { data: profileData, error: profileError } = await supabase
           .from('profiles')
           .select('*')
           .eq('user_id', user.id)
           .maybeSingle();
 
-        if (error) {
-          console.error('Error fetching profile:', error);
-          setError(error.message);
+        if (profileError) {
+          console.error('Error fetching profile:', profileError);
+          setError(profileError.message);
           return;
         }
 
-        setProfile(data);
+        // Fetch user role from user_roles table (secure role management)
+        const { data: roleData, error: roleError } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', user.id)
+          .maybeSingle();
+
+        if (roleError) {
+          console.error('Error fetching user role:', roleError);
+          // Don't set error here as profile might still be valid
+        }
+
+        // Combine profile and role data
+        const combinedProfile = {
+          ...profileData,
+          role: roleData?.role || profileData?.role || 'viewer' as UserRole
+        };
+
+        setProfile(combinedProfile);
       } catch (err: any) {
         console.error('Error fetching profile:', err);
         setError(err?.message || 'Failed to fetch profile');
