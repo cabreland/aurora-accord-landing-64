@@ -115,7 +115,7 @@ export const useChatWidget = () => {
           deal_id: targetDealId || null,
           deal_name: targetDealName || 'General Inquiry',
           subject: targetDealId ? `Question about ${targetDealName}` : 'General Inquiry',
-          channel: 'chat_widget',
+          channel: 'platform',
           status: 'active',
           unread_count_broker: 0
         } as any)

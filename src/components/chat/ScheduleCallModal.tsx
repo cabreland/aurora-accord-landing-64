@@ -61,7 +61,7 @@ export const ScheduleCallModal: React.FC<ScheduleCallModalProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[500px]" onClick={(e) => e.stopPropagation()}>
         <DialogHeader>
           <DialogTitle>Schedule a Call</DialogTitle>
           <p className="text-sm text-[hsl(var(--muted-foreground))] mt-1">
