@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils';
 import { useWatchlist } from '@/hooks/useWatchlist';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { useChatWidget } from '@/hooks/useChatWidget';
+import { useChatWidget } from '@/contexts/ChatWidgetContext';
 import { useWidgetSettings } from '@/hooks/useWidgetSettings';
 import { RequestInfoModal } from '@/components/chat/RequestInfoModal';
 import { ScheduleCallModal } from '@/components/chat/ScheduleCallModal';

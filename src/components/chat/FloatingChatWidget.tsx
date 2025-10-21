@@ -1,5 +1,5 @@
 import React from 'react';
-import { useChatWidget } from '@/hooks/useChatWidget';
+import { useChatWidget } from '@/contexts/ChatWidgetContext';
 import { ChatButton } from './ChatButton';
 import { ChatPanel } from './ChatPanel';
 import { useAuth } from '@/hooks/useAuth';
@@ -43,7 +43,6 @@ export const FloatingChatWidget: React.FC = () => {
     <div className={getPositionStyles()}>
       {!isOpen && (
         <ChatButton
-          onClick={() => {}} // Handled by useChatWidget
           unreadCount={unreadCount}
           settings={settings}
         />

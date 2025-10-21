@@ -3,15 +3,14 @@ import { MessageSquare } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { WidgetSettings } from '@/hooks/useWidgetSettings';
-import { useChatWidget } from '@/hooks/useChatWidget';
+import { useChatWidget } from '@/contexts/ChatWidgetContext';
 
 interface ChatButtonProps {
-  onClick: () => void;
   unreadCount: number;
   settings: WidgetSettings;
 }
 
-export const ChatButton: React.FC<ChatButtonProps> = ({ onClick, unreadCount, settings }) => {
+export const ChatButton: React.FC<ChatButtonProps> = ({ unreadCount, settings }) => {
   const { toggleWidget } = useChatWidget();
   
   // Get size based on settings
