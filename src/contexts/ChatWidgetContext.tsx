@@ -110,6 +110,16 @@ export const ChatWidgetProvider = ({ children }: { children: ReactNode }) => {
     };
   }, []);
 
+  // Debug: Log isOpen changes
+  useEffect(() => {
+    console.log('[ChatWidgetContext] isOpen changed:', isOpen);
+  }, [isOpen]);
+
+  // Debug: Log settings changes
+  useEffect(() => {
+    console.log('[ChatWidgetContext] settings loaded:', settings);
+  }, [settings]);
+
   // Auto-open widget if enabled
   useEffect(() => {
     if (settings?.auto_open_enabled && !sessionStorage.getItem('chatWidgetClosed') && user) {
@@ -370,6 +380,13 @@ export const ChatWidgetProvider = ({ children }: { children: ReactNode }) => {
     setDealContext: setCurrentDealContext,
     markAsRead
   };
+
+  console.log('[ChatWidgetProvider] Rendering with state:', { 
+    isOpen, 
+    hasSettings: !!settings,
+    hasUser: !!user,
+    messagesCount: messages.length 
+  });
 
   return (
     <ChatWidgetContext.Provider value={value}>

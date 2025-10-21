@@ -58,35 +58,46 @@ export const useWidgetSettings = () => {
   };
 
   const updateSettings = async (updates: Partial<WidgetSettings>) => {
-    if (!settings) {
-      toast.error('Settings not loaded');
+    if (!settings?.id) {
+      console.error('[useWidgetSettings] No settings ID available');
+      toast.error('Settings not loaded properly');
       return;
     }
 
+    console.log('[useWidgetSettings] Updating settings:', updates);
+
     try {
       setSaving(true);
-      const { data: user } = await supabase.auth.getUser();
+      const { data: { user } } = await supabase.auth.getUser();
       
-      const { error } = await supabase
+      if (!user) {
+        toast.error('Not authenticated');
+        return;
+      }
+
+      const { data, error } = await supabase
         .from('widget_settings' as any)
         .update({
           ...updates,
-          updated_by: user.user?.id,
+          updated_by: user.id,
           updated_at: new Date().toISOString()
         } as any)
-        .eq('id', settings.id);
+        .eq('id', settings.id)
+        .select()
+        .single();
 
       if (error) {
-        console.error('Update error:', error);
-        throw error;
+        console.error('[useWidgetSettings] Update failed:', error);
+        toast.error(`Save failed: ${error.message}`);
+        return;
       }
 
-      // Fetch fresh settings
-      await fetchSettings();
+      console.log('[useWidgetSettings] Settings saved successfully:', data);
+      setSettings(data as any);
       toast.success('Settings saved successfully');
-    } catch (error) {
-      console.error('Error updating widget settings:', error);
-      toast.error('Failed to save settings');
+    } catch (error: any) {
+      console.error('[useWidgetSettings] Exception:', error);
+      toast.error(error.message || 'Failed to save settings');
     } finally {
       setSaving(false);
     }
