@@ -34,6 +34,7 @@ const Compliance = lazy(() => import("./pages/Compliance"));
 const Messages = lazy(() => import("./pages/Messages"));
 const InvestorMessages = lazy(() => import("./pages/InvestorMessages"));
 const TeamConversations = lazy(() => import("./pages/TeamConversations"));
+const BrokerInbox = lazy(() => import("./pages/BrokerInbox"));
 
 // Wrap protected components with authentication
 const ProtectedDashboard = withAuth('investor')(Dashboard);
@@ -51,6 +52,7 @@ const ProtectedCompliance = withAuth('investor')(Compliance);
 const ProtectedMessages = withAuth('investor')(Messages);
 const ProtectedInvestorMessages = withAuth('investor')(InvestorMessages);
 const ProtectedTeamConversations = withAuth('staff')(TeamConversations);
+const ProtectedBrokerInbox = withAuth('staff')(BrokerInbox);
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -103,6 +105,7 @@ const App = () => (
               <Route path="/investor-portal/messages/:conversationId" element={<ProtectedInvestorMessages />} />
               <Route path="/dashboard/conversations" element={<ProtectedTeamConversations />} />
               <Route path="/dashboard/conversations/:conversationId" element={<ProtectedTeamConversations />} />
+              <Route path="/dashboard/chat-inbox" element={<ProtectedBrokerInbox />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>

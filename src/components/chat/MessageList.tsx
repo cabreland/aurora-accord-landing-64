@@ -1,12 +1,11 @@
 import React, { useEffect, useRef } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useAuth } from '@/hooks/useAuth';
-import { cn } from '@/lib/utils';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { format } from 'date-fns';
+import { WidgetSettings } from '@/hooks/useWidgetSettings';
 
 interface Message {
   id: string;
-  sender_id: string;
   sender_type: string;
   message_text: string;
   created_at: string;
@@ -14,10 +13,11 @@ interface Message {
 
 interface MessageListProps {
   messages: Message[];
+  isLoading?: boolean;
+  settings: WidgetSettings;
 }
 
-export const MessageList: React.FC<MessageListProps> = ({ messages }) => {
-  const { user } = useAuth();
+export const MessageList: React.FC<MessageListProps> = ({ messages, isLoading, settings }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -26,59 +26,69 @@ export const MessageList: React.FC<MessageListProps> = ({ messages }) => {
     }
   }, [messages]);
 
-  if (messages.length === 0) {
-    return (
-      <div className="flex-1 flex items-center justify-center p-8 text-center">
-        <div className="text-[hsl(var(--muted-foreground))]">
-          <p className="text-sm">No messages yet</p>
-          <p className="text-xs mt-1">Start a conversation with the broker team</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <ScrollArea className="flex-1 p-4" ref={scrollRef}>
-      <div className="space-y-4">
+    <ScrollArea className="h-full p-4">
+      <div ref={scrollRef} className="space-y-4">
         {messages.map((message) => {
-          const isOwn = message.sender_id === user?.id;
+          const isInvestor = message.sender_type === 'investor';
+          const isSystem = message.sender_type === 'system';
           
+          if (isSystem) {
+            return (
+              <div key={message.id} className="flex justify-center">
+                <p className="text-sm text-muted-foreground italic">
+                  {message.message_text}
+                </p>
+              </div>
+            );
+          }
+
           return (
             <div
               key={message.id}
-              className={cn(
-                "flex",
-                isOwn ? "justify-end" : "justify-start"
-              )}
+              className={`flex ${isInvestor ? 'justify-end' : 'justify-start'}`}
             >
-              <div
-                className={cn(
-                  "max-w-[75%] rounded-lg px-4 py-2",
-                  isOwn
-                    ? "bg-[hsl(var(--primary))] text-white"
-                    : "bg-[hsl(var(--muted))] text-[hsl(var(--foreground))]"
-                )}
-              >
-                {!isOwn && (
-                  <div className="text-xs font-medium mb-1 opacity-70">
-                    Broker Team
-                  </div>
-                )}
-                <p className="text-sm whitespace-pre-wrap break-words">
-                  {message.message_text}
-                </p>
+              {!isInvestor && (
+                <Avatar className="h-8 w-8 mr-2">
+                  <AvatarFallback>B</AvatarFallback>
+                </Avatar>
+              )}
+              <div className={`max-w-[80%]`}>
                 <div
-                  className={cn(
-                    "text-xs mt-1",
-                    isOwn ? "text-white/70" : "text-[hsl(var(--muted-foreground))]"
-                  )}
+                  className={`rounded-2xl px-4 py-2 ${
+                    isInvestor
+                      ? 'rounded-br-sm'
+                      : 'bg-muted rounded-bl-sm'
+                  }`}
+                  style={isInvestor ? {
+                    backgroundColor: `${settings.primary_color}1A`, // 10% opacity
+                    border: `1px solid ${settings.primary_color}33`, // 20% opacity
+                    color: 'hsl(var(--foreground))'
+                  } : {}}
                 >
-                  {format(new Date(message.created_at), 'MMM d, h:mm a')}
+                  <p className="text-sm">{message.message_text}</p>
                 </div>
+                <p className="text-xs text-muted-foreground mt-1 px-2">
+                  {format(new Date(message.created_at), 'HH:mm')}
+                </p>
               </div>
             </div>
           );
         })}
+        {isLoading && settings.enable_typing_indicators && (
+          <div className="flex justify-start">
+            <Avatar className="h-8 w-8 mr-2">
+              <AvatarFallback>B</AvatarFallback>
+            </Avatar>
+            <div className="bg-muted rounded-2xl px-4 py-2 rounded-bl-sm">
+              <div className="flex space-x-2">
+                <div className="w-2 h-2 bg-foreground/40 rounded-full animate-bounce" />
+                <div className="w-2 h-2 bg-foreground/40 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }} />
+                <div className="w-2 h-2 bg-foreground/40 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </ScrollArea>
   );

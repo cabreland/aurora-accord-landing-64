@@ -75,6 +75,7 @@ const DashboardLayout = ({ children, activeTab = 'dashboard', onTabChange }: Das
 
     // Admin/Staff only items - based on USER ROLE, not current route
     const adminItems = [
+      { id: 'chat-inbox', label: 'Chat Inbox', icon: MessageSquare, path: '/dashboard/chat-inbox', badge: unreadCount as number | undefined },
       { id: 'conversations', label: 'Conversations', icon: MessageSquare, path: '/dashboard/conversations', badge: unreadCount as number | undefined },
       { id: 'documents', label: 'Documents', icon: FileText, path: '/documents', badge: undefined as number | undefined },
       { id: 'investor-invitations', label: 'Investor Relations', icon: Mail, path: '/investor-invitations', badge: undefined as number | undefined },

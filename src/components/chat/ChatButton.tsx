@@ -1,37 +1,61 @@
 import React from 'react';
 import { MessageSquare } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { cn } from '@/lib/utils';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { WidgetSettings } from '@/hooks/useWidgetSettings';
+import { useChatWidget } from '@/hooks/useChatWidget';
 
 interface ChatButtonProps {
   onClick: () => void;
   unreadCount: number;
+  settings: WidgetSettings;
 }
 
-export const ChatButton: React.FC<ChatButtonProps> = ({ onClick, unreadCount }) => {
+export const ChatButton: React.FC<ChatButtonProps> = ({ onClick, unreadCount, settings }) => {
+  const { toggleWidget } = useChatWidget();
+  
+  // Get size based on settings
+  const getSizeClass = () => {
+    switch (settings.widget_size) {
+      case 'small': return 'h-[50px] w-[50px]';
+      case 'large': return 'h-[70px] w-[70px]';
+      default: return 'h-[60px] w-[60px]';
+    }
+  };
+
+  // Get border radius based on bubble style
+  const getBorderRadius = () => {
+    return settings.bubble_style === 'rounded-square' ? 'rounded-2xl' : 'rounded-full';
+  };
+
   return (
-    <button
-      onClick={onClick}
-      className={cn(
-        "fixed bottom-6 right-6 z-50",
-        "w-16 h-16 rounded-full",
-        "bg-[hsl(var(--primary))] hover:bg-[hsl(var(--primary))]/90",
-        "shadow-lg hover:shadow-xl",
-        "transition-all duration-200",
-        "flex items-center justify-center",
-        "group"
-      )}
-      aria-label="Open chat"
-    >
-      <MessageSquare className="w-7 h-7 text-white" />
-      
-      {unreadCount > 0 && (
-        <Badge 
-          className="absolute -top-1 -right-1 h-6 min-w-6 px-1.5 flex items-center justify-center bg-red-500 text-white border-2 border-white"
-        >
-          {unreadCount > 9 ? '9+' : unreadCount}
-        </Badge>
-      )}
-    </button>
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <button
+            onClick={toggleWidget}
+            className={`${getSizeClass()} ${getBorderRadius()} shadow-lg hover:scale-105 transition-transform flex items-center justify-center relative`}
+            style={{ 
+              backgroundColor: settings.primary_color,
+              color: '#ffffff'
+            }}
+            aria-label="Open chat"
+          >
+            <MessageSquare className="h-6 w-6" />
+            {unreadCount > 0 && (
+              <Badge 
+                variant="destructive" 
+                className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
+              >
+                {unreadCount > 9 ? '9+' : unreadCount}
+              </Badge>
+            )}
+          </button>
+        </TooltipTrigger>
+        <TooltipContent side="left">
+          <p>{settings.minimized_tooltip}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 };

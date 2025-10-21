@@ -1,10 +1,11 @@
 import React, { useEffect } from 'react';
-import { X, Minimize2 } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 import { MessageList } from './MessageList';
 import { MessageInput } from './MessageInput';
 import { DealContextBadge } from './DealContextBadge';
-import { cn } from '@/lib/utils';
+import { WidgetSettings } from '@/hooks/useWidgetSettings';
 
 interface ChatPanelProps {
   messages: any[];
@@ -12,7 +13,8 @@ interface ChatPanelProps {
   onSendMessage: (message: string) => Promise<void>;
   dealContext?: { id: string; name: string } | null;
   onMarkAsRead: () => void;
-  isLoading: boolean;
+  isLoading?: boolean;
+  settings: WidgetSettings;
 }
 
 export const ChatPanel: React.FC<ChatPanelProps> = ({
@@ -21,57 +23,79 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
   onSendMessage,
   dealContext,
   onMarkAsRead,
-  isLoading
+  isLoading = false,
+  settings
 }) => {
   useEffect(() => {
-    onMarkAsRead();
-  }, [messages]);
+    if (messages.length > 0) {
+      onMarkAsRead();
+    }
+  }, [messages.length, onMarkAsRead]);
+
+  // Get dimensions based on widget size
+  const getDimensions = () => {
+    switch (settings.widget_size) {
+      case 'small': return 'w-[340px] h-[500px]';
+      case 'large': return 'w-[420px] h-[650px]';
+      default: return 'w-[380px] h-[600px]';
+    }
+  };
+
+  // Show initial greeting if no messages
+  const displayMessages = messages.length === 0 
+    ? [{
+        id: 'greeting',
+        message_text: settings.initial_greeting,
+        sender_type: 'system',
+        created_at: new Date().toISOString()
+      }]
+    : messages;
 
   return (
-    <div
-      className={cn(
-        "fixed bottom-6 right-6 z-50",
-        "w-[380px] h-[600px]",
-        "bg-[hsl(var(--background))] border border-[hsl(var(--border))]",
-        "rounded-lg shadow-2xl",
-        "flex flex-col",
-        "animate-in slide-in-from-bottom-4 duration-200"
-      )}
-    >
+    <Card className={`${getDimensions()} flex flex-col shadow-2xl animate-in slide-in-from-bottom-4 duration-300`}>
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-[hsl(var(--border))]">
-        <div>
-          <h3 className="font-semibold text-[hsl(var(--foreground))]">
-            Chat with Broker Team
-          </h3>
-          <p className="text-xs text-[hsl(var(--muted-foreground))]">
-            Usually responds within minutes
-          </p>
+      <div 
+        className="flex items-center justify-between p-4 border-b text-white rounded-t-lg"
+        style={{ backgroundColor: settings.primary_color }}
+      >
+        <div className="flex-1">
+          <div className="flex items-center gap-2">
+            <h3 className="font-semibold">{settings.widget_title}</h3>
+            {settings.show_online_status && (
+              <div className="flex items-center gap-1">
+                <div className="h-2 w-2 bg-green-400 rounded-full" />
+              </div>
+            )}
+          </div>
+          {dealContext && (
+            <DealContextBadge dealName={dealContext.name} />
+          )}
         </div>
-        <div className="flex gap-1">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onClose}
-            className="h-8 w-8"
-          >
-            <Minimize2 className="w-4 h-4" />
-          </Button>
-        </div>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onClose}
+          className="text-white hover:bg-white/20"
+        >
+          <ChevronDown className="h-5 w-5" />
+        </Button>
       </div>
 
-      {/* Deal Context */}
-      {dealContext && (
-        <div className="px-4 pt-4">
-          <DealContextBadge dealName={dealContext.name} />
-        </div>
-      )}
-
       {/* Messages */}
-      <MessageList messages={messages} />
+      <div className="flex-1 overflow-hidden">
+        <MessageList 
+          messages={displayMessages} 
+          isLoading={isLoading}
+          settings={settings}
+        />
+      </div>
 
       {/* Input */}
-      <MessageInput onSend={onSendMessage} disabled={isLoading} />
-    </div>
+      <MessageInput 
+        onSend={onSendMessage} 
+        disabled={isLoading}
+        settings={settings}
+      />
+    </Card>
   );
 };
