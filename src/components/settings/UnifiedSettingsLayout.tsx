@@ -25,7 +25,8 @@ import {
   Download,
   Upload,
   Save,
-  History
+  History,
+  MessageSquare
 } from 'lucide-react';
 
 // Import all setting components
@@ -39,6 +40,7 @@ import { EmailTemplatesTab } from './EmailTemplatesTab';
 import AccessPolicyTab from './AccessPolicyTab';
 import CustomFieldsTab from './CustomFieldsTab';
 import DataRetentionTab from './DataRetentionTab';
+import ChatWidgetSettingsTab from './ChatWidgetSettingsTab';
 import {
   RolePermissionsTab,
   RegistrationConfigTab,
@@ -94,6 +96,7 @@ const settingsGroups: SettingsGroup[] = [
       { key: 'registration', title: 'Registration Configuration', icon: FileText, component: RegistrationConfigTab },
       { key: 'email-templates', title: 'Email Templates', icon: Bell, component: EmailTemplatesTab },
       { key: 'access-policies', title: 'Access Policies', icon: Key, component: AccessPolicyTab },
+      { key: 'chat-widget', title: 'Chat Widget', icon: MessageSquare, component: ChatWidgetSettingsTab, requiredRole: 'admin' },
     ]
   },
   {
