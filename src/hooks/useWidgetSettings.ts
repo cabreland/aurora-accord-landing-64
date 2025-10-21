@@ -58,20 +58,30 @@ export const useWidgetSettings = () => {
   };
 
   const updateSettings = async (updates: Partial<WidgetSettings>) => {
-    if (!settings) return;
+    if (!settings) {
+      toast.error('Settings not loaded');
+      return;
+    }
 
     try {
       setSaving(true);
+      const { data: user } = await supabase.auth.getUser();
+      
       const { error } = await supabase
         .from('widget_settings' as any)
         .update({
           ...updates,
-          updated_by: (await supabase.auth.getUser()).data.user?.id
+          updated_by: user.user?.id,
+          updated_at: new Date().toISOString()
         } as any)
         .eq('id', settings.id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Update error:', error);
+        throw error;
+      }
 
+      // Fetch fresh settings
       await fetchSettings();
       toast.success('Settings saved successfully');
     } catch (error) {

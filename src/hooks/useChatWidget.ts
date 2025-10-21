@@ -233,16 +233,49 @@ export const useChatWidget = () => {
   // Load widget settings
   useEffect(() => {
     const loadSettings = async () => {
-      const { data } = await supabase
-        .from('widget_settings' as any)
-        .select('*')
-        .maybeSingle();
-      
-      if (data) {
-        setSettings(data as any);
+      try {
+        const { data, error } = await supabase
+          .from('widget_settings' as any)
+          .select('*')
+          .maybeSingle();
+        
+        if (error) {
+          console.error('Error loading widget settings:', error);
+          return;
+        }
+        
+        if (data) {
+          console.log('Widget settings loaded:', data);
+          setSettings(data as any);
+        } else {
+          console.warn('No widget settings found');
+        }
+      } catch (err) {
+        console.error('Failed to load widget settings:', err);
       }
     };
     loadSettings();
+
+    // Subscribe to settings changes for live updates
+    const channel = supabase
+      .channel('widget-settings-changes')
+      .on(
+        'postgres_changes' as any,
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'widget_settings'
+        } as any,
+        (payload) => {
+          console.log('Widget settings updated:', payload);
+          setSettings(payload.new as any);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   // Auto-open widget if enabled
