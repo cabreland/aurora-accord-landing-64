@@ -48,14 +48,32 @@ export const ChatWidgetProvider = ({ children }: { children: ReactNode }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [settings, setSettings] = useState<WidgetSettings | null>(null);
 
-  // Auto-detect deal context from URL
+  // Auto-detect deal AND conversation context from URL
   useEffect(() => {
+    console.log('[ChatWidget] Checking URL for context:', location.pathname);
+    
+    // Check for conversation ID in URL
+    const conversationMatch = location.pathname.match(/\/conversations\/([a-f0-9-]+)/i);
+    if (conversationMatch) {
+      const convId = conversationMatch[1];
+      console.log('[ChatWidget] Detected conversation from URL:', convId);
+      
+      // Load this conversation's messages
+      if (convId !== currentConversationId) {
+        setCurrentConversationId(convId);
+        fetchMessages(convId);
+      }
+      return;
+    }
+    
+    // Check for deal ID in URL
     const dealMatch = location.pathname.match(/\/deal\/([a-f0-9-]+)/i);
     if (dealMatch) {
       const dealId = dealMatch[1];
+      console.log('[ChatWidget] Detected deal from URL:', dealId);
       fetchDealContext(dealId);
     }
-  }, [location.pathname]);
+  }, [location.pathname, currentConversationId]);
 
   // Fetch unread count on mount
   useEffect(() => {
@@ -66,31 +84,66 @@ export const ChatWidgetProvider = ({ children }: { children: ReactNode }) => {
 
   // Load widget settings
   useEffect(() => {
+    console.log('[ChatWidget] useEffect triggered for settings load');
+    
     const loadSettings = async () => {
       console.log('[ChatWidget] Starting to load settings...');
+      
+      const defaultSettings: WidgetSettings = {
+        widget_position: 'bottom-right',
+        primary_color: '#D4AF37',
+        widget_size: 'medium',
+        bubble_style: 'circle',
+        minimized_tooltip: 'Chat with us',
+        widget_title: 'Chat with Broker Team',
+        placeholder_text: 'Type your message...',
+        initial_greeting: 'Hi! Have questions about a deal? We\'re here to help.',
+        show_online_status: true,
+        enable_typing_indicators: true,
+        enable_file_attachments: true,
+        enable_emojis: true,
+        auto_open_enabled: false,
+        auto_open_delay: 5000,
+        away_message: 'We\'re currently offline.',
+        ask_button_label: 'Ask',
+        info_button_label: 'Info',
+        interest_button_label: 'Interest',
+        call_button_label: 'Call',
+        enable_manual_scheduling: true,
+        broker_email_notifications: true,
+        investor_email_notifications: true
+      } as WidgetSettings;
+      
       try {
+        console.log('[ChatWidget] Fetching from database...');
         const { data, error } = await supabase
-          .from('widget_settings' as any)
+          .from('widget_settings')
           .select('*')
-          .maybeSingle();
+          .limit(1);
         
-        console.log('[ChatWidget] Settings fetch result:', { data, error });
+        console.log('[ChatWidget] Fetch complete:', { hasData: !!data, dataLength: data?.length, error });
         
         if (error) {
-          console.error('[ChatWidget] Error loading settings:', error);
+          console.error('[ChatWidget] Database error:', error);
+          console.log('[ChatWidget] Using default settings due to error');
+          setSettings(defaultSettings);
           return;
         }
         
-        if (data) {
-          console.log('[ChatWidget] Settings loaded successfully:', data);
-          setSettings(data as any);
+        if (data && data.length > 0) {
+          console.log('[ChatWidget] Settings loaded from DB');
+          setSettings(data[0] as WidgetSettings);
         } else {
-          console.warn('[ChatWidget] No settings found in database');
+          console.warn('[ChatWidget] No settings in database, using defaults');
+          setSettings(defaultSettings);
         }
       } catch (err) {
-        console.error('[ChatWidget] Failed to load settings:', err);
+        console.error('[ChatWidget] Exception during fetch:', err);
+        console.log('[ChatWidget] Using default settings due to exception');
+        setSettings(defaultSettings);
       }
     };
+    
     loadSettings();
 
     // Subscribe to settings changes
@@ -122,8 +175,16 @@ export const ChatWidgetProvider = ({ children }: { children: ReactNode }) => {
 
   // Debug: Log settings changes
   useEffect(() => {
-    console.log('[ChatWidgetContext] settings loaded:', settings);
+    console.log('[ChatWidgetContext] settings loaded:', !!settings);
   }, [settings]);
+
+  // Debug: Log messages changes
+  useEffect(() => {
+    console.log('[ChatWidgetContext] messages changed:', {
+      count: messages.length,
+      conversationId: currentConversationId
+    });
+  }, [messages, currentConversationId]);
 
   // Auto-open widget if enabled
   useEffect(() => {
@@ -250,6 +311,7 @@ export const ChatWidgetProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const fetchMessages = async (conversationId: string) => {
+    console.log('[ChatWidget] fetchMessages called for conversation:', conversationId);
     try {
       const { data, error } = await supabase
         .from('conversation_messages' as any)
@@ -257,19 +319,33 @@ export const ChatWidgetProvider = ({ children }: { children: ReactNode }) => {
         .eq('conversation_id', conversationId)
         .order('created_at', { ascending: true });
       
+      console.log('[ChatWidget] Fetch messages result:', { 
+        count: data?.length || 0, 
+        error,
+        conversationId 
+      });
+      
       if (error || !data) {
         console.error('[ChatWidget] Error fetching messages:', error);
+        setMessages([]);
         return;
       }
       
+      console.log('[ChatWidget] Setting messages:', data);
       setMessages(data as any as Message[]);
     } catch (error) {
-      console.error('[ChatWidget] Error fetching messages:', error);
+      console.error('[ChatWidget] Exception fetching messages:', error);
+      setMessages([]);
     }
   };
 
   const openWidget = useCallback(async (dealId?: string, dealName?: string) => {
-    console.log('[ChatWidget] openWidget called:', { dealId, dealName, user: !!user });
+    console.log('[ChatWidget] openWidget called:', { 
+      dealId, 
+      dealName, 
+      hasUser: !!user,
+      currentConvId: currentConversationId
+    });
     
     if (!user) {
       console.warn('[ChatWidget] No user, cannot open widget');
@@ -277,21 +353,27 @@ export const ChatWidgetProvider = ({ children }: { children: ReactNode }) => {
     }
 
     setIsLoading(true);
+    setIsOpen(true); // Open immediately for better UX
     
     if (dealId && dealName) {
+      console.log('[ChatWidget] Setting deal context:', { dealId, dealName });
       setCurrentDealContext({ id: dealId, name: dealName });
     }
 
     const conversationId = await ensureConversation(dealId, dealName);
+    console.log('[ChatWidget] Conversation ensured:', conversationId);
+    
     if (conversationId) {
       setCurrentConversationId(conversationId);
       await fetchMessages(conversationId);
+    } else {
+      console.error('[ChatWidget] Failed to get conversation ID');
+      setMessages([]);
     }
 
-    setIsOpen(true);
     setIsLoading(false);
     sessionStorage.removeItem('chatWidgetClosed');
-  }, [user]);
+  }, [user, currentConversationId]);
 
   const closeWidget = useCallback(() => {
     console.log('[ChatWidget] closeWidget called');

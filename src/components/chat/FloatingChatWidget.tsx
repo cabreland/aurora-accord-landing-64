@@ -52,7 +52,7 @@ export const FloatingChatWidget: React.FC = () => {
     return null;
   }
 
-  console.log('[FloatingChatWidget] Rendering widget, isOpen:', isOpen);
+  console.log('[FloatingChatWidget] Rendering widget, isOpen:', isOpen, 'messages count:', messages.length);
 
   // Get position styles based on settings
   const getPositionStyles = () => {
@@ -62,6 +62,8 @@ export const FloatingChatWidget: React.FC = () => {
       : 'bottom-6 right-6';
     return `${base} ${position}`;
   };
+
+  console.log('[FloatingChatWidget] Rendering at position:', getPositionStyles());
 
   return (
     <div className={getPositionStyles()}>
@@ -73,15 +75,18 @@ export const FloatingChatWidget: React.FC = () => {
       )}
 
       {isOpen && (
-        <ChatPanel
-          messages={messages}
-          onClose={closeWidget}
-          onSendMessage={sendMessage}
-          dealContext={currentDealContext}
-          onMarkAsRead={markAsRead}
-          isLoading={isLoading}
-          settings={settings}
-        />
+        <>
+          <div className="absolute inset-0 -z-10" />
+          <ChatPanel
+            messages={messages}
+            onClose={closeWidget}
+            onSendMessage={sendMessage}
+            dealContext={currentDealContext}
+            onMarkAsRead={markAsRead}
+            isLoading={isLoading}
+            settings={settings}
+          />
+        </>
       )}
     </div>
   );
