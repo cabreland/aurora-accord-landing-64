@@ -355,6 +355,16 @@ export const ChatWidgetProvider = ({ children }: { children: ReactNode }) => {
     setIsLoading(true);
     setIsOpen(true); // Open immediately for better UX
     
+    // If we already have a conversation ID (e.g., from URL), use it directly
+    if (currentConversationId) {
+      console.log('[ChatWidget] Using existing conversation from context:', currentConversationId);
+      await fetchMessages(currentConversationId);
+      setIsLoading(false);
+      sessionStorage.removeItem('chatWidgetClosed');
+      return;
+    }
+    
+    // Otherwise, create or find a conversation based on deal context
     if (dealId && dealName) {
       console.log('[ChatWidget] Setting deal context:', { dealId, dealName });
       setCurrentDealContext({ id: dealId, name: dealName });
@@ -373,7 +383,7 @@ export const ChatWidgetProvider = ({ children }: { children: ReactNode }) => {
 
     setIsLoading(false);
     sessionStorage.removeItem('chatWidgetClosed');
-  }, [user, currentConversationId]);
+  }, [user, currentConversationId]); // fetchMessages and ensureConversation are stable functions
 
   const closeWidget = useCallback(() => {
     console.log('[ChatWidget] closeWidget called');
