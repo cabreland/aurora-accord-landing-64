@@ -69,11 +69,11 @@ const queryClient = new QueryClient({
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
-      <ChatWidgetProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <ChatWidgetProvider>
             <FloatingChatWidget />
             <Suspense
             fallback={
@@ -111,9 +111,9 @@ const App = () => (
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>
+          </ChatWidgetProvider>
         </BrowserRouter>
       </TooltipProvider>
-      </ChatWidgetProvider>
     </AuthProvider>
   </QueryClientProvider>
 );
