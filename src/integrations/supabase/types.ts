@@ -251,7 +251,7 @@ export type Database = {
           accepted_at: string
           company_id: string
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           nda_version: string | null
           user_agent: string | null
           user_id: string
@@ -260,7 +260,7 @@ export type Database = {
           accepted_at?: string
           company_id: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           nda_version?: string | null
           user_agent?: string | null
           user_id: string
@@ -269,7 +269,7 @@ export type Database = {
           accepted_at?: string
           company_id?: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           nda_version?: string | null
           user_agent?: string | null
           user_id?: string
@@ -869,7 +869,7 @@ export type Database = {
           full_name: string
           id: string
           invitation_id: string | null
-          ip_address: unknown | null
+          ip_address: unknown
           signature_data: Json
           signed_at: string
           user_agent: string | null
@@ -882,7 +882,7 @@ export type Database = {
           full_name: string
           id?: string
           invitation_id?: string | null
-          ip_address?: unknown | null
+          ip_address?: unknown
           signature_data: Json
           signed_at?: string
           user_agent?: string | null
@@ -895,7 +895,7 @@ export type Database = {
           full_name?: string
           id?: string
           invitation_id?: string | null
-          ip_address?: unknown | null
+          ip_address?: unknown
           signature_data?: Json
           signed_at?: string
           user_agent?: string | null
@@ -1098,7 +1098,7 @@ export type Database = {
           event_data: Json | null
           event_type: string
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           user_agent: string | null
           user_id: string | null
         }
@@ -1107,7 +1107,7 @@ export type Database = {
           event_data?: Json | null
           event_type: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           user_agent?: string | null
           user_id?: string | null
         }
@@ -1116,7 +1116,7 @@ export type Database = {
           event_data?: Json | null
           event_type?: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           user_agent?: string | null
           user_id?: string | null
         }
@@ -1128,7 +1128,7 @@ export type Database = {
           event_data: Json | null
           event_type: string
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           severity: string | null
           user_agent: string | null
           user_id: string | null
@@ -1138,7 +1138,7 @@ export type Database = {
           event_data?: Json | null
           event_type: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           severity?: string | null
           user_agent?: string | null
           user_id?: string | null
@@ -1148,7 +1148,7 @@ export type Database = {
           event_data?: Json | null
           event_type?: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           severity?: string | null
           user_agent?: string | null
           user_id?: string | null
@@ -1220,7 +1220,7 @@ export type Database = {
           action: string
           created_at: string
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           metadata: Json | null
           resource_id: string | null
           resource_type: string | null
@@ -1231,7 +1231,7 @@ export type Database = {
           action: string
           created_at?: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           metadata?: Json | null
           resource_id?: string | null
           resource_type?: string | null
@@ -1242,7 +1242,7 @@ export type Database = {
           action?: string
           created_at?: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           metadata?: Json | null
           resource_id?: string | null
           resource_type?: string | null
@@ -1288,7 +1288,7 @@ export type Database = {
           created_at: string
           expires_at: string
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           is_active: boolean
           last_activity: string
           location_data: Json | null
@@ -1300,7 +1300,7 @@ export type Database = {
           created_at?: string
           expires_at: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           is_active?: boolean
           last_activity?: string
           location_data?: Json | null
@@ -1312,7 +1312,7 @@ export type Database = {
           created_at?: string
           expires_at?: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           is_active?: boolean
           last_activity?: string
           location_data?: Json | null
@@ -1484,10 +1484,7 @@ export type Database = {
       }
     }
     Functions: {
-      accept_company_nda: {
-        Args: { p_company_id: string }
-        Returns: Json
-      }
+      accept_company_nda: { Args: { p_company_id: string }; Returns: Json }
       get_user_role: {
         Args: { user_uuid: string }
         Returns: Database["public"]["Enums"]["user_role"]
