@@ -67,11 +67,14 @@ export const ChatWidgetProvider = ({ children }: { children: ReactNode }) => {
   // Load widget settings
   useEffect(() => {
     const loadSettings = async () => {
+      console.log('[ChatWidget] Starting to load settings...');
       try {
         const { data, error } = await supabase
           .from('widget_settings' as any)
           .select('*')
           .maybeSingle();
+        
+        console.log('[ChatWidget] Settings fetch result:', { data, error });
         
         if (error) {
           console.error('[ChatWidget] Error loading settings:', error);
@@ -79,8 +82,10 @@ export const ChatWidgetProvider = ({ children }: { children: ReactNode }) => {
         }
         
         if (data) {
-          console.log('[ChatWidget] Settings loaded:', data);
+          console.log('[ChatWidget] Settings loaded successfully:', data);
           setSettings(data as any);
+        } else {
+          console.warn('[ChatWidget] No settings found in database');
         }
       } catch (err) {
         console.error('[ChatWidget] Failed to load settings:', err);

@@ -6,6 +6,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { useLocation } from 'react-router-dom';
 
 export const FloatingChatWidget: React.FC = () => {
+  console.log('[FloatingChatWidget] Component rendering');
+  
   const { user } = useAuth();
   const location = useLocation();
   const {
@@ -20,15 +22,37 @@ export const FloatingChatWidget: React.FC = () => {
     settings
   } = useChatWidget();
 
+  console.log('[FloatingChatWidget] State:', {
+    hasUser: !!user,
+    pathname: location.pathname,
+    isOpen,
+    hasSettings: !!settings,
+    unreadCount
+  });
+
   // Hide widget on auth pages
   const isAuthPage = location.pathname.startsWith('/auth') || 
                      location.pathname === '/' || 
                      location.pathname === '/v2';
 
-  // Don't render if not authenticated or on auth pages
-  if (!user || isAuthPage || !settings) {
+  console.log('[FloatingChatWidget] isAuthPage:', isAuthPage);
+
+  if (!user) {
+    console.log('[FloatingChatWidget] No user - not rendering');
     return null;
   }
+  
+  if (isAuthPage) {
+    console.log('[FloatingChatWidget] Auth page - not rendering');
+    return null;
+  }
+  
+  if (!settings) {
+    console.log('[FloatingChatWidget] No settings loaded yet - not rendering');
+    return null;
+  }
+
+  console.log('[FloatingChatWidget] Rendering widget, isOpen:', isOpen);
 
   // Get position styles based on settings
   const getPositionStyles = () => {
