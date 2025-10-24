@@ -20,7 +20,9 @@ const Auth = () => {
   const { onboardingCompleted, loading: onboardingLoading } = useOnboardingStatus();
   
   const handleDevLogin = () => {
-    handleSignIn('admin@ebbdataroom.com', 'admin123');
+    // Use your actual super admin account email
+    // You'll need to set the password or sign up first if you haven't
+    handleSignIn('cabreland@gmail.com', 'admin123');
   };
 
   const redirectToAppropriateRoute = async (userId: string) => {
@@ -90,8 +92,8 @@ const Auth = () => {
               Login as Super Admin
             </Button>
             <div className="text-xs text-blue-300/70 space-y-1">
-              <p>Email: admin@ebbdataroom.com</p>
-              <p>Password: admin123</p>
+              <p>Email: cabreland@gmail.com</p>
+              <p className="text-amber-400">⚠️ Set password to "admin123" or update code with your actual password</p>
             </div>
           </div>
 
