@@ -10,11 +10,18 @@ import { GoogleAuthButton } from '@/components/auth/GoogleAuthButton';
 import { SignInForm } from '@/components/auth/SignInForm';
 import { SignUpForm } from '@/components/auth/SignUpForm';
 import { getDashboardRoute, getFallbackDashboardRoute } from '@/lib/auth-utils';
+import { DeveloperBadge } from '@/components/investor/DeveloperBadge';
+import { Button } from '@/components/ui/button';
+import { Shield } from 'lucide-react';
 
 const Auth = () => {
   const navigate = useNavigate();
   const { loading, handleGoogleSignIn, handleSignIn, handleSignUp } = useAuthHandlers();
   const { onboardingCompleted, loading: onboardingLoading } = useOnboardingStatus();
+  
+  const handleDevLogin = () => {
+    handleSignIn('admin@ebbdataroom.com', 'admin123');
+  };
 
   const redirectToAppropriateRoute = async (userId: string) => {
     try {
@@ -68,6 +75,34 @@ const Auth = () => {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
+          {/* Dev Mode Quick Login */}
+          <div className="bg-blue-950/30 border border-blue-500/30 rounded-lg p-4 space-y-3">
+            <div className="flex items-center justify-between">
+              <DeveloperBadge />
+              <span className="text-xs text-blue-400">Quick Access</span>
+            </div>
+            <Button
+              onClick={handleDevLogin}
+              disabled={loading}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold"
+            >
+              <Shield className="mr-2 h-4 w-4" />
+              Login as Super Admin
+            </Button>
+            <div className="text-xs text-blue-300/70 space-y-1">
+              <p>Email: admin@ebbdataroom.com</p>
+              <p>Password: admin123</p>
+            </div>
+          </div>
+
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <Separator className="w-full bg-[#D4AF37]/20" />
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="bg-[#0A0F0F] px-3 text-[#F4E4BC]/70">or continue with</span>
+            </div>
+          </div>
           {/* Google OAuth Button */}
           <GoogleAuthButton onClick={handleGoogleSignIn} loading={loading} />
 
