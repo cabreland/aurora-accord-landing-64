@@ -42,6 +42,41 @@ export const MessagingLayout = ({ userType }: MessagingLayoutProps) => {
     }
   }, [conversationId, currentUserId]);
 
+  // Real-time subscriptions
+  useEffect(() => {
+    if (!currentUserId) return;
+
+    const conversationsChannel = supabase
+      .channel('conversations_changes')
+      .on('postgres_changes', { 
+        event: '*', 
+        schema: 'public', 
+        table: 'conversations' 
+      }, () => {
+        fetchConversations();
+      })
+      .subscribe();
+
+    const messagesChannel = supabase
+      .channel('messages_changes')
+      .on('postgres_changes', { 
+        event: '*', 
+        schema: 'public', 
+        table: 'conversation_messages',
+        filter: conversationId ? `conversation_id=eq.${conversationId}` : undefined
+      }, () => {
+        if (conversationId) {
+          fetchMessages(conversationId);
+        }
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(conversationsChannel);
+      supabase.removeChannel(messagesChannel);
+    };
+  }, [currentUserId, conversationId]);
+
   const fetchCurrentUser = async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (user) {
@@ -69,6 +104,19 @@ export const MessagingLayout = ({ userType }: MessagingLayoutProps) => {
         query = query.not('deal_id', 'is', null);
       } else if (filter === 'general') {
         query = query.is('deal_id', null);
+      } else if (filter === 'urgent') {
+        query = query.eq('priority', 'urgent');
+      } else if (filter === 'high-priority') {
+        query = query.in('priority', ['high', 'urgent']);
+      } else if (filter === 'resolved') {
+        query = query.eq('status', 'resolved');
+      } else if (filter === 'archived') {
+        query = query.not('archived_at', 'is', null);
+      }
+
+      // Exclude archived by default unless specifically filtering for archived
+      if (filter !== 'archived') {
+        query = query.is('archived_at', null);
       }
 
       if (searchQuery) {
@@ -108,7 +156,10 @@ export const MessagingLayout = ({ userType }: MessagingLayoutProps) => {
             unread: unreadCount,
             channel: conv.channel,
             messageType: lastMsg?.message_type,
-            status: conv.status
+            status: conv.status,
+            priority: conv.priority || 'normal',
+            archivedAt: conv.archived_at,
+            assignedTo: conv.assigned_to
           };
         })
       );
@@ -254,14 +305,49 @@ export const MessagingLayout = ({ userType }: MessagingLayoutProps) => {
       if (error) throw error;
 
       toast({ title: 'Success', description: 'Conversation marked as resolved' });
+      fetchConversations();
+    } catch (error: any) {
+      toast({ title: 'Failed to resolve conversation', description: error.message, variant: 'destructive' });
+    }
+  };
+
+  const handleArchive = async () => {
+    if (!conversationId) return;
+
+    try {
+      const { error } = await supabase
+        .from('conversations' as any)
+        .update({ archived_at: new Date().toISOString() } as any)
+        .eq('id', conversationId);
+
+      if (error) throw error;
+
+      toast({ title: 'Success', description: 'Conversation archived' });
       
-      // Navigate back to conversations list
       const basePath = userType === 'investor' ? '/investor-portal/messages' : '/dashboard/conversations';
       navigate(basePath);
       
       fetchConversations();
     } catch (error: any) {
-      toast({ title: 'Failed to resolve conversation', description: error.message, variant: 'destructive' });
+      toast({ title: 'Failed to archive conversation', description: error.message, variant: 'destructive' });
+    }
+  };
+
+  const handleSetPriority = async (priority: 'low' | 'normal' | 'high' | 'urgent') => {
+    if (!conversationId) return;
+
+    try {
+      const { error } = await supabase
+        .from('conversations' as any)
+        .update({ priority } as any)
+        .eq('id', conversationId);
+
+      if (error) throw error;
+
+      toast({ title: 'Success', description: `Priority set to ${priority}` });
+      fetchConversations();
+    } catch (error: any) {
+      toast({ title: 'Failed to set priority', description: error.message, variant: 'destructive' });
     }
   };
 
@@ -295,6 +381,8 @@ export const MessagingLayout = ({ userType }: MessagingLayoutProps) => {
           userType={userType}
           isSending={isSending}
           onResolve={userType === 'team' ? handleResolve : undefined}
+          onArchive={userType === 'team' ? handleArchive : undefined}
+          onSetPriority={userType === 'team' ? handleSetPriority : undefined}
         />
       </div>
 

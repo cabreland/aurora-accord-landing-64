@@ -26,7 +26,7 @@ export const LeftPane = ({
   onNewConversation
 }: LeftPaneProps) => {
   const investorFilters: FilterType[] = ['all', 'unread', 'deal-specific', 'general'];
-  const teamFilters: FilterType[] = ['all', 'unread', 'by-deal', 'by-investor', 'urgent'];
+  const teamFilters: FilterType[] = ['all', 'unread', 'urgent', 'high-priority', 'resolved', 'archived'];
 
   const filters = userType === 'investor' ? investorFilters : teamFilters;
 

@@ -4,11 +4,17 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Send, ExternalLink, CheckCircle2 } from 'lucide-react';
+import { Send, ExternalLink, CheckCircle2, Archive, Flag } from 'lucide-react';
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import { MessageType, ConversationType, UserType } from './types';
 import { cn } from '@/lib/utils';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 interface ChatPaneProps {
   conversation: ConversationType | null;
@@ -17,15 +23,19 @@ interface ChatPaneProps {
   userType: UserType;
   isSending: boolean;
   onResolve?: () => void;
+  onArchive?: () => void;
+  onSetPriority?: (priority: 'low' | 'normal' | 'high' | 'urgent') => void;
 }
 
-export const ChatPane = ({
-  conversation,
-  messages,
-  onSendMessage,
-  userType,
+export const ChatPane = ({ 
+  conversation, 
+  messages, 
+  onSendMessage, 
+  userType, 
   isSending,
-  onResolve
+  onResolve,
+  onArchive,
+  onSetPriority
 }: ChatPaneProps) => {
   const [messageContent, setMessageContent] = useState('');
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -92,15 +102,53 @@ export const ChatPane = ({
                 <ExternalLink className="ml-2 h-4 w-4" />
               </Button>
             )}
-            {userType === 'team' && onResolve && conversation.status !== 'resolved' && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={onResolve}
-              >
-                <CheckCircle2 className="mr-2 h-4 w-4" />
-                Mark Resolved
-              </Button>
+            {userType === 'team' && (
+              <>
+                {onSetPriority && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" size="sm">
+                        <Flag className="h-4 w-4 mr-2" />
+                        {conversation.priority || 'normal'}
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                      <DropdownMenuItem onClick={() => onSetPriority('low')}>
+                        Low Priority
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => onSetPriority('normal')}>
+                        Normal Priority
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => onSetPriority('high')}>
+                        High Priority
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => onSetPriority('urgent')}>
+                        Urgent
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
+                {onResolve && conversation.status !== 'resolved' && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={onResolve}
+                  >
+                    <CheckCircle2 className="mr-2 h-4 w-4" />
+                    Resolve
+                  </Button>
+                )}
+                {onArchive && !conversation.archivedAt && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={onArchive}
+                  >
+                    <Archive className="mr-2 h-4 w-4" />
+                    Archive
+                  </Button>
+                )}
+              </>
             )}
           </div>
         </div>

@@ -337,6 +337,8 @@ export type Database = {
       }
       conversations: {
         Row: {
+          archived_at: string | null
+          assigned_to: string | null
           channel: string | null
           created_at: string | null
           deal_id: string | null
@@ -344,6 +346,7 @@ export type Database = {
           id: string
           investor_id: string
           last_message_at: string | null
+          priority: string | null
           status: string | null
           subject: string
           unread_count_broker: number | null
@@ -351,6 +354,8 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          archived_at?: string | null
+          assigned_to?: string | null
           channel?: string | null
           created_at?: string | null
           deal_id?: string | null
@@ -358,6 +363,7 @@ export type Database = {
           id?: string
           investor_id: string
           last_message_at?: string | null
+          priority?: string | null
           status?: string | null
           subject: string
           unread_count_broker?: number | null
@@ -365,6 +371,8 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          archived_at?: string | null
+          assigned_to?: string | null
           channel?: string | null
           created_at?: string | null
           deal_id?: string | null
@@ -372,6 +380,7 @@ export type Database = {
           id?: string
           investor_id?: string
           last_message_at?: string | null
+          priority?: string | null
           status?: string | null
           subject?: string
           unread_count_broker?: number | null

@@ -18,6 +18,9 @@ export interface ConversationType {
   channel: string;
   messageType?: string;
   status: string;
+  priority?: 'low' | 'normal' | 'high' | 'urgent';
+  archivedAt?: string;
+  assignedTo?: string;
 }
 
 export interface MessageType {
@@ -34,5 +37,5 @@ export interface MessageType {
 }
 
 export type UserType = 'investor' | 'team';
-export type FilterType = 'all' | 'unread' | 'deal-specific' | 'general' | 'by-deal' | 'by-investor' | 'urgent';
+export type FilterType = 'all' | 'unread' | 'deal-specific' | 'general' | 'urgent' | 'high-priority' | 'resolved' | 'archived';
 export type ChannelType = 'all' | 'platform' | 'email' | 'phone';
