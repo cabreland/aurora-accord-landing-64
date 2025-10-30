@@ -33,6 +33,7 @@ interface ChatWidgetContextType {
   sendMessage: (text: string) => Promise<void>;
   setDealContext: (context: DealContext | null) => void;
   markAsRead: () => Promise<void>;
+  deleteMessage: (messageId: string) => Promise<void>;
 }
 
 const ChatWidgetContext = createContext<ChatWidgetContextType | null>(null);
@@ -463,6 +464,25 @@ export const ChatWidgetProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [currentConversationId, user]);
 
+  const deleteMessage = useCallback(async (messageId: string) => {
+    if (!user?.id) return;
+
+    try {
+      const { error } = await supabase
+        .from('conversation_messages' as any)
+        .delete()
+        .eq('id', messageId)
+        .eq('sender_id', user.id);
+
+      if (error) throw error;
+
+      // Update local messages state
+      setMessages(prev => prev.filter(msg => msg.id !== messageId));
+    } catch (error) {
+      console.error('[ChatWidget] Error deleting message:', error);
+    }
+  }, [user?.id]);
+
   const value = {
     isOpen,
     messages,
@@ -475,7 +495,8 @@ export const ChatWidgetProvider = ({ children }: { children: ReactNode }) => {
     toggleWidget,
     sendMessage,
     setDealContext: setCurrentDealContext,
-    markAsRead
+    markAsRead,
+    deleteMessage
   };
 
   console.log('[ChatWidgetProvider] Rendering with state:', { 

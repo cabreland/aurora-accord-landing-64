@@ -6,6 +6,7 @@ import { MessageList } from './MessageList';
 import { MessageInput } from './MessageInput';
 import { DealContextBadge } from './DealContextBadge';
 import { WidgetSettings } from '@/hooks/useWidgetSettings';
+import { useChatWidget } from '@/contexts/ChatWidgetContext';
 
 interface ChatPanelProps {
   messages: any[];
@@ -26,6 +27,8 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
   isLoading = false,
   settings
 }) => {
+  const { deleteMessage } = useChatWidget();
+  
   useEffect(() => {
     if (messages.length > 0) {
       onMarkAsRead();
@@ -87,6 +90,7 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
           messages={displayMessages} 
           isLoading={isLoading}
           settings={settings}
+          onDeleteMessage={deleteMessage}
         />
       </div>
 

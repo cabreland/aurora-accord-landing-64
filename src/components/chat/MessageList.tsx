@@ -1,12 +1,16 @@
 import React, { useEffect, useRef } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
+import { Trash2 } from 'lucide-react';
 import { WidgetSettings } from '@/hooks/useWidgetSettings';
+import { useAuth } from '@/hooks/useAuth';
 
 interface Message {
   id: string;
   sender_type: string;
+  sender_id?: string;
   message_text: string;
   created_at: string;
 }
@@ -15,10 +19,12 @@ interface MessageListProps {
   messages: Message[];
   isLoading?: boolean;
   settings: WidgetSettings;
+  onDeleteMessage?: (messageId: string) => void;
 }
 
-export const MessageList: React.FC<MessageListProps> = ({ messages, isLoading, settings }) => {
+export const MessageList: React.FC<MessageListProps> = ({ messages, isLoading, settings, onDeleteMessage }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const { user } = useAuth();
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -46,10 +52,10 @@ export const MessageList: React.FC<MessageListProps> = ({ messages, isLoading, s
           return (
             <div
               key={message.id}
-              className={`flex ${isInvestor ? 'justify-end' : 'justify-start'}`}
+              className={`flex gap-2 group ${isInvestor ? 'justify-end' : 'justify-start'}`}
             >
               {!isInvestor && (
-                <Avatar className="h-8 w-8 mr-2">
+                <Avatar className="h-8 w-8">
                   <AvatarFallback>B</AvatarFallback>
                 </Avatar>
               )}
@@ -72,6 +78,16 @@ export const MessageList: React.FC<MessageListProps> = ({ messages, isLoading, s
                   {format(new Date(message.created_at), 'HH:mm')}
                 </p>
               </div>
+              {onDeleteMessage && user?.id === message.sender_id && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                  onClick={() => onDeleteMessage(message.id)}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              )}
             </div>
           );
         })}
