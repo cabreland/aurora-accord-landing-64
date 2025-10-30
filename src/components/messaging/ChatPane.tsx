@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Send, ExternalLink } from 'lucide-react';
+import { Send, ExternalLink, CheckCircle2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import { MessageType, ConversationType, UserType } from './types';
@@ -16,6 +16,7 @@ interface ChatPaneProps {
   onSendMessage: (content: string) => void;
   userType: UserType;
   isSending: boolean;
+  onResolve?: () => void;
 }
 
 export const ChatPane = ({
@@ -23,7 +24,8 @@ export const ChatPane = ({
   messages,
   onSendMessage,
   userType,
-  isSending
+  isSending,
+  onResolve
 }: ChatPaneProps) => {
   const [messageContent, setMessageContent] = useState('');
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -71,6 +73,12 @@ export const ChatPane = ({
             )}
           </div>
           <div className="flex items-center gap-2">
+            {conversation.status === 'resolved' && (
+              <Badge variant="secondary" className="flex items-center gap-1">
+                <CheckCircle2 className="h-3 w-3" />
+                Resolved
+              </Badge>
+            )}
             {conversation.dealName && (
               <Badge variant="outline">{conversation.dealName}</Badge>
             )}
@@ -78,10 +86,20 @@ export const ChatPane = ({
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => navigate(`/investor-portal/deal/${conversation.dealId}`)}
+                onClick={() => navigate(`/deal/${conversation.dealId}`)}
               >
                 View Deal
                 <ExternalLink className="ml-2 h-4 w-4" />
+              </Button>
+            )}
+            {userType === 'team' && onResolve && conversation.status !== 'resolved' && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onResolve}
+              >
+                <CheckCircle2 className="mr-2 h-4 w-4" />
+                Mark Resolved
               </Button>
             )}
           </div>

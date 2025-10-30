@@ -242,6 +242,29 @@ export const MessagingLayout = ({ userType }: MessagingLayoutProps) => {
     handleConversationSelect(id);
   };
 
+  const handleResolve = async () => {
+    if (!conversationId) return;
+
+    try {
+      const { error } = await supabase
+        .from('conversations' as any)
+        .update({ status: 'resolved' } as any)
+        .eq('id', conversationId);
+
+      if (error) throw error;
+
+      toast({ title: 'Success', description: 'Conversation marked as resolved' });
+      
+      // Navigate back to conversations list
+      const basePath = userType === 'investor' ? '/investor-portal/messages' : '/dashboard/conversations';
+      navigate(basePath);
+      
+      fetchConversations();
+    } catch (error: any) {
+      toast({ title: 'Failed to resolve conversation', description: error.message, variant: 'destructive' });
+    }
+  };
+
   const activeConversation = conversations.find(c => c.id === conversationId) || null;
 
   return (
@@ -271,6 +294,7 @@ export const MessagingLayout = ({ userType }: MessagingLayoutProps) => {
           onSendMessage={handleSendMessage}
           userType={userType}
           isSending={isSending}
+          onResolve={userType === 'team' ? handleResolve : undefined}
         />
       </div>
 
