@@ -14,6 +14,66 @@ export type Database = {
   }
   public: {
     Tables: {
+      access_requests: {
+        Row: {
+          company_id: string
+          created_at: string
+          current_level: string
+          id: string
+          reason: string
+          requested_at: string
+          requested_level: string
+          review_notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          current_level: string
+          id?: string
+          reason: string
+          requested_at?: string
+          requested_level: string
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          current_level?: string
+          id?: string
+          reason?: string
+          requested_at?: string
+          requested_level?: string
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "access_requests_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "access_requests_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "public_company_teasers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       call_requests: {
         Row: {
           additional_message: string | null
@@ -633,8 +693,50 @@ export type Database = {
           },
         ]
       }
+      document_views: {
+        Row: {
+          action: string
+          document_id: string
+          id: string
+          ip_address: string | null
+          session_data: Json | null
+          user_agent: string | null
+          user_id: string | null
+          viewed_at: string
+        }
+        Insert: {
+          action: string
+          document_id: string
+          id?: string
+          ip_address?: string | null
+          session_data?: Json | null
+          user_agent?: string | null
+          user_id?: string | null
+          viewed_at?: string
+        }
+        Update: {
+          action?: string
+          document_id?: string
+          id?: string
+          ip_address?: string | null
+          session_data?: Json | null
+          user_agent?: string | null
+          user_id?: string | null
+          viewed_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_views_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       documents: {
         Row: {
+          confidentiality_level: string | null
           created_at: string
           deal_id: string
           file_path: string
@@ -648,6 +750,7 @@ export type Database = {
           version: number
         }
         Insert: {
+          confidentiality_level?: string | null
           created_at?: string
           deal_id: string
           file_path: string
@@ -661,6 +764,7 @@ export type Database = {
           version?: number
         }
         Update: {
+          confidentiality_level?: string | null
           created_at?: string
           deal_id?: string
           file_path?: string
@@ -1268,6 +1372,51 @@ export type Database = {
           },
         ]
       }
+      user_company_access: {
+        Row: {
+          access_level: string
+          company_id: string
+          granted_at: string
+          granted_by: string | null
+          id: string
+          notes: string | null
+          user_id: string
+        }
+        Insert: {
+          access_level: string
+          company_id: string
+          granted_at?: string
+          granted_by?: string | null
+          id?: string
+          notes?: string | null
+          user_id: string
+        }
+        Update: {
+          access_level?: string
+          company_id?: string
+          granted_at?: string
+          granted_by?: string | null
+          id?: string
+          notes?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_company_access_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_company_access_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "public_company_teasers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           assigned_at: string | null
@@ -1494,6 +1643,14 @@ export type Database = {
     }
     Functions: {
       accept_company_nda: { Args: { p_company_id: string }; Returns: Json }
+      can_access_document: {
+        Args: { p_document_id: string; p_user_id: string }
+        Returns: boolean
+      }
+      get_user_access_level: {
+        Args: { p_company_id: string; p_user_id: string }
+        Returns: string
+      }
       get_user_role: {
         Args: { user_uuid: string }
         Returns: Database["public"]["Enums"]["user_role"]

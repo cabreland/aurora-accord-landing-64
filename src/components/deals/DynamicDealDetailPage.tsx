@@ -13,13 +13,15 @@ import {
   FolderOpen,
   Lock,
   Unlock,
-  Edit
+  Edit,
+  DollarSign
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useNavigate } from 'react-router-dom';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { getDashboardRoute } from '@/lib/auth-utils';
@@ -28,6 +30,11 @@ import { MyDeal } from '@/hooks/useMyDeals';
 import { useToast } from '@/hooks/use-toast';
 import { ExpandedDealEditModal } from './ExpandedDealEditModal';
 import { resolveDealRoute } from '@/lib/data/dealRouting';
+import { useCompanyNDA } from '@/hooks/useCompanyNDA';
+import { useCompanyAccessLevel } from '@/hooks/useCompanyAccessLevel';
+import { DataRoomSection } from './DataRoomSection';
+import { NDADialog } from './NDADialog';
+import { AccessRequestDialog } from './AccessRequestDialog';
 
 interface DynamicDealDetailPageProps {
   dealId?: string;
@@ -39,10 +46,15 @@ export const DynamicDealDetailPage = ({ dealId }: DynamicDealDetailPageProps) =>
   const { profile, isAdmin, isEditor, getDisplayName, getRoleDisplayName, loading: profileLoading } = useUserProfile();
   const [deal, setDeal] = useState<MyDeal | null>(null);
   const [loading, setLoading] = useState(true);
-  const [ndaAccepted, setNdaAccepted] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showNDAModal, setShowNDAModal] = useState(false);
+  const [showAccessRequest, setShowAccessRequest] = useState(false);
   const [documents, setDocuments] = useState<any[]>([]);
   const { toast } = useToast();
+  
+  // Data room hooks
+  const { hasAcceptedNDA, loading: ndaLoading, refetch: refetchNDA } = useCompanyNDA(deal?.company_id);
+  const { accessLevel, loading: accessLoading, refetch: refetchAccess } = useCompanyAccessLevel(deal?.company_id);
 
   // Effects after all hook declarations
   useEffect(() => {
@@ -293,10 +305,28 @@ export const DynamicDealDetailPage = ({ dealId }: DynamicDealDetailPageProps) =>
           </div>
         </div>
 
-        {/* Two Column Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column - 2/3 width */}
-          <div className="lg:col-span-2 space-y-8">
+        {/* Two Column Layout with Tabs */}
+        <Tabs defaultValue="overview" className="w-full">
+          <TabsList className="grid w-full max-w-md grid-cols-3 bg-[#2A2F3A] border border-[#D4AF37]/20">
+            <TabsTrigger value="overview" className="data-[state=active]:bg-[#D4AF37] data-[state=active]:text-[#0A0F0F]">
+              Overview
+            </TabsTrigger>
+            <TabsTrigger value="dataroom" className="data-[state=active]:bg-[#D4AF37] data-[state=active]:text-[#0A0F0F]">
+              <FileText className="w-4 h-4 mr-2" />
+              Data Room
+              {!hasAcceptedNDA && <Lock className="ml-2 h-3 w-3" />}
+            </TabsTrigger>
+            <TabsTrigger value="financials" className="data-[state=active]:bg-[#D4AF37] data-[state=active]:text-[#0A0F0F]">
+              <DollarSign className="w-4 h-4 mr-2" />
+              Financials
+              {accessLevel !== 'financials' && accessLevel !== 'full' && <Lock className="ml-2 h-3 w-3" />}
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="overview" className="mt-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              {/* Left Column - 2/3 width */}
+              <div className="lg:col-span-2 space-y-8">
             {/* Company Overview */}
             <Card className="bg-gradient-to-br from-[#2A2F3A] to-[#1A1F2E] border-[#D4AF37]/20">
               <CardHeader>
@@ -403,14 +433,14 @@ export const DynamicDealDetailPage = ({ dealId }: DynamicDealDetailPageProps) =>
                     <FileText className="w-6 h-6 text-[#D4AF37]" />
                     Deal Documents
                   </div>
-                  <Badge className={`${ndaAccepted ? 'bg-[#22C55E]' : 'bg-[#F28C38]'} text-[#0A0F0F] flex items-center gap-2`}>
-                    {ndaAccepted ? <Unlock className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
-                    {ndaAccepted ? 'Access Granted' : 'NDA Required'}
+                  <Badge className={`${hasAcceptedNDA ? 'bg-[#22C55E]' : 'bg-[#F28C38]'} text-[#0A0F0F] flex items-center gap-2`}>
+                    {hasAcceptedNDA ? <Unlock className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
+                    {hasAcceptedNDA ? 'Access Granted' : 'NDA Required'}
                   </Badge>
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {ndaAccepted ? (
+                {hasAcceptedNDA ? (
                   <div className="space-y-3">
                     {documents.length > 0 ? (
                       documents.map((doc, index) => (
@@ -447,7 +477,7 @@ export const DynamicDealDetailPage = ({ dealId }: DynamicDealDetailPageProps) =>
                     <p className="text-[#F4E4BC] mb-6">Sign NDA to unlock documents</p>
                     <Button 
                       className="bg-[#D4AF37] hover:bg-[#F4E4BC] text-[#0A0F0F]"
-                      onClick={() => setNdaAccepted(true)}
+                      onClick={() => setShowNDAModal(true)}
                     >
                       Sign NDA & Access Documents
                     </Button>
@@ -576,24 +606,86 @@ export const DynamicDealDetailPage = ({ dealId }: DynamicDealDetailPageProps) =>
                 >
                   Schedule Call
                 </Button>
-
-                <Button 
-                  variant="ghost" 
-                  className="w-full text-[#F4E4BC] hover:bg-[#D4AF37]/10 hover:text-[#D4AF37]"
-                  onClick={() => {
-                    // Handle request more info
-                  }}
-                >
-                  <FolderOpen className="w-5 h-5 mr-3" />
-                  Request Additional Information
-                </Button>
               </CardContent>
             </Card>
           </div>
         </div>
+      </TabsContent>
+
+      <TabsContent value="dataroom" className="mt-6">
+        <DataRoomSection
+          dealId={dealId || ''}
+          companyId={deal?.company_id}
+          hasSignedNDA={hasAcceptedNDA}
+          accessLevel={accessLevel}
+          onOpenNDA={() => setShowNDAModal(true)}
+          onRequestAccess={() => setShowAccessRequest(true)}
+        />
+      </TabsContent>
+
+      <TabsContent value="financials" className="mt-6">
+        <Card className="bg-gradient-to-br from-[#2A2F3A] to-[#1A1F2E] border-[#D4AF37]/20">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-3 text-[#FAFAFA]">
+              <DollarSign className="w-6 h-6 text-[#D4AF37]" />
+              Financial Details
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {accessLevel === 'financials' || accessLevel === 'full' ? (
+              <div className="space-y-6">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-[#0A0F0F]/50 rounded-lg p-4">
+                    <div className="text-[#F4E4BC]/60 text-sm mb-2">Annual Revenue</div>
+                    <div className="text-2xl font-bold text-[#FAFAFA]">
+                      {deal?.revenue || 'Confidential'}
+                    </div>
+                  </div>
+                  <div className="bg-[#0A0F0F]/50 rounded-lg p-4">
+                    <div className="text-[#F4E4BC]/60 text-sm mb-2">EBITDA</div>
+                    <div className="text-2xl font-bold text-[#FAFAFA]">
+                      {deal?.ebitda || 'Confidential'}
+                    </div>
+                  </div>
+                  <div className="bg-[#0A0F0F]/50 rounded-lg p-4">
+                    <div className="text-[#F4E4BC]/60 text-sm mb-2">Asking Price</div>
+                    <div className="text-2xl font-bold text-[#D4AF37]">
+                      {(deal as any)?.asking_price || 'Contact for Pricing'}
+                    </div>
+                  </div>
+                  <div className="bg-[#0A0F0F]/50 rounded-lg p-4">
+                    <div className="text-[#F4E4BC]/60 text-sm mb-2">Growth Rate</div>
+                    <div className="text-2xl font-bold text-[#FAFAFA]">
+                      {(deal as any)?.growth_rate || 'N/A'}
+                    </div>
+                  </div>
+                </div>
+                <div className="text-sm text-[#F4E4BC]/60">
+                  Detailed financial statements and analysis are available in the Data Room
+                </div>
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <Lock className="w-16 h-16 text-[#F28C38] mx-auto mb-4" />
+                <p className="text-[#F4E4BC] mb-2">Financial Access Required</p>
+                <p className="text-[#F4E4BC]/60 text-sm mb-6">
+                  Request access to view detailed financial information
+                </p>
+                <Button 
+                  className="bg-[#D4AF37] hover:bg-[#F4E4BC] text-[#0A0F0F]"
+                  onClick={() => setShowAccessRequest(true)}
+                >
+                  Request Financial Access
+                </Button>
+               </div>
+            )}
+          </CardContent>
+        </Card>
+      </TabsContent>
+    </Tabs>
       </div>
 
-      {/* Edit Modal */}
+      {/* Modals */}
       {showEditModal && deal && (
         <ExpandedDealEditModal
           deal={deal}
@@ -602,6 +694,27 @@ export const DynamicDealDetailPage = ({ dealId }: DynamicDealDetailPageProps) =>
           onSaved={handleEditSaved}
         />
       )}
+
+      <NDADialog
+        open={showNDAModal}
+        onOpenChange={setShowNDAModal}
+        companyId={deal?.company_id || ''}
+        companyName={deal?.company_name}
+        onSuccess={() => {
+          refetchNDA();
+          refetchAccess();
+        }}
+      />
+
+      <AccessRequestDialog
+        open={showAccessRequest}
+        onOpenChange={setShowAccessRequest}
+        companyId={deal?.company_id || ''}
+        currentLevel={accessLevel}
+        onSuccess={() => {
+          refetchAccess();
+        }}
+      />
     </div>
   );
 };
