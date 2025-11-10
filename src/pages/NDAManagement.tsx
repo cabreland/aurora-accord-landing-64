@@ -29,8 +29,8 @@ interface NDARecord {
     last_name: string;
     email: string;
   };
-  deals?: {
-    company_name: string;
+  companies?: {
+    name: string;
   };
 }
 
@@ -55,7 +55,7 @@ const NDAManagement = () => {
         .select(`
           *,
           profiles:user_id(first_name, last_name, email),
-          deals:company_id(company_name)
+          companies:company_id(name)
         `)
         .order('accepted_at', { ascending: false });
 
@@ -131,7 +131,7 @@ const NDAManagement = () => {
     return (
       nda.signer_name?.toLowerCase().includes(search) ||
       nda.signer_email?.toLowerCase().includes(search) ||
-      nda.deals?.company_name?.toLowerCase().includes(search)
+      nda.companies?.name?.toLowerCase().includes(search)
     );
   });
 
@@ -256,7 +256,7 @@ const NDAManagement = () => {
                           <p className="text-sm text-muted-foreground">{nda.signer_email}</p>
                         </div>
                       </TableCell>
-                      <TableCell>{nda.deals?.company_name || 'N/A'}</TableCell>
+                      <TableCell>{nda.companies?.name || 'N/A'}</TableCell>
                       <TableCell>{format(new Date(nda.accepted_at), 'MMM d, yyyy')}</TableCell>
                       <TableCell>
                         <div className="flex flex-col">
