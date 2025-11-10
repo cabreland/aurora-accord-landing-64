@@ -310,27 +310,48 @@ export type Database = {
         Row: {
           accepted_at: string
           company_id: string
+          expires_at: string | null
           id: string
           ip_address: unknown
+          nda_content: string | null
           nda_version: string | null
+          signature: string | null
+          signer_company: string | null
+          signer_email: string | null
+          signer_name: string | null
+          status: string | null
           user_agent: string | null
           user_id: string
         }
         Insert: {
           accepted_at?: string
           company_id: string
+          expires_at?: string | null
           id?: string
           ip_address?: unknown
+          nda_content?: string | null
           nda_version?: string | null
+          signature?: string | null
+          signer_company?: string | null
+          signer_email?: string | null
+          signer_name?: string | null
+          status?: string | null
           user_agent?: string | null
           user_id: string
         }
         Update: {
           accepted_at?: string
           company_id?: string
+          expires_at?: string | null
           id?: string
           ip_address?: unknown
+          nda_content?: string | null
           nda_version?: string | null
+          signature?: string | null
+          signer_company?: string | null
+          signer_email?: string | null
+          signer_name?: string | null
+          status?: string | null
           user_agent?: string | null
           user_id?: string
         }

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -9,8 +9,11 @@ import {
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useCompanyNDA } from '@/hooks/useCompanyNDA';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 interface NDADialogProps {
   open: boolean;
@@ -29,17 +32,92 @@ export const NDADialog: React.FC<NDADialogProps> = ({
 }) => {
   const [agreed, setAgreed] = useState(false);
   const [accepting, setAccepting] = useState(false);
+  const [signature, setSignature] = useState('');
+  const [signerName, setSignerName] = useState('');
+  const [signerEmail, setSignerEmail] = useState('');
+  const [signerCompany, setSignerCompany] = useState('');
   const { acceptNDA } = useCompanyNDA(companyId);
 
+  // Auto-populate signer information from profile
+  useEffect(() => {
+    const loadProfile = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('first_name, last_name, email')
+        .eq('user_id', user.id)
+        .single();
+      
+      if (profile) {
+        const fullName = `${profile.first_name || ''} ${profile.last_name || ''}`.trim();
+        setSignerName(fullName || profile.email);
+        setSignerEmail(profile.email);
+        setSignature(fullName || profile.email);
+      }
+    };
+    if (open) {
+      loadProfile();
+    }
+  }, [open]);
+
   const handleAccept = async () => {
+    if (!signature.trim()) {
+      toast.error('Please provide your signature');
+      return;
+    }
+
     setAccepting(true);
-    const result = await acceptNDA();
-    setAccepting(false);
     
-    if (result.success) {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      // Get IP address
+      let ipAddress = null;
+      try {
+        const res = await fetch('https://api.ipify.org?format=json');
+        const data = await res.json();
+        ipAddress = data.ip;
+      } catch (e) {
+        console.error('Failed to get IP:', e);
+      }
+
+      // Get full NDA content
+      const ndaContent = document.querySelector('.nda-content')?.textContent || '';
+
+      const ndaRecord = {
+        user_id: user.id,
+        company_id: companyId,
+        accepted_at: new Date().toISOString(),
+        expires_at: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString(), // 60 days
+        signature: signature.trim(),
+        signer_name: signerName,
+        signer_email: signerEmail,
+        signer_company: signerCompany || null,
+        ip_address: ipAddress,
+        user_agent: navigator.userAgent,
+        nda_content: ndaContent,
+        status: 'active'
+      };
+
+      const { error } = await supabase
+        .from('company_nda_acceptances')
+        .insert(ndaRecord);
+
+      if (error) throw error;
+
+      toast.success('NDA signed successfully!');
       setAgreed(false);
+      setSignature('');
       onOpenChange(false);
       onSuccess?.();
+    } catch (error: any) {
+      console.error('Error signing NDA:', error);
+      toast.error(error.message || 'Failed to sign NDA');
+    } finally {
+      setAccepting(false);
     }
   };
 
@@ -52,9 +130,34 @@ export const NDADialog: React.FC<NDADialogProps> = ({
             Please review and accept the NDA to access confidential documents for {companyName}
           </DialogDescription>
         </DialogHeader>
+
+        {/* Signer Information */}
+        <div className="bg-muted rounded-lg p-4">
+          <h3 className="font-semibold mb-3">Signer Information</h3>
+          <div className="grid grid-cols-2 gap-3 text-sm">
+            <div>
+              <p className="text-muted-foreground">Name</p>
+              <p className="font-medium">{signerName}</p>
+            </div>
+            <div>
+              <p className="text-muted-foreground">Email</p>
+              <p className="font-medium">{signerEmail}</p>
+            </div>
+            {signerCompany && (
+              <div>
+                <p className="text-muted-foreground">Company</p>
+                <p className="font-medium">{signerCompany}</p>
+              </div>
+            )}
+            <div>
+              <p className="text-muted-foreground">Date</p>
+              <p className="font-medium">{new Date().toLocaleDateString()}</p>
+            </div>
+          </div>
+        </div>
         
-        <ScrollArea className="h-[400px] w-full rounded border p-4">
-          <div className="space-y-4 text-sm">
+        <ScrollArea className="h-[300px] w-full rounded border p-4">
+          <div className="nda-content space-y-4 text-sm">
             <h3 className="font-semibold text-lg">CONFIDENTIAL INFORMATION MEMORANDUM</h3>
             
             <p>
@@ -107,6 +210,24 @@ export const NDADialog: React.FC<NDADialogProps> = ({
           </div>
         </ScrollArea>
 
+        {/* Electronic Signature */}
+        <div className="space-y-2">
+          <Label htmlFor="signature">Electronic Signature *</Label>
+          <p className="text-sm text-muted-foreground">
+            Type your full legal name to sign electronically. This has the same legal effect as a handwritten signature.
+          </p>
+          <Input
+            id="signature"
+            value={signature}
+            onChange={(e) => setSignature(e.target.value)}
+            placeholder="Type your full name"
+            className="text-lg font-serif"
+          />
+          <p className="text-xs text-muted-foreground">
+            Signed on {new Date().toLocaleString()} • IP and browser info will be recorded
+          </p>
+        </div>
+
         <div className="flex items-start space-x-3 rounded-lg border p-4">
           <Checkbox
             id="nda-agree"
@@ -136,9 +257,9 @@ export const NDADialog: React.FC<NDADialogProps> = ({
           </Button>
           <Button
             onClick={handleAccept}
-            disabled={!agreed || accepting}
+            disabled={!agreed || !signature.trim() || accepting}
           >
-            {accepting ? "Accepting..." : "Accept & Sign NDA"}
+            {accepting ? "Signing..." : "Accept & Sign NDA"}
           </Button>
         </div>
       </DialogContent>
