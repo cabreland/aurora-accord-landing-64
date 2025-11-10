@@ -13,7 +13,8 @@ import {
   ArrowLeft,
   Users,
   Mail,
-  MessageSquare
+  MessageSquare,
+  Lock
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -80,6 +81,7 @@ const DashboardLayout = ({ children, activeTab = 'dashboard', onTabChange }: Das
       { id: 'documents', label: 'Documents', icon: FileText, path: '/documents', badge: undefined as number | undefined },
       { id: 'investor-invitations', label: 'Investor Relations', icon: Mail, path: '/investor-invitations', badge: undefined as number | undefined },
       { id: 'ndas', label: 'NDA Management', icon: Shield, path: '/dashboard/ndas', badge: undefined as number | undefined },
+      { id: 'access-requests', label: 'Access Requests', icon: Lock, path: '/dashboard/access-requests', badge: undefined as number | undefined },
       { id: 'users', label: 'Users', icon: Users, path: '/users', badge: undefined as number | undefined },
       { id: 'settings', label: 'Settings', icon: Settings, path: '/settings', badge: undefined as number | undefined },
       { id: 'activity', label: 'Activity', icon: Shield, path: '/activity', badge: undefined as number | undefined },
