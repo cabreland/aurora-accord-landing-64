@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { supabase } from '@/integrations/supabase/client';
 import { format, differenceInDays } from 'date-fns';
-import { Eye, XCircle, Search, Calendar, FileText } from 'lucide-react';
+import { Eye, XCircle, Search, Calendar, FileText, Mail, Send } from 'lucide-react';
 import { toast } from 'sonner';
 import DashboardLayout from '@/components/investor/DashboardLayout';
 
@@ -41,6 +41,7 @@ const NDAManagement = () => {
   const [selectedNDA, setSelectedNDA] = useState<NDARecord | null>(null);
   const [showContent, setShowContent] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [checkingEmails, setCheckingEmails] = useState(false);
 
   useEffect(() => {
     loadNDAs();
@@ -107,6 +108,24 @@ const NDAManagement = () => {
     }
   };
 
+  const checkExpiringNDAs = async () => {
+    setCheckingEmails(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('check-expiring-ndas');
+      
+      if (error) throw error;
+      
+      if (data) {
+        toast.success(`Sent ${data.success_count || 0} expiration reminder emails`);
+      }
+    } catch (error: any) {
+      console.error('Error checking expiring NDAs:', error);
+      toast.error(error.message || 'Failed to send expiration reminders');
+    } finally {
+      setCheckingEmails(false);
+    }
+  };
+
   const filteredNDAs = ndas.filter(nda => {
     const search = searchTerm.toLowerCase();
     return (
@@ -126,9 +145,20 @@ const NDAManagement = () => {
   return (
     <DashboardLayout activeTab="ndas">
       <div className="p-8 space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold">NDA Management</h1>
-          <p className="text-muted-foreground">Track and manage all signed NDAs</p>
+        <div className="flex justify-between items-start">
+          <div>
+            <h1 className="text-3xl font-bold">NDA Management</h1>
+            <p className="text-muted-foreground">Track and manage all signed NDAs</p>
+          </div>
+          <Button 
+            onClick={checkExpiringNDAs} 
+            disabled={checkingEmails}
+            variant="outline"
+            className="gap-2"
+          >
+            <Send className="h-4 w-4" />
+            {checkingEmails ? 'Sending...' : 'Send Expiration Reminders'}
+          </Button>
         </div>
 
         {/* Stats */}

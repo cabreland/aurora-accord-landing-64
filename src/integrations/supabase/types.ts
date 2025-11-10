@@ -995,6 +995,41 @@ export type Database = {
           },
         ]
       }
+      nda_extension_tokens: {
+        Row: {
+          created_at: string
+          expires_at: string
+          id: string
+          nda_id: string
+          token: string
+          used_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          expires_at: string
+          id?: string
+          nda_id: string
+          token: string
+          used_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          nda_id?: string
+          token?: string
+          used_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nda_extension_tokens_nda_id_fkey"
+            columns: ["nda_id"]
+            isOneToOne: false
+            referencedRelation: "company_nda_acceptances"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       nda_signatures: {
         Row: {
           company_id: string | null
