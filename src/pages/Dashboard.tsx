@@ -1,8 +1,8 @@
 import React from 'react';
-import DashboardMain from '@/components/dashboard/DashboardMain';
+import { AdminDashboardStats } from '@/components/dashboard/AdminDashboardStats';
 
 const DashboardPage = () => {
-  return <DashboardMain />;
+  return <AdminDashboardStats />;
 };
 
 export default DashboardPage;

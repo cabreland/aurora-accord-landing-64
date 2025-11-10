@@ -1,13 +1,8 @@
 import React from 'react';
-import { InvestorContextProvider } from '@/hooks/useInvestorContext';
-import InvestorPortalMain from '@/components/investor/InvestorPortalMain';
+import { InvestorPortalStats } from '@/components/investor/InvestorPortalStats';
 
 const InvestorPortal = () => {
-  return (
-    <InvestorContextProvider>
-      <InvestorPortalMain />
-    </InvestorContextProvider>
-  );
+  return <InvestorPortalStats />;
 };
 
 export default InvestorPortal;
