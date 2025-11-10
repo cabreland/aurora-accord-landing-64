@@ -12,6 +12,8 @@ import { MyDeal } from '@/hooks/useMyDeals';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Save, X, Plus, Trash2 } from 'lucide-react';
+import { DocumentUploadSection } from './documents/DocumentUploadSection';
+import { DocumentListManagement } from './documents/DocumentListManagement';
 
 interface ExpandedDealEditModalProps {
   deal: MyDeal;
@@ -68,6 +70,7 @@ export const ExpandedDealEditModal: React.FC<ExpandedDealEditModalProps> = ({
   });
 
   const [newOpportunity, setNewOpportunity] = useState('');
+  const [documentRefresh, setDocumentRefresh] = useState(0);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -218,12 +221,13 @@ export const ExpandedDealEditModal: React.FC<ExpandedDealEditModalProps> = ({
         </DialogHeader>
 
         <Tabs defaultValue="basic" className="py-4">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="basic">Basic Info</TabsTrigger>
             <TabsTrigger value="company">Company Details</TabsTrigger>
             <TabsTrigger value="founder">Founder Info</TabsTrigger>
             <TabsTrigger value="growth">Growth & Strategy</TabsTrigger>
             <TabsTrigger value="financials">Financials</TabsTrigger>
+            <TabsTrigger value="documents">Documents</TabsTrigger>
           </TabsList>
 
           <TabsContent value="basic" className="space-y-6">
@@ -606,6 +610,19 @@ export const ExpandedDealEditModal: React.FC<ExpandedDealEditModalProps> = ({
                   </div>
                 </CardContent>
               </Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="documents" className="space-y-6">
+            <div className="space-y-6">
+              <DocumentUploadSection 
+                dealId={deal.id} 
+                onUploadComplete={() => setDocumentRefresh(prev => prev + 1)}
+              />
+              <DocumentListManagement 
+                dealId={deal.id}
+                refreshTrigger={documentRefresh}
+              />
             </div>
           </TabsContent>
         </Tabs>
