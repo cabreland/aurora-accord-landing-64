@@ -29,14 +29,19 @@ export const NDASettings = () => {
   }, []);
 
   const loadSettings = async () => {
-    const { data } = await supabase
-      .from('platform_settings')
-      .select('*')
-      .eq('key', 'nda_settings')
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from('platform_settings' as any)
+        .select('*')
+        .eq('key', 'nda_settings')
+        .maybeSingle();
 
-    if (data?.value) {
-      setSettings({ ...settings, ...data.value });
+      if (!error && data && 'value' in data && data.value) {
+        const settingsData = data.value as any;
+        setSettings({ ...settings, ...settingsData });
+      }
+    } catch (error) {
+      console.error('Error loading NDA settings:', error);
     }
   };
 
@@ -44,10 +49,10 @@ export const NDASettings = () => {
     setSaving(true);
     try {
       const { error } = await supabase
-        .from('platform_settings')
+        .from('platform_settings' as any)
         .upsert({
           key: 'nda_settings',
-          value: settings
+          value: settings as any
         });
 
       if (error) throw error;
