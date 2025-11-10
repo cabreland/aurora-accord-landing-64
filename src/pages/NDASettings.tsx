@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Label } from '@/components/ui/label';
@@ -13,6 +14,7 @@ import { FileText, Settings as SettingsIcon, Clock, Mail } from 'lucide-react';
 import DashboardLayout from '@/components/investor/DashboardLayout';
 
 export const NDASettings = () => {
+  const navigate = useNavigate();
   const [saving, setSaving] = useState(false);
   const [settings, setSettings] = useState({
     master_nda_content: '',
@@ -81,7 +83,7 @@ export const NDASettings = () => {
           <div className="flex gap-2">
             <Button 
               variant="outline" 
-              onClick={() => window.open('/dashboard/ndas', '_blank')}
+              onClick={() => navigate('/dashboard/ndas')}
             >
               View Signed NDAs
             </Button>
