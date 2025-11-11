@@ -113,26 +113,37 @@ const NDAManagement = () => {
         newExpiry: newExpiry.toISOString()
       });
 
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('company_nda_acceptances')
         .update({ 
           expires_at: newExpiry.toISOString(),
           status: 'active' // Reactivate if it was expired
         })
-        .eq('id', id)
-        .select();
+        .eq('id', id);
 
       if (error) throw error;
 
-      console.log('✅ [NDA] Extended successfully:', data);
+      console.log('✅ [NDA] Extended successfully');
       toast.success(`NDA extended by ${days} days`);
       
       // Refresh the list to show new date
       await loadNDAs();
       
-      // If viewing details, update the selected NDA
-      if (selectedNDA?.id === id && data) {
-        setSelectedNDA(data[0] as any);
+      // If viewing details modal, fetch fresh data with companies relation
+      if (selectedNDA?.id === id) {
+        const { data: freshData, error: fetchError } = await supabase
+          .from('company_nda_acceptances')
+          .select(`
+            *,
+            companies:company_id(name)
+          `)
+          .eq('id', id)
+          .single();
+        
+        if (!fetchError && freshData) {
+          console.log('🔄 [NDA] Updated modal with fresh data:', freshData);
+          setSelectedNDA(freshData as any);
+        }
       }
     } catch (error) {
       console.error('❌ [NDA] Extend error:', error);
