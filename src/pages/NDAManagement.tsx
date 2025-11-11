@@ -24,11 +24,6 @@ interface NDARecord {
   expires_at: string | null;
   status: string;
   nda_content: string;
-  profiles?: {
-    first_name: string;
-    last_name: string;
-    email: string;
-  };
   companies?: {
     name: string;
   };
@@ -54,7 +49,6 @@ const NDAManagement = () => {
         .from('company_nda_acceptances')
         .select(`
           *,
-          profiles:user_id(first_name, last_name, email),
           companies:company_id(name)
         `)
         .order('accepted_at', { ascending: false });
