@@ -1,63 +1,97 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { seedTestData } from '@/lib/seedTestData';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { ChevronDown, Database, Trash2, TestTube, Copy } from 'lucide-react';
+import { ChevronDown, Database, Trash2, TestTube, Copy, Shield } from 'lucide-react';
 
 export const DevTools = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [testCount, setTestCount] = useState(0);
+  const [prodCount, setProdCount] = useState(0);
 
   // Only show in development mode
   if (!import.meta.env.DEV) return null;
 
+  const refreshCounts = async () => {
+    const [test, prod] = await Promise.all([
+      supabase.from('deals').select('*', { count: 'exact', head: true }).eq('is_test_data', true),
+      supabase.from('deals').select('*', { count: 'exact', head: true }).eq('is_test_data', false)
+    ]);
+    
+    setTestCount(test.count || 0);
+    setProdCount(prod.count || 0);
+  };
+
+  useEffect(() => {
+    if (isOpen) {
+      refreshCounts();
+    }
+  }, [isOpen]);
+
   const handleSeedData = async () => {
     setLoading(true);
     await seedTestData();
+    await refreshCounts();
     setLoading(false);
   };
 
   const handleClearTestData = async () => {
-    // Get test deal IDs from localStorage
-    const testDealIdsJson = localStorage.getItem('test_deal_ids');
-    if (!testDealIdsJson) {
-      toast.error('No test data found to clear. Use "Seed Test Data" first.');
+    // Count test vs production deals
+    const { count: currentTestCount } = await supabase
+      .from('deals')
+      .select('*', { count: 'exact', head: true })
+      .eq('is_test_data', true);
+
+    const { count: currentProdCount } = await supabase
+      .from('deals')
+      .select('*', { count: 'exact', head: true })
+      .eq('is_test_data', false);
+
+    if (!currentTestCount || currentTestCount === 0) {
+      toast.info('No test data found');
       return;
     }
 
-    const testDealIds = JSON.parse(testDealIdsJson) as string[];
+    // Require explicit confirmation
+    const confirmed = confirm(
+      `⚠️ DELETE TEST DATA ONLY\n\n` +
+      `Will delete: ${currentTestCount} test deals\n` +
+      `Will preserve: ${currentProdCount} production deals\n\n` +
+      `Click OK to confirm deletion of TEST data only.`
+    );
     
-    if (!confirm(`⚠️ Clear ${testDealIds.length} test deals?\n\nThis will delete ONLY test deals created by the seed function.\n\nThis action cannot be undone.`)) {
+    if (!confirmed) {
+      toast.info('Cancelled');
       return;
     }
     
     setLoading(true);
     try {
-      // Delete in correct order (child tables first to respect foreign keys)
-      // Only delete records related to test deals
-      await supabase.from('document_views').delete().in('document_id', 
-        (await supabase.from('documents').select('id').in('deal_id', testDealIds)).data?.map(d => d.id) || []
-      );
-      await supabase.from('access_requests').delete().in('company_id',
-        (await supabase.from('deals').select('company_id').in('id', testDealIds)).data?.map(d => d.company_id).filter(Boolean) || []
-      );
-      await supabase.from('company_nda_acceptances').delete().in('company_id',
-        (await supabase.from('deals').select('company_id').in('id', testDealIds)).data?.map(d => d.company_id).filter(Boolean) || []
-      );
-      await supabase.from('documents').delete().in('deal_id', testDealIds);
-      await supabase.from('deals').delete().in('id', testDealIds);
+      console.log('🗑️ [Clear] Deleting ONLY test data...');
+
+      // Delete ONLY where is_test_data = true
+      const { error } = await supabase
+        .from('deals')
+        .delete()
+        .eq('is_test_data', true);
+
+      if (error) throw error;
+
+      console.log('✅ [Clear] Deleted', currentTestCount, 'test deals');
+      console.log('✅ [Clear] Preserved', currentProdCount, 'production deals');
       
-      // Clear localStorage
-      localStorage.removeItem('test_deal_ids');
+      toast.success(`Cleared ${currentTestCount} test deals. ${currentProdCount} production deals preserved.`);
+      await refreshCounts();
       
-      toast.success(`Cleared ${testDealIds.length} test deals successfully`);
     } catch (error) {
-      console.error('Clear error:', error);
-      toast.error('Failed to clear data: ' + (error as Error).message);
+      console.error('❌ [Clear] Error:', error);
+      toast.error('Failed to clear test data');
     }
     setLoading(false);
   };
@@ -184,6 +218,26 @@ SELECT email, role, full_name FROM profiles WHERE email LIKE '%@test.com';`;
                 </TabsContent>
 
                 <TabsContent value="data" className="space-y-3 mt-4">
+                  <div className="grid grid-cols-2 gap-4 p-4 bg-muted rounded-lg mb-4">
+                    <div className="text-center">
+                      <div className="text-3xl font-bold text-blue-600">{testCount}</div>
+                      <div className="text-xs text-muted-foreground">Test Deals</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-3xl font-bold text-green-600">{prodCount}</div>
+                      <div className="text-xs text-muted-foreground">Production Deals</div>
+                    </div>
+                  </div>
+
+                  <Alert className="mb-4">
+                    <Shield className="h-4 w-4" />
+                    <AlertTitle>Safe Test Data Management</AlertTitle>
+                    <AlertDescription>
+                      Test deals are marked with is_test_data flag. 
+                      Clear will ONLY delete test deals - production data is always safe.
+                    </AlertDescription>
+                  </Alert>
+
                   <Button
                     onClick={handleSeedData}
                     disabled={loading}
@@ -203,10 +257,10 @@ SELECT email, role, full_name FROM profiles WHERE email LIKE '%@test.com';`;
                     className="w-full"
                   >
                     <Trash2 className="h-4 w-4 mr-2" />
-                    {loading ? 'Clearing...' : 'Clear All Test Data'}
+                    {loading ? 'Clearing...' : 'Clear Test Data Only'}
                   </Button>
                   <p className="text-xs text-muted-foreground">
-                    ⚠️ Removes all deals, NDAs, access requests, and documents (irreversible!)
+                    ⚠️ Removes ONLY test deals marked with is_test_data flag. Production data is protected.
                   </p>
 
                   <div className="border-t pt-3 mt-4">

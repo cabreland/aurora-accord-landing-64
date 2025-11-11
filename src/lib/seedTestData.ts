@@ -12,6 +12,17 @@ export const seedTestData = async () => {
       return { success: false, error: 'Not authenticated' };
     }
 
+    // Check if test deals already exist
+    const { data: existingTestDeals } = await supabase
+      .from('deals')
+      .select('id')
+      .eq('is_test_data', true);
+
+    if (existingTestDeals && existingTestDeals.length > 0) {
+      toast.error(`${existingTestDeals.length} test deals already exist. Clear them first to avoid duplicates.`);
+      return { success: false, message: 'Test data already exists' };
+    }
+
     // Create test deals with actual schema fields
     const testDeals = [
       {
@@ -34,6 +45,7 @@ export const seedTestData = async () => {
           'Hire dedicated sales team for outbound growth'
         ]),
         reason_for_sale: 'Founder pursuing new opportunity',
+        is_test_data: true,
         created_by: user.id
       },
       {
@@ -57,6 +69,7 @@ export const seedTestData = async () => {
         ]),
         reason_for_sale: 'Founder ready to exit after successful scale',
         profit_margin: '33%',
+        is_test_data: true,
         created_by: user.id
       },
       {
@@ -80,6 +93,7 @@ export const seedTestData = async () => {
         ]),
         reason_for_sale: 'Founder pivoting to new venture',
         profit_margin: '31%',
+        is_test_data: true,
         created_by: user.id
       },
       {
@@ -103,6 +117,7 @@ export const seedTestData = async () => {
         ]),
         reason_for_sale: 'Retirement',
         profit_margin: '30%',
+        is_test_data: true,
         created_by: user.id
       },
       {
@@ -126,6 +141,7 @@ export const seedTestData = async () => {
         ]),
         reason_for_sale: 'Founder starting new business',
         profit_margin: '33%',
+        is_test_data: true,
         created_by: user.id
       }
     ];
@@ -136,13 +152,7 @@ export const seedTestData = async () => {
       .select();
 
     if (dealsError) throw dealsError;
-    console.log('✅ Created', createdDeals?.length, 'test deals');
-
-    // Store test deal IDs for safe deletion later
-    if (createdDeals && createdDeals.length > 0) {
-      const testDealIds = createdDeals.map(d => d.id);
-      localStorage.setItem('test_deal_ids', JSON.stringify(testDealIds));
-    }
+    console.log('✅ Created', createdDeals?.length, 'test deals (safely marked with is_test_data flag)');
 
     // Create NDA settings in platform_settings
     const ndaSettings = {
@@ -244,7 +254,7 @@ Date: {{date}}`,
     if (settingsError) throw settingsError;
     console.log('✅ Created NDA settings');
 
-    toast.success(`Created ${createdDeals?.length} deals and NDA settings!`);
+    toast.success(`Created ${createdDeals?.length} test deals (safely marked)!`, { duration: 5000 });
     
     return {
       success: true,

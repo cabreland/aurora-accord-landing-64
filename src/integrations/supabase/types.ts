@@ -618,6 +618,7 @@ export type Database = {
           id: string
           ideal_buyer_profile: string | null
           industry: string | null
+          is_test_data: boolean | null
           location: string | null
           market_trends_alignment: string | null
           priority: string
@@ -651,6 +652,7 @@ export type Database = {
           id?: string
           ideal_buyer_profile?: string | null
           industry?: string | null
+          is_test_data?: boolean | null
           location?: string | null
           market_trends_alignment?: string | null
           priority?: string
@@ -684,6 +686,7 @@ export type Database = {
           id?: string
           ideal_buyer_profile?: string | null
           industry?: string | null
+          is_test_data?: boolean | null
           location?: string | null
           market_trends_alignment?: string | null
           priority?: string
