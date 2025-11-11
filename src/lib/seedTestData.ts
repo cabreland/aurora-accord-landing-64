@@ -138,6 +138,12 @@ export const seedTestData = async () => {
     if (dealsError) throw dealsError;
     console.log('✅ Created', createdDeals?.length, 'test deals');
 
+    // Store test deal IDs for safe deletion later
+    if (createdDeals && createdDeals.length > 0) {
+      const testDealIds = createdDeals.map(d => d.id);
+      localStorage.setItem('test_deal_ids', JSON.stringify(testDealIds));
+    }
+
     // Create NDA settings in platform_settings
     const ndaSettings = {
       key: 'nda_settings',

@@ -22,20 +22,39 @@ export const DevTools = () => {
   };
 
   const handleClearTestData = async () => {
-    if (!confirm('⚠️ Clear all test data?\n\nThis will delete:\n- All deals\n- All NDAs\n- All access requests\n- All documents\n\nThis action cannot be undone.')) {
+    // Get test deal IDs from localStorage
+    const testDealIdsJson = localStorage.getItem('test_deal_ids');
+    if (!testDealIdsJson) {
+      toast.error('No test data found to clear. Use "Seed Test Data" first.');
+      return;
+    }
+
+    const testDealIds = JSON.parse(testDealIdsJson) as string[];
+    
+    if (!confirm(`⚠️ Clear ${testDealIds.length} test deals?\n\nThis will delete ONLY test deals created by the seed function.\n\nThis action cannot be undone.`)) {
       return;
     }
     
     setLoading(true);
     try {
       // Delete in correct order (child tables first to respect foreign keys)
-      await supabase.from('document_views').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-      await supabase.from('access_requests').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-      await supabase.from('company_nda_acceptances').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-      await supabase.from('documents').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-      await supabase.from('deals').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+      // Only delete records related to test deals
+      await supabase.from('document_views').delete().in('document_id', 
+        (await supabase.from('documents').select('id').in('deal_id', testDealIds)).data?.map(d => d.id) || []
+      );
+      await supabase.from('access_requests').delete().in('company_id',
+        (await supabase.from('deals').select('company_id').in('id', testDealIds)).data?.map(d => d.company_id).filter(Boolean) || []
+      );
+      await supabase.from('company_nda_acceptances').delete().in('company_id',
+        (await supabase.from('deals').select('company_id').in('id', testDealIds)).data?.map(d => d.company_id).filter(Boolean) || []
+      );
+      await supabase.from('documents').delete().in('deal_id', testDealIds);
+      await supabase.from('deals').delete().in('id', testDealIds);
       
-      toast.success('All test data cleared successfully');
+      // Clear localStorage
+      localStorage.removeItem('test_deal_ids');
+      
+      toast.success(`Cleared ${testDealIds.length} test deals successfully`);
     } catch (error) {
       console.error('Clear error:', error);
       toast.error('Failed to clear data: ' + (error as Error).message);
