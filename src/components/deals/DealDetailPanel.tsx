@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { X, FileText, Upload, MoreVertical, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -21,6 +22,7 @@ export const DealDetailPanel: React.FC<DealDetailPanelProps> = ({
   onClose,
   onDealUpdated
 }) => {
+  const navigate = useNavigate();
   const [deal, setDeal] = useState<MyDeal | null>(null);
   const [loading, setLoading] = useState(true);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -220,7 +222,7 @@ export const DealDetailPanel: React.FC<DealDetailPanelProps> = ({
                 <Button 
                   variant="outline" 
                   className="w-full"
-                  onClick={() => window.open(`/deal/${deal.id}`, '_blank')}
+                  onClick={() => navigate(`/deal/${deal.id}`)}
                 >
                   View Deal Details
                 </Button>
@@ -245,7 +247,7 @@ export const DealDetailPanel: React.FC<DealDetailPanelProps> = ({
               <div className="space-y-3">
                 <Button 
                   className="w-full" 
-                  onClick={() => window.open(`/documents?deal=${deal.id}`, '_blank')}
+                  onClick={() => navigate(`/documents?deal=${deal.id}`)}
                 >
                   <FileText className="w-4 h-4 mr-2" />
                   Open Document Manager
