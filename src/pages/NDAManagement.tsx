@@ -103,13 +103,31 @@ const NDAManagement = () => {
   const extendNDA = async (id: string, days = 60) => {
     setActionLoading(id);
     try {
-      // Calculate new expiry from NOW (not from old expiry)
-      const newExpiry = new Date();
+      // Calculate new expiry from CURRENT expiry if it's in the future; otherwise from NOW
+      const { data: existing, error: fetchErr } = await supabase
+        .from('company_nda_acceptances')
+        .select('expires_at')
+        .eq('id', id)
+        .single();
+
+      if (fetchErr) {
+        console.warn('⚠️ [NDA] Could not fetch existing expiry, defaulting to now:', fetchErr);
+      }
+
+      const now = new Date();
+      let baseDate = now;
+      if (existing?.expires_at) {
+        const existingDate = new Date(existing.expires_at);
+        baseDate = existingDate > now ? existingDate : now;
+      }
+
+      const newExpiry = new Date(baseDate);
       newExpiry.setDate(newExpiry.getDate() + days);
 
       console.log('📅 [NDA] Extending NDA:', {
         ndaId: id,
         days,
+        from: baseDate.toISOString(),
         newExpiry: newExpiry.toISOString()
       });
 
