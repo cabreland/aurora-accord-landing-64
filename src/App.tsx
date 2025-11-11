@@ -9,6 +9,7 @@ import { withAuth } from "@/utils/withAuth";
 import React, { Suspense, lazy } from "react";
 import { FloatingChatWidget } from "@/components/chat/FloatingChatWidget";
 import { ChatWidgetProvider } from "@/contexts/ChatWidgetContext";
+import { DevTools } from "@/components/dev/DevTools";
 
 import Index from "./pages/Index";
 import Demo from "./pages/Demo";
@@ -114,6 +115,7 @@ const App = () => (
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>
+          <DevTools />
           </ChatWidgetProvider>
         </BrowserRouter>
       </TooltipProvider>
