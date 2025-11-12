@@ -1,5 +1,5 @@
 // LeadAcademyReplica - Complete high-fidelity recreation of leadacademy.io
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   Phone,
@@ -12,8 +12,14 @@ import {
   DollarSign,
   ShieldCheck,
   PlayCircle,
+  X,
+  ChevronDown,
+  Crown,
+  Play,
+  Settings,
 } from 'lucide-react';
 import * as Accordion from '@radix-ui/react-accordion';
+import heroThumbnail from '@/assets/hero-video-thumbnail.png';
 
 // Helper component for the feature banner pills
 function FeaturePill({ icon: Icon, label }: { icon: React.ElementType; label: string }) {
@@ -25,28 +31,52 @@ function FeaturePill({ icon: Icon, label }: { icon: React.ElementType; label: st
   );
 }
 
+// Announcement Bar Component
+function AnnouncementBar({ onClose }: { onClose: () => void }) {
+  return (
+    <div className="bg-[#dbeafe] border-b border-[#93c5fd]">
+      <div className="max-w-7xl mx-auto px-6 py-2 flex items-center justify-center relative">
+        <p className="text-[#0f172a] text-sm text-center">
+          We offer a 7-day free trial for all people looking to join the Professor plan.
+        </p>
+        <button
+          onClick={onClose}
+          className="absolute right-6 text-[#0f172a] hover:text-[#334155] transition-colors"
+        >
+          <X className="w-4 h-4" />
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // Navigation bar
 function NavBar() {
   return (
-    <nav className="fixed top-0 left-0 right-0 z-30 bg-[#010e21]/90 backdrop-blur-md border-b border-[#0a1a37] text-white">
-      <div className="max-w-7xl mx-auto flex items-center justify-between px-6 py-4">
+    <nav className="sticky top-0 z-30 bg-transparent backdrop-blur-sm border-b border-white/10 text-white">
+      <div className="max-w-7xl mx-auto flex items-center justify-between px-6 py-5">
         <div className="flex items-center gap-2">
-          <span className="bg-gradient-to-r from-[#3b82f6] to-[#60a5fa] text-white font-bold text-xl rounded-md px-2 py-1">L</span>
+          <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
+            <span className="text-[#2563eb] text-xl font-bold">L</span>
+          </div>
           <span className="font-semibold text-lg">Lead Academy</span>
         </div>
         <div className="hidden md:flex items-center gap-8 text-sm font-medium">
-          <a href="#case-studies" className="hover:text-[#3b82f6] transition-colors">Case Studies</a>
-          <a href="#courses" className="hover:text-[#3b82f6] transition-colors">Courses</a>
-          <a href="#pricing" className="hover:text-[#3b82f6] transition-colors">Pricing</a>
-          <a href="#tools" className="hover:text-[#3b82f6] transition-colors">Tools</a>
-          <a href="#faq" className="hover:text-[#3b82f6] transition-colors">FAQ</a>
+          <a href="#who" className="hover:text-white/80 transition-colors">Who Is it for?</a>
+          <a href="#case-studies" className="hover:text-white/80 transition-colors flex items-center gap-1">
+            Case Studies <ChevronDown className="w-4 h-4" />
+          </a>
+          <a href="#courses" className="hover:text-white/80 transition-colors">Courses</a>
+          <a href="#pricing" className="hover:text-white/80 transition-colors">Pricing</a>
+          <a href="#tools" className="hover:text-white/80 transition-colors">Tools</a>
+          <a href="#faq" className="hover:text-white/80 transition-colors">FAQ's</a>
         </div>
         <div className="hidden md:block">
           <a
             href="#pricing"
-            className="inline-flex items-center gap-2 bg-[#3b82f6] hover:bg-[#2563eb] transition-colors text-white font-semibold px-4 py-2 rounded-full shadow-lg"
+            className="inline-flex items-center gap-2 bg-[#2563eb] hover:bg-[#3b82f6] transition-colors text-white font-semibold px-6 py-2 rounded-full shadow-lg"
           >
-            <ShieldCheck className="w-4 h-4" /> Start 7‑Day Trial
+            Start 7‑Day Trial
           </a>
         </div>
       </div>
@@ -54,80 +84,106 @@ function NavBar() {
   );
 }
 
-// Hero section with video card and before/after overlays
+// Hero section with video card
 function HeroSection() {
   return (
-    <section className="pt-32 pb-24 bg-gradient-to-b from-[#010e21] via-[#04163a] to-[#0a1a37] text-white relative overflow-hidden">
-      <div className="max-w-7xl mx-auto px-6 flex flex-col lg:flex-row items-center gap-12">
-        {/* Left column */}
-        <div className="flex-1 flex flex-col items-start gap-6 max-w-xl">
-          <h1 className="text-4xl md:text-5xl font-extrabold leading-tight">
-            An Exclusive Community For Lead Generation Experts.
-          </h1>
-          <p className="text-lg text-gray-200">
-            The lead generation industry is constantly changing. With Lead Academy, keeping up isn't just possible—it's effortless. You're in good company.
-          </p>
-          <div className="flex items-center gap-4">
-            <a
-              href="#pricing"
-              className="inline-flex items-center gap-2 bg-[#3b82f6] hover:bg-[#2563eb] text-white font-semibold px-6 py-3 rounded-full shadow-xl"
-            >
-              <ShieldCheck className="w-5 h-5" /> Start Free Trial
-            </a>
-            <a
-              href="#case-studies"
-              className="inline-flex items-center gap-1 text-[#3b82f6] hover:underline font-medium"
-            >
-              Learn More <ChevronRight className="w-4 h-4" />
-            </a>
+    <section className="relative overflow-hidden">
+      {/* Feature Pills Row */}
+      <div className="pt-8 pb-12 px-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-wrap items-center justify-center gap-4">
+            <div className="bg-[#031329] border border-white/10 rounded-full px-6 py-2 flex items-center gap-2">
+              <Phone className="w-4 h-4 text-white" />
+              <span className="text-white text-sm">Weekly Coaching Calls</span>
+            </div>
+            <div className="bg-[#031329] border border-white/10 rounded-full px-6 py-2 flex items-center gap-2">
+              <GraduationCap className="w-4 h-4 text-white" />
+              <span className="text-white text-sm">Prerecorded Lead Gen Course</span>
+            </div>
+            <div className="bg-[#031329] border border-white/10 rounded-full px-6 py-2 flex items-center gap-2">
+              <Settings className="w-4 h-4 text-white" />
+              <span className="text-white text-sm">Lead Scrapers</span>
+            </div>
+            <div className="bg-[#031329] border border-white/10 rounded-full px-6 py-2 flex items-center gap-2">
+              <Users className="w-4 h-4 text-white" />
+              <span className="text-white text-sm">Like Minded Community</span>
+            </div>
           </div>
-        </div>
-        {/* Right column: video card */}
-        <div className="flex-1 relative w-full max-w-xl">
-          {/* Video thumbnail */}
-          <div className="relative overflow-hidden rounded-2xl shadow-2xl">
-            <img
-              src="https://images.unsplash.com/photo-1613011932846-80f316cd54ce?auto=format&fit=crop&w=900&q=80"
-              alt="Lead Academy video preview"
-              className="w-full h-72 md:h-96 object-cover"
-            />
-            {/* Play button overlay */}
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
-              className="absolute inset-0 flex items-center justify-center"
-            >
-              <PlayCircle className="w-20 h-20 text-white/90 drop-shadow-lg" />
-            </motion.button>
-          </div>
-          {/* Before/After cards */}
-          <div className="absolute -top-8 -left-6 bg-white text-[#010e21] rounded-xl shadow-lg px-4 py-3 flex flex-col items-start" style={{ width: '9rem' }}>
-            <span className="text-xs font-semibold text-gray-500 mb-1 flex items-center gap-1"><DollarSign className="w-4 h-4" /> Balance:</span>
-            <span className="text-2xl font-bold">$9.04</span>
-            <span className="mt-1 text-xs bg-red-500 text-white px-2 py-0.5 rounded-full">Before</span>
-          </div>
-          <div className="absolute -bottom-8 -right-6 bg-white text-[#010e21] rounded-xl shadow-lg px-4 py-3 flex flex-col items-start" style={{ width: '10.5rem' }}>
-            <span className="text-xs font-semibold text-gray-500 mb-1 flex items-center gap-1"><DollarSign className="w-4 h-4" /> Balance:</span>
-            <span className="text-2xl font-bold">$74,602</span>
-            <span className="mt-1 text-xs bg-blue-600 text-white px-2 py-0.5 rounded-full">After</span>
-          </div>
-          {/* Decorative arrow SVGs */}
-          <svg className="absolute -top-16 left-24 w-32 h-32 text-blue-400 opacity-40 rotate-[20deg]" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M10 90 C 40 10, 60 10, 90 90" />
-            <polyline points="80,80 90,90 80,95" />
-          </svg>
-          <svg className="absolute bottom-0 right-40 w-24 h-24 text-blue-400 opacity-40" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M20 80 C 50 20, 70 20, 90 80" />
-            <polyline points="70,70 90,80 85,60" />
-          </svg>
         </div>
       </div>
-      {/* Feature banner below nav, above hero text */}
-      <div className="absolute top-24 left-1/2 -translate-x-1/2 w-full px-6 max-w-5xl flex flex-wrap justify-center gap-3">
-        <FeaturePill icon={Phone} label="Weekly Coaching Calls" />
-        <FeaturePill icon={GraduationCap} label="Prerecorded Course" />
-        <FeaturePill icon={Search} label="Lead Scrapers" />
-        <FeaturePill icon={Users} label="Like Minded Community" />
+
+      {/* Hero Content */}
+      <div className="pb-20 px-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            {/* Left: Text */}
+            <div>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8 }}
+              >
+                <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6 leading-[1.1]">
+                  An Exclusive Community For
+                  <br />
+                  Lead Generation Experts.
+                </h1>
+                <p className="text-lg text-white/80 mb-8 leading-relaxed">
+                  Learn cutting-edge lead generation strategies, access powerful tools, and connect
+                  with a community of ambitious entrepreneurs scaling their businesses to 7-figures.
+                </p>
+                <div className="flex flex-wrap gap-4">
+                  <a
+                    href="#pricing"
+                    className="inline-flex items-center gap-2 bg-[#2563eb] hover:bg-[#3b82f6] text-white font-semibold px-8 py-3 rounded-full shadow-xl transition-colors"
+                  >
+                    <Crown className="w-5 h-5" />
+                    Start 7-Day Trial
+                  </a>
+                </div>
+              </motion.div>
+            </div>
+
+            {/* Right: Video Preview */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="relative"
+            >
+              {/* Curly Arrow SVG */}
+              <svg
+                className="absolute -left-20 top-1/2 -translate-y-1/2 w-16 h-16 text-[#3b82f6] opacity-40 hidden lg:block"
+                viewBox="0 0 100 100"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M10 50 Q 25 20, 40 50 T 70 50 L 80 50 M 75 45 L 85 50 L 75 55"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+
+              {/* Video Card with Hover Effect */}
+              <div className="relative rounded-xl overflow-hidden shadow-2xl border border-white/10 transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_0_40px_rgba(59,130,246,0.6)]">
+                <img
+                  src={heroThumbnail}
+                  alt="Lead Generation Success Story"
+                  className="w-full h-auto"
+                />
+                {/* Play Button */}
+                <button className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-xl hover:scale-110 transition-transform group">
+                  <div className="w-16 h-16 bg-[#2563eb] rounded-full flex items-center justify-center">
+                    <Play className="w-8 h-8 text-white ml-1 fill-white" />
+                  </div>
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        </div>
       </div>
     </section>
   );
@@ -757,8 +813,11 @@ function Footer() {
 
 // Main page component assembling all pieces
 export default function HomePageA() {
+  const [announcementVisible, setAnnouncementVisible] = useState(true);
+
   return (
-    <div className="font-inter antialiased">
+    <div className="font-inter antialiased bg-gradient-to-br from-[#020617] via-[#03204b] to-[#0b4ed8]">
+      {announcementVisible && <AnnouncementBar onClose={() => setAnnouncementVisible(false)} />}
       <NavBar />
       <HeroSection />
       <SuccessStories />
