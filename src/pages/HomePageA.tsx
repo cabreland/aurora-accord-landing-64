@@ -389,7 +389,7 @@ function WhatComesSection() {
     {
       title: 'Weekly Coaching Calls',
       description:
-        'Join our weekly coaching calls to gain targeted, actionable advice that's directly applicable to growing your business.',
+        'Join our weekly coaching calls to gain targeted, actionable advice that\'s directly applicable to growing your business.',
       image: 'https://images.unsplash.com/photo-1581091870621-6c3e1b36c3e1?auto=format&fit=crop&w=800&q=80',
     },
   ];
@@ -607,7 +607,7 @@ function TestimonialsSection() {
     },
     {
       video: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=600&q=80',
-      quote: 'Within 15 minutes I've gotten more value than any other course I've taken.',
+      quote: 'Within 15 minutes I\'ve gotten more value than any other course I\'ve taken.',
       name: 'Michael',
       company: 'InventoryPanda',
     },
@@ -661,7 +661,7 @@ function FAQSection() {
     },
     {
       question: 'Can I cancel my membership at any time?',
-      answer: 'Yes. Your membership is billed monthly and you can cancel at any time without penalty. You'll retain access for the remainder of your billing cycle.',
+      answer: 'Yes. Your membership is billed monthly and you can cancel at any time without penalty. You\'ll retain access for the remainder of your billing cycle.',
     },
     {
       question: 'Do you offer refunds?',
