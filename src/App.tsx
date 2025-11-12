@@ -17,6 +17,7 @@ import InvestorPortal from "./pages/InvestorPortal";
 
 // Lazy-load remaining pages to reduce initial bundle size
 const IndexV2 = lazy(() => import("./pages/IndexV2"));
+const HomePageA = lazy(() => import("./pages/HomePageA"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Auth = lazy(() => import("./pages/Auth"));
 const AuthAccept = lazy(() => import("./pages/AuthAccept"));
@@ -88,6 +89,7 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/v2" element={<IndexV2 />} />
+              <Route path="/home-page-a" element={<HomePageA />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/auth/accept" element={<AuthAccept />} />
               <Route path="/demo" element={<Demo />} />
