@@ -1,11 +1,19 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Shield, Zap, Scale, Handshake, ArrowRight, CheckCircle2, XCircle, ChevronDown } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Shield, Zap, Lock, LineChart, Handshake, ArrowRight, CheckCircle2, ChevronDown } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 const HomePageC = () => {
   return (
-    <div className="min-h-screen bg-[#020617] text-[#f9fafb]">
+    <div className="min-h-screen bg-gradient-to-br from-[#020617] via-[#020819] to-[#02091b] text-white relative overflow-hidden">
+      {/* Subtle background noise */}
+      <div className="absolute inset-0 opacity-[0.03]" style={{
+        backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
+      }} />
+      
+      {/* Soft vignette */}
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#020617]/50 pointer-events-none" />
+      
       <Navigation />
       <Hero />
       <TrustStrip />
@@ -25,23 +33,23 @@ const HomePageC = () => {
 // Navigation
 function Navigation() {
   return (
-    <nav className="fixed top-0 w-full z-50 bg-[#020617]/80 backdrop-blur-md border-b border-white/5">
+    <nav className="fixed top-0 w-full z-50 bg-black/10 backdrop-blur-xl border-b border-white/5">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-[#fbbf24] to-[#eab308] rounded-lg flex items-center justify-center">
-              <span className="text-[#020617] font-bold text-sm">NT</span>
+            <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg shadow-lg shadow-blue-500/20 flex items-center justify-center">
+              <span className="text-white font-semibold text-sm">NT</span>
             </div>
-            <span className="text-[#f9fafb] font-extrabold text-lg tracking-tight">Next Tier Partners</span>
+            <span className="text-white/95 font-semibold text-lg tracking-tight">Next Tier Partners</span>
           </div>
           
           <div className="hidden md:flex items-center gap-8">
-            <a href="#how-it-works" className="text-[#94a3b8] hover:text-[#f9fafb] transition-colors text-sm">How It Works</a>
-            <a href="#exit-paths" className="text-[#94a3b8] hover:text-[#f9fafb] transition-colors text-sm">Exit Paths</a>
-            <a href="#faq" className="text-[#94a3b8] hover:text-[#f9fafb] transition-colors text-sm">FAQ</a>
+            <a href="#how-it-works" className="text-slate-300 hover:text-white transition-colors text-sm">How It Works</a>
+            <a href="#exit-paths" className="text-slate-300 hover:text-white transition-colors text-sm">Exit Paths</a>
+            <a href="#faq" className="text-slate-300 hover:text-white transition-colors text-sm">FAQ</a>
           </div>
           
-          <Button className="bg-[#fbbf24] hover:bg-[#eab308] text-[#020617] font-semibold rounded-full px-6">
+          <Button className="bg-blue-600 text-white hover:bg-blue-500 font-medium shadow-[0_0_40px_rgba(37,99,235,0.35)] hover:shadow-[0_0_50px_rgba(37,99,235,0.45)] transition-all duration-200 hover:scale-[1.02]">
             Apply Now
           </Button>
         </div>
@@ -53,88 +61,81 @@ function Navigation() {
 // Hero Section
 function Hero() {
   return (
-    <section className="relative pt-32 pb-20 md:pt-40 md:pb-32 overflow-hidden">
-      {/* Background with subtle grid */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#020617] via-[#020617] to-[#111827]">
-        <div className="absolute inset-0 opacity-20" style={{
-          backgroundImage: `linear-gradient(to right, #fbbf24 1px, transparent 1px), linear-gradient(to bottom, #fbbf24 1px, transparent 1px)`,
-          backgroundSize: '80px 80px'
-        }}></div>
+    <section className="relative pt-32 pb-20 md:pt-40 md:pb-32">
+      {/* Soft blue glow */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-blue-600/10 rounded-full blur-3xl" />
       </div>
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="grid md:grid-cols-2 gap-12 items-center">
+        <div className="grid lg:grid-cols-2 gap-16 items-center">
           {/* Left Column */}
-          <div>
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#fbbf24]/10 border border-[#fbbf24]/20 mb-6">
-              <span className="text-[#fbbf24] text-xs font-semibold tracking-wide uppercase">Founder-First Exit Firm</span>
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="space-y-8"
+          >
+            <div className="inline-flex items-center px-4 py-1.5 rounded-full bg-white/5 border border-white/10 hover:border-white/20 transition-colors">
+              <span className="text-slate-200 text-sm font-medium">Founder-First Exit Firm</span>
             </div>
             
-            <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight leading-[1.1] mb-6">
+            <h1 className="text-5xl md:text-6xl font-semibold text-white/95 tracking-tight leading-[1.1]">
               The Modern Path to a Fast, Professional Business Exit
             </h1>
             
-            <div className="space-y-3 mb-8 text-[#94a3b8] text-lg leading-relaxed">
-              <p>Exit your digital business in 45 days through our licensed brokerage infrastructure.</p>
-              <p>We handle valuation, buyer sourcing, and closing while you stay in control.</p>
-              <p>Backed by Exclusive Business Brokers — fully licensed, compliant, confidential.</p>
-            </div>
+            <p className="text-lg md:text-xl text-slate-200 leading-relaxed max-w-xl">
+              Sell your digital business in 45 days or less. Licensed, confidential, founder-first. Backed by Exclusive Business Brokers.
+            </p>
             
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Button className="bg-[#fbbf24] hover:bg-[#eab308] text-[#020617] font-semibold rounded-full px-8 py-6 text-base">
+            <div className="flex flex-col sm:flex-row gap-4 pt-2">
+              <Button size="lg" className="bg-blue-600 text-white hover:bg-blue-500 font-medium shadow-[0_0_40px_rgba(37,99,235,0.35)] hover:shadow-[0_0_50px_rgba(37,99,235,0.45)] transition-all duration-200 hover:scale-[1.02]">
                 Apply for a 45-Day Exit Plan
               </Button>
-              <a href="#how-it-works" className="flex items-center justify-center gap-2 text-[#fbbf24] hover:text-[#eab308] transition-colors text-base font-medium">
-                See how the process works <ArrowRight className="w-4 h-4" />
-              </a>
+              <Button size="lg" variant="outline" className="border-white/20 text-slate-100 hover:bg-white/5 hover:border-white/40 transition-all duration-200">
+                See how the process works →
+              </Button>
             </div>
-          </div>
-          
+          </motion.div>
+
           {/* Right Column - Dashboard Mockup */}
-          <div className="relative">
-            <div className="rounded-2xl border border-white/10 bg-black/40 backdrop-blur-xl p-6 shadow-2xl hover:shadow-[0_0_40px_rgba(251,191,36,0.15)] transition-all duration-300">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-[#64748b] text-sm uppercase tracking-wide">Exit Dashboard</span>
-                  <div className="w-2 h-2 rounded-full bg-[#10b981] animate-pulse"></div>
+          <motion.div 
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="relative"
+          >
+            {/* Soft blue glow behind card */}
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-600/20 via-blue-500/10 to-transparent blur-3xl" />
+            
+            <div className="relative bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-[0_18px_45px_rgba(15,23,42,0.65)] hover:-translate-y-1 hover:border-white/20 transition-all duration-300">
+              <div className="space-y-6">
+                <div className="flex items-center justify-between pb-4 border-b border-white/10">
+                  <span className="text-sm text-slate-300">Exit Valuation Range</span>
+                  <span className="text-2xl font-semibold text-white/95">$2.4M - $3.1M</span>
                 </div>
-                
-                <div className="border-t border-white/5 pt-4">
-                  <div className="text-[#64748b] text-xs mb-2">Estimated Valuation</div>
-                  <div className="text-3xl font-bold text-[#fbbf24]">$2.4M – $3.1M</div>
+                <div className="flex items-center justify-between pb-4 border-b border-white/10">
+                  <span className="text-sm text-slate-300">Target Days to Close</span>
+                  <span className="text-2xl font-semibold text-blue-400">45 Days</span>
                 </div>
-                
-                <div className="grid grid-cols-2 gap-4 border-t border-white/5 pt-4">
-                  <div>
-                    <div className="text-[#64748b] text-xs mb-1">Target Timeline</div>
-                    <div className="text-lg font-semibold">45 Days</div>
+                <div className="space-y-3">
+                  <div className="text-sm text-slate-300 mb-2">Exit Path Options</div>
+                  <div className="flex items-center space-x-3 p-3 bg-white/5 rounded-lg border border-blue-500/30 hover:bg-white/8 transition-colors">
+                    <CheckCircle2 className="w-5 h-5 text-blue-400" />
+                    <span className="text-sm text-white/95">Brokered Sale</span>
                   </div>
-                  <div>
-                    <div className="text-[#64748b] text-xs mb-1">Active Buyers</div>
-                    <div className="text-lg font-semibold">12+</div>
+                  <div className="flex items-center space-x-3 p-3 bg-white/5 rounded-lg border border-white/10 hover:bg-white/8 transition-colors">
+                    <CheckCircle2 className="w-5 h-5 text-slate-400" />
+                    <span className="text-sm text-slate-200">Direct Acquisition</span>
                   </div>
-                </div>
-                
-                <div className="border-t border-white/5 pt-4 space-y-2">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-[#64748b]">Valuation Complete</span>
-                    <CheckCircle2 className="w-4 h-4 text-[#10b981]" />
-                  </div>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-[#64748b]">Buyer Outreach</span>
-                    <div className="text-[#fbbf24] font-medium">In Progress</div>
-                  </div>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-[#64748b]">Due Diligence</span>
-                    <span className="text-[#64748b]">Pending</span>
+                  <div className="flex items-center space-x-3 p-3 bg-white/5 rounded-lg border border-white/10 hover:bg-white/8 transition-colors">
+                    <CheckCircle2 className="w-5 h-5 text-slate-400" />
+                    <span className="text-sm text-slate-200">Scale Before Exit</span>
                   </div>
                 </div>
               </div>
             </div>
-            
-            {/* Accent line */}
-            <div className="absolute -top-4 -right-4 w-24 h-24 border-t-2 border-r-2 border-[#fbbf24]/30 rounded-tr-3xl"></div>
-          </div>
+          </motion.div>
         </div>
       </div>
     </section>
@@ -144,14 +145,16 @@ function Hero() {
 // Trust Strip
 function TrustStrip() {
   return (
-    <div className="border-y border-white/5 bg-[#020617]/60 backdrop-blur-sm">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-        <div className="flex items-center justify-center gap-3 text-sm text-[#64748b]">
-          <Shield className="w-4 h-4 text-[#fbbf24]" />
-          <span>Backed by Exclusive Business Brokers — licensed, compliant, confidential transactions</span>
+    <section className="py-6 border-y border-white/5 bg-white/[0.02]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-center space-x-3 text-slate-300">
+          <Shield className="w-5 h-5 text-blue-400" />
+          <span className="text-sm md:text-base">
+            Backed by Exclusive Business Brokers — licensed, compliant, confidential transactions
+          </span>
         </div>
       </div>
-    </div>
+    </section>
   );
 }
 
@@ -161,17 +164,17 @@ function WhatWeDo() {
     {
       icon: Zap,
       title: "Exit Fast",
-      description: "Sell your digital business in approximately 45 days through our buyer network and brokerage infrastructure."
+      description: "Sell your digital business in ~45 days through our buyer network and brokerage infrastructure."
     },
     {
-      icon: Shield,
+      icon: Lock,
       title: "Exit Safely",
       description: "Licensed, compliant, confidential transactions handled by Exclusive Business Brokers."
     },
     {
-      icon: Scale,
+      icon: LineChart,
       title: "Scale Before Exit",
-      description: "Use AI-driven growth and automation to increase valuation before going to market."
+      description: "Use AI-driven growth & automation to increase valuation before going to market."
     },
     {
       icon: Handshake,
@@ -181,27 +184,41 @@ function WhatWeDo() {
   ];
 
   return (
-    <section className="py-16 md:py-24 bg-[#020617]">
+    <section className="py-20 md:py-28">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-4">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+          className="text-center mb-16"
+        >
+          <h2 className="text-3xl md:text-4xl font-semibold text-white/95 mb-4 tracking-tight">
             What We Do for Modern Founders
           </h2>
-          <p className="text-[#94a3b8] text-lg max-w-2xl mx-auto">
-            Professional exits, growth partnerships, and post-exit infrastructure for digital businesses.
+          <p className="text-lg text-slate-200 max-w-2xl mx-auto leading-relaxed">
+            We handle exits, growth, and post-exit partnerships for digital businesses.
           </p>
-        </div>
-        
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {pillars.map((pillar, idx) => (
-            <div key={idx} className="rounded-2xl border border-white/10 bg-black/40 backdrop-blur p-6 hover:border-[#fbbf24]/30 transition-all duration-300 group">
-              <pillar.icon className="w-10 h-10 text-[#fbbf24] mb-4 group-hover:scale-110 transition-transform" />
-              <h3 className="text-xl font-bold mb-3">{pillar.title}</h3>
-              <p className="text-[#94a3b8] text-sm leading-relaxed mb-4">{pillar.description}</p>
-              <a href="#" className="text-[#fbbf24] text-sm font-medium inline-flex items-center gap-1 hover:gap-2 transition-all">
-                Learn more <ArrowRight className="w-3 h-3" />
+        </motion.div>
+
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {pillars.map((pillar, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.4, delay: index * 0.1 }}
+              className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6 hover:bg-white/[0.07] hover:border-white/20 hover:-translate-y-1 transition-all duration-300 group shadow-[0_18px_45px_rgba(15,23,42,0.65)]"
+            >
+              <pillar.icon className="w-10 h-10 text-blue-400 mb-4 group-hover:scale-110 transition-transform duration-200" />
+              <h3 className="text-xl font-semibold text-white/95 mb-3">{pillar.title}</h3>
+              <p className="text-slate-200 leading-relaxed mb-4 text-sm">{pillar.description}</p>
+              <a href="#" className="text-blue-400 text-sm font-medium flex items-center space-x-1 hover:space-x-2 transition-all duration-200">
+                <span>Learn more</span>
+                <ArrowRight className="w-4 h-4" />
               </a>
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>
@@ -212,63 +229,71 @@ function WhatWeDo() {
 // Why Next Tier - Comparison
 function WhyNextTier() {
   return (
-    <section className="py-16 md:py-24 bg-[#0f172a]">
+    <section className="py-20 md:py-28 bg-[#020617]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-4">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+          className="text-center mb-16"
+        >
+          <h2 className="text-3xl md:text-4xl font-semibold text-white/95 mb-4 tracking-tight">
             Why Next Tier Partners vs Typical Buyers
           </h2>
-        </div>
-        
+        </motion.div>
+
         <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
           {/* Typical Buyers */}
-          <div className="rounded-2xl border border-red-500/20 bg-black/20 backdrop-blur p-8">
-            <div className="flex items-center gap-2 mb-6">
-              <XCircle className="w-6 h-6 text-red-400" />
-              <h3 className="text-2xl font-bold">Typical Buyers & Flippers</h3>
-            </div>
-            <ul className="space-y-3">
+          <motion.div 
+            initial={{ opacity: 0, x: -20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+            className="bg-slate-900/70 backdrop-blur-md border border-white/10 rounded-2xl p-8 shadow-[0_18px_45px_rgba(15,23,42,0.65)]"
+          >
+            <h3 className="text-2xl font-semibold text-white/90 mb-6">Typical Buyers & Flippers</h3>
+            <ul className="space-y-4">
               {[
-                "Lowball offers and aggressive negotiation tactics",
-                "No licensing or regulatory compliance",
-                "Opaque process with hidden fees",
-                "Slow timelines stretching 6–12+ months",
-                "No post-exit support or partnership options",
-                "High pressure and founder burnout"
-              ].map((item, idx) => (
-                <li key={idx} className="flex items-start gap-3 text-[#94a3b8]">
-                  <XCircle className="w-4 h-4 text-red-400 mt-1 flex-shrink-0" />
-                  <span className="text-sm">{item}</span>
+                "Lowball offers with hidden terms",
+                "No licensing or regulatory oversight",
+                "Opaque process and slow timelines",
+                "No post-exit support or guidance",
+                "Pressure tactics and rushed decisions"
+              ].map((item, index) => (
+                <li key={index} className="flex items-start space-x-3">
+                  <span className="text-red-400/70 mt-1 text-lg">×</span>
+                  <span className="text-slate-300 text-sm">{item}</span>
                 </li>
               ))}
             </ul>
-          </div>
-          
+          </motion.div>
+
           {/* Next Tier Partners */}
-          <div className="rounded-2xl border-2 border-[#fbbf24] bg-black/40 backdrop-blur p-8 relative">
-            <div className="absolute -top-3 right-8 bg-[#fbbf24] text-[#020617] px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wide">
-              Our Approach
-            </div>
-            <div className="flex items-center gap-2 mb-6">
-              <CheckCircle2 className="w-6 h-6 text-[#fbbf24]" />
-              <h3 className="text-2xl font-bold">Next Tier Partners</h3>
-            </div>
-            <ul className="space-y-3">
+          <motion.div 
+            initial={{ opacity: 0, x: 20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+            className="bg-gradient-to-br from-blue-600/10 to-transparent backdrop-blur-md border border-blue-500/30 rounded-2xl p-8 relative overflow-hidden shadow-[0_18px_45px_rgba(15,23,42,0.65)] hover:border-blue-400/40 transition-colors duration-300"
+          >
+            <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-blue-500 via-blue-400 to-blue-500" />
+            <h3 className="text-2xl font-semibold text-white/95 mb-6">Next Tier Partners</h3>
+            <ul className="space-y-4">
               {[
-                "Founder-first approach with fair market valuations",
+                "Fair valuations with transparent methodology",
                 "Licensed via Exclusive Business Brokers",
-                "45-day target timeline from start to close",
-                "Transparent deal structure with clear pricing",
-                "Multiple exit paths tailored to your goals",
-                "Post-exit partnership and growth options"
-              ].map((item, idx) => (
-                <li key={idx} className="flex items-start gap-3">
-                  <CheckCircle2 className="w-4 h-4 text-[#10b981] mt-1 flex-shrink-0" />
-                  <span className="text-sm">{item}</span>
+                "45-day target with clear milestones",
+                "Multiple exit paths to choose from",
+                "Post-exit partnership opportunities"
+              ].map((item, index) => (
+                <li key={index} className="flex items-start space-x-3">
+                  <CheckCircle2 className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
+                  <span className="text-white/95 text-sm">{item}</span>
                 </li>
               ))}
             </ul>
-          </div>
+          </motion.div>
         </div>
       </div>
     </section>
@@ -281,54 +306,69 @@ function Process() {
     {
       number: "01",
       title: "Apply",
-      description: "Share your business details and exit goals through our confidential application."
+      description: "Share your business and exit goals."
     },
     {
       number: "02",
       title: "Valuation & Exit Plan",
-      description: "We analyze your business and map the optimal path forward based on your objectives."
+      description: "We run numbers and map the best path."
     },
     {
       number: "03",
       title: "Exit Path Selection",
-      description: "Choose to sell via brokerage, direct acquisition, or scale before exit."
+      description: "Choose: sell via brokerage, direct acquisition, or scale before exit."
     },
     {
       number: "04",
       title: "Close & Next Chapter",
-      description: "Complete the transaction and step confidently into your next venture."
+      description: "Close the transaction and step into your next play."
     }
   ];
 
   return (
-    <section id="how-it-works" className="py-16 md:py-24 bg-[#f9fafb]">
+    <section id="how-it-works" className="py-20 md:py-28 bg-slate-950">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight text-[#020617] mb-4">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+          className="text-center mb-16"
+        >
+          <h2 className="text-3xl md:text-4xl font-semibold text-white/95 mb-4 tracking-tight">
             How the Process Works
           </h2>
-          <p className="text-[#64748b] text-lg">
-            Clear, professional guidance from first call to close.
+          <p className="text-lg text-slate-200 max-w-2xl mx-auto leading-relaxed">
+            From first call to close, we provide clarity and speed at every step.
           </p>
-        </div>
-        
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          {steps.map((step, idx) => (
-            <div key={idx} className="relative">
-              <div className="text-6xl font-extrabold text-[#fbbf24]/20 mb-4">{step.number}</div>
-              <h3 className="text-xl font-bold text-[#020617] mb-3">{step.title}</h3>
-              <p className="text-[#64748b] text-sm leading-relaxed">{step.description}</p>
-              
-              {idx < steps.length - 1 && (
-                <div className="hidden lg:block absolute top-12 -right-4 w-8 h-0.5 bg-gradient-to-r from-[#fbbf24] to-transparent"></div>
+        </motion.div>
+
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+          {steps.map((step, index) => (
+            <motion.div 
+              key={index} 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.4, delay: index * 0.1 }}
+              className="relative"
+            >
+              <div className="bg-slate-900 border border-white/10 rounded-2xl p-6 shadow-[0_18px_45px_rgba(15,23,42,0.65)] hover:bg-slate-900/80 hover:border-white/20 transition-all duration-300">
+                <div className="text-3xl font-medium text-blue-400 mb-4">{step.number}</div>
+                <h3 className="text-xl font-semibold text-white/95 mb-3">{step.title}</h3>
+                <p className="text-slate-300 leading-relaxed text-sm">{step.description}</p>
+              </div>
+              {index < 3 && (
+                <div className="hidden lg:block absolute top-1/2 -right-4 w-8 h-0.5 bg-blue-500/20" />
               )}
-            </div>
+            </motion.div>
           ))}
         </div>
-        
+
         <div className="text-center mt-12">
-          <a href="#" className="text-[#64748b] text-sm hover:text-[#020617] transition-colors inline-flex items-center gap-2">
-            View a sample 45-day timeline <ArrowRight className="w-4 h-4" />
+          <a href="#" className="text-slate-300 hover:text-white text-sm font-medium inline-flex items-center space-x-2 transition-colors">
+            <span>View a sample 45-day timeline</span>
+            <ArrowRight className="w-4 h-4" />
           </a>
         </div>
       </div>
@@ -342,61 +382,67 @@ function ExitPaths() {
     {
       title: "Sell My Business",
       subtitle: "Brokered Exit",
-      description: "Work with our licensed brokerage arm to market, negotiate, and close your sale with qualified buyers.",
-      highlight: true
+      description: "Work with our licensed brokerage arm to market, negotiate, and close your sale.",
+      highlighted: true
     },
     {
       title: "Get Acquired Directly",
       subtitle: "We Buy",
-      description: "For the right businesses, we step in as the buyer with a clean, professional acquisition process.",
-      highlight: false
+      description: "For the right businesses, we come in as the buyer with a clean, professional process.",
+      highlighted: false
     },
     {
       title: "Scale Before I Exit",
       subtitle: "Growth Partnership",
-      description: "Use our AI-driven growth systems to increase valuation before you sell for maximum return.",
-      highlight: false
+      description: "Use our AI-driven growth systems to increase valuation before you sell.",
+      highlighted: false
     }
   ];
 
   return (
-    <section id="exit-paths" className="py-16 md:py-24 bg-[#020617]">
+    <section id="exit-paths" className="py-20 md:py-28">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-4">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+          className="text-center mb-16"
+        >
+          <h2 className="text-3xl md:text-4xl font-semibold text-white/95 mb-4 tracking-tight">
             Choose the Path That Protects Your Time and Value
           </h2>
-        </div>
-        
-        <div className="grid md:grid-cols-3 gap-6">
-          {paths.map((path, idx) => (
-            <div 
-              key={idx} 
-              className={`rounded-2xl border p-8 hover:scale-105 transition-all duration-300 ${
-                path.highlight 
-                  ? 'border-[#fbbf24] bg-gradient-to-br from-[#fbbf24]/10 to-black/40 shadow-lg shadow-[#fbbf24]/20' 
-                  : 'border-white/10 bg-black/40 hover:border-[#fbbf24]/30'
-              }`}
+        </motion.div>
+
+        <div className="grid md:grid-cols-3 gap-8">
+          {paths.map((path, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.4, delay: index * 0.1 }}
+              className={`rounded-2xl p-8 ${
+                path.highlighted
+                  ? 'bg-gradient-to-br from-blue-600/10 to-transparent border-2 border-blue-500/40 shadow-[0_0_50px_rgba(37,99,235,0.2)]'
+                  : 'bg-white/5 backdrop-blur-md border border-white/10'
+              } hover:-translate-y-1 transition-all duration-300 shadow-[0_18px_45px_rgba(15,23,42,0.65)]`}
             >
-              {path.highlight && (
-                <div className="inline-block bg-[#fbbf24] text-[#020617] px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide mb-4">
-                  Most Popular
-                </div>
-              )}
-              <h3 className="text-2xl font-bold mb-2">{path.title}</h3>
-              <div className="text-[#fbbf24] text-sm font-semibold mb-4">{path.subtitle}</div>
-              <p className="text-[#94a3b8] leading-relaxed">{path.description}</p>
-              <Button 
-                variant={path.highlight ? "default" : "outline"} 
-                className={`w-full mt-6 rounded-full ${
-                  path.highlight 
-                    ? 'bg-[#fbbf24] hover:bg-[#eab308] text-[#020617]' 
-                    : 'border-white/20 hover:border-[#fbbf24]/50'
-                }`}
+              <div className="mb-6">
+                <h3 className="text-2xl font-semibold text-white/95 mb-2">{path.title}</h3>
+                <p className={`font-medium ${path.highlighted ? 'text-blue-400' : 'text-slate-300'}`}>{path.subtitle}</p>
+              </div>
+              <p className="text-slate-200 leading-relaxed text-sm mb-6">{path.description}</p>
+              <Button
+                className={`w-full ${
+                  path.highlighted
+                    ? 'bg-blue-600 text-white hover:bg-blue-500 shadow-[0_0_30px_rgba(37,99,235,0.3)]'
+                    : 'bg-white/5 text-white hover:bg-white/10 border border-white/20'
+                } transition-all duration-200 hover:scale-[1.02]`}
               >
                 Learn More
               </Button>
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>
@@ -408,57 +454,86 @@ function ExitPaths() {
 function ResultsTestimonials() {
   const testimonials = [
     {
-      quote: "Next Tier Partners handled everything professionally. The 45-day timeline was accurate, and I felt protected throughout the entire process.",
-      author: "Michael R.",
-      business: "Performance Marketing Agency"
+      quote: "The process was transparent, professional, and fast. I felt protected every step of the way.",
+      author: "Alex Chen",
+      business: "Performance Marketing Agency",
+      initial: "AC"
     },
     {
-      quote: "I appreciated the transparency and licensing through Exclusive Business Brokers. It made the exit feel legitimate and safe.",
-      author: "Sarah T.",
-      business: "SaaS Product"
+      quote: "Next Tier helped me understand my options clearly. No pressure, just clarity and professionalism.",
+      author: "Sarah Mitchell",
+      business: "SaaS Product",
+      initial: "SM"
     },
     {
-      quote: "They gave me options I did not know existed. We scaled first, then exited at a much higher valuation. Smart approach.",
-      author: "James K.",
-      business: "Content Media Property"
+      quote: "I closed in 42 days. The licensed brokerage backing gave me confidence throughout.",
+      author: "James Rodriguez",
+      business: "Content Business",
+      initial: "JR"
     }
   ];
 
   return (
-    <section className="py-16 md:py-24 bg-[#f9fafb]">
+    <section className="py-20 md:py-28 bg-slate-950">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight text-[#020617] mb-4">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+          className="text-center mb-16"
+        >
+          <h2 className="text-3xl md:text-4xl font-semibold text-white/95 mb-4 tracking-tight">
             What Founders Say After Working With Us
           </h2>
-        </div>
-        
-        <div className="grid md:grid-cols-3 gap-6 mb-12">
-          {testimonials.map((testimonial, idx) => (
-            <div key={idx} className="rounded-2xl border border-slate-200 bg-white p-8 shadow-lg">
-              <p className="text-[#1f2933] leading-relaxed mb-6 italic">"{testimonial.quote}"</p>
-              <div>
-                <div className="font-bold text-[#020617]">{testimonial.author}</div>
-                <div className="text-[#64748b] text-sm">{testimonial.business}</div>
+        </motion.div>
+
+        <div className="grid md:grid-cols-3 gap-8 mb-16">
+          {testimonials.map((testimonial, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.4, delay: index * 0.1 }}
+              className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6 shadow-[0_18px_45px_rgba(15,23,42,0.65)] hover:bg-white/[0.07] hover:border-white/20 transition-all duration-300"
+            >
+              <p className="text-slate-200 mb-6 italic leading-relaxed text-sm">"{testimonial.quote}"</p>
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-600 to-blue-700 flex items-center justify-center text-white font-medium text-sm">
+                  {testimonial.initial}
+                </div>
+                <div>
+                  <p className="font-semibold text-white/95">{testimonial.author}</p>
+                  <p className="text-xs text-slate-300">{testimonial.business}</p>
+                </div>
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
-        
-        <div className="flex items-center justify-center gap-8 text-sm text-[#64748b] flex-wrap">
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-[#fbbf24]"></div>
-            <span>Avg. timeline target: 45 days</span>
+
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+          className="flex flex-wrap justify-center items-center gap-12 text-center"
+        >
+          <div>
+            <div className="text-3xl font-semibold text-white/95">45 Days</div>
+            <div className="text-sm text-slate-300 mt-1">Avg. Timeline Target</div>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-[#fbbf24]"></div>
-            <span>Licensed transactions via EBB</span>
+          <div className="w-px h-12 bg-white/10" />
+          <div>
+            <div className="text-3xl font-semibold text-white/95">Licensed</div>
+            <div className="text-sm text-slate-300 mt-1">Via Exclusive Business Brokers</div>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-[#fbbf24]"></div>
-            <span>Digital-only focus</span>
+          <div className="w-px h-12 bg-white/10" />
+          <div>
+            <div className="text-3xl font-semibold text-white/95">Digital Only</div>
+            <div className="text-sm text-slate-300 mt-1">Focused Expertise</div>
           </div>
-        </div>
+        </motion.div>
       </div>
     </section>
   );
@@ -470,32 +545,47 @@ function WhoWeWorkWith() {
     "Digital Agencies",
     "Performance Marketing Shops",
     "SaaS Products",
-    "Software Products",
+    "Software Development",
     "Online Service Businesses",
     "Content & Media Properties",
     "E-commerce Brands",
-    "Subscription Businesses"
+    "Developer Tools"
   ];
 
   return (
-    <section className="py-16 md:py-24 bg-[#020617]">
+    <section className="py-20 md:py-28">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-4">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+          className="text-center mb-12"
+        >
+          <h2 className="text-3xl md:text-4xl font-semibold text-white/95 mb-4 tracking-tight">
             Who We Work With
           </h2>
-          <p className="text-[#94a3b8] text-lg max-w-2xl mx-auto">
+          <p className="text-lg text-slate-200 max-w-2xl mx-auto leading-relaxed">
             Digital founders who are serious about a professional exit or scale path.
           </p>
-        </div>
-        
-        <div className="flex flex-wrap justify-center gap-3 max-w-4xl mx-auto">
-          {businessTypes.map((type, idx) => (
-            <div key={idx} className="px-6 py-3 rounded-full bg-black/40 border border-white/10 text-[#f9fafb] text-sm backdrop-blur">
-              {type}
+        </motion.div>
+
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="flex flex-wrap justify-center gap-4"
+        >
+          {businessTypes.map((category, index) => (
+            <div
+              key={index}
+              className="px-6 py-2.5 bg-white/5 backdrop-blur-md border border-white/10 rounded-full text-slate-200 text-sm hover:bg-white/10 hover:border-white/30 transition-all duration-200 hover:scale-[1.02]"
+            >
+              {category}
             </div>
           ))}
-        </div>
+        </motion.div>
       </div>
     </section>
   );
@@ -508,52 +598,58 @@ function FAQ() {
   const faqs = [
     {
       question: "What deal sizes do you work with?",
-      answer: "We typically work with digital businesses generating $500K–$10M in annual revenue. However, we review each opportunity individually based on growth potential, business model, and strategic fit."
+      answer: "We typically work with digital businesses valued between $500K and $10M, though we evaluate each opportunity individually based on the business model and growth potential."
     },
     {
       question: "How does the 45-day target work?",
-      answer: "The 45-day timeline begins after we complete initial due diligence and valuation. It covers buyer outreach, negotiation, and closing. Some deals close faster, others may take slightly longer depending on complexity."
+      answer: "Our 45-day timeline is a target based on having all documentation ready and working with motivated buyers. The actual timeline can vary based on deal complexity, but we structure our process to move as quickly as possible while maintaining thoroughness."
     },
     {
       question: "How are you different from a typical broker or buyer?",
-      answer: "We operate as both a licensed brokerage (through Exclusive Business Brokers) and a strategic acquirer. This gives founders multiple exit paths and ensures every transaction is compliant, professional, and founder-focused."
+      answer: "We offer multiple exit paths (brokered sale, direct acquisition, or scale before exit), we're backed by a licensed brokerage (Exclusive Business Brokers), and we focus exclusively on digital businesses. We're founder-first, meaning we prioritize your goals and timeline."
     },
     {
       question: "How does confidentiality work?",
-      answer: "All initial conversations are confidential. When we market your business through our brokerage arm, we use blind profiles and NDAs. Your identity is only revealed to qualified, serious buyers you approve."
+      answer: "All potential buyers sign NDAs before receiving any identifying information about your business. We use anonymous teasers initially and only reveal details to pre-qualified, serious buyers. Your confidentiality is protected at every step."
     },
     {
       question: "What fees should I expect?",
-      answer: "Brokerage fees are success-based and disclosed upfront during valuation. Direct acquisitions have no brokerage fees. We never charge upfront fees or retainers."
+      answer: "Fee structures vary based on the exit path chosen. For brokered sales, we use industry-standard success fees (typically 10-15% on a sliding scale). For direct acquisitions, there are no broker fees. We're transparent about all costs upfront."
     },
     {
-      question: "What is the difference between Next Tier Partners and Exclusive Business Brokers?",
-      answer: "Next Tier Partners is the operating brand focused on founder relationships and strategic exits. Exclusive Business Brokers is our licensed brokerage entity that handles regulated transaction components and ensures legal compliance."
+      question: "What's the difference between Next Tier Partners and Exclusive Business Brokers?",
+      answer: "Next Tier Partners is the founder-facing brand focused on modern digital businesses and multiple exit paths. Exclusive Business Brokers is our licensed brokerage arm that handles the regulatory and transactional aspects of sales. Together, we provide both the modern experience founders expect and the licensed infrastructure that protects all parties."
     }
   ];
 
   return (
-    <section id="faq" className="py-16 md:py-24 bg-[#f9fafb]">
+    <section id="faq" className="py-20 md:py-28 bg-slate-950">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight text-[#020617] mb-4">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+          className="text-center mb-16"
+        >
+          <h2 className="text-3xl md:text-4xl font-semibold text-white/95 mb-4 tracking-tight">
             Frequently Asked Questions
           </h2>
-        </div>
-        
+        </motion.div>
+
         <div className="space-y-4">
           {faqs.map((faq, idx) => (
-            <div key={idx} className="rounded-2xl border border-slate-200 bg-white overflow-hidden">
+            <div key={idx} className="bg-white/5 backdrop-blur-md border border-white/10 rounded-xl px-6 hover:bg-white/[0.07] transition-colors overflow-hidden">
               <button
                 onClick={() => setOpenIndex(openIndex === idx ? null : idx)}
-                className="w-full flex items-center justify-between p-6 text-left hover:bg-slate-50 transition-colors"
+                className="w-full flex items-center justify-between py-4 text-left"
               >
-                <span className="font-bold text-[#020617] pr-4">{faq.question}</span>
-                <ChevronDown className={`w-5 h-5 text-[#64748b] flex-shrink-0 transition-transform ${openIndex === idx ? 'rotate-180' : ''}`} />
+                <span className="font-medium text-white/95 hover:no-underline pr-4">{faq.question}</span>
+                <ChevronDown className={`w-5 h-5 text-slate-300 flex-shrink-0 transition-transform ${openIndex === idx ? 'rotate-180' : ''}`} />
               </button>
               {openIndex === idx && (
-                <div className="px-6 pb-6">
-                  <p className="text-[#64748b] leading-relaxed">{faq.answer}</p>
+                <div className="pb-4 pt-2">
+                  <p className="text-slate-300 leading-relaxed text-sm">{faq.answer}</p>
                 </div>
               )}
             </div>
@@ -567,26 +663,31 @@ function FAQ() {
 // Final CTA
 function FinalCTA() {
   return (
-    <section className="py-20 md:py-32 bg-gradient-to-br from-[#020617] via-[#020617] to-[#111827] relative overflow-hidden">
-      <div className="absolute inset-0 opacity-10" style={{
-        backgroundImage: `linear-gradient(to right, #fbbf24 1px, transparent 1px), linear-gradient(to bottom, #fbbf24 1px, transparent 1px)`,
-        backgroundSize: '80px 80px'
-      }}></div>
-      
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-        <h2 className="text-4xl md:text-6xl font-extrabold tracking-tight mb-6">
+    <section className="py-24 md:py-32 relative overflow-hidden">
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-blue-600/10 rounded-full blur-3xl" />
+      </div>
+
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.5 }}
+        className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10"
+      >
+        <h2 className="text-4xl md:text-5xl font-semibold text-white/95 mb-6 tracking-tight">
           Your Next Chapter Starts Here
         </h2>
-        <p className="text-[#94a3b8] text-lg md:text-xl mb-10 max-w-2xl mx-auto leading-relaxed">
-          Share your business and we will map a clear, professional exit or scale path in under 45 days.
+        <p className="text-xl text-slate-200 mb-10 max-w-2xl mx-auto leading-relaxed">
+          Share your business and we'll map a clear, professional exit or scale path in under 45 days.
         </p>
-        <Button className="bg-[#fbbf24] hover:bg-[#eab308] text-[#020617] font-semibold rounded-full px-12 py-6 text-lg mb-4">
+        <Button size="lg" className="bg-blue-600 text-white hover:bg-blue-500 font-medium text-lg px-10 shadow-[0_0_50px_rgba(37,99,235,0.4)] hover:shadow-[0_0_60px_rgba(37,99,235,0.5)] transition-all duration-200 hover:scale-[1.02]">
           Apply for a 45-Day Exit Plan
         </Button>
-        <p className="text-[#64748b] text-sm">
+        <p className="text-sm text-slate-400 mt-6">
           No obligation. Strictly confidential.
         </p>
-      </div>
+      </motion.div>
     </section>
   );
 }
@@ -594,25 +695,45 @@ function FinalCTA() {
 // Footer
 function Footer() {
   return (
-    <footer className="py-12 bg-[#020617] border-t border-white/5">
+    <footer className="border-t border-white/5 py-12 bg-black/10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-[#fbbf24] to-[#eab308] rounded-lg flex items-center justify-center">
-              <span className="text-[#020617] font-bold text-sm">NT</span>
+        <div className="grid md:grid-cols-4 gap-8 mb-8">
+          <div>
+            <div className="flex items-center space-x-2 mb-4">
+              <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg shadow-lg shadow-blue-500/20" />
+              <span className="text-lg font-semibold text-white/95">Next Tier Partners</span>
             </div>
-            <span className="text-[#f9fafb] font-extrabold text-lg">Next Tier Partners</span>
+            <p className="text-sm text-slate-300">
+              Professional exits for modern founders.
+            </p>
           </div>
-          
-          <div className="text-[#64748b] text-sm text-center">
-            Licensed transactions through Exclusive Business Brokers · {new Date().getFullYear()}
+          <div>
+            <h4 className="font-medium text-white/95 mb-4 text-sm">Company</h4>
+            <ul className="space-y-2 text-sm text-slate-300">
+              <li><a href="#" className="hover:text-white transition-colors">About Us</a></li>
+              <li><a href="#" className="hover:text-white transition-colors">Process</a></li>
+              <li><a href="#" className="hover:text-white transition-colors">Exit Paths</a></li>
+            </ul>
           </div>
-          
-          <div className="flex gap-6 text-sm text-[#64748b]">
-            <a href="#" className="hover:text-[#f9fafb] transition-colors">Privacy</a>
-            <a href="#" className="hover:text-[#f9fafb] transition-colors">Terms</a>
-            <a href="#" className="hover:text-[#f9fafb] transition-colors">Contact</a>
+          <div>
+            <h4 className="font-medium text-white/95 mb-4 text-sm">Resources</h4>
+            <ul className="space-y-2 text-sm text-slate-300">
+              <li><a href="#" className="hover:text-white transition-colors">FAQ</a></li>
+              <li><a href="#" className="hover:text-white transition-colors">Blog</a></li>
+              <li><a href="#" className="hover:text-white transition-colors">Contact</a></li>
+            </ul>
           </div>
+          <div>
+            <h4 className="font-medium text-white/95 mb-4 text-sm">Legal</h4>
+            <ul className="space-y-2 text-sm text-slate-300">
+              <li><a href="#" className="hover:text-white transition-colors">Privacy Policy</a></li>
+              <li><a href="#" className="hover:text-white transition-colors">Terms of Service</a></li>
+              <li><a href="#" className="hover:text-white transition-colors">Disclosures</a></li>
+            </ul>
+          </div>
+        </div>
+        <div className="border-t border-white/5 pt-8 text-center text-sm text-slate-400">
+          <p>&copy; 2024 Next Tier Partners. All rights reserved. Licensed transactions via Exclusive Business Brokers.</p>
         </div>
       </div>
     </footer>
