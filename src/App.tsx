@@ -19,6 +19,7 @@ import InvestorPortal from "./pages/InvestorPortal";
 const IndexV2 = lazy(() => import("./pages/IndexV2"));
 const HomePageA = lazy(() => import("./pages/HomePageA"));
 const HomePageB = lazy(() => import("./pages/HomePageB"));
+const HomePageC = lazy(() => import("./pages/HomePageC"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Auth = lazy(() => import("./pages/Auth"));
 const AuthAccept = lazy(() => import("./pages/AuthAccept"));
@@ -92,6 +93,7 @@ const App = () => (
               <Route path="/v2" element={<IndexV2 />} />
               <Route path="/home-page-a" element={<HomePageA />} />
               <Route path="/home-page-b" element={<HomePageB />} />
+              <Route path="/home-page-c" element={<HomePageC />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/auth/accept" element={<AuthAccept />} />
               <Route path="/demo" element={<Demo />} />
