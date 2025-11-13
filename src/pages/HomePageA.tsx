@@ -193,8 +193,8 @@ function HeroSection() {
 function SectionHeading({ title, subtitle }: { title: string; subtitle?: string }) {
   return (
     <div className="text-center mb-12">
-      <h2 className="text-3xl md:text-4xl font-bold text-[#010e21] mb-2">{title}</h2>
-      {subtitle && <p className="text-gray-600 max-w-2xl mx-auto">{subtitle}</p>}
+      <h2 className="text-3xl md:text-4xl font-bold text-[#0f172a] mb-2">{title}</h2>
+      {subtitle && <p className="text-[#475569] max-w-2xl mx-auto">{subtitle}</p>}
     </div>
   );
 }
@@ -234,7 +234,13 @@ function SuccessStories() {
     },
   ];
   return (
-    <section id="case-studies" className="py-20 bg-[url('https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=1600&q=80')] bg-cover bg-center bg-fixed">
+    <section 
+      id="case-studies" 
+      className="py-20 md:py-24 bg-[#f8fafc] relative"
+      style={{
+        backgroundImage: `url("data:image/svg+xml,%3Csvg width='36' height='36' viewBox='0 0 36 36' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='18' cy='18' r='1.5' fill='%23cbd5e1' fill-opacity='0.25'/%3E%3C/svg%3E")`
+      }}
+    >
       <div className="max-w-7xl mx-auto px-6">
         <SectionHeading
           title="Success Stories from Our Members"
