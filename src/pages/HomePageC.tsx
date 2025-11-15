@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 
 const HomePageC = () => {
   return (
-    <div className="min-h-screen bg-[#020617] text-[#f9fafb]">
+    <div className="min-h-screen bg-black text-white">
       <Navigation />
       <Hero />
       <TrustStrip />
@@ -25,23 +25,23 @@ const HomePageC = () => {
 // Navigation
 function Navigation() {
   return (
-    <nav className="fixed top-0 w-full z-50 bg-[#020617]/80 backdrop-blur-md border-b border-white/5">
+    <nav className="fixed top-0 w-full z-50 bg-black/90 backdrop-blur-md border-b border-[#2D2D2D]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-[#fbbf24] to-[#eab308] rounded-lg flex items-center justify-center">
-              <span className="text-[#020617] font-bold text-sm">NT</span>
+            <div className="w-8 h-8 bg-gradient-to-br from-[#C19A47] to-[#A67D2E] rounded-lg flex items-center justify-center">
+              <span className="text-black font-bold text-sm">NT</span>
             </div>
-            <span className="text-[#f9fafb] font-extrabold text-lg tracking-tight">Next Tier Partners</span>
+            <span className="text-white font-extrabold text-lg tracking-tight">Next Tier Partners</span>
           </div>
           
           <div className="hidden md:flex items-center gap-8">
-            <a href="#how-it-works" className="text-[#94a3b8] hover:text-[#f9fafb] transition-colors text-sm">How It Works</a>
-            <a href="#exit-paths" className="text-[#94a3b8] hover:text-[#f9fafb] transition-colors text-sm">Exit Paths</a>
-            <a href="#faq" className="text-[#94a3b8] hover:text-[#f9fafb] transition-colors text-sm">FAQ</a>
+            <a href="#how-it-works" className="text-[#CCCCCC] hover:text-[#C19A47] transition-colors text-sm">How It Works</a>
+            <a href="#exit-paths" className="text-[#CCCCCC] hover:text-[#C19A47] transition-colors text-sm">Exit Paths</a>
+            <a href="#faq" className="text-[#CCCCCC] hover:text-[#C19A47] transition-colors text-sm">FAQ</a>
           </div>
           
-          <Button className="bg-[#fbbf24] hover:bg-[#eab308] text-[#020617] font-semibold rounded-full px-6">
+          <Button className="bg-[#C19A47] hover:bg-[#D4AF5F] text-black font-semibold rounded-full px-6 shadow-lg shadow-[#C19A47]/20">
             Apply Now
           </Button>
         </div>
@@ -54,37 +54,32 @@ function Navigation() {
 function Hero() {
   return (
     <section className="relative pt-32 pb-20 md:pt-40 md:pb-32 overflow-hidden">
-      {/* Background with subtle grid */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#020617] via-[#020617] to-[#111827]">
-        <div className="absolute inset-0 opacity-20" style={{
-          backgroundImage: `linear-gradient(to right, #fbbf24 1px, transparent 1px), linear-gradient(to bottom, #fbbf24 1px, transparent 1px)`,
-          backgroundSize: '80px 80px'
-        }}></div>
-      </div>
+      {/* Solid gradient background - no grid */}
+      <div className="absolute inset-0 bg-gradient-to-br from-black via-[#0A0A0A] to-[#1A1A1A]" />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="grid md:grid-cols-2 gap-12 items-center">
           {/* Left Column */}
           <div>
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#fbbf24]/10 border border-[#fbbf24]/20 mb-6">
-              <span className="text-[#fbbf24] text-xs font-semibold tracking-wide uppercase">Founder-First Exit Firm</span>
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-transparent border border-[#C19A47] mb-6">
+              <span className="text-[#C19A47] text-xs font-semibold tracking-wide uppercase">Founder-First Exit Firm</span>
             </div>
             
-            <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight leading-[1.1] mb-6">
+            <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight leading-[1.1] mb-6 text-white">
               The Modern Path to a Fast, Professional Business Exit
             </h1>
             
-            <div className="space-y-3 mb-8 text-[#94a3b8] text-lg leading-relaxed">
+            <div className="space-y-3 mb-8 text-[#CCCCCC] text-lg leading-relaxed">
               <p>Exit your digital business in 45 days through our licensed brokerage infrastructure.</p>
               <p>We handle valuation, buyer sourcing, and closing while you stay in control.</p>
               <p>Backed by Exclusive Business Brokers — fully licensed, compliant, confidential.</p>
             </div>
             
             <div className="flex flex-col sm:flex-row gap-4">
-              <Button className="bg-[#fbbf24] hover:bg-[#eab308] text-[#020617] font-semibold rounded-full px-8 py-6 text-base">
+              <Button className="bg-[#C19A47] hover:bg-[#D4AF5F] text-black font-semibold rounded-full px-8 py-6 text-base shadow-2xl shadow-[#A67D2E]/40">
                 Apply for a 45-Day Exit Plan
               </Button>
-              <a href="#how-it-works" className="flex items-center justify-center gap-2 text-[#fbbf24] hover:text-[#eab308] transition-colors text-base font-medium">
+              <a href="#how-it-works" className="flex items-center justify-center gap-2 text-[#C19A47] hover:text-[#D4AF5F] transition-colors text-base font-medium">
                 See how the process works <ArrowRight className="w-4 h-4" />
               </a>
             </div>
