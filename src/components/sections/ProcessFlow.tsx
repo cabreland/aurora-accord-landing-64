@@ -1,119 +1,195 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, ArrowLeft, User, Settings, DollarSign } from 'lucide-react';
+import { Building2, Handshake, FileCheck, TrendingUp, Users, DollarSign } from 'lucide-react';
 
 const ProcessFlow = () => {
   return (
     <section className="py-24 bg-black">
       <div className="container mx-auto px-6">
         {/* Main Title */}
-        <h2 className="text-5xl md:text-6xl font-bold text-white text-center mb-20">
-          Fast, safe, and easy
+        <h2 className="text-5xl md:text-6xl font-bold text-white text-center mb-8">
+          Two Paths to Exit
         </h2>
+        <p className="text-xl text-[#CCCCCC] text-center max-w-3xl mx-auto mb-20">
+          Choose the path that works best for your business — fast acquisition or premium exit facilitation
+        </p>
         
-        {/* Three Column Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-16 items-center max-w-7xl mx-auto">
+        {/* Two Paths Side by Side */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 max-w-7xl mx-auto">
           
-          {/* Sellers Column */}
-          <div className="text-center space-y-6">
-            <h3 className="text-2xl font-bold text-white mb-8">Sellers</h3>
-            <p className="text-gray-300 mb-8">
-              Maximize your exit with expert help from our team.
-            </p>
-            
-            {/* Seller Cards */}
-            <div className="space-y-4">
-              <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
-                <div className="flex items-center gap-3 mb-3">
-                  <User className="w-6 h-6 text-gray-400" />
-                  <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full"></div>
-                </div>
-                <p className="text-white text-sm text-left">
-                  Your startup listing is almost ready to go live! Last step is the asking price...
-                </p>
+          {/* PATH 1: Direct Acquisition */}
+          <div className="bg-[#0A0A0A] border-2 border-[#C19A47] rounded-3xl p-8">
+            <div className="text-center mb-8">
+              <div className="w-16 h-16 rounded-full bg-[#C19A47]/20 flex items-center justify-center mx-auto mb-4">
+                <Building2 className="w-8 h-8 text-[#C19A47]" />
               </div>
-              
-              <div className="bg-gray-800 rounded-xl p-4 border border-gray-700">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-gradient-to-r from-green-500 to-teal-500 rounded-full"></div>
-                  <p className="text-white text-sm">Cool, here you go...</p>
+              <h3 className="text-3xl font-bold text-white mb-2">
+                We Buy Your Business
+              </h3>
+              <p className="text-[#C19A47] font-semibold text-lg">45-60 Day Close</p>
+              <p className="text-[#999999] mt-2">Fast, direct acquisition by Next Tier Partners</p>
+            </div>
+
+            {/* Timeline Steps */}
+            <div className="space-y-6">
+              {/* Step 1 */}
+              <div className="flex gap-4">
+                <div className="flex flex-col items-center">
+                  <div className="w-10 h-10 rounded-full bg-[#C19A47] flex items-center justify-center text-black font-bold">
+                    1
+                  </div>
+                  <div className="w-0.5 h-full bg-[#C19A47]/30 mt-2"></div>
+                </div>
+                <div className="flex-1 pb-6">
+                  <h4 className="text-white font-semibold text-lg mb-1">Initial Assessment</h4>
+                  <p className="text-[#CCCCCC] text-sm mb-2">Days 1-7</p>
+                  <p className="text-[#999999]">Submit business details, receive preliminary valuation and acquisition interest confirmation</p>
                 </div>
               </div>
+
+              {/* Step 2 */}
+              <div className="flex gap-4">
+                <div className="flex flex-col items-center">
+                  <div className="w-10 h-10 rounded-full bg-[#C19A47] flex items-center justify-center text-black font-bold">
+                    2
+                  </div>
+                  <div className="w-0.5 h-full bg-[#C19A47]/30 mt-2"></div>
+                </div>
+                <div className="flex-1 pb-6">
+                  <h4 className="text-white font-semibold text-lg mb-1">Due Diligence</h4>
+                  <p className="text-[#CCCCCC] text-sm mb-2">Days 8-30</p>
+                  <p className="text-[#999999]">Financial review, operational assessment, technical audit, and legal verification</p>
+                </div>
+              </div>
+
+              {/* Step 3 */}
+              <div className="flex gap-4">
+                <div className="flex flex-col items-center">
+                  <div className="w-10 h-10 rounded-full bg-[#C19A47] flex items-center justify-center text-black font-bold">
+                    3
+                  </div>
+                  <div className="w-0.5 h-full bg-[#C19A47]/30 mt-2"></div>
+                </div>
+                <div className="flex-1 pb-6">
+                  <h4 className="text-white font-semibold text-lg mb-1">Offer & Terms</h4>
+                  <p className="text-[#CCCCCC] text-sm mb-2">Days 31-40</p>
+                  <p className="text-[#999999]">Formal offer presentation, deal structure negotiation, payment terms finalization</p>
+                </div>
+              </div>
+
+              {/* Step 4 */}
+              <div className="flex gap-4">
+                <div className="flex flex-col items-center">
+                  <div className="w-10 h-10 rounded-full bg-[#C19A47] flex items-center justify-center text-black font-bold">
+                    4
+                  </div>
+                </div>
+                <div className="flex-1">
+                  <h4 className="text-white font-semibold text-lg mb-1">Close & Transfer</h4>
+                  <p className="text-[#CCCCCC] text-sm mb-2">Days 41-60</p>
+                  <p className="text-[#999999]">Legal documentation, asset transfer, funds disbursement, smooth handoff</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-8 pt-6 border-t border-[#2D2D2D]">
+              <Button className="w-full bg-[#C19A47] hover:bg-[#D4AF5F] text-black font-semibold py-6 rounded-full text-lg">
+                Get Acquisition Offer
+              </Button>
+            </div>
+          </div>
+
+          {/* PATH 2: Exit Facilitation */}
+          <div className="bg-[#0A0A0A] border-2 border-[#999999] rounded-3xl p-8">
+            <div className="text-center mb-8">
+              <div className="w-16 h-16 rounded-full bg-[#999999]/20 flex items-center justify-center mx-auto mb-4">
+                <Handshake className="w-8 h-8 text-[#999999]" />
+              </div>
+              <h3 className="text-3xl font-bold text-white mb-2">
+                Premium Exit Facilitation
+              </h3>
+              <p className="text-[#999999] font-semibold text-lg">60-90 Day Close</p>
+              <p className="text-[#999999] mt-2">Matched with qualified buyers from our network</p>
+            </div>
+
+            {/* Timeline Steps */}
+            <div className="space-y-6">
+              {/* Step 1 */}
+              <div className="flex gap-4">
+                <div className="flex flex-col items-center">
+                  <div className="w-10 h-10 rounded-full bg-[#999999] flex items-center justify-center text-black font-bold">
+                    1
+                  </div>
+                  <div className="w-0.5 h-full bg-[#999999]/30 mt-2"></div>
+                </div>
+                <div className="flex-1 pb-6">
+                  <h4 className="text-white font-semibold text-lg mb-1">Business Preparation</h4>
+                  <p className="text-[#CCCCCC] text-sm mb-2">Days 1-14</p>
+                  <p className="text-[#999999]">Valuation analysis, CIM creation, buyer profile development, confidential marketing materials</p>
+                </div>
+              </div>
+
+              {/* Step 2 */}
+              <div className="flex gap-4">
+                <div className="flex flex-col items-center">
+                  <div className="w-10 h-10 rounded-full bg-[#999999] flex items-center justify-center text-black font-bold">
+                    2
+                  </div>
+                  <div className="w-0.5 h-full bg-[#999999]/30 mt-2"></div>
+                </div>
+                <div className="flex-1 pb-6">
+                  <h4 className="text-white font-semibold text-lg mb-1">Buyer Matching</h4>
+                  <p className="text-[#CCCCCC] text-sm mb-2">Days 15-35</p>
+                  <p className="text-[#999999]">Strategic outreach to qualified buyers, NDA execution, initial interest gauging</p>
+                </div>
+              </div>
+
+              {/* Step 3 */}
+              <div className="flex gap-4">
+                <div className="flex flex-col items-center">
+                  <div className="w-10 h-10 rounded-full bg-[#999999] flex items-center justify-center text-black font-bold">
+                    3
+                  </div>
+                  <div className="w-0.5 h-full bg-[#999999]/30 mt-2"></div>
+                </div>
+                <div className="flex-1 pb-6">
+                  <h4 className="text-white font-semibold text-lg mb-1">Negotiation Support</h4>
+                  <p className="text-[#CCCCCC] text-sm mb-2">Days 36-60</p>
+                  <p className="text-[#999999]">LOI negotiation, buyer due diligence coordination, deal structure optimization</p>
+                </div>
+              </div>
+
+              {/* Step 4 */}
+              <div className="flex gap-4">
+                <div className="flex flex-col items-center">
+                  <div className="w-10 h-10 rounded-full bg-[#999999] flex items-center justify-center text-black font-bold">
+                    4
+                  </div>
+                </div>
+                <div className="flex-1">
+                  <h4 className="text-white font-semibold text-lg mb-1">Transaction Close</h4>
+                  <p className="text-[#CCCCCC] text-sm mb-2">Days 61-90</p>
+                  <p className="text-[#999999]">Purchase agreement finalization, escrow management, closing coordination, post-close support</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-8 pt-6 border-t border-[#2D2D2D]">
+              <Button className="w-full bg-white hover:bg-gray-100 text-black font-semibold py-6 rounded-full text-lg">
+                Start Exit Process
+              </Button>
             </div>
           </div>
           
-          {/* Center - Brokers with Arrows */}
-          <div className="relative text-center">
-            {/* Arrow pointing right (hidden on mobile) */}
-            <ArrowRight className="absolute -left-8 top-1/2 transform -translate-y-1/2 w-8 h-8 text-yellow-500 hidden lg:block" />
-            
-            {/* Hexagon Logo */}
-            <div className="inline-flex items-center justify-center w-24 h-24 bg-gray-800 border-2 border-gray-600 rounded-2xl mb-6 mx-auto">
-              <div className="w-12 h-12 border-2 border-white transform rotate-45"></div>
-            </div>
-            
-            <h3 className="text-2xl font-bold text-white mb-6">
-              Exclusive<br />Business<br />Brokers
-            </h3>
-            
-            {/* Service Cards */}
-            <div className="space-y-3">
-              <div className="bg-gray-800 rounded-lg px-6 py-3 border border-gray-700">
-                <div className="flex items-center gap-3">
-                  <Settings className="w-5 h-5 text-gray-400" />
-                  <span className="text-white">Expert Tooling</span>
-                </div>
-              </div>
-              
-              <div className="bg-gray-800 rounded-lg px-6 py-3 border border-gray-700">
-                <div className="flex items-center gap-3">
-                  <User className="w-5 h-5 text-gray-400" />
-                  <span className="text-white">World-class support</span>
-                </div>
-              </div>
-              
-              <div className="bg-gray-800 rounded-lg px-6 py-3 border border-gray-700">
-                <div className="flex items-center gap-3">
-                  <DollarSign className="w-5 h-5 text-gray-400" />
-                  <span className="text-white">Escrow & Financing</span>
-                </div>
-              </div>
-            </div>
-            
-            {/* Arrow pointing left (hidden on mobile) */}
-            <ArrowLeft className="absolute -right-8 top-1/2 transform -translate-y-1/2 w-8 h-8 text-yellow-500 hidden lg:block" />
-          </div>
-          
-          {/* Buyers Column */}
-          <div className="text-center space-y-6">
-            <h3 className="text-2xl font-bold text-white mb-8">Buyers</h3>
-            <p className="text-gray-300 mb-8">
-              Find your ideal startup and make an offer in minutes.
-            </p>
-            
-            {/* My Deals Section */}
-            <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
-              <h4 className="text-white font-semibold mb-4 text-left">My Deals</h4>
-              
-              <div className="space-y-3">
-                <div className="flex items-center gap-3 bg-gray-700 rounded-lg p-3">
-                  <div className="w-8 h-8 bg-gradient-to-r from-pink-500 to-purple-500 rounded-full"></div>
-                  <span className="text-white text-sm">Cool SaaS</span>
-                </div>
-                
-                <div className="flex items-center gap-3 bg-gray-700 rounded-lg p-3">
-                  <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full"></div>
-                  <span className="text-white text-sm">Rare Ecommerce</span>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
-        
-        {/* CTA Button */}
+
+        {/* Bottom CTA */}
         <div className="text-center mt-16">
-          <Button className="bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-black font-bold px-12 py-4 text-lg rounded-full shadow-lg">
-            Apply to Sell →
+          <p className="text-[#CCCCCC] mb-6 text-lg">
+            Not sure which path is right for you?
+          </p>
+          <Button className="bg-[#C19A47] hover:bg-[#D4AF5F] text-black font-bold px-12 py-4 text-lg rounded-full">
+            Get Your Free Valuation →
           </Button>
         </div>
       </div>
