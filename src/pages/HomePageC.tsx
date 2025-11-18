@@ -65,70 +65,67 @@ function Hero() {
               <span className="text-[#C19A47] text-xs font-semibold tracking-wide uppercase">Founder-First Exit Firm</span>
             </div>
             
-            <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight leading-[1.1] mb-6 text-white">
-              The Modern Path to a Fast, Professional Business Exit
+            <h1 className="text-5xl md:text-6xl font-bold text-white leading-tight mb-6">
+              We Buy & Sell Digital Businesses in 45-60 Days
             </h1>
             
-            <div className="space-y-3 mb-8 text-[#CCCCCC] text-lg leading-relaxed">
-              <p>Exit your digital business in 45 days through our licensed brokerage infrastructure.</p>
-              <p>We handle valuation, buyer sourcing, and closing while you stay in control.</p>
-              <p>Backed by Exclusive Business Brokers — fully licensed, compliant, confidential.</p>
+            <p className="text-xl md:text-2xl text-[#CCCCCC] font-light mb-8">
+              Strategic acquisitions and premium exits for SaaS, agencies, and DTC brands
+            </p>
+            
+            <div className="space-y-3 mb-8 text-lg text-[#CCCCCC]">
+              <p className="flex items-center gap-3">
+                <span className="text-[#C19A47]">→</span>
+                We acquire digital businesses for optimization and growth
+              </p>
+              <p className="flex items-center gap-3">
+                <span className="text-[#C19A47]">→</span>
+                Or facilitate premium exits to qualified buyers in our network
+              </p>
+              <p className="flex items-center gap-3">
+                <span className="text-[#C19A47]">→</span>
+                Fast, professional transactions in 45-60 days
+              </p>
             </div>
             
             <div className="flex flex-col sm:flex-row gap-4">
               <Button className="bg-[#C19A47] hover:bg-[#D4AF5F] text-black font-semibold rounded-full px-8 py-6 text-base shadow-2xl shadow-[#A67D2E]/40">
-                Apply for a 45-Day Exit Plan
+                Get Your Business Valued
               </Button>
-              <a href="#how-it-works" className="flex items-center justify-center gap-2 text-[#C19A47] hover:text-[#D4AF5F] transition-colors text-base font-medium">
-                See how the process works <ArrowRight className="w-4 h-4" />
+              <a href="#acquisitions" className="flex items-center justify-center gap-2 text-[#C19A47] hover:text-[#D4AF5F] transition-colors text-base font-medium">
+                See Recent Acquisitions <ArrowRight className="w-4 h-4" />
               </a>
             </div>
           </div>
           
-          {/* Right Column - Dashboard Mockup */}
+          {/* Right Column - Video */}
           <div className="relative">
-            <div className="rounded-2xl border border-white/10 bg-black/40 backdrop-blur-xl p-6 shadow-2xl hover:shadow-[0_0_40px_rgba(251,191,36,0.15)] transition-all duration-300">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-[#64748b] text-sm uppercase tracking-wide">Exit Dashboard</span>
-                  <div className="w-2 h-2 rounded-full bg-[#10b981] animate-pulse"></div>
-                </div>
-                
-                <div className="border-t border-white/5 pt-4">
-                  <div className="text-[#64748b] text-xs mb-2">Estimated Valuation</div>
-                  <div className="text-3xl font-bold text-[#fbbf24]">$2.4M – $3.1M</div>
-                </div>
-                
-                <div className="grid grid-cols-2 gap-4 border-t border-white/5 pt-4">
-                  <div>
-                    <div className="text-[#64748b] text-xs mb-1">Target Timeline</div>
-                    <div className="text-lg font-semibold">45 Days</div>
-                  </div>
-                  <div>
-                    <div className="text-[#64748b] text-xs mb-1">Active Buyers</div>
-                    <div className="text-lg font-semibold">12+</div>
-                  </div>
-                </div>
-                
-                <div className="border-t border-white/5 pt-4 space-y-2">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-[#64748b]">Valuation Complete</span>
-                    <CheckCircle2 className="w-4 h-4 text-[#10b981]" />
-                  </div>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-[#64748b]">Buyer Outreach</span>
-                    <div className="text-[#fbbf24] font-medium">In Progress</div>
-                  </div>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-[#64748b]">Due Diligence</span>
-                    <span className="text-[#64748b]">Pending</span>
-                  </div>
+            {/* Video Container */}
+            <div className="relative aspect-video rounded-2xl overflow-hidden border-2 border-[#C19A47] shadow-2xl bg-black">
+              
+              {/* Replace src with your video URL */}
+              <iframe
+                src="https://www.youtube.com/embed/dQw4w9WgXcQ"
+                className="w-full h-full"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+              
+              {/* Optional: Thumbnail overlay with play button (remove if video autoplays) */}
+              <div className="absolute inset-0 bg-gradient-to-br from-black/50 to-black/80 flex items-center justify-center group cursor-pointer hover:from-black/40 hover:to-black/70 transition">
+                <div className="w-24 h-24 rounded-full bg-[#C19A47] flex items-center justify-center group-hover:scale-110 transition shadow-2xl">
+                  <svg className="w-10 h-10 text-black ml-2" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M4 3l10 6-10 6V3z"/>
+                  </svg>
                 </div>
               </div>
             </div>
             
-            {/* Accent line */}
-            <div className="absolute -top-4 -right-4 w-24 h-24 border-t-2 border-r-2 border-[#fbbf24]/30 rounded-tr-3xl"></div>
+            {/* Video Caption */}
+            <div className="mt-6 text-center">
+              <p className="text-[#C19A47] font-semibold">Watch: Our Acquisition Process</p>
+              <p className="text-[#999999] text-sm mt-1">See how we structure deals in 45-60 days</p>
+            </div>
           </div>
         </div>
       </div>
@@ -139,65 +136,99 @@ function Hero() {
 // Trust Strip
 function TrustStrip() {
   return (
-    <div className="border-y border-white/5 bg-[#020617]/60 backdrop-blur-sm">
+    <div className="border-y border-[#2D2D2D] bg-black/60 backdrop-blur-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-        <div className="flex items-center justify-center gap-3 text-sm text-[#64748b]">
-          <Shield className="w-4 h-4 text-[#fbbf24]" />
-          <span>Backed by Exclusive Business Brokers — licensed, compliant, confidential transactions</span>
+        <div className="flex items-center justify-center gap-3 text-sm text-[#999999]">
+          <Shield className="w-4 h-4 text-[#C19A47]" />
+          <span>Professional acquisition and exit facilitation — Fast, transparent, and confidential</span>
         </div>
       </div>
     </div>
   );
 }
 
-// What We Do Section
+// What We Do Section - Now "Our Business Model"
 function WhatWeDo() {
-  const pillars = [
-    {
-      icon: Zap,
-      title: "Exit Fast",
-      description: "Sell your digital business in approximately 45 days through our buyer network and brokerage infrastructure."
-    },
-    {
-      icon: Shield,
-      title: "Exit Safely",
-      description: "Licensed, compliant, confidential transactions handled by Exclusive Business Brokers."
-    },
-    {
-      icon: Scale,
-      title: "Scale Before Exit",
-      description: "Use AI-driven growth and automation to increase valuation before going to market."
-    },
-    {
-      icon: Handshake,
-      title: "Post-Exit Partnerships",
-      description: "Partner with us on your next venture using our growth infrastructure."
-    }
-  ];
-
   return (
-    <section className="py-16 md:py-24 bg-[#020617]">
+    <section className="py-20 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-4">
-            What We Do for Modern Founders
+          <h2 className="text-4xl md:text-5xl font-bold text-black mb-4">
+            Our Business Model
           </h2>
-          <p className="text-[#94a3b8] text-lg max-w-2xl mx-auto">
-            Professional exits, growth partnerships, and post-exit infrastructure for digital businesses.
+          <p className="text-xl text-[#666666] max-w-3xl mx-auto">
+            We operate as both strategic buyers and exit facilitators for digital businesses
           </p>
         </div>
         
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {pillars.map((pillar, idx) => (
-            <div key={idx} className="rounded-2xl border border-white/10 bg-black/40 backdrop-blur p-6 hover:border-[#fbbf24]/30 transition-all duration-300 group">
-              <pillar.icon className="w-10 h-10 text-[#fbbf24] mb-4 group-hover:scale-110 transition-transform" />
-              <h3 className="text-xl font-bold mb-3">{pillar.title}</h3>
-              <p className="text-[#94a3b8] text-sm leading-relaxed mb-4">{pillar.description}</p>
-              <a href="#" className="text-[#fbbf24] text-sm font-medium inline-flex items-center gap-1 hover:gap-2 transition-all">
-                Learn more <ArrowRight className="w-3 h-3" />
-              </a>
+        <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+          
+          {/* Path 1: Acquisition */}
+          <div className="bg-[#0A0A0A] border-2 border-[#C19A47] rounded-2xl p-8">
+            <div className="w-16 h-16 rounded-full bg-[#C19A47]/20 flex items-center justify-center mb-6">
+              <svg className="w-8 h-8 text-[#C19A47]" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/>
+                <path fillRule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clipRule="evenodd"/>
+              </svg>
             </div>
-          ))}
+            
+            <h3 className="text-2xl font-bold text-white mb-4">
+              Strategic Acquisitions
+            </h3>
+            
+            <p className="text-[#CCCCCC] mb-6">
+              We acquire stable, cash-flowing digital businesses for optimization and long-term growth or quick arbitrage opportunities.
+            </p>
+            
+            <ul className="space-y-3 text-[#CCCCCC]">
+              <li className="flex items-start gap-3">
+                <span className="text-[#C19A47] mt-1">✓</span>
+                <span>Focus on SaaS, agencies, and e-commerce</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="text-[#C19A47] mt-1">✓</span>
+                <span>Operational improvements and growth strategies</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="text-[#C19A47] mt-1">✓</span>
+                <span>Portfolio approach with multiple holdings</span>
+              </li>
+            </ul>
+          </div>
+          
+          {/* Path 2: Exit Facilitation */}
+          <div className="bg-[#0A0A0A] border-2 border-[#C19A47] rounded-2xl p-8">
+            <div className="w-16 h-16 rounded-full bg-[#C19A47]/20 flex items-center justify-center mb-6">
+              <svg className="w-8 h-8 text-[#C19A47]" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z"/>
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clipRule="evenodd"/>
+              </svg>
+            </div>
+            
+            <h3 className="text-2xl font-bold text-white mb-4">
+              Premium Exit Services
+            </h3>
+            
+            <p className="text-[#CCCCCC] mb-6">
+              Not ready to sell to us? We facilitate premium exits to qualified buyers in our extensive network.
+            </p>
+            
+            <ul className="space-y-3 text-[#CCCCCC]">
+              <li className="flex items-start gap-3">
+                <span className="text-[#C19A47] mt-1">✓</span>
+                <span>Curated buyer network of strategic acquirers</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="text-[#C19A47] mt-1">✓</span>
+                <span>Confidential deal structuring and negotiation</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="text-[#C19A47] mt-1">✓</span>
+                <span>Full transaction support from LOI to close</span>
+              </li>
+            </ul>
+          </div>
+          
         </div>
       </div>
     </section>
@@ -240,19 +271,19 @@ function WhyNextTier() {
           </div>
           
           {/* Next Tier Partners */}
-          <div className="rounded-2xl border-2 border-[#fbbf24] bg-black/40 backdrop-blur p-8 relative">
-            <div className="absolute -top-3 right-8 bg-[#fbbf24] text-[#020617] px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wide">
+          <div className="rounded-2xl border-2 border-[#C19A47] bg-black/40 backdrop-blur p-8 relative">
+            <div className="absolute -top-3 right-8 bg-[#C19A47] text-black px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wide">
               Our Approach
             </div>
             <div className="flex items-center gap-2 mb-6">
-              <CheckCircle2 className="w-6 h-6 text-[#fbbf24]" />
+              <CheckCircle2 className="w-6 h-6 text-[#C19A47]" />
               <h3 className="text-2xl font-bold">Next Tier Partners</h3>
             </div>
             <ul className="space-y-3">
               {[
+                "Strategic acquisitions and premium exit facilitation",
                 "Founder-first approach with fair market valuations",
-                "Licensed via Exclusive Business Brokers",
-                "45-day target timeline from start to close",
+                "45-60 day transaction timelines",
                 "Transparent deal structure with clear pricing",
                 "Multiple exit paths tailored to your goals",
                 "Post-exit partnership and growth options"
@@ -336,8 +367,8 @@ function ExitPaths() {
   const paths = [
     {
       title: "Sell My Business",
-      subtitle: "Brokered Exit",
-      description: "Work with our licensed brokerage arm to market, negotiate, and close your sale with qualified buyers.",
+      subtitle: "Premium Exit Facilitation",
+      description: "We connect you with qualified buyers from our network and manage the entire transaction process.",
       highlight: true
     },
     {
@@ -589,25 +620,54 @@ function FinalCTA() {
 // Footer
 function Footer() {
   return (
-    <footer className="py-12 bg-[#020617] border-t border-white/5">
+    <footer className="bg-black border-t border-[#2D2D2D] py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-[#fbbf24] to-[#eab308] rounded-lg flex items-center justify-center">
-              <span className="text-[#020617] font-bold text-sm">NT</span>
+        <div className="grid md:grid-cols-4 gap-8 mb-8">
+          <div>
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-8 h-8 bg-gradient-to-br from-[#C19A47] to-[#A67D2E] rounded-lg flex items-center justify-center">
+                <span className="text-black font-bold text-sm">NT</span>
+              </div>
+              <span className="text-white font-bold">Next Tier Partners</span>
             </div>
-            <span className="text-[#f9fafb] font-extrabold text-lg">Next Tier Partners</span>
+            <p className="text-[#999999] text-sm">Strategic acquisitions and premium exits for digital businesses</p>
           </div>
           
-          <div className="text-[#64748b] text-sm text-center">
-            Licensed transactions through Exclusive Business Brokers · {new Date().getFullYear()}
+          <div>
+            <h4 className="text-white font-semibold mb-4">Company</h4>
+            <ul className="space-y-2 text-[#999999] text-sm">
+              <li><a href="#" className="hover:text-[#C19A47] transition-colors">About</a></li>
+              <li><a href="#" className="hover:text-[#C19A47] transition-colors">Process</a></li>
+              <li><a href="#" className="hover:text-[#C19A47] transition-colors">Case Studies</a></li>
+            </ul>
           </div>
           
-          <div className="flex gap-6 text-sm text-[#64748b]">
-            <a href="#" className="hover:text-[#f9fafb] transition-colors">Privacy</a>
-            <a href="#" className="hover:text-[#f9fafb] transition-colors">Terms</a>
-            <a href="#" className="hover:text-[#f9fafb] transition-colors">Contact</a>
+          <div>
+            <h4 className="text-white font-semibold mb-4">Resources</h4>
+            <ul className="space-y-2 text-[#999999] text-sm">
+              <li><a href="#" className="hover:text-[#C19A47] transition-colors">Blog</a></li>
+              <li><a href="#" className="hover:text-[#C19A47] transition-colors">Exit Guide</a></li>
+              <li><a href="#" className="hover:text-[#C19A47] transition-colors">FAQ</a></li>
+            </ul>
           </div>
+          
+          <div>
+            <h4 className="text-white font-semibold mb-4">Legal</h4>
+            <ul className="space-y-2 text-[#999999] text-sm">
+              <li><a href="#" className="hover:text-[#C19A47] transition-colors">Privacy</a></li>
+              <li><a href="#" className="hover:text-[#C19A47] transition-colors">Terms</a></li>
+              <li><a href="#" className="hover:text-[#C19A47] transition-colors">Contact</a></li>
+            </ul>
+          </div>
+        </div>
+        
+        <div className="border-t border-[#2D2D2D] pt-8">
+          <p className="text-[#999999] text-sm text-center mb-2">
+            Next Tier Partners operates independently as a digital business acquisition and exit facilitation company.
+          </p>
+          <p className="text-[#999999] text-sm text-center">
+            &copy; 2024 Next Tier Partners. All rights reserved.
+          </p>
         </div>
       </div>
     </footer>
