@@ -64,7 +64,7 @@ export const MyDealsWidget = () => {
       title="My Deals" 
       icon={BarChart3} 
       headerActions={viewToggle}
-      className="col-span-full lg:col-span-2"
+      
     >
       <div className="space-y-6 p-6">
         {/* Filters */}
