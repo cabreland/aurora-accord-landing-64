@@ -23,6 +23,7 @@ import { useUserProfile } from '@/hooks/useUserProfile';
 import { getDashboardRoute } from '@/lib/auth-utils';
 import UserMenuDropdown from '@/components/ui/UserMenuDropdown';
 import { useUnreadCount } from '@/hooks/useUnreadCount';
+import { NotificationBell } from '@/components/dashboard/NotificationBell';
 
 interface NavItem {
   id: string;
@@ -233,9 +234,10 @@ const DashboardLayout = ({ children, activeTab = 'dashboard', onTabChange }: Das
 
       {/* Main Content */}
       <div className="flex-1 overflow-auto">
-        {/* Header with User Menu */}
+        {/* Header with Notification Bell and User Menu */}
         <div className="bg-card border-b border-border p-4 lg:p-6">
-          <div className="flex justify-end">
+          <div className="flex justify-end items-center gap-3">
+            <NotificationBell />
             <UserMenuDropdown />
           </div>
         </div>
