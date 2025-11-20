@@ -24,6 +24,7 @@ import { getDashboardRoute } from '@/lib/auth-utils';
 import UserMenuDropdown from '@/components/ui/UserMenuDropdown';
 import { useUnreadCount } from '@/hooks/useUnreadCount';
 import { NotificationBell } from '@/components/dashboard/NotificationBell';
+import { usePendingAccessRequests } from '@/hooks/usePendingAccessRequests';
 
 interface NavItem {
   id: string;
@@ -48,6 +49,7 @@ const DashboardLayout = ({ children, activeTab = 'dashboard', onTabChange }: Das
   const location = useLocation();
   const { profile, getDisplayName, getRoleDisplayName, loading } = useUserProfile();
   const unreadCount = useUnreadCount();
+  const { count: pendingAccessCount } = usePendingAccessRequests();
 
   const isDemo = location.pathname === '/demo';
   const currentActiveTab = onTabChange ? activeTab : internalActiveTab;
@@ -94,10 +96,10 @@ const DashboardLayout = ({ children, activeTab = 'dashboard', onTabChange }: Das
   // Admin/Broker navigation (7 items)
   const getAdminNavigation = (): NavItem[] => [
     { id: 'dashboard', label: 'Dashboard', icon: Home, path: '/dashboard' },
-    { id: 'deals', label: 'Deals', icon: BarChart3, path: '/deals', badge: 4 },
+    { id: 'deals', label: 'Deals', icon: BarChart3, path: '/deals' },
     { id: 'documents', label: 'Documents', icon: FileText, path: '/documents' },
-    { id: 'access-requests', label: 'Access Requests', icon: Lock, path: '/dashboard/access-requests', badge: 3, badgeColor: 'bg-orange-500' },
-    { id: 'ndas', label: 'Signed NDAs', icon: FileCheck, path: '/dashboard/ndas', badge: 12 },
+    { id: 'access-requests', label: 'Access Requests', icon: Lock, path: '/dashboard/access-requests', badge: pendingAccessCount, badgeColor: 'bg-orange-500' },
+    { id: 'ndas', label: 'Signed NDAs', icon: FileCheck, path: '/dashboard/ndas' },
     { id: 'investor-relations', label: 'Investor Relations', icon: Mail, path: '/investor-invitations' },
     { 
       id: 'settings', 
@@ -115,9 +117,9 @@ const DashboardLayout = ({ children, activeTab = 'dashboard', onTabChange }: Das
   // Investor navigation (5 items)
   const getInvestorNavigation = (): NavItem[] => [
     { id: 'browse-deals', label: 'Browse Deals', icon: BarChart3, path: '/investor-portal' },
-    { id: 'watchlist', label: 'My Watchlist', icon: Heart, path: '/investor-portal/watchlist', badge: 2 },
-    { id: 'my-requests', label: 'My Requests', icon: Lock, path: '/investor-portal/requests', badge: 1, badgeColor: 'bg-orange-500' },
-    { id: 'my-ndas', label: 'My NDAs', icon: FileCheck, path: '/investor-portal/ndas', badge: 3 },
+    { id: 'watchlist', label: 'My Watchlist', icon: Heart, path: '/investor-portal/watchlist' },
+    { id: 'my-requests', label: 'My Requests', icon: Lock, path: '/investor-portal/requests' },
+    { id: 'my-ndas', label: 'My NDAs', icon: FileCheck, path: '/investor-portal/ndas' },
     { id: 'profile', label: 'Profile', icon: User, path: '/investor-portal/profile' },
   ];
 
