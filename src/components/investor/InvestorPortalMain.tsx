@@ -341,7 +341,7 @@ const InvestorPortalMain = () => {
         </Card>
 
         {/* Deal Cards Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6 auto-rows-fr">
           {loading ? (
             // Loading skeleton
             Array.from({ length: 6 }).map((_, i) => (
