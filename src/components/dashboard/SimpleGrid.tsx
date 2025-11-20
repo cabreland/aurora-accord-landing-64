@@ -23,7 +23,7 @@ export const SimpleGrid: React.FC<SimpleGridProps> = ({
     .sort((a, b) => a.order - b.order);
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 auto-rows-[minmax(300px,auto)]">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 auto-rows-[minmax(300px,auto)]">
       {sortedWidgets.map((widget) => (
         <div
           key={widget.id}

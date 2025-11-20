@@ -74,82 +74,59 @@ export const QuickActionsWidget = () => {
   return (
     <WidgetContainer title="Quick Actions" icon={Zap}>
       <div className="space-y-4">
-        {/* Primary Actions */}
-        <div className="space-y-2">
+        {/* Primary Actions - Grid Layout */}
+        <div className="grid grid-cols-2 gap-3">
           {primaryActions.map((action) => (
-            <Link key={action.label} to={action.path}>
-              <Button 
-                className={`w-full justify-start h-auto p-3 transition-all duration-200 ${
+            <Link key={action.label} to={action.path} className="block">
+              <div className={`h-full p-4 rounded-lg border transition-all duration-200 group cursor-pointer ${
+                action.primary 
+                  ? 'bg-gradient-to-br from-[#D4AF37] to-[#F4E4BC] hover:shadow-lg hover:-translate-y-1' 
+                  : 'bg-[#1A1F2E] border-[#D4AF37]/30 hover:border-[#D4AF37]/50 hover:bg-[#2A2F3A]'
+              }`}>
+                <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-3 ${
                   action.primary 
-                    ? 'bg-[#D4AF37] hover:bg-[#F4E4BC] text-[#0A0F0F] hover:scale-[1.02] shadow-md hover:shadow-lg' 
-                    : 'bg-[#D4AF37]/20 hover:bg-[#D4AF37]/30 text-[#F4E4BC] border border-[#D4AF37]/30 hover:border-[#D4AF37]/50'
-                }`}
-                size="sm"
-              >
-                <action.icon className="w-4 h-4 mr-2 flex-shrink-0" />
-                <div className="text-left min-w-0 flex-1">
-                  <div className="font-semibold text-sm truncate">{action.label}</div>
-                  <div className={`text-xs mt-0.5 truncate ${
-                    action.primary ? 'opacity-75' : 'opacity-60'
-                  }`}>
-                    {action.description}
-                  </div>
+                    ? 'bg-[#0A0F0F]/20' 
+                    : 'bg-[#D4AF37]/20'
+                }`}>
+                  <action.icon className={`w-6 h-6 ${
+                    action.primary ? 'text-[#0A0F0F]' : 'text-[#D4AF37]'
+                  }`} />
                 </div>
-              </Button>
+                <div className={`font-bold text-sm mb-1 ${
+                  action.primary ? 'text-[#0A0F0F]' : 'text-[#FAFAFA]'
+                }`}>
+                  {action.label}
+                </div>
+                <div className={`text-xs ${
+                  action.primary ? 'text-[#0A0F0F]/70' : 'text-[#F4E4BC]/60'
+                }`}>
+                  {action.description}
+                </div>
+              </div>
             </Link>
           ))}
         </div>
 
-        {/* Divider */}
+        {/* Secondary Actions - Grid Layout */}
         {secondaryActions.length > 0 && (
-          <div className="border-t border-[#D4AF37]/20 pt-3">
-            <h4 className="text-sm font-semibold text-[#F4E4BC] mb-3 flex items-center gap-2">
-              <span className="w-1 h-1 bg-[#D4AF37] rounded-full"></span>
+          <div className="border-t border-[#D4AF37]/20 pt-4">
+            <h4 className="text-xs font-semibold text-[#F4E4BC]/70 mb-3 uppercase tracking-wider">
               More Actions
             </h4>
-            <div className="space-y-1">
+            <div className="grid grid-cols-2 gap-2">
               {secondaryActions.map((action) => (
                 <Link key={action.label} to={action.path}>
-                  <Button 
-                    variant="ghost" 
-                    className="w-full justify-between bg-[#1A1F2E]/50 hover:bg-[#D4AF37]/10 border border-transparent hover:border-[#D4AF37]/20 h-9 px-3 transition-all duration-200 group"
-                    size="sm"
-                  >
-                    <div className="flex items-center gap-2 min-w-0 flex-1">
-                      <action.icon className="w-3.5 h-3.5 flex-shrink-0 text-[#D4AF37]/70 group-hover:text-[#D4AF37]" />
-                      <span className="text-xs font-medium text-[#F4E4BC] truncate group-hover:text-[#FAFAFA]">{action.label}</span>
+                  <div className="bg-[#1A1F2E] hover:bg-[#2A2F3A] border border-[#D4AF37]/20 hover:border-[#D4AF37]/40 rounded-lg p-3 transition-all duration-200 group cursor-pointer">
+                    <action.icon className="w-5 h-5 text-[#D4AF37]/70 group-hover:text-[#D4AF37] mb-2" />
+                    <div className="text-xs font-medium text-[#F4E4BC] group-hover:text-[#FAFAFA]">
+                      {action.label}
                     </div>
-                    <span className="text-xs text-[#F4E4BC]/60 hidden sm:inline truncate ml-2 group-hover:text-[#F4E4BC]/80">
-                      {action.description}
-                    </span>
-                  </Button>
+                  </div>
                 </Link>
               ))}
             </div>
           </div>
         )}
-
-        {/* Help Section */}
-        <div className="bg-gradient-to-r from-[#1A1F2E] to-[#2A2F3A] rounded-lg p-3 border border-[#D4AF37]/20">
-          <div className="flex items-start gap-3">
-            <div className="w-8 h-8 rounded-full bg-[#D4AF37]/20 flex items-center justify-center flex-shrink-0">
-              <FileText className="w-4 h-4 text-[#D4AF37]" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-semibold text-[#F4E4BC] mb-1">Need Help?</p>
-              <p className="text-xs text-[#F4E4BC]/70 mb-3">
-                Access comprehensive guides, API documentation, and expert support resources
-              </p>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="h-7 text-xs bg-transparent border-[#D4AF37]/30 text-[#D4AF37] hover:bg-[#D4AF37]/10 hover:border-[#D4AF37]/50 transition-all duration-200"
-              >
-                View Documentation
-              </Button>
-            </div>
-          </div>
-        </div>
       </div>
     </WidgetContainer>
   );

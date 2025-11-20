@@ -66,7 +66,7 @@ export const MyDealsWidget = () => {
       headerActions={viewToggle}
       className="col-span-full lg:col-span-2"
     >
-      <div className="space-y-4">
+      <div className="space-y-6 p-6">
         {/* Filters */}
         <div className="flex flex-wrap gap-3">
           <div className="relative flex-1 min-w-[200px]">
@@ -111,11 +111,10 @@ export const MyDealsWidget = () => {
         </div>
 
         {/* Results Summary */}
-        <div className="flex justify-between items-center text-sm text-[#F4E4BC]">
-          <span>Showing {filteredCount} of {totalDeals} deals</span>
-          <Link to="/deals">
-            <Button size="sm" className="bg-[#D4AF37] text-[#0A0F0F] hover:bg-[#F4E4BC]">
-              <Plus className="w-4 h-4 mr-1" />
+        <div className="flex justify-between items-center">
+          <Link to="/deals" className="flex-1">
+            <Button size="lg" className="w-full bg-gradient-to-r from-[#D4AF37] to-[#F4E4BC] text-[#0A0F0F] hover:shadow-lg font-bold">
+              <Plus className="w-5 h-5 mr-2" />
               New Deal
             </Button>
           </Link>
@@ -123,13 +122,13 @@ export const MyDealsWidget = () => {
 
         {/* Deals Display */}
         {view === 'grid' ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {deals.map((deal) => (
               <DealCard key={deal.id} deal={deal} />
             ))}
           </div>
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-3">
             {deals.map((deal) => (
               <DealListItem key={deal.id} deal={deal} />
             ))}
