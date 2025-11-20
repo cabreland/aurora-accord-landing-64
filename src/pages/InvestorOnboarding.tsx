@@ -60,6 +60,7 @@ const InvestorOnboarding = () => {
         .from('profiles')
         .update({ 
           onboarding_completed: true,
+          onboarding_skipped: false
         })
         .eq('user_id', user.id);
 
@@ -101,17 +102,18 @@ const InvestorOnboarding = () => {
       const { error } = await supabase
         .from('profiles')
         .update({ 
-          onboarding_completed: true,
+          onboarding_completed: false, // Not completed
+          onboarding_skipped: true // But skipped
         })
         .eq('user_id', user.id);
 
       if (error) throw error;
 
-      console.log('[InvestorOnboarding] Profile updated, redirecting to portal');
+      console.log('[InvestorOnboarding] Profile marked as skipped, redirecting to portal');
 
       toast({
-        title: "Redirecting to deals...",
-        description: "You can complete your profile later from settings.",
+        title: "Skipped for now",
+        description: "You can complete your profile later for better recommendations.",
       });
 
       navigate('/investor-portal');

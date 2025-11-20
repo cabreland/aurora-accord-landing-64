@@ -25,6 +25,7 @@ const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Auth = lazy(() => import("./pages/Auth"));
 const AuthAccept = lazy(() => import("./pages/AuthAccept"));
 const NotFound = lazy(() => import("./pages/NotFound"));
+const Forbidden = lazy(() => import("./pages/Forbidden"));
 const UserManagement = lazy(() => import("./pages/UserManagement"));
 const Onboarding = lazy(() => import("./pages/Onboarding"));
 const InvestorOnboarding = lazy(() => import("./pages/InvestorOnboarding"));
@@ -120,6 +121,7 @@ const AppContent = () => {
               <Route path="/dashboard/ndas" element={<ProtectedNDAManagement />} />
               <Route path="/dashboard/access-requests" element={<ProtectedAccessRequests />} />
               <Route path="/dashboard/nda-settings" element={<ProtectedNDASettings />} />
+              <Route path="/403" element={<Forbidden />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>
