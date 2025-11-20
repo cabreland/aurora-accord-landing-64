@@ -10,6 +10,7 @@ import React, { Suspense, lazy } from "react";
 import { FloatingChatWidget } from "@/components/chat/FloatingChatWidget";
 import { ChatWidgetProvider } from "@/contexts/ChatWidgetContext";
 import { DevTools } from "@/components/dev/DevTools";
+import { useOnboardingCheck } from "@/hooks/useOnboardingCheck";
 
 import Index from "./pages/Index";
 import Demo from "./pages/Demo";
@@ -74,15 +75,13 @@ const queryClient = new QueryClient({
   },
 });
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <ChatWidgetProvider>
-            <FloatingChatWidget />
+const AppContent = () => {
+  // Check onboarding status on every page load
+  useOnboardingCheck();
+  
+  return (
+    <>
+      <FloatingChatWidget />
             <Suspense
             fallback={
               <div className="min-h-screen bg-[#1C2526] flex items-center justify-center">
@@ -125,6 +124,19 @@ const App = () => (
             </Routes>
           </Suspense>
           <DevTools />
+    </>
+  );
+};
+
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <AuthProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <ChatWidgetProvider>
+            <AppContent />
           </ChatWidgetProvider>
         </BrowserRouter>
       </TooltipProvider>
