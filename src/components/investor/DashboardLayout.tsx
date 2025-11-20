@@ -235,15 +235,13 @@ const DashboardLayout = ({ children, activeTab = 'dashboard', onTabChange }: Das
       {/* Main Content */}
       <div className="flex-1 overflow-auto">
         {/* Header with Notification Bell and User Menu */}
-        <div className="bg-card border-b border-border p-4 lg:p-6">
+        <div className="bg-gradient-to-b from-[#0A0F0F] to-[#1A1F2E] border-b border-[#D4AF37]/30 p-4 lg:p-6">
           <div className="flex justify-end items-center gap-3">
             <NotificationBell />
             <UserMenuDropdown />
           </div>
         </div>
-        <div className="p-6 lg:p-8">
-          {children}
-        </div>
+        {children}
       </div>
     </div>
   );

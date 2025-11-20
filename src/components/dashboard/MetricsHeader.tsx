@@ -26,7 +26,7 @@ const MetricCard = ({ title, value, change, icon: Icon, trend, onClick, showBadg
 
   return (
     <Card 
-      className="bg-gradient-to-b from-[#2A2F3A] to-[#1A1F2E] border-[#D4AF37]/30 hover:border-[#D4AF37]/50 hover:shadow-lg hover:-translate-y-1 transition-all duration-200 min-h-[120px] cursor-pointer"
+      className="bg-background border border-border hover:shadow-md transition-all duration-200 min-h-[120px] cursor-pointer rounded-lg"
       onClick={onClick}
     >
       <CardContent className="p-6">
@@ -44,8 +44,8 @@ const MetricCard = ({ title, value, change, icon: Icon, trend, onClick, showBadg
           )}
         </div>
         <div>
-          <div className="text-3xl font-bold text-[#FAFAFA] mb-2">{value}</div>
-          <p className="text-sm text-[#F4E4BC]/70 font-medium">{title}</p>
+          <div className="text-3xl font-bold text-foreground mb-2">{value}</div>
+          <p className="text-sm text-muted-foreground font-medium">{title}</p>
         </div>
       </CardContent>
     </Card>
@@ -184,9 +184,9 @@ export const MetricsHeader: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-10">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {[...Array(4)].map((_, i) => (
-          <Card key={i} className="bg-gradient-to-b from-[#2A2F3A] to-[#1A1F2E] border-[#D4AF37]/30 min-h-[120px]">
+          <Card key={i} className="bg-background border border-border min-h-[120px] rounded-lg">
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <Skeleton className="w-7 h-7" />
@@ -202,7 +202,7 @@ export const MetricsHeader: React.FC = () => {
   }
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-10">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
       <MetricCard
         title="Pipeline Value"
         value={formatValue(metrics.pipelineValue)}
