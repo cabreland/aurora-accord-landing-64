@@ -199,23 +199,34 @@ export const useAuthHandlers = () => {
         variant: "destructive",
       });
     } else if (data.user) {
-      console.log('[Signup] New investor created:', data.user.id);
+      console.log('[Signup] User created:', data.user.id, 'Session:', data.session ? 'Active' : 'Pending confirmation');
       logSecurityEvent('signup_success', {
         email: cleanEmail,
         userId: data.user.id,
         role: 'viewer'
       });
       
-      toast({
-        title: "Welcome! Complete your profile to access deals.",
-        description: "You'll be redirected to complete your profile.",
-      });
-      
-      // Navigate to onboarding after short delay
-      setTimeout(() => {
-        console.log('[Signup] Redirecting to onboarding...');
-        navigate('/investor/onboarding');
-      }, 1500);
+      // Check if we have an active session (email confirmation disabled)
+      if (data.session) {
+        console.log('[Signup] Active session - redirecting to onboarding');
+        toast({
+          title: "Welcome! Complete your profile to access deals.",
+          description: "Redirecting to onboarding...",
+        });
+        
+        // Navigate to onboarding after short delay
+        setTimeout(() => {
+          navigate('/investor/onboarding');
+        }, 1500);
+      } else {
+        // No session - email confirmation required
+        console.log('[Signup] Email confirmation required');
+        toast({
+          title: "Account created successfully!",
+          description: "Please check your email to confirm your account before signing in.",
+          duration: 8000,
+        });
+      }
     }
 
     setLoading(false);
