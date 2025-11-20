@@ -183,46 +183,46 @@ export const InvestorDealCard: React.FC<InvestorDealCardProps> = ({
         </div>
       </div>
 
-      {/* Action Buttons */}
-      <div className="flex items-center gap-2">
+      {/* Action Buttons - 2x2 Grid Layout */}
+      <div className="grid grid-cols-2 gap-2 w-full">
         <Button
           variant="ghost"
           size="sm"
           onClick={handleAsk}
-          className="flex-1 text-[hsl(var(--text-primary))] hover:text-[hsl(var(--primary))] hover:bg-[hsl(var(--primary))]/10"
+          className="text-[hsl(var(--text-primary))] hover:text-[hsl(var(--primary))] hover:bg-[hsl(var(--primary))]/10 text-xs px-2 py-2 h-auto min-h-[36px] justify-start"
         >
-          <MessageSquare className="w-4 h-4 mr-1" />
-          {buttonLabels.ask}
+          <MessageSquare className="w-4 h-4 mr-1 flex-shrink-0" />
+          <span className="truncate">{buttonLabels.ask}</span>
         </Button>
 
         <Button
           variant="ghost"
           size="sm"
           onClick={handleInfo}
-          className="flex-1 text-[hsl(var(--text-primary))] hover:text-[hsl(var(--primary))] hover:bg-[hsl(var(--primary))]/10"
+          className="text-[hsl(var(--text-primary))] hover:text-[hsl(var(--primary))] hover:bg-[hsl(var(--primary))]/10 text-xs px-2 py-2 h-auto min-h-[36px] justify-start"
         >
-          <Info className="w-4 h-4 mr-1" />
-          {buttonLabels.info}
+          <Info className="w-4 h-4 mr-1 flex-shrink-0" />
+          <span className="truncate">{buttonLabels.info}</span>
         </Button>
 
         <Button
           variant="ghost"
           size="sm"
           onClick={handleInterest}
-          className="flex-1 text-[hsl(var(--text-primary))] hover:text-[#22C55E] hover:bg-[#22C55E]/10"
+          className="text-[hsl(var(--text-primary))] hover:text-[#22C55E] hover:bg-[#22C55E]/10 text-xs px-2 py-2 h-auto min-h-[36px] justify-start"
         >
-          <Heart className="w-4 h-4 mr-1" />
-          {buttonLabels.interest}
+          <Heart className="w-4 h-4 mr-1 flex-shrink-0" />
+          <span className="truncate">{buttonLabels.interest}</span>
         </Button>
 
         <Button
           variant="ghost"
           size="sm"
           onClick={handleCall}
-          className="flex-1 text-[hsl(var(--text-primary))] hover:text-[#F28C38] hover:bg-[#F28C38]/10"
+          className="text-[hsl(var(--text-primary))] hover:text-[#F28C38] hover:bg-[#F28C38]/10 text-xs px-2 py-2 h-auto min-h-[36px] justify-start"
         >
-          <Calendar className="w-4 h-4 mr-1" />
-          {buttonLabels.call}
+          <Calendar className="w-4 h-4 mr-1 flex-shrink-0" />
+          <span className="truncate">{buttonLabels.call}</span>
         </Button>
       </div>
       </div>
