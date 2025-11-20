@@ -35,6 +35,17 @@ export const withAuth = (requiredRole?: RequiredRole, options: WithAuthOptions =
 
       const userRole = profile?.role;
       const pathname = window.location.pathname;
+      
+      // Wait for profile to load properly before making access decisions
+      if (!userRole) {
+        console.log('[withAuth] Waiting for user role to load...');
+        return (
+          <div className="min-h-screen bg-[#1C2526] flex items-center justify-center">
+            <div className="text-[#FAFAFA]">Loading...</div>
+          </div>
+        );
+      }
+      
       console.log('[RouteGuard] Checking access for role:', userRole, 'route:', pathname, 'required:', requiredRole);
 
       // SUPER ADMIN BYPASS: Super admin and admin users have full access to EVERYTHING

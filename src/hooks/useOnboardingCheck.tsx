@@ -32,6 +32,12 @@ export const useOnboardingCheck = () => {
 
         console.log('[OnboardingCheck] Profile data:', data);
 
+        // IMPORTANT: Skip check for admins/super_admins (they can access any page for testing)
+        if (data?.role === 'super_admin' || data?.role === 'admin') {
+          console.log('[OnboardingCheck] Admin user - skipping onboarding check');
+          return;
+        }
+
         // Only apply to investors (viewer role)
         if (data?.role === 'viewer' && !data?.onboarding_completed) {
           const currentPath = location.pathname;
