@@ -22,9 +22,22 @@ export interface AccessibleDeal extends DealData {
 
 /**
  * Get investor's permissions based on their email and accepted invitations
+ * Returns null for non-investor users (admins, staff)
  */
 export const getInvestorPermissions = async (email: string): Promise<InvestorPermissions | null> => {
   try {
+    // First check if user is admin/staff - they don't need investor permissions
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('email', email)
+      .single();
+
+    if (profile?.role && ['super_admin', 'admin', 'editor'].includes(profile.role)) {
+      console.log('[getInvestorPermissions] Admin/staff user, skipping investor permissions check');
+      return null;
+    }
+
     const { data, error } = await supabase
       .from('investor_invitations')
       .select('access_type, deal_ids, portfolio_access, master_nda_signed, status')
@@ -33,7 +46,7 @@ export const getInvestorPermissions = async (email: string): Promise<InvestorPer
       .single();
 
     if (error || !data) {
-      console.warn('No valid investor permissions found for:', email);
+      console.warn('[getInvestorPermissions] No valid investor permissions found for:', email);
       return null;
     }
 
@@ -45,20 +58,51 @@ export const getInvestorPermissions = async (email: string): Promise<InvestorPer
       invitation_status: data.status as InvitationStatus
     };
   } catch (error) {
-    console.error('Error fetching investor permissions:', error);
+    console.error('[getInvestorPermissions] Error fetching investor permissions:', error);
     return null;
   }
 };
 
 /**
  * Get deals accessible to investor based on their permissions
+ * Admins/staff get all deals, investors get filtered based on permissions
  */
 export const getAccessibleDeals = async (email: string): Promise<AccessibleDeal[]> => {
   try {
+    // Check if user is admin/staff - they get all deals
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('email', email)
+      .single();
+
+    if (profile?.role && ['super_admin', 'admin', 'editor'].includes(profile.role)) {
+      console.log('[getAccessibleDeals] Admin/staff user, returning all deals');
+      
+      const { data: deals, error } = await supabase
+        .from('deals')
+        .select('*')
+        .eq('status', 'active');
+
+      if (error) {
+        console.error('[getAccessibleDeals] Error fetching deals:', error);
+        return [];
+      }
+
+      return (deals || []).map(deal => ({
+        ...deal,
+        access_granted: true,
+        nda_required: false,
+        nda_accepted: true,
+        priority: deal.priority || 'medium'
+      }));
+    }
+
+    // For investors, check permissions
     const permissions = await getInvestorPermissions(email);
     
     if (!permissions) {
-      console.warn('No permissions found, returning empty deals array');
+      console.warn('[getAccessibleDeals] No permissions found, returning empty deals array');
       return [];
     }
 
@@ -95,7 +139,7 @@ export const getAccessibleDeals = async (email: string): Promise<AccessibleDeal[
     const { data: deals, error } = await dealQuery;
 
     if (error) {
-      console.error('Error fetching accessible deals:', error);
+      console.error('[getAccessibleDeals] Error fetching accessible deals:', error);
       return [];
     }
 
@@ -117,7 +161,7 @@ export const getAccessibleDeals = async (email: string): Promise<AccessibleDeal[
 
     return accessibleDeals;
   } catch (error) {
-    console.error('Error in getAccessibleDeals:', error);
+    console.error('[getAccessibleDeals] Error in getAccessibleDeals:', error);
     return [];
   }
 };

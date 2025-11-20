@@ -14,23 +14,31 @@ const InvestorOnboarding = () => {
   const [formCompleted, setFormCompleted] = useState(false);
 
   useEffect(() => {
+    if (user) {
+      console.log('[InvestorOnboarding] Page loaded for user:', user.id);
+    }
+
     // Load GHL form embed script
     const script = document.createElement('script');
     script.src = 'https://link.msgsndr.com/js/form_embed.js';
     script.async = true;
+    script.onload = () => console.log('[InvestorOnboarding] GHL form script loaded');
     document.body.appendChild(script);
 
     return () => {
-      document.body.removeChild(script);
+      if (document.body.contains(script)) {
+        document.body.removeChild(script);
+      }
     };
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     // Listen for form submission via postMessage
     const handleMessage = (event: MessageEvent) => {
+      console.log('[InvestorOnboarding] Received postMessage:', event.data);
       // Check if message is from GoHighLevel form
       if (event.data?.type === 'ghl-form-submit' || event.data?.formSubmitted) {
-        console.log('[InvestorOnboarding] GHL form submitted');
+        console.log('[InvestorOnboarding] GHL form submitted via postMessage');
         handleFormCompletion();
       }
     };
@@ -46,7 +54,7 @@ const InvestorOnboarding = () => {
     setFormCompleted(true);
 
     try {
-      console.log('[InvestorOnboarding] Marking onboarding as completed:', user.id);
+      console.log('[InvestorOnboarding] Form submitted, marking complete for user:', user.id);
 
       const { error } = await supabase
         .from('profiles')
@@ -57,7 +65,7 @@ const InvestorOnboarding = () => {
 
       if (error) throw error;
 
-      console.log('[InvestorOnboarding] Profile updated successfully');
+      console.log('[InvestorOnboarding] Profile updated successfully, redirecting to portal');
 
       toast({
         title: "Profile complete! Redirecting to deals...",
@@ -172,7 +180,7 @@ const InvestorOnboarding = () => {
               src="https://api.leadconnectorhq.com/widget/form/lkG4itWbml8RpnxnupNB"
               style={{ width: '100%', height: '2430px', border: 'none' }}
               id="inline-lkG4itWbml8RpnxnupNB"
-              data-layout="{'id':'INLINE'}"
+              data-layout='{"id":"INLINE"}'
               data-trigger-type="alwaysShow"
               data-trigger-value=""
               data-activation-type="alwaysActivated"
@@ -185,6 +193,7 @@ const InvestorOnboarding = () => {
               data-form-id="lkG4itWbml8RpnxnupNB"
               title="Buyer Interest Form"
               className="rounded-lg"
+              onLoad={() => console.log('[InvestorOnboarding] GHL form iframe loaded')}
             />
           </div>
         )}
