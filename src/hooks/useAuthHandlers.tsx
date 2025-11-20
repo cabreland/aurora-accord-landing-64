@@ -135,6 +135,7 @@ export const useAuthHandlers = () => {
     // Check if user already exists
     const userExists = await checkExistingUser(cleanEmail);
     if (userExists) {
+      console.log('[Signup] Account already exists:', cleanEmail);
       toast({
         title: "Account already exists",
         description: "An account with this email already exists. Please sign in instead.",
@@ -147,8 +148,9 @@ export const useAuthHandlers = () => {
     // Validate password strength
     const passwordValidation = validatePassword(password);
     if (!passwordValidation.isValid) {
+      console.log('[Signup] Password validation failed');
       toast({
-        title: "Password too weak",
+        title: "Password must be at least 8 characters",
         description: passwordValidation.errors.join('\n'),
         variant: "destructive",
       });
@@ -159,6 +161,7 @@ export const useAuthHandlers = () => {
     // Rate limiting check
     const rateLimitKey = `signup_${cleanEmail}`;
     if (!checkRateLimit(rateLimitKey, 3, 60 * 60 * 1000)) {
+      console.log('[Signup] Rate limit exceeded:', cleanEmail);
       toast({
         title: "Too many attempts",
         description: "Please wait 1 hour before trying again.",
@@ -168,9 +171,9 @@ export const useAuthHandlers = () => {
       return;
     }
 
-    const redirectUrl = await getRedirectUrl();
+    const redirectUrl = `${window.location.origin}/investor/onboarding`;
 
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email: cleanEmail,
       password,
       options: {
@@ -178,11 +181,13 @@ export const useAuthHandlers = () => {
         data: {
           first_name: cleanFirstName,
           last_name: cleanLastName,
+          role: 'viewer' // Public signup always creates investor/viewer role
         }
       }
     });
 
     if (error) {
+      console.error('[Signup] Signup failed:', error.message);
       logSecurityEvent('signup_failed', {
         email: cleanEmail,
         error: error.message
@@ -193,15 +198,24 @@ export const useAuthHandlers = () => {
         description: getSafeErrorMessage(error),
         variant: "destructive",
       });
-    } else {
+    } else if (data.user) {
+      console.log('[Signup] New investor created:', data.user.id);
       logSecurityEvent('signup_success', {
-        email: cleanEmail
+        email: cleanEmail,
+        userId: data.user.id,
+        role: 'viewer'
       });
       
       toast({
-        title: "Account created!",
-        description: "Please check your email to verify your account.",
+        title: "Welcome! Complete your profile to access deals.",
+        description: "You'll be redirected to complete your profile.",
       });
+      
+      // Navigate to onboarding after short delay
+      setTimeout(() => {
+        console.log('[Signup] Redirecting to onboarding...');
+        navigate('/investor/onboarding');
+      }, 1500);
     }
 
     setLoading(false);

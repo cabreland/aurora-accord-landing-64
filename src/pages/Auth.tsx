@@ -27,23 +27,37 @@ const Auth = () => {
 
   const redirectToAppropriateRoute = async (userId: string) => {
     try {
-      // Get user profile with role
       const { data: profile } = await supabase
         .from('profiles')
-        .select('onboarding_completed, role')
+        .select('role, onboarding_completed')
         .eq('user_id', userId)
         .single();
-      
-      if (!profile?.onboarding_completed) {
-        navigate('/onboarding');
+
+      if (!profile) {
+        console.error('[Auth] No profile found for user');
         return;
       }
 
-      // Route based on user role
-      const dashboardRoute = profile.role ? getDashboardRoute(profile.role) : getFallbackDashboardRoute();
-      navigate(dashboardRoute);
+      console.log('[Auth] Profile loaded:', { role: profile.role, onboardingCompleted: profile.onboarding_completed });
+
+      // Investors (viewers) must complete onboarding first
+      if (profile.role === 'viewer' && !profile.onboarding_completed) {
+        console.log('[Auth] Redirecting to investor onboarding');
+        navigate('/investor/onboarding');
+        return;
+      }
+
+      // Route based on role
+      if (profile.role === 'viewer') {
+        console.log('[Auth] Redirecting to investor portal');
+        navigate('/investor-portal');
+      } else {
+        const route = getDashboardRoute(profile.role);
+        console.log('[Auth] Redirecting to:', route);
+        navigate(route);
+      }
     } catch (error) {
-      console.error('Error determining user route:', error);
+      console.error('[Auth] Error redirecting user:', error);
       navigate(getFallbackDashboardRoute());
     }
   };
