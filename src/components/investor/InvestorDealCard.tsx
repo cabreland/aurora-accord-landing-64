@@ -124,7 +124,7 @@ export const InvestorDealCard: React.FC<InvestorDealCardProps> = ({
     <>
       <div
         className={cn(
-          "relative w-[400px] bg-[hsl(var(--portal-card))] border rounded-lg p-6 transition-all duration-200 cursor-pointer",
+          "relative w-full h-full bg-[hsl(var(--portal-card))] border rounded-xl p-6 transition-all duration-200 cursor-pointer flex flex-col",
           "hover:border-[hsl(var(--primary))] hover:shadow-[0_0_20px_rgba(212,175,55,0.15)]",
           isSelected ? "border-[hsl(var(--primary))] shadow-[0_0_20px_rgba(212,175,55,0.15)]" : "border-[hsl(var(--primary))]/30"
         )}
@@ -157,7 +157,7 @@ export const InvestorDealCard: React.FC<InvestorDealCardProps> = ({
       </h3>
 
       {/* Description */}
-      <p className="text-sm text-[hsl(var(--text-primary))]/70 mb-6 leading-relaxed line-clamp-3">
+      <p className="text-sm text-[hsl(var(--text-primary))]/70 mb-6 leading-relaxed line-clamp-3 flex-grow">
         {truncateDescription(deal.description || 'No description available')}
       </p>
 

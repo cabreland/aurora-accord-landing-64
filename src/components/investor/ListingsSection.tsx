@@ -389,7 +389,7 @@ const ListingsSection = () => {
 
       {/* Loading State */}
       {isLoading ? (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6 auto-rows-fr">
           {[...Array(6)].map((_, i) => (
             <Card key={i} className="bg-gradient-to-br from-[#2A2F3A] to-[#1A1F2E] border-[#D4AF37]/20 animate-pulse rounded-2xl">
               <CardContent className="p-6">
@@ -405,7 +405,7 @@ const ListingsSection = () => {
       ) : (
         <>
           {/* Deal Cards Grid - 3 columns XL, 2 LG, 1 mobile */}
-          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6 auto-rows-fr">
             {items.map((item) => (
               <ListingCard
                 key={item.id}
