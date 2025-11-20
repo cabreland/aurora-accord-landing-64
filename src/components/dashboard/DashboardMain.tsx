@@ -134,71 +134,34 @@ const DashboardMain = () => {
 
   return (
     <DashboardLayout activeTab="dashboard">
-      <div className="space-y-8">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="bg-gradient-to-r from-[#0A0F0F] to-[#1A1F2E] border border-[#D4AF37]/30 rounded-xl p-6">
-            <div className="flex justify-between items-start">
-              <div>
-                <h1 className="text-4xl font-bold text-[#FAFAFA] mb-2">
-                  Broker Dashboard
-                </h1>
-                <p className="text-xl text-[#F4E4BC]">
-                  Comprehensive deal management and analytics for M&A professionals
-                </p>
-              </div>
-              <div className="flex items-center gap-3">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={resetLayout}
-                  className="border-[#D4AF37]/30 text-[#F4E4BC] hover:bg-[#D4AF37]/10"
-                >
-                  <RotateCcw className="w-4 h-4 mr-2" />
-                  Reset Layout
-                </Button>
-                <div className="bg-gradient-to-r from-[#D4AF37] to-[#F4E4BC] px-4 py-2 rounded-lg">
-                  <span className="text-[#0A0F0F] font-semibold text-sm">Live Dashboard</span>
-                </div>
-              </div>
-            </div>
-          </div>
+      <div className="p-8 space-y-8">
+        {/* Page Header */}
+        <div className="mb-12">
+          <h1 className="text-[32px] font-bold text-[#FAFAFA] mb-2">
+            Broker Dashboard
+          </h1>
+          <p className="text-base text-[#F4E4BC]/60">
+            Manage your M&A deals and investor relationships
+          </p>
         </div>
 
-        {/* Fixed Metrics Header */}
-        <MetricsHeader />
+        {/* Metrics Row */}
+        <div className="mb-8">
+          <MetricsHeader />
+        </div>
 
-        {/* Main Content Grid - My Deals (2/3) + Quick Actions (1/3) */}
-        {Array.isArray(widgets) && widgets.filter(w => w.visible).length > 0 ? (
-          <div className="grid grid-cols-12 gap-6">
-            {/* My Deals Widget - 8 columns (2/3 width) */}
-            <div className="col-span-12 lg:col-span-8">
-              <MyDealsWidget />
-            </div>
-            
-            {/* Quick Actions Widget - 4 columns (1/3 width) */}
-            <div className="col-span-12 lg:col-span-4">
-              <QuickActionsWidget />
-            </div>
+        {/* Main Content Grid - My Deals (66%) + Quick Actions (33%) */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* My Deals Widget - 2 columns (66% width) */}
+          <div className="lg:col-span-2">
+            <MyDealsWidget />
           </div>
-        ) : (
-          <div className="text-center py-12">
-            <Card className="bg-gradient-to-b from-[#2A2F3A] to-[#1A1F2E] border-[#D4AF37]/30 max-w-md mx-auto">
-              <CardContent className="p-8">
-                <div className="text-[#F4E4BC]/60 mb-4">
-                  No widgets are currently visible
-                </div>
-                <Button
-                  variant="outline"
-                  onClick={resetLayout}
-                  className="border-[#D4AF37]/30 text-[#F4E4BC] hover:bg-[#D4AF37]/10"
-                >
-                  Reset to Default
-                </Button>
-              </CardContent>
-            </Card>
+          
+          {/* Quick Actions Widget - 1 column (33% width) */}
+          <div className="lg:col-span-1">
+            <QuickActionsWidget />
           </div>
-        )}
+        </div>
       </div>
     </DashboardLayout>
   );

@@ -29,7 +29,7 @@ export const MyDealsWidget = () => {
         size="sm"
         variant={view === 'grid' ? 'default' : 'outline'}
         onClick={() => setView('grid')}
-        className="p-2 bg-[#D4AF37]/20 border-[#D4AF37]/50 text-[#D4AF37] hover:bg-[#D4AF37] hover:text-[#0A0F0F]"
+        className={view === 'grid' ? 'bg-[#D4AF37] hover:bg-[#D4AF37]/90' : ''}
       >
         <Grid3X3 className="w-4 h-4" />
       </Button>
@@ -37,7 +37,7 @@ export const MyDealsWidget = () => {
         size="sm"
         variant={view === 'list' ? 'default' : 'outline'}
         onClick={() => setView('list')}
-        className="p-2 bg-[#D4AF37]/20 border-[#D4AF37]/50 text-[#D4AF37] hover:bg-[#D4AF37] hover:text-[#0A0F0F]"
+        className={view === 'list' ? 'bg-[#D4AF37] hover:bg-[#D4AF37]/90' : ''}
       >
         <List className="w-4 h-4" />
       </Button>
@@ -66,20 +66,20 @@ export const MyDealsWidget = () => {
       headerActions={viewToggle}
       
     >
-      <div className="space-y-6 p-6">
+      <div className="space-y-4">
         {/* Filters */}
         <div className="flex flex-wrap gap-3">
           <div className="relative flex-1 min-w-[200px]">
-            <Search className="absolute left-3 top-3 h-4 w-4 text-[#F4E4BC]/60" />
+            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search deals..."
               value={filters.search || ''}
               onChange={(e) => updateFilters({ search: e.target.value })}
-              className="pl-10 bg-[#2A2F3A] border-[#D4AF37]/30 text-[#FAFAFA] placeholder:text-[#F4E4BC]/60"
+              className="pl-10 bg-background border-border text-foreground placeholder:text-muted-foreground"
             />
           </div>
           <Select value={filters.status || 'all'} onValueChange={(value) => updateFilters({ status: value })}>
-            <SelectTrigger className="w-[150px] bg-[#2A2F3A] border-[#D4AF37]/30 text-[#FAFAFA]">
+            <SelectTrigger className="w-[150px] bg-background border-border text-foreground">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
@@ -90,7 +90,7 @@ export const MyDealsWidget = () => {
             </SelectContent>
           </Select>
           <Select value={filters.priority || 'all'} onValueChange={(value) => updateFilters({ priority: value })}>
-            <SelectTrigger className="w-[150px] bg-[#2A2F3A] border-[#D4AF37]/30 text-[#FAFAFA]">
+            <SelectTrigger className="w-[150px] bg-background border-border text-foreground">
               <SelectValue placeholder="Priority" />
             </SelectTrigger>
             <SelectContent>
@@ -104,7 +104,7 @@ export const MyDealsWidget = () => {
             size="sm"
             variant="outline"
             onClick={clearFilters}
-            className="bg-[#2A2F3A] border-[#D4AF37]/30 text-[#F4E4BC] hover:bg-[#D4AF37]/20"
+            className="bg-background border-border text-muted-foreground hover:bg-accent"
           >
             Clear
           </Button>
@@ -122,7 +122,7 @@ export const MyDealsWidget = () => {
 
         {/* Deals Display */}
         {view === 'grid' ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {deals.map((deal) => (
               <DealCard key={deal.id} deal={deal} />
             ))}
@@ -137,8 +137,8 @@ export const MyDealsWidget = () => {
 
         {deals.length === 0 && (
           <div className="text-center py-8">
-            <Building2 className="w-12 h-12 text-[#D4AF37]/50 mx-auto mb-3" />
-            <p className="text-[#F4E4BC]/60">
+            <Building2 className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+            <p className="text-muted-foreground">
               {filters.search || filters.status !== 'all' ? 'No deals match your filters' : 'No deals yet'}
             </p>
           </div>
@@ -179,10 +179,10 @@ const DealCard = ({ deal }: { deal: any }) => {
 };
 
 const DealListItem = ({ deal }: { deal: any }) => (
-  <div className="flex items-center justify-between p-3 bg-[#1A1F2E] border border-[#D4AF37]/20 rounded-lg hover:border-[#D4AF37]/40 transition-colors">
+  <div className="flex items-center justify-between p-3 bg-card border border-border rounded-lg hover:border-[#D4AF37]/40 transition-colors">
     <div className="flex-1 min-w-0">
       <div className="flex items-center gap-3">
-        <h4 className="font-medium text-[#FAFAFA] truncate">{deal.title}</h4>
+        <h4 className="font-medium text-foreground truncate">{deal.title}</h4>
         <Badge 
           variant="outline" 
           className={`text-xs ${
@@ -194,7 +194,7 @@ const DealListItem = ({ deal }: { deal: any }) => (
           {deal.status}
         </Badge>
       </div>
-      <div className="flex items-center gap-4 text-sm text-[#F4E4BC]/60 mt-1">
+      <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
         <span>{deal.company_name}</span>
         <span>{deal.industry || 'N/A'}</span>
         <span>{deal.revenue || 'Revenue TBD'}</span>
