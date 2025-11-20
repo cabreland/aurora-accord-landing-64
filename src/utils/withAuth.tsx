@@ -8,7 +8,11 @@ import { Database } from '@/integrations/supabase/types';
 type UserRole = Database['public']['Enums']['user_role'];
 export type RequiredRole = 'admin' | 'staff' | 'investor';
 
-export const withAuth = (requiredRole?: RequiredRole) => {
+interface WithAuthOptions {
+  skipOnboardingCheck?: boolean;
+}
+
+export const withAuth = (requiredRole?: RequiredRole, options: WithAuthOptions = {}) => {
   return function AuthWrapper(Component: React.ComponentType<any>) {
     return function WrappedComponent(props: any) {
       const { user, loading: authLoading } = useAuth();
@@ -26,9 +30,21 @@ export const withAuth = (requiredRole?: RequiredRole) => {
         return <Navigate to="/auth" replace />;
       }
 
+      const userRole = profile?.role;
+
+      // Check onboarding completion for investors (unless explicitly skipped)
+      if (!options.skipOnboardingCheck && userRole === 'viewer' && !profile?.onboarding_completed) {
+        console.log('[withAuth] Investor onboarding not completed, redirecting');
+        return <Navigate to="/investor/onboarding" replace />;
+      }
+
+      // If accessing onboarding page but already completed, redirect to portal
+      if (options.skipOnboardingCheck && profile?.onboarding_completed && userRole === 'viewer') {
+        console.log('[withAuth] Onboarding already completed, redirecting to portal');
+        return <Navigate to="/investor-portal" replace />;
+      }
+
       if (requiredRole) {
-        const userRole = profile?.role;
-        
         // SUPER ADMIN BYPASS: Super admin and admin users have full access to everything
         if (userRole === 'super_admin' || userRole === 'admin') {
           return <Component {...props} />;
