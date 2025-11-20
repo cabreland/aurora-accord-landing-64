@@ -177,10 +177,15 @@ const InvestorOnboarding = () => {
 
         {/* Embedded GHL Form */}
         {!formCompleted && (
-          <div className="bg-white rounded-lg shadow-2xl overflow-hidden">
+          <div className="bg-white rounded-lg shadow-2xl overflow-hidden min-h-[2430px]">
             <iframe
               src="https://api.leadconnectorhq.com/widget/form/lkG4itWbml8RpnxnupNB"
-              style={{ width: '100%', height: '2430px', border: 'none' }}
+              style={{ 
+                width: '100%', 
+                height: '2430px', 
+                border: 'none',
+                display: 'block'
+              }}
               id="inline-lkG4itWbml8RpnxnupNB"
               data-layout='{"id":"INLINE"}'
               data-trigger-type="alwaysShow"
@@ -195,7 +200,11 @@ const InvestorOnboarding = () => {
               data-form-id="lkG4itWbml8RpnxnupNB"
               title="Buyer Interest Form"
               className="rounded-lg"
+              sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-top-navigation allow-modals"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              loading="eager"
               onLoad={() => console.log('[InvestorOnboarding] GHL form iframe loaded')}
+              onError={(e) => console.error('[InvestorOnboarding] GHL form iframe error:', e)}
             />
           </div>
         )}
