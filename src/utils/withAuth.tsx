@@ -32,6 +32,13 @@ export const withAuth = (requiredRole?: RequiredRole, options: WithAuthOptions =
 
       const userRole = profile?.role;
 
+      // SUPER ADMIN BYPASS: Super admin and admin users have full access to EVERYTHING
+      // This check must come first to prevent any redirects
+      if (userRole === 'super_admin' || userRole === 'admin') {
+        console.log('[withAuth] Super admin/admin access granted');
+        return <Component {...props} />;
+      }
+
       // Check onboarding completion for investors (unless explicitly skipped)
       if (!options.skipOnboardingCheck && userRole === 'viewer' && !profile?.onboarding_completed) {
         console.log('[withAuth] Investor onboarding not completed, redirecting');
@@ -45,10 +52,6 @@ export const withAuth = (requiredRole?: RequiredRole, options: WithAuthOptions =
       }
 
       if (requiredRole) {
-        // SUPER ADMIN BYPASS: Super admin and admin users have full access to everything
-        if (userRole === 'super_admin' || userRole === 'admin') {
-          return <Component {...props} />;
-        }
         
         let hasAccess = false;
         
