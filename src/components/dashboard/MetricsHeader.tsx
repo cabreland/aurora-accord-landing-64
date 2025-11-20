@@ -22,17 +22,17 @@ const MetricCard = ({ title, value, change, icon: Icon, trend }: MetricCardProps
   };
 
   return (
-    <Card className="bg-gradient-to-b from-[#2A2F3A] to-[#1A1F2E] border-[#D4AF37]/30 hover:border-[#D4AF37]/50 transition-colors">
-      <CardContent className="p-4">
-        <div className="flex items-center justify-between mb-3">
-          <Icon className="w-6 h-6 text-[#D4AF37]" />
-          <span className={`text-xs font-medium ${trendColors[trend]}`}>
+    <Card className="bg-gradient-to-b from-[#2A2F3A] to-[#1A1F2E] border-[#D4AF37]/30 hover:border-[#D4AF37]/50 hover:shadow-lg hover:-translate-y-1 transition-all duration-200 min-h-[120px]">
+      <CardContent className="p-6">
+        <div className="flex items-center justify-between mb-4">
+          <Icon className="w-7 h-7 text-[#D4AF37]" />
+          <span className={`text-sm font-semibold ${trendColors[trend]}`}>
             {change}
           </span>
         </div>
         <div>
-          <div className="text-2xl font-bold text-[#FAFAFA] mb-1">{value}</div>
-          <p className="text-xs text-[#F4E4BC]/60">{title}</p>
+          <div className="text-3xl font-bold text-[#FAFAFA] mb-2">{value}</div>
+          <p className="text-sm text-[#F4E4BC]/70 font-medium">{title}</p>
         </div>
       </CardContent>
     </Card>
@@ -73,7 +73,7 @@ export const MetricsHeader: React.FC = () => {
   }
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-10">
       <MetricCard
         title="Pipeline Value"
         value={formatValue(totalValue)}

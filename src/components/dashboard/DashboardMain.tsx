@@ -1,7 +1,7 @@
 import React from 'react';
 import DashboardLayout from '@/components/investor/DashboardLayout';
 import { MyDealsWidget } from './widgets/MyDealsWidget';
-import { PipelineWidget } from './widgets/PipelineWidget';
+import { InvestorEngagementWidget } from './widgets/InvestorEngagementWidget';
 import { QuickActionsWidget } from './widgets/QuickActionsWidget';
 import { ActivityFeedWidget } from './widgets/ActivityFeedWidget';
 import { NDAWidget } from './widgets/NDAWidget';
@@ -25,10 +25,10 @@ const defaultWidgets: DashboardWidget[] = [
     order: 1
   },
   { 
-    id: 'pipeline-widget', 
+    id: 'engagement-widget', 
     type: 'pipeline',
-    title: 'Pipeline Analytics',
-    description: 'Deal pipeline and conversion stats',
+    title: 'Investor Engagement',
+    description: 'NDAs, interests, and watchlist metrics',
     visible: true,
     order: 2
   },
@@ -156,7 +156,7 @@ const DashboardMain = () => {
   const getWidgetComponent = (widget: DashboardWidget) => {
     switch (widget.type) {
       case 'deals': return <MyDealsWidget />;
-      case 'pipeline': return <PipelineWidget />;
+      case 'pipeline': return <InvestorEngagementWidget />;
       case 'actions': return <QuickActionsWidget />;
       case 'activity': return <ActivityFeedWidget />;
       case 'nda': return <NDAWidget />;
@@ -166,7 +166,7 @@ const DashboardMain = () => {
 
   return (
     <DashboardLayout activeTab="dashboard">
-      <div className="space-y-6">
+      <div className="space-y-8">
         {/* Header */}
         <div className="mb-8">
           <div className="bg-gradient-to-r from-[#0A0F0F] to-[#1A1F2E] border border-[#D4AF37]/30 rounded-xl p-6">
