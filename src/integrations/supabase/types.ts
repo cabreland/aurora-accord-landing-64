@@ -69,6 +69,20 @@ export type Database = {
             foreignKeyName: "access_requests_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
+            referencedRelation: "company_with_custom"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "access_requests_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "company_with_growth"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "access_requests_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
             referencedRelation: "public_company_teasers"
             referencedColumns: ["id"]
           },
@@ -254,6 +268,20 @@ export type Database = {
             foreignKeyName: "company_custom_values_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
+            referencedRelation: "company_with_custom"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_custom_values_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "company_with_growth"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_custom_values_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
             referencedRelation: "public_company_teasers"
             referencedColumns: ["id"]
           },
@@ -288,6 +316,20 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_growth_opps_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "company_with_custom"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_growth_opps_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "company_with_growth"
             referencedColumns: ["id"]
           },
           {
@@ -361,6 +403,20 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_nda_acceptances_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "company_with_custom"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_nda_acceptances_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "company_with_growth"
             referencedColumns: ["id"]
           },
           {
@@ -480,6 +536,20 @@ export type Database = {
             foreignKeyName: "conversations_deal_id_fkey"
             columns: ["deal_id"]
             isOneToOne: false
+            referencedRelation: "company_with_custom"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "company_with_growth"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
             referencedRelation: "public_company_teasers"
             referencedColumns: ["id"]
           },
@@ -586,6 +656,20 @@ export type Database = {
             columns: ["deal_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deal_watchlist_company_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "company_with_custom"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deal_watchlist_company_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "company_with_growth"
             referencedColumns: ["id"]
           },
           {
@@ -706,6 +790,20 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deals_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "company_with_custom"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deals_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "company_with_growth"
             referencedColumns: ["id"]
           },
           {
@@ -1495,6 +1593,20 @@ export type Database = {
             foreignKeyName: "user_company_access_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
+            referencedRelation: "company_with_custom"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_company_access_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "company_with_growth"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_company_access_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
             referencedRelation: "public_company_teasers"
             referencedColumns: ["id"]
           },
@@ -1666,6 +1778,60 @@ export type Database = {
       }
     }
     Views: {
+      company_with_custom: {
+        Row: {
+          asking_price: string | null
+          created_at: string | null
+          custom_fields: Json | null
+          ebitda: string | null
+          fit_score: number | null
+          highlights: Json | null
+          id: string | null
+          industry: string | null
+          is_draft: boolean | null
+          is_published: boolean | null
+          location: string | null
+          name: string | null
+          owner_id: string | null
+          passcode: string | null
+          priority: Database["public"]["Enums"]["priority_level"] | null
+          publish_at: string | null
+          revenue: string | null
+          risks: Json | null
+          stage: Database["public"]["Enums"]["company_stage"] | null
+          summary: string | null
+          teaser_payload: Json | null
+          updated_at: string | null
+        }
+        Relationships: []
+      }
+      company_with_growth: {
+        Row: {
+          asking_price: string | null
+          created_at: string | null
+          ebitda: string | null
+          fit_score: number | null
+          growth_opportunities: Json | null
+          highlights: Json | null
+          id: string | null
+          industry: string | null
+          is_draft: boolean | null
+          is_published: boolean | null
+          location: string | null
+          name: string | null
+          owner_id: string | null
+          passcode: string | null
+          priority: Database["public"]["Enums"]["priority_level"] | null
+          publish_at: string | null
+          revenue: string | null
+          risks: Json | null
+          stage: Database["public"]["Enums"]["company_stage"] | null
+          summary: string | null
+          teaser_payload: Json | null
+          updated_at: string | null
+        }
+        Relationships: []
+      }
       public_company_teasers: {
         Row: {
           asking_price: string | null
