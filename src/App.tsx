@@ -106,6 +106,7 @@ const App = () => (
         <Route path="/settings" element={<ProtectedSettings />} />
               <Route path="/activity" element={<ProtectedActivity />} />
               <Route path="/onboarding" element={<ProtectedOnboarding />} />
+              <Route path="/investor/onboarding" element={<ProtectedOnboarding />} />
               <Route path="/investor-invitations" element={<ProtectedInvestorInvitations />} />
               <Route path="/investor-registration" element={<InvestorRegistration />} />
               <Route path="/test-registration" element={<TestRegistration />} />

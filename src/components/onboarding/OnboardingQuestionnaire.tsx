@@ -119,6 +119,8 @@ const OnboardingQuestionnaire = () => {
     setLoading(true);
     
     try {
+      console.log('[Onboarding] Saving investor profile:', user.id);
+
       // Convert data to database format
       const onboardingData = {
         user_id: user.id,
@@ -156,32 +158,26 @@ const OnboardingQuestionnaire = () => {
       // Update profile to mark onboarding as completed
       const { error: profileError } = await supabase
         .from('profiles')
-        .update({ onboarding_completed: true })
+        .update({ 
+          onboarding_completed: true,
+          first_name: data.fullName.split(' ')[0],
+          last_name: data.fullName.split(' ').slice(1).join(' '),
+        })
         .eq('user_id', user.id);
 
       if (profileError) throw profileError;
 
-      // Get updated profile with role for proper routing
-      const { data: updatedProfile, error: updatedProfileError } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('user_id', user.id)
-        .single();
-
-      if (updatedProfileError) {
-        console.error('Error fetching updated profile:', updatedProfileError);
-      }
+      console.log('[Onboarding] Profile completed, redirecting to investor portal');
 
       toast({
-        title: "Onboarding Complete!",
-        description: "Welcome to EBB Data Room. You can now access investment opportunities.",
+        title: "Welcome aboard!",
+        description: "Your profile has been set up successfully.",
       });
 
-      // Route based on user role
-      const dashboardRoute = updatedProfile?.role ? getDashboardRoute(updatedProfile.role) : getFallbackDashboardRoute();
-      navigate(dashboardRoute);
+      // Investors always go to investor portal after onboarding
+      navigate('/investor-portal');
     } catch (error) {
-      console.error('Error saving onboarding data:', error);
+      console.error('[Onboarding] Error submitting onboarding:', error);
       toast({
         title: "Error",
         description: "Failed to save your information. Please try again.",
