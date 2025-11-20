@@ -1,13 +1,8 @@
 import React from 'react';
 import DashboardLayout from '@/components/investor/DashboardLayout';
 import { MyDealsWidget } from './widgets/MyDealsWidget';
-import { InvestorEngagementWidget } from './widgets/InvestorEngagementWidget';
 import { QuickActionsWidget } from './widgets/QuickActionsWidget';
-import { ActivityFeedWidget } from './widgets/ActivityFeedWidget';
-import { NDAWidget } from './widgets/NDAWidget';
 import { MetricsHeader } from './MetricsHeader';
-import { SimpleGrid } from './SimpleGrid';
-import { WidgetCustomizer } from './WidgetCustomizer';
 import { RotateCcw } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -25,36 +20,12 @@ const defaultWidgets: DashboardWidget[] = [
     order: 1
   },
   { 
-    id: 'engagement-widget', 
-    type: 'pipeline',
-    title: 'Investor Engagement',
-    description: 'NDAs, interests, and watchlist metrics',
-    visible: true,
-    order: 2
-  },
-  { 
     id: 'actions-widget', 
     type: 'actions',
     title: 'Quick Actions',
     description: 'Common tasks and shortcuts',
     visible: true,
-    order: 3
-  },
-  { 
-    id: 'activity-widget', 
-    type: 'activity',
-    title: 'Recent Activity',
-    description: 'Latest actions and updates',
-    visible: true,
-    order: 4
-  },
-  { 
-    id: 'nda-widget', 
-    type: 'nda',
-    title: 'NDA Management',
-    description: 'Non-disclosure agreement tracking',
-    visible: true,
-    order: 5
+    order: 2
   }
 ];
 
@@ -156,10 +127,7 @@ const DashboardMain = () => {
   const getWidgetComponent = (widget: DashboardWidget) => {
     switch (widget.type) {
       case 'deals': return <MyDealsWidget />;
-      case 'pipeline': return <InvestorEngagementWidget />;
       case 'actions': return <QuickActionsWidget />;
-      case 'activity': return <ActivityFeedWidget />;
-      case 'nda': return <NDAWidget />;
       default: return <div>Unknown widget</div>;
     }
   };
@@ -180,11 +148,6 @@ const DashboardMain = () => {
                 </p>
               </div>
               <div className="flex items-center gap-3">
-                <WidgetCustomizer 
-                  widgets={widgets}
-                  onToggleVisibility={toggleWidgetVisibility}
-                  onReset={resetLayout}
-                />
                 <Button
                   variant="outline"
                   size="sm"
@@ -205,16 +168,19 @@ const DashboardMain = () => {
         {/* Fixed Metrics Header */}
         <MetricsHeader />
 
-        {/* Simple Widget Grid */}
+        {/* Main Content Grid - My Deals (2/3) + Quick Actions (1/3) */}
         {Array.isArray(widgets) && widgets.filter(w => w.visible).length > 0 ? (
-          <SimpleGrid
-            widgets={widgets}
-            onDragStart={handleDragStart}
-            onDragEnd={handleDragEnd}
-            onDrop={handleDrop}
-            renderWidget={getWidgetComponent}
-            dragState={dragState}
-          />
+          <div className="grid grid-cols-12 gap-6">
+            {/* My Deals Widget - 8 columns (2/3 width) */}
+            <div className="col-span-12 lg:col-span-8">
+              <MyDealsWidget />
+            </div>
+            
+            {/* Quick Actions Widget - 4 columns (1/3 width) */}
+            <div className="col-span-12 lg:col-span-4">
+              <QuickActionsWidget />
+            </div>
+          </div>
         ) : (
           <div className="text-center py-12">
             <Card className="bg-gradient-to-b from-[#2A2F3A] to-[#1A1F2E] border-[#D4AF37]/30 max-w-md mx-auto">
@@ -222,11 +188,13 @@ const DashboardMain = () => {
                 <div className="text-[#F4E4BC]/60 mb-4">
                   No widgets are currently visible
                 </div>
-                <WidgetCustomizer 
-                  widgets={widgets}
-                  onToggleVisibility={toggleWidgetVisibility}
-                  onReset={resetLayout}
-                />
+                <Button
+                  variant="outline"
+                  onClick={resetLayout}
+                  className="border-[#D4AF37]/30 text-[#F4E4BC] hover:bg-[#D4AF37]/10"
+                >
+                  Reset to Default
+                </Button>
               </CardContent>
             </Card>
           </div>
