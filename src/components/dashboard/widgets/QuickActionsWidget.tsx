@@ -81,7 +81,7 @@ export const QuickActionsWidget = () => {
               <div className={`h-full p-4 rounded-lg border transition-all duration-200 group cursor-pointer ${
                 action.primary 
                   ? 'bg-gradient-to-br from-[#D4AF37] to-[#F4E4BC] hover:shadow-lg hover:-translate-y-1' 
-                  : 'bg-card border-border hover:border-[#D4AF37]/50 hover:bg-accent'
+                  : 'bg-[#1A1F2E] border-[#D4AF37]/30 hover:border-[#D4AF37]/50 hover:bg-[#2A2F3A]'
               }`}>
                 <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-3 ${
                   action.primary 
@@ -93,12 +93,12 @@ export const QuickActionsWidget = () => {
                   }`} />
                 </div>
                 <div className={`font-bold text-sm mb-1 ${
-                  action.primary ? 'text-[#0A0F0F]' : 'text-foreground'
+                  action.primary ? 'text-[#0A0F0F]' : 'text-[#FAFAFA]'
                 }`}>
                   {action.label}
                 </div>
                 <div className={`text-xs ${
-                  action.primary ? 'text-[#0A0F0F]/70' : 'text-muted-foreground'
+                  action.primary ? 'text-[#0A0F0F]/70' : 'text-[#F4E4BC]/60'
                 }`}>
                   {action.description}
                 </div>
@@ -109,16 +109,16 @@ export const QuickActionsWidget = () => {
 
         {/* Secondary Actions - Grid Layout */}
         {secondaryActions.length > 0 && (
-          <div className="border-t border-border pt-4">
-            <h4 className="text-xs font-semibold text-muted-foreground mb-3 uppercase tracking-wider">
+          <div className="border-t border-[#D4AF37]/20 pt-4">
+            <h4 className="text-xs font-semibold text-[#F4E4BC]/70 mb-3 uppercase tracking-wider">
               More Actions
             </h4>
             <div className="grid grid-cols-2 gap-2">
               {secondaryActions.map((action) => (
                 <Link key={action.label} to={action.path}>
-                  <div className="bg-card hover:bg-accent border border-border hover:border-[#D4AF37]/40 rounded-lg p-3 transition-all duration-200 group cursor-pointer">
+                  <div className="bg-[#1A1F2E] hover:bg-[#2A2F3A] border border-[#D4AF37]/20 hover:border-[#D4AF37]/40 rounded-lg p-3 transition-all duration-200 group cursor-pointer">
                     <action.icon className="w-5 h-5 text-[#D4AF37]/70 group-hover:text-[#D4AF37] mb-2" />
-                    <div className="text-xs font-medium text-foreground">
+                    <div className="text-xs font-medium text-[#F4E4BC] group-hover:text-[#FAFAFA]">
                       {action.label}
                     </div>
                   </div>
