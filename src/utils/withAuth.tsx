@@ -34,7 +34,8 @@ export const withAuth = (requiredRole?: RequiredRole, options: WithAuthOptions =
       }
 
       const userRole = profile?.role;
-      console.log('[withAuth] Checking access:', { userRole, requiredRole, skipOnboardingCheck: options.skipOnboardingCheck });
+      const pathname = window.location.pathname;
+      console.log('[RouteGuard] Checking access for role:', userRole, 'route:', pathname, 'required:', requiredRole);
 
       // SUPER ADMIN BYPASS: Super admin and admin users have full access to EVERYTHING
       // This check must come first to prevent any redirects
@@ -59,7 +60,7 @@ export const withAuth = (requiredRole?: RequiredRole, options: WithAuthOptions =
 
         // CRITICAL: Investors can ONLY access investor routes
         if (requiredRole && requiredRole !== 'investor') {
-          console.log('[withAuth] Investor denied access to broker area:', requiredRole);
+          console.log('[RouteGuard] Access denied - Investor attempting to access broker area:', pathname);
           toast({
             title: "Access Denied",
             description: "You don't have permission to access this area. Redirecting to investor portal.",
