@@ -130,9 +130,9 @@ const InvestorOnboarding = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#1A1F2E] via-[#0F1419] to-[#1A1F2E]">
+    <div className="min-h-screen bg-white">
       {/* Header */}
-      <div className="border-b border-[#D4AF37]/20 bg-[#0A0F0F]/50 backdrop-blur-sm">
+      <div className="border-b border-border bg-card/50 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
@@ -140,12 +140,12 @@ const InvestorOnboarding = () => {
                 <span className="text-[#0A0F0F] font-bold text-lg">E</span>
               </div>
               <div>
-                <h1 className="text-xl font-bold text-[#D4AF37]">EBB Data Room</h1>
-                <p className="text-xs text-[#F4E4BC]/70">Investment Platform</p>
+                <h1 className="text-xl font-bold text-primary">EBB Data Room</h1>
+                <p className="text-xs text-muted-foreground">Investment Platform</p>
               </div>
             </div>
-            <div className="text-sm text-[#F4E4BC]/70">
-              Step 1 of 1: <span className="text-[#D4AF37] font-semibold">Complete Your Profile</span>
+            <div className="text-sm text-muted-foreground">
+              Step 1 of 1: <span className="text-primary font-semibold">Complete Your Profile</span>
             </div>
           </div>
         </div>
@@ -155,13 +155,13 @@ const InvestorOnboarding = () => {
       <div className="max-w-5xl mx-auto px-6 py-12">
         {/* Welcome Section */}
         <div className="text-center mb-12">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-[#D4AF37]/20 to-[#F4E4BC]/10 rounded-full mb-6">
-            <CheckCircle className="w-10 h-10 text-[#D4AF37]" />
+          <div className="inline-flex items-center justify-center w-20 h-20 bg-primary/10 rounded-full mb-6">
+            <CheckCircle className="w-10 h-10 text-primary" />
           </div>
-          <h2 className="text-4xl font-bold text-[#F4E4BC] mb-4">
+          <h2 className="text-4xl font-bold text-foreground mb-4">
             Welcome to EBB Data Room
           </h2>
-          <p className="text-lg text-[#F4E4BC]/70 max-w-2xl mx-auto">
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Help us understand your investment criteria so we can show you the best opportunities
           </p>
         </div>
@@ -177,7 +177,7 @@ const InvestorOnboarding = () => {
 
         {/* Embedded GHL Form */}
         {!formCompleted && (
-          <div className="bg-white rounded-lg shadow-2xl overflow-hidden min-h-[2430px]">
+          <div className="overflow-hidden min-h-[2430px]">
             <iframe
               src="https://api.leadconnectorhq.com/widget/form/lkG4itWbml8RpnxnupNB"
               style={{ 
@@ -216,11 +216,11 @@ const InvestorOnboarding = () => {
               variant="ghost"
               onClick={handleSkip}
               disabled={loading}
-              className="text-[#F4E4BC]/60 hover:text-[#F4E4BC] hover:bg-[#D4AF37]/10"
+              className="text-muted-foreground hover:text-foreground hover:bg-accent"
             >
               {loading ? 'Processing...' : 'Skip for now →'}
             </Button>
-            <p className="text-xs text-[#F4E4BC]/50 mt-2">
+            <p className="text-xs text-muted-foreground mt-2">
               You can complete this later from your profile settings
             </p>
           </div>
@@ -228,7 +228,7 @@ const InvestorOnboarding = () => {
       </div>
 
       {/* Footer Note */}
-      <div className="text-center py-8 text-sm text-[#F4E4BC]/50">
+      <div className="text-center py-8 text-sm text-muted-foreground">
         <p>Your information is secure and will only be used to match you with relevant deals</p>
       </div>
     </div>
