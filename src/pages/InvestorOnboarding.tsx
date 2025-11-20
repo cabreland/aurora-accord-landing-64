@@ -130,7 +130,7 @@ const InvestorOnboarding = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-background">
       {/* Header */}
       <div className="border-b border-border bg-card/50 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-6 py-4">
@@ -177,7 +177,7 @@ const InvestorOnboarding = () => {
 
         {/* Embedded GHL Form */}
         {!formCompleted && (
-          <div className="overflow-hidden min-h-[2430px]">
+          <div className="bg-card rounded-lg overflow-hidden min-h-[2430px]">
             <iframe
               src="https://api.leadconnectorhq.com/widget/form/lkG4itWbml8RpnxnupNB"
               style={{ 
