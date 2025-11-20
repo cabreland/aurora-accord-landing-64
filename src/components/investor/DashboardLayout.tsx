@@ -4,17 +4,17 @@ import {
   BarChart3, 
   FileText, 
   Settings, 
-  Bell, 
   User, 
   Home,
-  TrendingUp,
   Shield,
-  Filter,
   ArrowLeft,
   Users,
   Mail,
-  MessageSquare,
-  Lock
+  Lock,
+  Heart,
+  FileCheck,
+  ChevronDown,
+  ChevronRight
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -24,6 +24,16 @@ import { getDashboardRoute } from '@/lib/auth-utils';
 import UserMenuDropdown from '@/components/ui/UserMenuDropdown';
 import { useUnreadCount } from '@/hooks/useUnreadCount';
 
+interface NavItem {
+  id: string;
+  label: string;
+  icon: any;
+  path: string;
+  badge?: number;
+  badgeColor?: string;
+  submenu?: NavItem[];
+}
+
 interface DashboardLayoutProps {
   children: React.ReactNode;
   activeTab?: string;
@@ -32,9 +42,10 @@ interface DashboardLayoutProps {
 
 const DashboardLayout = ({ children, activeTab = 'dashboard', onTabChange }: DashboardLayoutProps) => {
   const [internalActiveTab, setInternalActiveTab] = useState(activeTab);
+  const [settingsExpanded, setSettingsExpanded] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const { profile, getDisplayName, getRoleDisplayName, loading, canManageUsers, isAdmin } = useUserProfile();
+  const { profile, getDisplayName, getRoleDisplayName, loading } = useUserProfile();
   const unreadCount = useUnreadCount();
 
   const isDemo = location.pathname === '/demo';
@@ -48,6 +59,17 @@ const DashboardLayout = ({ children, activeTab = 'dashboard', onTabChange }: Das
     }
   };
 
+  // Determine if user is admin/broker based on role
+  const isAdminOrBroker = () => {
+    if (!profile?.role) return false;
+    return ['admin', 'super_admin', 'broker', 'editor'].includes(profile.role);
+  };
+
+  const isInvestor = () => {
+    if (!profile?.role) return true; // Default to investor view (safer)
+    return ['viewer', 'investor'].includes(profile.role);
+  };
+
   // Helper function to determine if nav item is active
   const isNavItemActive = (path: string) => {
     if (path === '/dashboard') {
@@ -59,71 +81,61 @@ const DashboardLayout = ({ children, activeTab = 'dashboard', onTabChange }: Das
     if (path === '/deals') {
       return location.pathname.startsWith('/deals') || location.pathname.startsWith('/deal/');
     }
+    if (path === '/access-requests') {
+      return location.pathname.includes('access-requests');
+    }
+    if (path === '/ndas') {
+      return location.pathname.includes('nda');
+    }
     return location.pathname === path;
   };
 
-  // Role-based navigation items
-  const getNavigationItems = () => {
-    const baseItems = [
-      { id: 'dashboard', label: 'Dashboard', icon: Home, path: '/dashboard', badge: undefined as number | undefined },
-      { id: 'deals', label: 'Deals', icon: BarChart3, path: '/deals', badge: undefined as number | undefined },
-    ];
+  // Admin/Broker navigation (7 items)
+  const getAdminNavigation = (): NavItem[] => [
+    { id: 'dashboard', label: 'Dashboard', icon: Home, path: '/dashboard' },
+    { id: 'deals', label: 'Deals', icon: BarChart3, path: '/deals', badge: 4 },
+    { id: 'documents', label: 'Documents', icon: FileText, path: '/documents' },
+    { id: 'access-requests', label: 'Access Requests', icon: Lock, path: '/dashboard/access-requests', badge: 3, badgeColor: 'bg-orange-500' },
+    { id: 'ndas', label: 'Signed NDAs', icon: FileCheck, path: '/dashboard/ndas', badge: 12 },
+    { id: 'investor-relations', label: 'Investor Relations', icon: Mail, path: '/investor-invitations' },
+    { 
+      id: 'settings', 
+      label: 'Settings', 
+      icon: Settings, 
+      path: '/settings',
+      submenu: [
+        { id: 'user-management', label: 'User Management', path: '/users', icon: Users },
+        { id: 'nda-config', label: 'NDA Configuration', path: '/dashboard/nda-settings', icon: Shield },
+        { id: 'platform-settings', label: 'Platform Settings', path: '/settings', icon: Settings },
+      ]
+    },
+  ];
 
-    // Investor-specific items
-    const investorItems = [
-      { id: 'messages', label: 'Messages', icon: MessageSquare, path: '/investor-portal/messages', badge: unreadCount as number | undefined },
-    ];
+  // Investor navigation (5 items)
+  const getInvestorNavigation = (): NavItem[] => [
+    { id: 'browse-deals', label: 'Browse Deals', icon: BarChart3, path: '/investor-portal' },
+    { id: 'watchlist', label: 'My Watchlist', icon: Heart, path: '/investor-portal/watchlist', badge: 2 },
+    { id: 'my-requests', label: 'My Requests', icon: Lock, path: '/investor-portal/requests', badge: 1, badgeColor: 'bg-orange-500' },
+    { id: 'my-ndas', label: 'My NDAs', icon: FileCheck, path: '/investor-portal/ndas', badge: 3 },
+    { id: 'profile', label: 'Profile', icon: User, path: '/investor-portal/profile' },
+  ];
 
-    // Admin/Staff only items - based on USER ROLE, not current route
-    const adminItems = [
-      { id: 'chat-inbox', label: 'Chat Inbox', icon: MessageSquare, path: '/dashboard/chat-inbox', badge: unreadCount as number | undefined },
-      { id: 'conversations', label: 'Conversations', icon: MessageSquare, path: '/dashboard/conversations', badge: unreadCount as number | undefined },
-      { id: 'documents', label: 'Documents', icon: FileText, path: '/documents', badge: undefined as number | undefined },
-      { id: 'investor-invitations', label: 'Investor Relations', icon: Mail, path: '/investor-invitations', badge: undefined as number | undefined },
-      { id: 'nda-settings', label: 'NDA Settings', icon: FileText, path: '/dashboard/nda-settings', badge: undefined as number | undefined },
-      { id: 'ndas', label: 'Signed NDAs', icon: Shield, path: '/dashboard/ndas', badge: undefined as number | undefined },
-      { id: 'access-requests', label: 'Access Requests', icon: Lock, path: '/dashboard/access-requests', badge: undefined as number | undefined },
-      { id: 'users', label: 'Users', icon: Users, path: '/users', badge: undefined as number | undefined },
-      { id: 'settings', label: 'Settings', icon: Settings, path: '/settings', badge: undefined as number | undefined },
-      { id: 'activity', label: 'Activity', icon: Shield, path: '/activity', badge: undefined as number | undefined },
-    ];
-
-    // Return appropriate items based on role (not demo status)
-    if (isDemo) {
-      return baseItems; // Demo users only see basic items
-    }
-
-    // Check actual user permissions, not just admin role
-    if (canManageUsers()) {
-      return [...baseItems, ...adminItems]; // Users who can manage users see everything
-    }
-
-    return [...baseItems, ...investorItems]; // Regular investors see basic items + messages
-  };
-
-  const navigationItems = getNavigationItems();
+  const navigationItems = isAdminOrBroker() ? getAdminNavigation() : getInvestorNavigation();
 
   return (
     <div className="min-h-screen bg-[#1C2526] flex">
       {/* Sidebar */}
       <div className="w-64 bg-gradient-to-b from-[#0A0F0F] to-[#1A1F2E] border-r border-[#D4AF37]/30 hidden lg:block">
         <div className="p-6">
-          {/* Back to Dashboard Button */}
-          <Button 
-            onClick={() => navigate(profile?.role ? getDashboardRoute(profile.role) : '/dashboard')}
-            className="w-full mb-6 bg-[#2A2F3A] border border-[#D4AF37] text-[#D4AF37] hover:bg-[#D4AF37] hover:text-[#0A0F0F] transition-all duration-300"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Dashboard
-          </Button>
-
-          {/* Logo Area */}
-          <div className="mb-8">
-            <h2 className="text-2xl font-bold text-[#D4AF37] mb-2">
-              {isDemo ? 'M&A Portal (Demo)' : 'M&A Portal'}
-            </h2>
-            <p className="text-sm text-[#F4E4BC]/60">Exclusive Business Brokers</p>
-          </div>
+          {/* Logo Area - Only show for admin/broker */}
+          {isAdminOrBroker() && (
+            <div className="mb-8">
+              <h2 className="text-2xl font-bold text-[#D4AF37] mb-2">
+                {isDemo ? 'M&A Portal (Demo)' : 'M&A Portal'}
+              </h2>
+              <p className="text-sm text-[#F4E4BC]/60">Admin Dashboard</p>
+            </div>
+          )}
 
           {/* User Info */}
           <div className="bg-[#2A2F3A]/60 rounded-xl p-4 mb-6 border border-[#D4AF37]/20">
@@ -143,10 +155,57 @@ const DashboardLayout = ({ children, activeTab = 'dashboard', onTabChange }: Das
           </div>
 
           {/* Navigation */}
-          <nav className="space-y-2">
+          <nav className="space-y-1">
             {navigationItems.map((item) => {
               const Icon = item.icon;
               const isActive = isNavItemActive(item.path);
+              const hasSubmenu = 'submenu' in item && item.submenu;
+              
+              if (hasSubmenu) {
+                return (
+                  <div key={item.id}>
+                    <button
+                      onClick={() => setSettingsExpanded(!settingsExpanded)}
+                      className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-300 group ${
+                        location.pathname.includes('/settings') || location.pathname.includes('/users') || location.pathname.includes('/nda-settings')
+                          ? 'bg-gradient-to-r from-[#D4AF37]/20 to-[#F4E4BC]/10 text-[#D4AF37]' 
+                          : 'text-[#F4E4BC] hover:bg-[#D4AF37]/10 hover:text-[#D4AF37]'
+                      }`}
+                    >
+                      <Icon className="w-5 h-5" />
+                      <span className="font-medium flex-1 text-left">{item.label}</span>
+                      {settingsExpanded ? (
+                        <ChevronDown className="w-4 h-4" />
+                      ) : (
+                        <ChevronRight className="w-4 h-4" />
+                      )}
+                    </button>
+                    
+                    {settingsExpanded && item.submenu && (
+                      <div className="ml-4 mt-1 space-y-1">
+                        {item.submenu.map((subItem) => {
+                          const SubIcon = subItem.icon;
+                          const isSubActive = isNavItemActive(subItem.path);
+                          return (
+                            <Link
+                              key={subItem.id}
+                              to={subItem.path}
+                              className={`flex items-center space-x-3 px-4 py-2 rounded-lg transition-all duration-300 ${
+                                isSubActive
+                                  ? 'bg-[#D4AF37]/10 text-[#D4AF37]'
+                                  : 'text-[#F4E4BC]/80 hover:bg-[#D4AF37]/5 hover:text-[#D4AF37]'
+                              }`}
+                            >
+                              <SubIcon className="w-4 h-4" />
+                              <span className="text-sm">{subItem.label}</span>
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                );
+              }
               
               return (
                 <Link
@@ -154,17 +213,16 @@ const DashboardLayout = ({ children, activeTab = 'dashboard', onTabChange }: Das
                   to={item.path}
                   className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-300 group ${
                     isActive 
-                      ? 'bg-gradient-to-r from-[#D4AF37]/20 to-[#F4E4BC]/10 text-[#D4AF37] border border-[#D4AF37]/30' 
+                      ? 'bg-gradient-to-r from-[#D4AF37]/20 to-[#F4E4BC]/10 text-[#D4AF37]' 
                       : 'text-[#F4E4BC] hover:bg-[#D4AF37]/10 hover:text-[#D4AF37]'
                   }`}
                 >
                   <Icon className={`w-5 h-5 transition-colors ${isActive ? 'text-[#D4AF37]' : 'group-hover:text-[#D4AF37]'}`} />
                   <span className="font-medium">{item.label}</span>
-                  {item.id === 'deals' && !isDemo && (
-                    <Badge className="ml-auto bg-[#F28C38] text-[#0A0F0F] text-xs">4</Badge>
-                  )}
-                  {(item.id === 'messages' || item.id === 'conversations') && item.badge && item.badge > 0 && (
-                    <Badge className="ml-auto bg-destructive text-destructive-foreground text-xs">{item.badge}</Badge>
+                  {item.badge && item.badge > 0 && (
+                    <Badge className={`ml-auto text-[#0A0F0F] text-xs ${item.badgeColor || 'bg-[#D4AF37]'}`}>
+                      {item.badge}
+                    </Badge>
                   )}
                 </Link>
               );
