@@ -177,7 +177,7 @@ const InvestorOnboarding = () => {
 
         {/* Embedded GHL Form */}
         {!formCompleted && (
-          <div className="bg-card rounded-lg overflow-hidden min-h-[2430px]">
+          <div className="rounded-lg overflow-hidden min-h-[2430px]">
             <iframe
               src="https://api.leadconnectorhq.com/widget/form/lkG4itWbml8RpnxnupNB"
               style={{ 
