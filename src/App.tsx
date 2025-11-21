@@ -9,6 +9,7 @@ import { withAuth } from "@/utils/withAuth";
 import React, { Suspense, lazy } from "react";
 import { FloatingChatWidget } from "@/components/chat/FloatingChatWidget";
 import { ChatWidgetProvider } from "@/contexts/ChatWidgetContext";
+import { ThemeProvider } from "@/contexts/ThemeContext";
 import { DevTools } from "@/components/dev/DevTools";
 import { useOnboardingCheck } from "@/hooks/useOnboardingCheck";
 
@@ -139,15 +140,17 @@ const AppContent = () => {
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <ChatWidgetProvider>
-            <AppContent />
-          </ChatWidgetProvider>
-        </BrowserRouter>
-      </TooltipProvider>
+      <ThemeProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <ChatWidgetProvider>
+              <AppContent />
+            </ChatWidgetProvider>
+          </BrowserRouter>
+        </TooltipProvider>
+      </ThemeProvider>
     </AuthProvider>
   </QueryClientProvider>
 );
