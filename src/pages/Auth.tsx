@@ -29,7 +29,7 @@ const Auth = () => {
     try {
       const { data: profile } = await supabase
         .from('profiles')
-        .select('role, onboarding_completed')
+        .select('role, onboarding_completed, onboarding_skipped')
         .eq('user_id', userId)
         .single();
 
@@ -38,10 +38,16 @@ const Auth = () => {
         return;
       }
 
-      console.log('[Auth] Profile loaded:', { role: profile.role, onboardingCompleted: profile.onboarding_completed });
+      console.log('[Auth] Profile loaded:', { 
+        role: profile.role, 
+        onboardingCompleted: profile.onboarding_completed,
+        onboardingSkipped: profile.onboarding_skipped 
+      });
 
-      // Investors (viewers) must complete onboarding first
-      if (profile.role === 'viewer' && !profile.onboarding_completed) {
+      // Investors (viewers) must complete OR skip onboarding first
+      const hasCompletedOrSkippedOnboarding = profile.onboarding_completed || profile.onboarding_skipped;
+      
+      if (profile.role === 'viewer' && !hasCompletedOrSkippedOnboarding) {
         console.log('[Auth] Redirecting to investor onboarding');
         navigate('/investor/onboarding');
         return;
