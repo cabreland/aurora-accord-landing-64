@@ -132,19 +132,6 @@ export const useAuthHandlers = () => {
     const cleanFirstName = sanitizeInput(firstName, 50);
     const cleanLastName = sanitizeInput(lastName, 50);
 
-    // Check if user already exists
-    const userExists = await checkExistingUser(cleanEmail);
-    if (userExists) {
-      console.log('[Signup] Account already exists:', cleanEmail);
-      toast({
-        title: "Account already exists",
-        description: "An account with this email already exists. Please sign in instead.",
-        variant: "destructive",
-      });
-      setLoading(false);
-      return;
-    }
-
     // Validate password strength
     const passwordValidation = validatePassword(password);
     if (!passwordValidation.isValid) {
@@ -188,17 +175,45 @@ export const useAuthHandlers = () => {
 
     if (error) {
       console.error('[Signup] Signup failed:', error.message);
+      
+      // Check for "User already registered" error
+      if (error.message?.toLowerCase().includes('already registered') || 
+          error.message?.toLowerCase().includes('already exists')) {
+        toast({
+          title: "Account already exists",
+          description: "An account with this email is already registered. Please sign in instead.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Sign up failed",
+          description: getSafeErrorMessage(error),
+          variant: "destructive",
+        });
+      }
+      
       logSecurityEvent('signup_failed', {
         email: cleanEmail,
         error: error.message
       });
-      
-      toast({
-        title: "Sign up failed",
-        description: getSafeErrorMessage(error),
-        variant: "destructive",
-      });
     } else if (data.user) {
+      // Check if this is a repeated signup (user exists but Supabase returns success)
+      const { data: existingProfile } = await supabase
+        .from('profiles')
+        .select('email')
+        .eq('email', cleanEmail)
+        .single();
+      
+      if (existingProfile && !data.session) {
+        console.log('[Signup] Account already exists (repeated signup detected):', cleanEmail);
+        toast({
+          title: "Account already exists",
+          description: "An account with this email is already registered. Please sign in instead.",
+          variant: "destructive",
+        });
+        setLoading(false);
+        return;
+      }
       console.log('[Signup] User created:', data.user.id, 'Session:', data.session ? 'Active' : 'Pending confirmation');
       logSecurityEvent('signup_success', {
         email: cleanEmail,
