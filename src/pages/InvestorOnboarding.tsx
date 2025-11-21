@@ -113,7 +113,17 @@ const InvestorOnboarding = () => {
   };
 
   const onSubmit = async (data: FormData) => {
-    if (!user) return;
+    console.log('[InvestorOnboarding] Form submitted with data:', data);
+    
+    if (!user) {
+      console.error('[InvestorOnboarding] No user found');
+      toast({
+        title: "Error",
+        description: "You must be logged in to complete onboarding.",
+        variant: "destructive"
+      });
+      return;
+    }
     
     setLoading(true);
     try {
@@ -567,10 +577,11 @@ const InvestorOnboarding = () => {
                       Continue
                       <ChevronRight className="w-4 h-4 ml-2" />
                     </Button>
-                  ) : (
+                   ) : (
                     <Button
                       type="submit"
                       disabled={loading}
+                      onClick={() => console.log('[InvestorOnboarding] Submit button clicked, form valid:', form.formState.isValid, 'errors:', form.formState.errors)}
                       className="bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] hover:bg-[hsl(var(--primary))]/90"
                     >
                       {loading ? 'Submitting...' : 'Complete Profile'}
