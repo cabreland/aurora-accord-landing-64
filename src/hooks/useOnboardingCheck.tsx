@@ -21,7 +21,7 @@ export const useOnboardingCheck = () => {
       try {
         const { data, error } = await supabase
           .from('profiles')
-          .select('role, onboarding_completed')
+          .select('role, onboarding_completed, onboarding_skipped')
           .eq('user_id', user.id)
           .single();
 
@@ -38,8 +38,8 @@ export const useOnboardingCheck = () => {
           return;
         }
 
-        // Only apply to investors (viewer role)
-        if (data?.role === 'viewer' && !data?.onboarding_completed) {
+        // Only apply to investors (viewer role) who haven't completed OR skipped
+        if (data?.role === 'viewer' && !data?.onboarding_completed && !data?.onboarding_skipped) {
           const currentPath = location.pathname;
           
           // Don't redirect if already on onboarding page or auth pages

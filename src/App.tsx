@@ -29,6 +29,7 @@ const Forbidden = lazy(() => import("./pages/Forbidden"));
 const UserManagement = lazy(() => import("./pages/UserManagement"));
 const Onboarding = lazy(() => import("./pages/Onboarding"));
 const InvestorOnboarding = lazy(() => import("./pages/InvestorOnboarding"));
+const InvestorOnboardingV2 = lazy(() => import("./pages/InvestorOnboardingV2"));
 const DealManagement = lazy(() => import("./pages/DealManagement"));
 const DealDetail = lazy(() => import("./pages/DealDetail"));
 const Documents = lazy(() => import("./pages/Documents"));
@@ -56,6 +57,7 @@ const ProtectedSettings = withAuth('staff')(Settings);
 const ProtectedActivity = withAuth('staff')(Activity);
 const ProtectedOnboarding = withAuth('investor')(Onboarding);
 const ProtectedInvestorOnboarding = withAuth('investor', { skipOnboardingCheck: true })(InvestorOnboarding);
+const ProtectedInvestorOnboardingV2 = withAuth('investor', { skipOnboardingCheck: true })(InvestorOnboardingV2);
 const ProtectedInvestorInvitations = withAuth('admin')(InvestorInvitations);
 const ProtectedAnalytics = withAuth('investor')(Analytics);
 const ProtectedCompliance = withAuth('investor')(Compliance);
@@ -109,6 +111,7 @@ const AppContent = () => {
               <Route path="/activity" element={<ProtectedActivity />} />
               <Route path="/onboarding" element={<ProtectedOnboarding />} />
               <Route path="/investor/onboarding" element={<ProtectedInvestorOnboarding />} />
+              <Route path="/investor/onboarding-v2" element={<ProtectedInvestorOnboardingV2 />} />
               <Route path="/investor-invitations" element={<ProtectedInvestorInvitations />} />
               <Route path="/investor-registration" element={<InvestorRegistration />} />
               <Route path="/test-registration" element={<TestRegistration />} />

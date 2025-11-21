@@ -41,6 +41,7 @@ import AccessPolicyTab from './AccessPolicyTab';
 import CustomFieldsTab from './CustomFieldsTab';
 import DataRetentionTab from './DataRetentionTab';
 import ChatWidgetSettingsTab from './ChatWidgetSettingsTab';
+import InvestorSubmissionsTab from './InvestorSubmissionsTab';
 import {
   RolePermissionsTab,
   RegistrationConfigTab,
@@ -93,6 +94,7 @@ const settingsGroups: SettingsGroup[] = [
     title: 'INVESTOR PORTAL',
     defaultOpen: false,
     sections: [
+      { key: 'investor-submissions', title: 'Investor Submissions', icon: Users, component: InvestorSubmissionsTab, requiredRole: 'admin' },
       { key: 'registration', title: 'Registration Configuration', icon: FileText, component: RegistrationConfigTab },
       { key: 'email-templates', title: 'Email Templates', icon: Bell, component: EmailTemplatesTab },
       { key: 'access-policies', title: 'Access Policies', icon: Key, component: AccessPolicyTab },
