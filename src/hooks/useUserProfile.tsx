@@ -15,6 +15,7 @@ export interface UserProfile {
   created_at: string;
   updated_at: string;
   onboarding_completed: boolean | null;
+  onboarding_skipped: boolean | null;
 }
 
 export const useUserProfile = () => {

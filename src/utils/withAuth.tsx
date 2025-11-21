@@ -58,14 +58,16 @@ export const withAuth = (requiredRole?: RequiredRole, options: WithAuthOptions =
       // INVESTOR ROLE RESTRICTIONS
       if (userRole === 'viewer') {
         // Check onboarding completion (unless explicitly skipped for onboarding page)
-        if (!options.skipOnboardingCheck && !profile?.onboarding_completed) {
-          console.log('[withAuth] Investor onboarding not completed, redirecting');
+        const hasCompletedOrSkippedOnboarding = profile?.onboarding_completed || profile?.onboarding_skipped;
+        
+        if (!options.skipOnboardingCheck && !hasCompletedOrSkippedOnboarding) {
+          console.log('[withAuth] Investor onboarding not completed/skipped, redirecting');
           return <Navigate to="/investor/onboarding" replace />;
         }
 
-        // If accessing onboarding page but already completed, redirect to portal
-        if (options.skipOnboardingCheck && profile?.onboarding_completed) {
-          console.log('[withAuth] Onboarding already completed, redirecting to portal');
+        // If accessing onboarding page but already completed/skipped, redirect to portal
+        if (options.skipOnboardingCheck && hasCompletedOrSkippedOnboarding) {
+          console.log('[withAuth] Onboarding already completed/skipped, redirecting to portal');
           return <Navigate to="/investor-portal" replace />;
         }
 
