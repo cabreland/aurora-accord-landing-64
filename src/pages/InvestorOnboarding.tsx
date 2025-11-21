@@ -36,15 +36,40 @@ const InvestorOnboarding = () => {
     // Listen for form submission via postMessage
     const handleMessage = (event: MessageEvent) => {
       console.log('[InvestorOnboarding] Received postMessage:', event.data);
-      // Check if message is from GoHighLevel form
-      if (event.data?.type === 'ghl-form-submit' || event.data?.formSubmitted) {
+      
+      // GHL sends various message types - look for submission indicators
+      const data = event.data;
+      
+      // Check for form submission completion signals
+      if (
+        data?.type === 'ghl-form-submit' || 
+        data?.formSubmitted === true ||
+        data?.submitted === true ||
+        (Array.isArray(data) && data[0] === 'form-submitted') ||
+        (typeof data === 'string' && (data.includes('thank') || data.includes('success')))
+      ) {
         console.log('[InvestorOnboarding] GHL form submitted via postMessage');
         handleFormCompletion();
       }
     };
 
     window.addEventListener('message', handleMessage);
-    return () => window.removeEventListener('message', handleMessage);
+    
+    // Also listen for hash changes that might indicate form completion
+    const handleHashChange = () => {
+      const hash = window.location.hash;
+      if (hash.includes('thank') || hash.includes('success') || hash.includes('complete')) {
+        console.log('[InvestorOnboarding] Form completion detected via hash change:', hash);
+        handleFormCompletion();
+      }
+    };
+    
+    window.addEventListener('hashchange', handleHashChange);
+    
+    return () => {
+      window.removeEventListener('message', handleMessage);
+      window.removeEventListener('hashchange', handleHashChange);
+    };
   }, []);
 
   const handleFormCompletion = async () => {
@@ -69,13 +94,13 @@ const InvestorOnboarding = () => {
       console.log('[InvestorOnboarding] Profile updated successfully, redirecting to portal');
 
       toast({
-        title: "Profile complete! Redirecting to deals...",
-        description: "You can now browse investment opportunities.",
+        title: "Profile complete!",
+        description: "Taking you to your dashboard...",
       });
 
       // Redirect after 2 seconds
       setTimeout(() => {
-        console.log('[InvestorOnboarding] Redirecting to investor portal');
+        console.log('[InvestorOnboarding] Redirecting to investor dashboard');
         navigate('/investor-portal');
       }, 2000);
     } catch (error) {
@@ -168,10 +193,10 @@ const InvestorOnboarding = () => {
 
         {/* Success Message */}
         {formCompleted && (
-          <div className="mb-8 bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-500/30 rounded-lg p-6 text-center">
-            <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-3" />
-            <h3 className="text-xl font-semibold text-green-500 mb-2">Profile Complete!</h3>
-            <p className="text-[#F4E4BC]/70">Redirecting you to investment opportunities...</p>
+          <div className="mb-8 bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-500/30 rounded-lg p-6 text-center animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4 animate-in zoom-in duration-300" />
+            <h3 className="text-2xl font-semibold text-green-500 mb-2">Profile Complete!</h3>
+            <p className="text-muted-foreground text-lg">Taking you to your dashboard...</p>
           </div>
         )}
 
@@ -203,7 +228,33 @@ const InvestorOnboarding = () => {
               sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-top-navigation allow-modals"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               loading="eager"
-              onLoad={() => console.log('[InvestorOnboarding] GHL form iframe loaded')}
+              onLoad={() => {
+                console.log('[InvestorOnboarding] GHL form iframe loaded');
+                // Monitor iframe for content changes that might indicate submission
+                const iframe = document.getElementById('inline-lkG4itWbml8RpnxnupNB') as HTMLIFrameElement;
+                if (iframe) {
+                  try {
+                    // Try to detect iframe URL changes (may be blocked by CORS)
+                    const checkIframeUrl = setInterval(() => {
+                      try {
+                        const iframeUrl = iframe.contentWindow?.location.href;
+                        if (iframeUrl && (iframeUrl.includes('thank') || iframeUrl.includes('success'))) {
+                          console.log('[InvestorOnboarding] Form completion detected via iframe URL');
+                          clearInterval(checkIframeUrl);
+                          handleFormCompletion();
+                        }
+                      } catch (e) {
+                        // CORS error expected - silently continue
+                      }
+                    }, 1000);
+                    
+                    // Clear interval after 5 minutes
+                    setTimeout(() => clearInterval(checkIframeUrl), 300000);
+                  } catch (e) {
+                    console.log('[InvestorOnboarding] Cannot monitor iframe URL due to CORS');
+                  }
+                }
+              }}
               onError={(e) => console.error('[InvestorOnboarding] GHL form iframe error:', e)}
             />
           </div>
