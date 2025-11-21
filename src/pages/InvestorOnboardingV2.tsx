@@ -7,13 +7,11 @@ import { useToast } from '@/hooks/use-toast';
 import { CheckCircle2 } from 'lucide-react';
 const InvestorOnboardingV2 = () => {
   const navigate = useNavigate();
-  const {
-    toast
-  } = useToast();
-  const {
-    user
-  } = useAuth();
+  const { toast } = useToast();
+  const { user } = useAuth();
   const [formCompleted, setFormCompleted] = useState(false);
+  
+  console.log('[InvestorOnboardingV2] Component mounted, user:', user?.id);
   useEffect(() => {
     const script = document.createElement('script');
     script.src = 'https://link.msgsndr.com/js/form_embed.js';
