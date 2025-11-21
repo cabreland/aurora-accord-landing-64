@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Save, Upload, Palette, Check } from 'lucide-react';
 import { useSettings } from '@/hooks/useSettings';
 import { useToast } from '@/hooks/use-toast';
+import { useTheme } from '@/contexts/ThemeContext';
 
 interface ColorTheme {
   id: string;
@@ -155,6 +156,7 @@ const colorThemes: ColorTheme[] = [
 const BrandingTab: React.FC = () => {
   const { settings, loading, updateSetting } = useSettings();
   const { toast } = useToast();
+  const { applyTheme, updateThemeColor } = useTheme();
   const [localSettings, setLocalSettings] = useState<Record<string, any>>({});
   const [selectedTheme, setSelectedTheme] = useState<string>('default');
   const [customColors, setCustomColors] = useState<Partial<ColorTheme['colors']>>({});
@@ -189,8 +191,8 @@ const BrandingTab: React.FC = () => {
       // Save the theme ID
       await updateSetting('active_theme', themeId);
       
-      // Apply theme colors to CSS variables
-      applyThemeToDocument(theme.colors);
+      // Apply theme colors to CSS variables using ThemeContext
+      applyTheme(theme.colors);
       
       toast({
         title: 'Theme Applied',
@@ -205,13 +207,6 @@ const BrandingTab: React.FC = () => {
     }
   };
 
-  const applyThemeToDocument = (colors: ColorTheme['colors']) => {
-    const root = document.documentElement;
-    Object.entries(colors).forEach(([key, value]) => {
-      const cssVar = `--${key.replace(/([A-Z])/g, '-$1').toLowerCase()}`;
-      root.style.setProperty(cssVar, value);
-    });
-  };
 
   const handleCustomColorChange = (colorKey: keyof ColorTheme['colors'], value: string) => {
     setCustomColors(prev => ({ ...prev, [colorKey]: value }));
@@ -219,12 +214,20 @@ const BrandingTab: React.FC = () => {
 
   const handleSaveCustomColors = async () => {
     try {
+      // Save each color individually for easier retrieval
+      for (const [key, value] of Object.entries(customColors)) {
+        await updateSetting(`${key}_color`, value);
+      }
+      
+      // Also save as a combined object for backup
       await updateSetting('custom_theme_colors', customColors);
-      applyThemeToDocument({ ...colorThemes[0].colors, ...customColors } as ColorTheme['colors']);
+      
+      // Apply theme colors using ThemeContext
+      applyTheme({ ...colorThemes[0].colors, ...customColors } as ColorTheme['colors']);
       
       toast({
         title: 'Custom Colors Saved',
-        description: 'Your custom color scheme has been saved.',
+        description: 'Your custom color scheme has been applied instantly.',
       });
     } catch (error) {
       toast({
