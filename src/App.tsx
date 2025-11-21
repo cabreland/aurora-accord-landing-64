@@ -45,6 +45,7 @@ const TeamConversations = lazy(() => import("./pages/TeamConversations"));
 const NDAManagement = lazy(() => import("./pages/NDAManagement"));
 const AccessRequests = lazy(() => import("./pages/AccessRequests"));
 const NDASettings = lazy(() => import("./pages/NDASettings"));
+const InvestorProfile = lazy(() => import("./pages/InvestorProfile"));
 
 // Wrap protected components with authentication
 const ProtectedDashboard = withAuth('investor')(Dashboard);
@@ -66,6 +67,7 @@ const ProtectedTeamConversations = withAuth('staff')(TeamConversations);
 const ProtectedNDAManagement = withAuth('admin')(NDAManagement);
 const ProtectedAccessRequests = withAuth('admin')(AccessRequests);
 const ProtectedNDASettings = withAuth('admin')(NDASettings);
+const ProtectedInvestorProfile = withAuth('investor')(InvestorProfile);
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -124,6 +126,7 @@ const AppContent = () => {
               <Route path="/dashboard/ndas" element={<ProtectedNDAManagement />} />
               <Route path="/dashboard/access-requests" element={<ProtectedAccessRequests />} />
               <Route path="/dashboard/nda-settings" element={<ProtectedNDASettings />} />
+              <Route path="/investor-portal/profile" element={<ProtectedInvestorProfile />} />
               <Route path="/403" element={<Forbidden />} />
               <Route path="*" element={<NotFound />} />
             </Routes>

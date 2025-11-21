@@ -3,6 +3,8 @@ import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import OverviewTab from './OverviewTab';
 import { InvestorDeal } from '@/hooks/useInvestorDeals';
+import { InvestorProfileSettings } from './InvestorProfileSettings';
+
 
 interface PortalTabsProps {
   allDeals: InvestorDeal[];
@@ -27,7 +29,7 @@ const PortalTabs = ({
 }: PortalTabsProps) => {
   return (
     <Tabs defaultValue="overview" className="w-full">
-      <TabsList className="grid w-full grid-cols-4 bg-[#2A2F3A] border border-[#D4AF37]/20">
+      <TabsList className="grid w-full grid-cols-5 bg-[#2A2F3A] border border-[#D4AF37]/20">
         <TabsTrigger 
           value="overview" 
           className="text-[#F4E4BC] data-[state=active]:bg-[#D4AF37] data-[state=active]:text-[#0A0F0F]"
@@ -51,6 +53,12 @@ const PortalTabs = ({
           className="text-[#F4E4BC] data-[state=active]:bg-[#D4AF37] data-[state=active]:text-[#0A0F0F]"
         >
           Watchlist
+        </TabsTrigger>
+        <TabsTrigger 
+          value="profile" 
+          className="text-[#F4E4BC] data-[state=active]:bg-[#D4AF37] data-[state=active]:text-[#0A0F0F]"
+        >
+          Profile
         </TabsTrigger>
       </TabsList>
 
@@ -92,6 +100,10 @@ const PortalTabs = ({
           <div className="text-[#F4E4BC] text-xl mb-4">Your Watchlist</div>
           <p className="text-[#F4E4BC]/60">Track deals you're interested in</p>
         </div>
+      </TabsContent>
+
+      <TabsContent value="profile" className="mt-8">
+        <InvestorProfileSettings />
       </TabsContent>
     </Tabs>
   );
