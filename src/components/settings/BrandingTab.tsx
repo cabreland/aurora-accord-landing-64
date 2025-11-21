@@ -159,13 +159,16 @@ const BrandingTab: React.FC = () => {
   const { applyTheme, updateThemeColor } = useTheme();
   const [localSettings, setLocalSettings] = useState<Record<string, any>>({});
   const [selectedTheme, setSelectedTheme] = useState<string>('default');
+  const [savedTheme, setSavedTheme] = useState<string>('default');
+  const [previewTheme, setPreviewTheme] = useState<string | null>(null);
   const [customColors, setCustomColors] = useState<Partial<ColorTheme['colors']>>({});
 
   useEffect(() => {
     // Check if user has a saved theme
-    const savedTheme = settings.find(s => s.key === 'active_theme');
-    if (savedTheme?.value) {
-      setSelectedTheme(savedTheme.value);
+    const savedThemeData = settings.find(s => s.key === 'active_theme');
+    if (savedThemeData?.value) {
+      setSelectedTheme(savedThemeData.value as string);
+      setSavedTheme(savedThemeData.value as string);
     }
   }, [settings]);
 
@@ -181,27 +184,64 @@ const BrandingTab: React.FC = () => {
     setLocalSettings(prev => ({ ...prev, [key]: value }));
   };
 
-  const handleThemeSelect = async (themeId: string) => {
+  const handleThemePreview = (themeId: string) => {
     setSelectedTheme(themeId);
+    setPreviewTheme(themeId);
     const theme = colorThemes.find(t => t.id === themeId);
     
+    if (!theme) return;
+    
+    // Apply theme colors temporarily for preview
+    applyTheme(theme.colors);
+  };
+
+  const handleSaveTheme = async () => {
+    if (!selectedTheme) return;
+    
+    const theme = colorThemes.find(t => t.id === selectedTheme);
     if (!theme) return;
 
     try {
       // Save the theme ID
-      await updateSetting('active_theme', themeId);
-      
-      // Apply theme colors to CSS variables using ThemeContext
-      applyTheme(theme.colors);
+      await updateSetting('active_theme', selectedTheme);
+      setSavedTheme(selectedTheme);
+      setPreviewTheme(null);
       
       toast({
-        title: 'Theme Applied',
-        description: `${theme.name} theme has been applied successfully.`,
+        title: 'Theme Saved',
+        description: `${theme.name} theme has been saved successfully.`,
       });
     } catch (error) {
       toast({
         title: 'Error',
-        description: 'Failed to apply theme',
+        description: 'Failed to save theme',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleResetToDefault = async () => {
+    const defaultTheme = colorThemes.find(t => t.id === 'default');
+    if (!defaultTheme) return;
+
+    try {
+      // Reset to default theme
+      await updateSetting('active_theme', 'default');
+      setSelectedTheme('default');
+      setSavedTheme('default');
+      setPreviewTheme(null);
+      
+      // Apply default theme colors
+      applyTheme(defaultTheme.colors);
+      
+      toast({
+        title: 'Reset to Default',
+        description: 'Theme has been reset to default successfully.',
+      });
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to reset theme',
         variant: 'destructive',
       });
     }
@@ -260,6 +300,7 @@ const BrandingTab: React.FC = () => {
 
   const hasChanges = Object.keys(localSettings).length > 0;
   const hasCustomColors = Object.keys(customColors).length > 0;
+  const isPreviewing = previewTheme !== null && previewTheme !== savedTheme;
 
   return (
     <div className="space-y-6">
@@ -275,20 +316,55 @@ const BrandingTab: React.FC = () => {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          {isPreviewing && (
+            <div className="flex items-center justify-between p-4 bg-muted rounded-lg mb-4">
+              <div>
+                <p className="font-medium text-foreground">Preview Mode</p>
+                <p className="text-sm text-muted-foreground">
+                  Click "Save Theme" to keep these changes
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <Button 
+                  onClick={handleSaveTheme}
+                  className="flex items-center gap-2"
+                >
+                  <Save className="w-4 h-4" />
+                  Save Theme
+                </Button>
+              </div>
+            </div>
+          )}
+
+          <div className="flex justify-end mb-4">
+            <Button 
+              variant="outline" 
+              onClick={handleResetToDefault}
+              disabled={savedTheme === 'default'}
+            >
+              Reset to Default
+            </Button>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {colorThemes.map((theme) => (
               <button
                 key={theme.id}
-                onClick={() => handleThemeSelect(theme.id)}
+                onClick={() => handleThemePreview(theme.id)}
                 className={`relative p-4 rounded-lg border-2 transition-all hover:shadow-md ${
                   selectedTheme === theme.id
                     ? 'border-primary bg-primary/5'
                     : 'border-border bg-background hover:border-muted'
                 }`}
               >
-                {selectedTheme === theme.id && (
+                {selectedTheme === theme.id && savedTheme === theme.id && (
                   <div className="absolute top-2 right-2 w-6 h-6 bg-primary rounded-full flex items-center justify-center">
                     <Check className="w-4 h-4 text-primary-foreground" />
+                  </div>
+                )}
+                {selectedTheme === theme.id && savedTheme !== theme.id && (
+                  <div className="absolute top-2 right-2 w-6 h-6 bg-muted border-2 border-primary rounded-full flex items-center justify-center">
+                    <span className="text-xs text-primary">?</span>
                   </div>
                 )}
                 
