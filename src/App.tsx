@@ -29,7 +29,7 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 const Forbidden = lazy(() => import("./pages/Forbidden"));
 const UserManagement = lazy(() => import("./pages/UserManagement"));
 const Onboarding = lazy(() => import("./pages/Onboarding"));
-const InvestorOnboarding = lazy(() => import("./pages/InvestorOnboarding"));
+const InvestorOnboarding = lazy(() => import("./pages/InvestorOnboardingNew"));
 const InvestorOnboardingV2 = lazy(() => import("./pages/InvestorOnboardingV2"));
 const DealManagement = lazy(() => import("./pages/DealManagement"));
 const DealDetail = lazy(() => import("./pages/DealDetail"));

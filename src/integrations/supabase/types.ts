@@ -1096,6 +1096,90 @@ export type Database = {
           },
         ]
       }
+      investor_profiles: {
+        Row: {
+          communication_preference: string
+          company_name: string
+          created_at: string | null
+          deal_breakers: string[] | null
+          ebitda_range_preference: string
+          email: string
+          full_name: string
+          funding_type: string
+          geographic_preference: string
+          id: string
+          linkedin_url: string | null
+          max_investment: string
+          min_investment: string
+          must_haves: string[] | null
+          onboarding_completed_at: string | null
+          phone: string
+          pre_qualified: string
+          primary_goal: string
+          referral_details: string | null
+          referral_source: string | null
+          revenue_range_preference: string
+          target_industries: string[]
+          timeline_to_close: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          communication_preference: string
+          company_name: string
+          created_at?: string | null
+          deal_breakers?: string[] | null
+          ebitda_range_preference: string
+          email: string
+          full_name: string
+          funding_type: string
+          geographic_preference: string
+          id?: string
+          linkedin_url?: string | null
+          max_investment: string
+          min_investment: string
+          must_haves?: string[] | null
+          onboarding_completed_at?: string | null
+          phone: string
+          pre_qualified: string
+          primary_goal: string
+          referral_details?: string | null
+          referral_source?: string | null
+          revenue_range_preference: string
+          target_industries?: string[]
+          timeline_to_close: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          communication_preference?: string
+          company_name?: string
+          created_at?: string | null
+          deal_breakers?: string[] | null
+          ebitda_range_preference?: string
+          email?: string
+          full_name?: string
+          funding_type?: string
+          geographic_preference?: string
+          id?: string
+          linkedin_url?: string | null
+          max_investment?: string
+          min_investment?: string
+          must_haves?: string[] | null
+          onboarding_completed_at?: string | null
+          phone?: string
+          pre_qualified?: string
+          primary_goal?: string
+          referral_details?: string | null
+          referral_source?: string | null
+          revenue_range_preference?: string
+          target_industries?: string[]
+          timeline_to_close?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       nda_extension_tokens: {
         Row: {
           created_at: string
