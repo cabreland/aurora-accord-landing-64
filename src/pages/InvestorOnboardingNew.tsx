@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight, Check, Loader2 } from 'lucide-react';
+import { ArrowRight, ArrowLeft, Check, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -16,6 +16,7 @@ export interface OnboardingFormData {
   fullName: string;
   email: string;
   phone: string;
+  buyerType: string;
   companyName: string;
   linkedinUrl: string;
   
@@ -30,11 +31,13 @@ export interface OnboardingFormData {
   // Step 3: Deal Preferences
   primaryGoal: string;
   mustHaves: string[];
-  dealBreakers: string[];
+  dealBreakersText: string;
   communicationPreference: string;
   
   // Step 4: Funding Details
   fundingType: string;
+  fundingSources: string;
+  proofOfFunds: string;
   timelineToClose: string;
   preQualified: string;
   referralSource: string;
@@ -45,6 +48,7 @@ const initialFormData: OnboardingFormData = {
   fullName: '',
   email: '',
   phone: '',
+  buyerType: '',
   companyName: '',
   linkedinUrl: '',
   targetIndustries: [],
@@ -55,9 +59,11 @@ const initialFormData: OnboardingFormData = {
   geographicPreference: '',
   primaryGoal: '',
   mustHaves: [],
-  dealBreakers: [],
+  dealBreakersText: '',
   communicationPreference: '',
   fundingType: '',
+  fundingSources: '',
+  proofOfFunds: '',
   timelineToClose: '',
   preQualified: '',
   referralSource: '',
@@ -85,6 +91,12 @@ const InvestorOnboardingNew = () => {
 
   const updateFormData = (data: Partial<OnboardingFormData>) => {
     setFormData(prev => ({ ...prev, ...data }));
+  };
+
+  const handleBack = () => {
+    if (currentStep > 1) {
+      setCurrentStep(prev => prev - 1);
+    }
   };
 
   const handleContinue = async () => {
@@ -132,7 +144,7 @@ const InvestorOnboardingNew = () => {
           full_name: formData.fullName,
           email: formData.email,
           phone: formData.phone,
-          company_name: formData.companyName,
+          company_name: formData.buyerType === 'individual' ? '' : formData.companyName,
           linkedin_url: formData.linkedinUrl || null,
           target_industries: formData.targetIndustries,
           min_investment: formData.minInvestment,
@@ -142,13 +154,15 @@ const InvestorOnboardingNew = () => {
           geographic_preference: formData.geographicPreference,
           primary_goal: formData.primaryGoal,
           must_haves: formData.mustHaves,
-          deal_breakers: formData.dealBreakers,
+          deal_breakers: [formData.dealBreakersText],
           communication_preference: formData.communicationPreference,
           funding_type: formData.fundingType,
           timeline_to_close: formData.timelineToClose,
-          pre_qualified: formData.preQualified,
+          pre_qualified: formData.proofOfFunds,
           referral_source: formData.referralSource || null,
-          referral_details: formData.referralDetails || null,
+          referral_details: formData.fundingType === 'combination' 
+            ? formData.fundingSources 
+            : (formData.referralDetails || null),
         });
 
       if (profileError) throw profileError;
@@ -169,6 +183,9 @@ const InvestorOnboardingNew = () => {
       await new Promise(resolve => setTimeout(resolve, 500));
       setIsLoading(false);
       setIsComplete(true);
+
+      // Clear form data after successful completion
+      setFormData(initialFormData);
 
       // Redirect after delay
       await new Promise(resolve => setTimeout(resolve, 1500));
@@ -339,8 +356,24 @@ const InvestorOnboardingNew = () => {
             </motion.div>
           </AnimatePresence>
 
-          {/* Continue Button */}
-          <div className="flex justify-end mt-8 pt-6 border-t border-gray-100">
+          {/* Navigation Buttons */}
+          <div className="flex justify-between mt-8 pt-6 border-t border-gray-100">
+            {/* Back Button */}
+            {currentStep > 1 ? (
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={handleBack}
+                className="px-4 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back
+              </Button>
+            ) : (
+              <div />
+            )}
+
+            {/* Continue Button */}
             <Button
               onClick={handleContinue}
               disabled={!isValid}
