@@ -10,6 +10,17 @@ interface ContactInfoStepProps {
   setIsValid: (valid: boolean) => void;
 }
 
+const buyerTypes = [
+  { value: 'individual', label: 'Individual Investor' },
+  { value: 'family-office', label: 'Family Office' },
+  { value: 'pe-firm', label: 'Private Equity Firm' },
+  { value: 'vc-firm', label: 'Venture Capital Firm' },
+  { value: 'search-fund', label: 'Search Fund' },
+  { value: 'strategic', label: 'Strategic Buyer / Corporate' },
+  { value: 'investment-group', label: 'Investment Group' },
+  { value: 'other', label: 'Other' },
+];
+
 export const ContactInfoStep = ({ data, updateData, setIsValid }: ContactInfoStepProps) => {
   const [errors, setErrors] = React.useState<Record<string, string>>({});
   const [touched, setTouched] = React.useState<Record<string, boolean>>({});
@@ -29,6 +40,8 @@ export const ContactInfoStep = ({ data, updateData, setIsValid }: ContactInfoSte
     }
   };
 
+  const isCompanyRequired = data.buyerType !== '' && data.buyerType !== 'individual';
+
   useEffect(() => {
     const newErrors: Record<string, string> = {};
 
@@ -46,8 +59,12 @@ export const ContactInfoStep = ({ data, updateData, setIsValid }: ContactInfoSte
       newErrors.phone = 'Please enter a valid phone number';
     }
 
-    if (data.companyName.length < 2) {
-      newErrors.companyName = 'Company name must be at least 2 characters';
+    if (!data.buyerType) {
+      newErrors.buyerType = 'Please select your buyer type';
+    }
+
+    if (isCompanyRequired && data.companyName.length < 2) {
+      newErrors.companyName = 'Company/Fund name must be at least 2 characters';
     }
 
     if (data.linkedinUrl && !validateUrl(data.linkedinUrl)) {
@@ -55,12 +72,14 @@ export const ContactInfoStep = ({ data, updateData, setIsValid }: ContactInfoSte
     }
 
     setErrors(newErrors);
+    
     const valid = Object.keys(newErrors).length === 0 && 
       data.fullName.length >= 2 && 
       data.phone.length > 0 && 
-      data.companyName.length >= 2;
+      data.buyerType !== '' &&
+      (!isCompanyRequired || data.companyName.length >= 2);
     setIsValid(valid);
-  }, [data, setIsValid]);
+  }, [data, setIsValid, isCompanyRequired]);
 
   const handleBlur = (field: string) => {
     setTouched(prev => ({ ...prev, [field]: true }));
@@ -138,29 +157,64 @@ export const ContactInfoStep = ({ data, updateData, setIsValid }: ContactInfoSte
           )}
         </div>
 
-        {/* Company Name */}
+        {/* Buyer Type */}
         <div>
-          <Label htmlFor="companyName" className="text-sm font-medium text-gray-700 mb-2 block">
-            Company Name <span className="text-red-500">*</span>
+          <Label className="text-sm font-medium text-gray-700 mb-3 block">
+            Buyer Type <span className="text-red-500">*</span>
           </Label>
-          <div className="relative">
-            <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-            <Input
-              id="companyName"
-              type="text"
-              value={data.companyName}
-              onChange={(e) => updateData({ companyName: e.target.value })}
-              onBlur={() => handleBlur('companyName')}
-              placeholder="Acme Holdings LLC"
-              className={`h-12 pl-10 rounded-lg border-gray-300 focus:border-[#D4AF37] focus:ring-[#D4AF37] ${
-                touched.companyName && errors.companyName ? 'border-red-500' : ''
-              }`}
-            />
+          <div className="grid grid-cols-2 gap-3">
+            {buyerTypes.map((type) => (
+              <button
+                key={type.value}
+                type="button"
+                onClick={() => {
+                  updateData({ buyerType: type.value });
+                  setTouched(prev => ({ ...prev, buyerType: true }));
+                }}
+                className={`p-3 rounded-lg border transition-all text-left text-sm ${
+                  data.buyerType === type.value
+                    ? 'border-[#D4AF37] bg-[#D4AF37]/10 shadow-sm'
+                    : 'border-gray-200 hover:border-gray-300'
+                }`}
+              >
+                <span className="font-medium text-gray-700">{type.label}</span>
+              </button>
+            ))}
           </div>
-          {touched.companyName && errors.companyName && (
-            <p className="text-red-500 text-sm mt-1">{errors.companyName}</p>
+          {touched.buyerType && errors.buyerType && (
+            <p className="text-red-500 text-sm mt-2">{errors.buyerType}</p>
           )}
         </div>
+
+        {/* Company/Fund Name - Conditional */}
+        {data.buyerType && (
+          <div>
+            <Label htmlFor="companyName" className="text-sm font-medium text-gray-700 mb-2 block">
+              Company/Fund Name {isCompanyRequired && <span className="text-red-500">*</span>}
+              {!isCompanyRequired && <span className="text-gray-400">(optional)</span>}
+            </Label>
+            <div className="relative">
+              <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <Input
+                id="companyName"
+                type="text"
+                value={data.companyName}
+                onChange={(e) => updateData({ companyName: e.target.value })}
+                onBlur={() => handleBlur('companyName')}
+                placeholder="Acme Holdings LLC"
+                className={`h-12 pl-10 rounded-lg border-gray-300 focus:border-[#D4AF37] focus:ring-[#D4AF37] ${
+                  touched.companyName && errors.companyName ? 'border-red-500' : ''
+                }`}
+              />
+            </div>
+            {!isCompanyRequired && (
+              <p className="text-gray-500 text-xs mt-1">Leave blank if investing as an individual</p>
+            )}
+            {touched.companyName && errors.companyName && (
+              <p className="text-red-500 text-sm mt-1">{errors.companyName}</p>
+            )}
+          </div>
+        )}
 
         {/* LinkedIn */}
         <div>

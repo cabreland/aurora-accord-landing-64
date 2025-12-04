@@ -1,7 +1,8 @@
 import React, { useEffect } from 'react';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Target, Briefcase, DollarSign, Link2, PieChart, Mail, Phone, MessageSquare, Video } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
+import { Mail, Phone, MessageSquare, Video } from 'lucide-react';
 import type { OnboardingFormData } from '@/pages/InvestorOnboardingNew';
 
 interface DealPreferencesStepProps {
@@ -11,11 +12,11 @@ interface DealPreferencesStepProps {
 }
 
 const primaryGoals = [
-  { value: 'operate', label: 'Acquire and actively operate', icon: Target, emoji: '🎯' },
-  { value: 'hire-operator', label: 'Acquire and hire operator', icon: Briefcase, emoji: '👔' },
-  { value: 'passive-income', label: 'Generate passive income', icon: DollarSign, emoji: '💰' },
-  { value: 'add-on', label: 'Strategic add-on to existing business', icon: Link2, emoji: '🔗' },
-  { value: 'diversification', label: 'Portfolio diversification', icon: PieChart, emoji: '📊' },
+  { value: 'operate', label: 'Acquire and actively operate' },
+  { value: 'hire-operator', label: 'Acquire and hire operator' },
+  { value: 'passive-income', label: 'Generate passive income' },
+  { value: 'add-on', label: 'Strategic add-on to existing business' },
+  { value: 'diversification', label: 'Portfolio diversification' },
 ];
 
 const mustHaveOptions = [
@@ -29,14 +30,6 @@ const mustHaveOptions = [
   'Asset-light',
 ];
 
-const dealBreakerOptions = [
-  'Customer concentration >20%',
-  'Declining revenue',
-  'Legal/regulatory issues',
-  'High capital requirements',
-  'Highly seasonal business',
-];
-
 const communicationOptions = [
   { value: 'email', label: 'Email', icon: Mail },
   { value: 'phone', label: 'Phone', icon: Phone },
@@ -45,6 +38,8 @@ const communicationOptions = [
 ];
 
 export const DealPreferencesStep = ({ data, updateData, setIsValid }: DealPreferencesStepProps) => {
+  const [touched, setTouched] = React.useState<Record<string, boolean>>({});
+
   const handleMustHaveToggle = (item: string) => {
     const updated = data.mustHaves.includes(item)
       ? data.mustHaves.filter(i => i !== item)
@@ -52,17 +47,21 @@ export const DealPreferencesStep = ({ data, updateData, setIsValid }: DealPrefer
     updateData({ mustHaves: updated });
   };
 
-  const handleDealBreakerToggle = (item: string) => {
-    const updated = data.dealBreakers.includes(item)
-      ? data.dealBreakers.filter(i => i !== item)
-      : [...data.dealBreakers, item];
-    updateData({ dealBreakers: updated });
-  };
-
   useEffect(() => {
-    const isValid = data.primaryGoal !== '' && data.communicationPreference !== '';
+    const isValid = 
+      data.primaryGoal !== '' && 
+      data.communicationPreference !== '' &&
+      data.dealBreakersText.length >= 20;
     setIsValid(isValid);
   }, [data, setIsValid]);
+
+  const handleBlur = (field: string) => {
+    setTouched(prev => ({ ...prev, [field]: true }));
+  };
+
+  const dealBreakersError = touched.dealBreakersText && data.dealBreakersText.length < 20
+    ? 'Please provide at least 20 characters describing your deal breakers'
+    : '';
 
   return (
     <div>
@@ -87,7 +86,6 @@ export const DealPreferencesStep = ({ data, updateData, setIsValid }: DealPrefer
                     : 'border-gray-200 hover:border-gray-300'
                 }`}
               >
-                <span className="text-2xl">{goal.emoji}</span>
                 <span className="text-sm font-medium text-gray-700">{goal.label}</span>
               </button>
             ))}
@@ -123,29 +121,33 @@ export const DealPreferencesStep = ({ data, updateData, setIsValid }: DealPrefer
           </div>
         </div>
 
-        {/* Deal Breakers */}
+        {/* Deal Breakers - Textarea */}
         <div>
-          <Label className="text-sm font-medium text-gray-700 mb-3 block">
-            What would make you walk away? <span className="text-gray-400">(optional)</span>
+          <Label htmlFor="dealBreakersText" className="text-sm font-medium text-gray-700 mb-3 block">
+            What would make you walk away from a deal? <span className="text-red-500">*</span>
           </Label>
-          <div className="grid grid-cols-1 gap-3">
-            {dealBreakerOptions.map((item) => (
-              <label
-                key={item}
-                className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
-                  data.dealBreakers.includes(item)
-                    ? 'border-red-400 bg-red-50'
-                    : 'border-gray-200 hover:border-gray-300'
-                }`}
-              >
-                <Checkbox
-                  checked={data.dealBreakers.includes(item)}
-                  onCheckedChange={() => handleDealBreakerToggle(item)}
-                  className="data-[state=checked]:bg-red-500 data-[state=checked]:border-red-500"
-                />
-                <span className="text-sm text-gray-700">{item}</span>
-              </label>
-            ))}
+          <Textarea
+            id="dealBreakersText"
+            value={data.dealBreakersText}
+            onChange={(e) => {
+              const value = e.target.value.slice(0, 500);
+              updateData({ dealBreakersText: value });
+            }}
+            onBlur={() => handleBlur('dealBreakersText')}
+            placeholder="Describe specific red flags or concerns that would cause you to reject a deal. Example: Customer concentration over 30%, declining revenue, heavy regulatory requirements, etc."
+            className={`min-h-[120px] resize-none border-gray-300 focus:border-[#D4AF37] focus:ring-[#D4AF37] ${
+              dealBreakersError ? 'border-red-500' : ''
+            }`}
+          />
+          <div className="flex justify-between items-center mt-1">
+            {dealBreakersError ? (
+              <p className="text-red-500 text-sm">{dealBreakersError}</p>
+            ) : (
+              <p className="text-gray-500 text-xs">Minimum 20 characters required</p>
+            )}
+            <span className={`text-sm ${data.dealBreakersText.length >= 500 ? 'text-red-500' : 'text-gray-400'}`}>
+              {data.dealBreakersText.length} / 500
+            </span>
           </div>
         </div>
 
