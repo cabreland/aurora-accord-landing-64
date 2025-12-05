@@ -46,7 +46,7 @@ const TeamConversations = lazy(() => import("./pages/TeamConversations"));
 const NDAManagement = lazy(() => import("./pages/NDAManagement"));
 const AccessRequests = lazy(() => import("./pages/AccessRequests"));
 const NDASettings = lazy(() => import("./pages/NDASettings"));
-const InvestorProfile = lazy(() => import("./pages/InvestorProfile"));
+const InvestorProfile = lazy(() => import("./pages/InvestorProfilePage"));
 
 // Wrap protected components with authentication
 const ProtectedDashboard = withAuth('investor')(Dashboard);
