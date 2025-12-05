@@ -16,6 +16,7 @@ export interface UserProfile {
   updated_at: string;
   onboarding_completed: boolean | null;
   onboarding_skipped: boolean | null;
+  profile_picture_url: string | null;
 }
 
 export const useUserProfile = () => {
