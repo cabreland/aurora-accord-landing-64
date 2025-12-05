@@ -11,6 +11,7 @@ export interface InvestorProfileData {
   companyName: string;
   linkedinUrl: string;
   buyerType: string;
+  profilePictureUrl: string | null;
   
   // Investment criteria
   targetIndustries: string[];
@@ -49,6 +50,7 @@ const defaultProfileData: InvestorProfileData = {
   companyName: '',
   linkedinUrl: '',
   buyerType: '',
+  profilePictureUrl: null,
   targetIndustries: [],
   minInvestment: '',
   maxInvestment: '',
@@ -88,16 +90,18 @@ export const useInvestorProfileData = () => {
     try {
       setLoading(true);
       
-      // Fetch from investor_profiles table
-      const { data: investorProfile, error } = await supabase
-        .from('investor_profiles')
-        .select('*')
-        .eq('user_id', user.id)
-        .maybeSingle();
+      // Fetch from investor_profiles and profiles tables in parallel
+      const [investorProfileResult, profileResult] = await Promise.all([
+        supabase.from('investor_profiles').select('*').eq('user_id', user.id).maybeSingle(),
+        supabase.from('profiles').select('profile_picture_url').eq('user_id', user.id).maybeSingle()
+      ]);
 
-      if (error && error.code !== 'PGRST116') {
-        throw error;
+      if (investorProfileResult.error && investorProfileResult.error.code !== 'PGRST116') {
+        throw investorProfileResult.error;
       }
+
+      const investorProfile = investorProfileResult.data;
+      const profilePictureUrl = profileResult.data?.profile_picture_url || null;
 
       if (investorProfile) {
         setProfileData({
@@ -107,6 +111,7 @@ export const useInvestorProfileData = () => {
           companyName: investorProfile.company_name || '',
           linkedinUrl: investorProfile.linkedin_url || '',
           buyerType: (investorProfile as any).buyer_type || '',
+          profilePictureUrl,
           targetIndustries: investorProfile.target_industries || [],
           minInvestment: investorProfile.min_investment || '',
           maxInvestment: investorProfile.max_investment || '',
@@ -132,10 +137,10 @@ export const useInvestorProfileData = () => {
           onboardingCompletedAt: investorProfile.onboarding_completed_at || '',
         });
       } else {
-        // Set email from user if no profile exists
         setProfileData(prev => ({
           ...prev,
           email: user.email || '',
+          profilePictureUrl,
         }));
       }
     } catch (error) {

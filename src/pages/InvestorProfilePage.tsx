@@ -12,14 +12,28 @@ import { ActivityHistoryTab } from '@/components/investor/profile/ActivityHistor
 import { SettingsTab } from '@/components/investor/profile/SettingsTab';
 import { useInvestorProfileData } from '@/hooks/useInvestorProfileData';
 import { useInvestorProfileStats } from '@/hooks/useInvestorProfileStats';
+import { useAuth } from '@/hooks/useAuth';
 
 const InvestorProfilePage = () => {
   const [activeTab, setActiveTab] = useState('overview');
-  const { profileData, loading, saving, updateProfile, completionPercentage } = useInvestorProfileData();
+  const [profilePictureUrl, setProfilePictureUrl] = useState<string | null>(null);
+  const { profileData, loading, saving, updateProfile, completionPercentage, refetch } = useInvestorProfileData();
   const { stats, activities, loading: statsLoading } = useInvestorProfileStats();
+  const { user } = useAuth();
+
+  // Sync profile picture URL from profileData
+  React.useEffect(() => {
+    if (profileData.profilePictureUrl !== undefined) {
+      setProfilePictureUrl(profileData.profilePictureUrl || null);
+    }
+  }, [profileData.profilePictureUrl]);
 
   const handleEditClick = () => {
     setActiveTab('investment-criteria');
+  };
+
+  const handlePictureUpdated = (newUrl: string | null) => {
+    setProfilePictureUrl(newUrl);
   };
 
   if (loading) {
@@ -42,7 +56,10 @@ const InvestorProfilePage = () => {
               fullName={profileData.fullName}
               buyerType={profileData.buyerType}
               memberSince={profileData.createdAt}
+              profilePictureUrl={profilePictureUrl}
+              userId={user?.id}
               onEditClick={handleEditClick}
+              onPictureUpdated={handlePictureUpdated}
             />
           </Card>
 
