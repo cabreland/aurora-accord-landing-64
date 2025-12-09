@@ -46,13 +46,9 @@ const UserMenuDropdown = React.memo(() => {
   }, [signOut, toast, navigate]);
 
   const handleProfileClick = React.useCallback(() => {
-    // Navigate to appropriate profile page based on role
-    if (isAdminOrBroker) {
-      navigate('/settings');
-    } else {
-      navigate('/investor-portal/profile');
-    }
-  }, [isAdminOrBroker, navigate]);
+    // Always navigate to investor profile page for all roles
+    navigate('/investor-portal/profile');
+  }, [navigate]);
 
   const handleSettingsClick = React.useCallback(() => {
     if (isAdminOrBroker) {
