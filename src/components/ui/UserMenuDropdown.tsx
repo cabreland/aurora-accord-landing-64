@@ -9,7 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/hooks/useAuth';
@@ -21,6 +21,12 @@ const UserMenuDropdown = React.memo(() => {
   const { getDisplayName, getRoleDisplayName, profile, loading } = useUserProfile();
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // Determine if user is admin/broker based on role
+  const isAdminOrBroker = React.useMemo(() => {
+    if (!profile?.role) return false;
+    return ['admin', 'super_admin', 'broker', 'editor'].includes(profile.role);
+  }, [profile?.role]);
 
   const handleSignOut = React.useCallback(async () => {
     try {
@@ -40,12 +46,21 @@ const UserMenuDropdown = React.memo(() => {
   }, [signOut, toast, navigate]);
 
   const handleProfileClick = React.useCallback(() => {
-    // Navigate to profile/settings page when available
-    toast({
-      title: "Profile settings",
-      description: "Profile settings coming soon.",
-    });
-  }, [toast]);
+    // Navigate to appropriate profile page based on role
+    if (isAdminOrBroker) {
+      navigate('/settings');
+    } else {
+      navigate('/investor-portal/profile');
+    }
+  }, [isAdminOrBroker, navigate]);
+
+  const handleSettingsClick = React.useCallback(() => {
+    if (isAdminOrBroker) {
+      navigate('/settings');
+    } else {
+      navigate('/investor-portal/profile?tab=settings');
+    }
+  }, [isAdminOrBroker, navigate]);
 
   const getInitials = React.useMemo(() => {
     const name = getDisplayName();
@@ -67,6 +82,9 @@ const UserMenuDropdown = React.memo(() => {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-8 w-8">
+            {profile?.profile_picture_url && (
+              <AvatarImage src={profile.profile_picture_url} alt={getDisplayName()} />
+            )}
             <AvatarFallback className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground text-xs font-medium">
               {getInitials}
             </AvatarFallback>
@@ -92,9 +110,9 @@ const UserMenuDropdown = React.memo(() => {
           <User className="mr-2 h-4 w-4" />
           <span>Profile</span>
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => navigate('/settings')} className="cursor-pointer">
+        <DropdownMenuItem onClick={handleSettingsClick} className="cursor-pointer">
           <Settings className="mr-2 h-4 w-4" />
-          <span>Settings</span>
+          <span>Account Settings</span>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer text-destructive focus:text-destructive">
