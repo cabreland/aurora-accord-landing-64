@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import DashboardLayout from '@/components/investor/DashboardLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card } from '@/components/ui/card';
@@ -15,11 +16,31 @@ import { useInvestorProfileStats } from '@/hooks/useInvestorProfileStats';
 import { useAuth } from '@/hooks/useAuth';
 
 const InvestorProfilePage = () => {
-  const [activeTab, setActiveTab] = useState('overview');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const initialTab = searchParams.get('tab') || 'overview';
+  const [activeTab, setActiveTab] = useState(initialTab);
   const [profilePictureUrl, setProfilePictureUrl] = useState<string | null>(null);
   const { profileData, loading, saving, updateProfile, completionPercentage, refetch } = useInvestorProfileData();
   const { stats, activities, loading: statsLoading } = useInvestorProfileStats();
   const { user } = useAuth();
+
+  // Sync URL param with tab state
+  useEffect(() => {
+    const tabParam = searchParams.get('tab');
+    if (tabParam && tabParam !== activeTab) {
+      setActiveTab(tabParam);
+    }
+  }, [searchParams]);
+
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
+    if (tab === 'overview') {
+      searchParams.delete('tab');
+    } else {
+      searchParams.set('tab', tab);
+    }
+    setSearchParams(searchParams);
+  };
 
   // Sync profile picture URL from profileData
   React.useEffect(() => {
@@ -64,7 +85,7 @@ const InvestorProfilePage = () => {
           </Card>
 
           {/* Tabs Navigation */}
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
             <TabsList className="bg-card border border-border p-1 w-full flex-wrap h-auto gap-1">
               <TabsTrigger 
                 value="overview" 
