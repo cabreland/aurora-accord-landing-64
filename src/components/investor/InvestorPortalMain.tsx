@@ -5,33 +5,22 @@ import {
   Clock, 
   MessageSquare,
   Filter,
-  ArrowLeft,
-  User,
-  Home,
-  BarChart3,
-  FileText,
-  Settings,
-  Shield,
-  Users,
   ChevronDown
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useNavigate, Link, useLocation } from 'react-router-dom';
+import { Card, CardContent } from '@/components/ui/card';
+import { useNavigate } from 'react-router-dom';
 import { useUserProfile } from '@/hooks/useUserProfile';
-import { getDashboardRoute } from '@/lib/auth-utils';
 import { useInvestorContext } from '@/hooks/useInvestorContext';
 import { useInvestorDeals } from '@/hooks/useInvestorDeals';
-import UserMenuDropdown from '@/components/ui/UserMenuDropdown';
 import DealCard from '@/components/investor/DealCard';
 import { getDealDetailRoute } from '@/lib/data/dealRouting';
-
+import DashboardLayout from '@/components/investor/DashboardLayout';
 
 const InvestorPortalMain = () => {
   const navigate = useNavigate();
-  const location = useLocation();
-  const { profile, isAdmin, isEditor, getDisplayName, getRoleDisplayName, loading: profileLoading } = useUserProfile();
+  const { profile, loading: profileLoading } = useUserProfile();
   const { metrics, investorInfo, loading: contextLoading } = useInvestorContext();
   const { 
     filteredDeals, 
@@ -69,117 +58,11 @@ const InvestorPortalMain = () => {
     });
   };
 
-  // Helper function to determine if nav item is active
-  const isNavItemActive = (path: string) => {
-    if (path === '/investor-portal') {
-      return location.pathname === '/investor-portal';
-    }
-    if (path === '/dashboard') {
-      return location.pathname === '/dashboard';
-    }
-    if (path === '/deals') {
-      return location.pathname.startsWith('/deals') || location.pathname.startsWith('/deal/');
-    }
-    return location.pathname === path;
-  };
-
-  const getNavigationItems = () => {
-    const dashboardPath = (isAdmin() || isEditor()) ? '/dashboard' : '/investor-portal';
-    const baseItems = [
-      { id: 'dashboard', label: 'Dashboard', icon: Home, path: dashboardPath, badge: null },
-      { id: 'deals', label: 'Active Deals', icon: BarChart3, path: '/deals', badge: '4' },
-      { id: 'documents', label: 'Documents', icon: FileText, path: '/documents', badge: null },
-      { id: 'analytics', label: 'Analytics', icon: BarChart3, path: '/analytics', badge: null },
-      { id: 'compliance', label: 'Compliance', icon: Shield, path: '/compliance', badge: null },
-      { id: 'settings', label: 'Settings', icon: Settings, path: '/settings', badge: null }
-    ];
-
-    // Admin only items
-    const adminItems = [
-      { id: 'users', label: 'Users', icon: Users, path: '/users', badge: null },
-      { id: 'activity', label: 'Activity', icon: Shield, path: '/activity', badge: null }
-    ];
-
-    if (isAdmin()) {
-      return [...baseItems, ...adminItems];
-    }
-
-    return baseItems;
-  };
-
-  const navigationItems = getNavigationItems();
-
   return (
-    <div className="min-h-screen bg-[#1C2526] flex">
-      {/* Sidebar */}
-      <div className="w-64 bg-gradient-to-b from-[#0A0F0F] to-[#1A1F2E] border-r border-[#D4AF37]/30 flex-shrink-0">
-        <div className="p-6">
-          {/* Back to Dashboard Button */}
-          <Button 
-            onClick={() => navigate(profile?.role ? getDashboardRoute(profile.role) : '/dashboard')}
-            className="w-full mb-6 bg-transparent border border-[#D4AF37] text-[#D4AF37] hover:bg-[#D4AF37] hover:text-[#0A0F0F] transition-all duration-300"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Dashboard
-          </Button>
-
-          {/* Logo Area */}
-          <div className="mb-8">
-            <h2 className="text-2xl font-bold text-[#D4AF37] mb-2">M&A Portal</h2>
-            <p className="text-sm text-[#F4E4BC]/60">Exclusive Business Brokers</p>
-          </div>
-
-          {/* User Info */}
-          <div className="bg-[#2A2F3A]/60 rounded-xl p-4 mb-6 border border-[#D4AF37]/20">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-r from-[#D4AF37] to-[#F4E4BC] rounded-full flex items-center justify-center">
-                <User className="w-5 h-5 text-[#0A0F0F]" />
-              </div>
-              <div>
-                <div className="text-[#FAFAFA] font-medium">
-                  {loading ? 'Loading…' : (investorInfo?.name || getDisplayName())}
-                </div>
-                <div className="text-[#F4E4BC]/60 text-sm">
-                  {loading ? '' : (investorInfo?.company || getRoleDisplayName())}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Navigation */}
-          <nav className="space-y-2">
-            {navigationItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = isNavItemActive(item.path);
-              
-              return (
-                <Link
-                  key={item.id}
-                  to={item.path}
-                  className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-300 ${
-                    isActive 
-                      ? 'bg-gradient-to-r from-[#D4AF37]/20 to-[#F4E4BC]/10 text-[#D4AF37] border border-[#D4AF37]/30' 
-                      : 'text-[#F4E4BC] hover:bg-[#D4AF37]/10 hover:text-[#D4AF37]'
-                  }`}
-                >
-                  <Icon className="w-5 h-5" />
-                  <span className="font-medium">{item.label}</span>
-                  {item.badge && (
-                    <Badge className="ml-auto bg-[#F28C38] text-[#0A0F0F] text-xs">
-                      {item.badge}
-                    </Badge>
-                  )}
-                </Link>
-              );
-            })}
-          </nav>
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div className="flex-1 p-6 lg:p-8 overflow-auto">
+    <DashboardLayout>
+      <div className="space-y-8">
         {/* Header Section */}
-        <Card className="bg-gradient-to-r from-[#0A0F0F] to-[#1A1F2E] border-[#D4AF37]/30 mb-8">
+        <Card className="bg-gradient-to-r from-[#0A0F0F] to-[#1A1F2E] border-[#D4AF37]/30">
           <CardContent className="p-8">
             <div className="flex items-center justify-between">
               <div>
@@ -188,18 +71,15 @@ const InvestorPortalMain = () => {
                   Real-time access to curated M&A opportunities with comprehensive deal analytics
                 </p>
               </div>
-              <div className="flex items-center gap-4">
-                <Badge className="bg-gradient-to-r from-[#D4AF37] to-[#F4E4BC] text-[#0A0F0F] px-6 py-3 text-base font-bold rounded-full">
-                  Live Deals Dashboard
-                </Badge>
-                <UserMenuDropdown />
-              </div>
+              <Badge className="bg-gradient-to-r from-[#D4AF37] to-[#F4E4BC] text-[#0A0F0F] px-6 py-3 text-base font-bold rounded-full">
+                Live Deals Dashboard
+              </Badge>
             </div>
           </CardContent>
         </Card>
 
         {/* Metrics Cards - Buyer Focused */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
           <Card className="bg-gradient-to-br from-[#2A2F3A] to-[#1A1F2E] border-[#D4AF37]/20 hover:border-[#D4AF37]/50 transition-all duration-300 cursor-pointer"
                 onClick={() => toggleFilter('My Watchlist')}>
             <CardContent className="p-6">
@@ -252,7 +132,7 @@ const InvestorPortalMain = () => {
           </Card>
 
           <Card className="bg-gradient-to-br from-[#2A2F3A] to-[#1A1F2E] border-[#D4AF37]/20 hover:border-[#D4AF37]/50 transition-all duration-300 cursor-pointer"
-                onClick={() => navigate('/messages')}>
+                onClick={() => navigate('/investor-portal/messages')}>
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <MessageSquare className="w-8 h-8 text-[#D4AF37]" />
@@ -272,7 +152,7 @@ const InvestorPortalMain = () => {
         </div>
 
         {/* Filter Section */}
-        <Card className="bg-gradient-to-br from-[#2A2F3A] to-[#1A1F2E] border-[#D4AF37]/20 mb-8">
+        <Card className="bg-gradient-to-br from-[#2A2F3A] to-[#1A1F2E] border-[#D4AF37]/20">
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
@@ -377,7 +257,7 @@ const InvestorPortalMain = () => {
           )}
         </div>
       </div>
-    </div>
+    </DashboardLayout>
   );
 };
 
