@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import DocumentsToolbar from '@/components/documents/DocumentsToolbar';
@@ -8,7 +8,8 @@ import StorageDebugger from '@/components/debug/StorageDebugger';
 import UploadDebugger from '@/components/debug/UploadDebugger';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
-import { ArrowLeft, Building2, Bug } from 'lucide-react';
+import { Building2, Bug } from 'lucide-react';
+import DashboardLayout from '@/components/investor/DashboardLayout';
 
 const Documents = () => {
   const [selectedDealId, setSelectedDealId] = useState<string>('all');
@@ -17,7 +18,6 @@ const Documents = () => {
   const [showDebugger, setShowDebugger] = useState(false);
   const { user } = useAuth();
   const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
 
   // Check for deal parameter in URL
   useEffect(() => {
@@ -55,28 +55,30 @@ const Documents = () => {
     return <div>Please sign in to access documents.</div>;
   }
 
+  // Build breadcrumbs based on current context
+  const breadcrumbs = [
+    { label: 'Dashboard', path: '/dashboard' },
+    { label: 'Documents' },
+  ];
+  
+  if (dealInfo) {
+    breadcrumbs.splice(1, 0, { label: 'Deals', path: '/deals' });
+    breadcrumbs[2] = { label: dealInfo.title, path: `/deal/${selectedDealId}` };
+    breadcrumbs.push({ label: 'Documents' });
+  }
+
   return (
-    <div className="container mx-auto px-6 py-8">
+    <DashboardLayout breadcrumbs={breadcrumbs}>
       <div className="space-y-6">
-        {/* Navigation Header */}
+        {/* Page Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => navigate('/deals')}
-              className="gap-2"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Back to Deals
-            </Button>
-            
             <div className="flex items-center gap-3">
-              <h1 className="text-3xl font-bold text-foreground">Document Management</h1>
+              <h1 className="text-3xl font-bold text-[#FAFAFA]">Document Management</h1>
               {dealInfo && (
                 <div className="flex items-center gap-2">
-                  <Building2 className="w-5 h-5 text-muted-foreground" />
-                  <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">
+                  <Building2 className="w-5 h-5 text-[#F4E4BC]/60" />
+                  <Badge variant="outline" className="bg-[#D4AF37]/10 text-[#D4AF37] border-[#D4AF37]/20">
                     {dealInfo.title} • {dealInfo.company_name}
                   </Badge>
                 </div>
@@ -90,13 +92,14 @@ const Documents = () => {
               variant="outline"
               size="sm"
               onClick={() => setShowDebugger(!showDebugger)}
-              className="gap-2"
+              className="gap-2 border-[#D4AF37]/30 text-[#D4AF37] hover:bg-[#D4AF37]/10"
             >
               <Bug className="w-4 h-4" />
               {showDebugger ? 'Hide' : 'Debug Storage'}
             </Button>
           )}
         </div>
+
         <DocumentsToolbar 
           onDealSelect={setSelectedDealId}
           selectedDealId={selectedDealId}
@@ -119,7 +122,7 @@ const Documents = () => {
           }}
         />
       </div>
-    </div>
+    </DashboardLayout>
   );
 };
 
