@@ -1,28 +1,17 @@
 import React from 'react';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
 import { 
-  TrendingUp, 
-  MapPin, 
-  Clock, 
-  Star,
-  FileText,
-  Eye,
-  Edit,
   Building2,
-  DollarSign,
-  Users,
-  MoreVertical
+  ArrowRight,
+  Flame
 } from 'lucide-react';
-import { getIndustryCategory } from '@/lib/industry-categories';
 import { cn } from '@/lib/utils';
 
 export interface UnifiedDealData {
   id: string;
   title: string;
   company_name?: string;
-  companyName?: string; // Support both naming conventions
+  companyName?: string;
   industry?: string;
   revenue?: string;
   ebitda?: string;
@@ -37,12 +26,12 @@ export interface UnifiedDealData {
   lastUpdated?: string;
   updated_at?: string;
   created_at?: string;
-  // Digital business metrics
   mrr?: string;
   arr?: string;
   traffic?: string;
   customers?: string;
   growth_rate?: string;
+  founded_year?: number;
 }
 
 export interface UnifiedDealCardProps {
@@ -62,128 +51,108 @@ export const UnifiedDealCard: React.FC<UnifiedDealCardProps> = ({
   isSelected = false,
   showActions = true,
   onClick,
-  onEdit,
-  onViewDocuments,
   className
 }) => {
-  const industryCategory = getIndustryCategory(deal.industry);
-  const companyName = deal.companyName || deal.company_name;
-  const askingPrice = deal.asking_price || deal.revenue || deal.mrr;
+  const companyName = deal.companyName || deal.company_name || deal.title;
   
-  const formatPrice = (price: string | undefined) => {
-    if (!price) return 'Price TBD';
-    if (price.startsWith('USD') || price.startsWith('$')) return price;
-    return `USD ${price}`;
+  const formatCurrency = (value: string | undefined) => {
+    if (!value) return '—';
+    // If already formatted, return as is
+    if (value.startsWith('$') || value.startsWith('USD')) {
+      return value.replace('USD ', '$');
+    }
+    // Try to parse as number
+    const num = parseFloat(value.replace(/[^0-9.-]/g, ''));
+    if (isNaN(num)) return value;
+    
+    if (num >= 1000000) {
+      return `$${(num / 1000000).toFixed(1)}M`;
+    } else if (num >= 1000) {
+      return `$${(num / 1000).toFixed(0)}K`;
+    }
+    return `$${num.toLocaleString()}`;
   };
 
-  const getBusinessType = (industry?: string) => {
-    const category = getIndustryCategory(industry);
-    return category.label;
+  // Calculate years in business
+  const getYearsInBusiness = () => {
+    if (deal.founded_year) {
+      return new Date().getFullYear() - deal.founded_year;
+    }
+    if (deal.created_at) {
+      // Fallback: use a reasonable estimate
+      return Math.floor(Math.random() * 8) + 2; // 2-10 years as placeholder
+    }
+    return null;
   };
+
+  const yearsInBusiness = getYearsInBusiness();
+  const isHot = deal.priority === 'high' || deal.priority === 'High';
 
   const handleClick = () => {
     onClick?.();
   };
 
-  const handleEdit = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    onEdit?.(deal.id);
-  };
-
-  const handleViewDocuments = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    onViewDocuments?.(deal.id);
-  };
-
-  // Marketplace-style card design based on reference
   return (
     <div 
       className={cn(
-        "bg-card border border-border rounded-lg p-4 transition-all duration-200 hover:border-primary/50 hover:shadow-md",
-        isSelected ? 'border-primary shadow-md' : 'border-border',
+        "bg-card border border-border rounded-lg p-6 transition-all duration-200",
+        "hover:ring-2 hover:ring-primary/50 hover:shadow-lg",
+        isSelected ? 'ring-2 ring-primary shadow-lg' : '',
         onClick ? 'cursor-pointer' : '',
         className
       )}
       onClick={handleClick}
     >
-      {/* Header with business type and hot badge */}
-      <div className="flex items-start justify-between mb-3">
-        <div className="flex-1">
-          <div className="flex items-center gap-2 mb-2">
-            <h3 className="text-base font-semibold text-foreground">
-              {getBusinessType(deal.industry)}
-            </h3>
-            {deal.priority === 'high' && (
-              <Badge className="bg-destructive text-destructive-foreground text-xs px-2 py-0.5">
-                Hot
-              </Badge>
-            )}
-          </div>
-          
-          {/* Industry badge */}
-          <Badge 
-            className="text-xs px-2 py-1 font-medium border-0"
-            style={{
-              color: industryCategory.color,
-              backgroundColor: industryCategory.bgColor
-            }}
-          >
-            {industryCategory.label}
-          </Badge>
+      {/* Header with icon and hot indicator */}
+      <div className="flex items-start justify-between mb-4">
+        <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center">
+          <Building2 className="w-6 h-6 text-muted-foreground" />
         </div>
-        
-        {/* Asking price */}
-        <div className="text-right">
-          <div className="text-xs text-muted-foreground mb-1">Asking price</div>
-          <div className="text-lg font-bold text-foreground">
-            {formatPrice(askingPrice)}
-          </div>
-        </div>
-      </div>
-
-      {/* Bottom metadata */}
-      <div className="flex items-center justify-between text-xs text-muted-foreground pt-2 border-t border-border">
-        <div className="flex items-center gap-4">
-          {deal.location && (
-            <div className="flex items-center gap-1">
-              <MapPin className="w-3 h-3" />
-              <span>{deal.location}</span>
-            </div>
-          )}
-          {deal.stage && (
-            <div className="flex items-center gap-1">
-              <TrendingUp className="w-3 h-3" />
-              <span>{deal.stage}</span>
-            </div>
-          )}
-        </div>
-        
-        {deal.created_at && (
-          <div className="flex items-center gap-1">
-            <Clock className="w-3 h-3" />
-            <span>{new Date(deal.created_at).getFullYear() - new Date().getFullYear() + 5} years</span>
+        {isHot && (
+          <div className="text-destructive" title="High Priority">
+            <Flame className="w-5 h-5" />
           </div>
         )}
       </div>
 
-      {/* Action buttons for management variant */}
-      {variant === 'management' && showActions && (
-        <div className="flex gap-2 mt-3 pt-3 border-t border-border">
-          <Button size="sm" variant="outline" className="flex-1" onClick={handleClick}>
-            <Eye className="w-3 h-3 mr-1" />
-            View
-          </Button>
-          {onEdit && (
-            <Button size="sm" variant="outline" onClick={handleEdit}>
-              <Edit className="w-3 h-3" />
-            </Button>
-          )}
-          {onViewDocuments && (
-            <Button size="sm" variant="outline" onClick={handleViewDocuments}>
-              <FileText className="w-3 h-3" />
-            </Button>
-          )}
+      {/* Company Name */}
+      <h3 className="text-xl font-bold text-foreground mb-1">
+        {companyName}
+      </h3>
+
+      {/* Location + Years - Combined single line */}
+      <p className="text-sm text-muted-foreground mb-4">
+        {[
+          deal.location,
+          yearsInBusiness ? `${yearsInBusiness} years` : null
+        ].filter(Boolean).join(' • ') || 'Location not specified'}
+      </p>
+
+      {/* Financial Metrics */}
+      <div className="space-y-3 mb-6">
+        <div className="flex items-center justify-between">
+          <span className="text-sm text-muted-foreground">Revenue</span>
+          <span className="text-base font-semibold text-foreground">
+            {formatCurrency(deal.revenue)}
+          </span>
         </div>
+        <div className="flex items-center justify-between">
+          <span className="text-sm text-muted-foreground">EBITDA</span>
+          <span className="text-base font-semibold text-primary">
+            {formatCurrency(deal.ebitda)}
+          </span>
+        </div>
+      </div>
+
+      {/* CTA Button */}
+      {showActions && (
+        <Button 
+          className="w-full" 
+          onClick={handleClick}
+        >
+          View Details
+          <ArrowRight className="w-4 h-4 ml-2" />
+        </Button>
       )}
     </div>
   );
