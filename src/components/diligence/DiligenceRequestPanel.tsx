@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { format } from 'date-fns';
+import { formatSmartTimestamp, formatCompactTimestamp } from '@/lib/formatTimestamp';
 import { useDropzone } from 'react-dropzone';
 import { 
   X, 
@@ -441,7 +442,7 @@ const DiligenceRequestPanel: React.FC<DiligenceRequestPanelProps> = ({
                             {doc.file_name}
                           </div>
                           <div className="text-xs text-gray-500">
-                            {formatFileSize(doc.file_size)} • {format(new Date(doc.created_at), 'MMM d, yyyy')}
+                            {formatFileSize(doc.file_size)} • {formatCompactTimestamp(doc.created_at, { showTimezone: false })}
                           </div>
                         </div>
                       </div>
@@ -528,7 +529,7 @@ const DiligenceRequestPanel: React.FC<DiligenceRequestPanelProps> = ({
                         </span>
                         <span className="text-xs text-gray-400">·</span>
                         <span className="text-xs text-gray-400">
-                          {format(new Date(comment.created_at), 'MMM d, h:mm a')}
+                          {formatCompactTimestamp(comment.created_at)}
                         </span>
                       </div>
                       <p className="text-sm text-gray-700 pl-8">{comment.content}</p>
@@ -548,7 +549,9 @@ const DiligenceRequestPanel: React.FC<DiligenceRequestPanelProps> = ({
                     <div className="text-sm text-gray-900">
                       <span className="font-medium">Status changed</span> to Resolved
                     </div>
-                    <div className="text-xs text-gray-500">Jan 9, 2026 at 2:30 PM</div>
+                    <div className="text-xs text-gray-500">
+                      {formatSmartTimestamp(request.updated_at)}
+                    </div>
                   </div>
                 </div>
                 
@@ -560,7 +563,9 @@ const DiligenceRequestPanel: React.FC<DiligenceRequestPanelProps> = ({
                     <div className="text-sm text-gray-900">
                       <span className="font-medium">Assigned</span> to John Doe
                     </div>
-                    <div className="text-xs text-gray-500">Jan 8, 2026 at 10:15 AM</div>
+                    <div className="text-xs text-gray-500">
+                      {formatSmartTimestamp(request.created_at)}
+                    </div>
                   </div>
                 </div>
                 
@@ -573,7 +578,7 @@ const DiligenceRequestPanel: React.FC<DiligenceRequestPanelProps> = ({
                       <span className="font-medium">Request created</span>
                     </div>
                     <div className="text-xs text-gray-500">
-                      {format(new Date(request.created_at), 'MMM d, yyyy \'at\' h:mm a')}
+                      {formatSmartTimestamp(request.created_at)}
                     </div>
                   </div>
                 </div>
