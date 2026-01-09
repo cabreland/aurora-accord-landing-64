@@ -9,7 +9,8 @@ import {
   Check,
   Clock,
   Circle,
-  AlertCircle
+  AlertCircle,
+  Plus
 } from 'lucide-react';
 import {
   Table,
@@ -41,6 +42,7 @@ interface DiligenceRequestTableProps {
   onSelectRequest: (request: DiligenceRequest) => void;
   isLoading: boolean;
   dealId?: string;
+  onAddRequest?: () => void;
 }
 
 // Status badge configuration with icons and proper colors
@@ -80,7 +82,8 @@ const DiligenceRequestTable: React.FC<DiligenceRequestTableProps> = ({
   subcategories,
   onSelectRequest,
   isLoading,
-  dealId
+  dealId,
+  onAddRequest
 }) => {
   const [selectedRequests, setSelectedRequests] = React.useState<string[]>([]);
   const { data: teamMembers = [] } = useTeamMembers();
@@ -185,10 +188,19 @@ const DiligenceRequestTable: React.FC<DiligenceRequestTableProps> = ({
   
   if (requests.length === 0) {
     return (
-      <div className="text-center py-16 bg-gray-50 rounded-lg border border-gray-200">
+      <div className="text-center py-16 bg-gray-50 rounded-lg border border-gray-200 border-dashed">
         <FileText className="w-12 h-12 text-gray-300 mx-auto mb-4" />
         <h3 className="text-lg font-medium text-gray-900 mb-2">No requests found</h3>
-        <p className="text-gray-500">Add a request or apply a template to get started</p>
+        <p className="text-gray-500 mb-4">Add a request or apply a template to get started</p>
+        {onAddRequest && (
+          <Button 
+            onClick={onAddRequest}
+            className="bg-blue-600 hover:bg-blue-700 text-white"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Add First Request
+          </Button>
+        )}
       </div>
     );
   }
