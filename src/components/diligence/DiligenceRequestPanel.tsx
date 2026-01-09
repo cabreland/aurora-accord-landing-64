@@ -24,7 +24,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
@@ -65,6 +65,12 @@ import {
   useDownloadDiligenceDocument,
   formatFileSize
 } from '@/hooks/useDiligenceDocuments';
+import UserAvatarBadge, { 
+  getAvatarColor, 
+  getUserInitials, 
+  getUserDisplayName,
+  getRoleDisplayName 
+} from '@/components/common/UserAvatarBadge';
 
 interface DiligenceRequestPanelProps {
   request: DiligenceRequest | null;
@@ -118,6 +124,150 @@ const getCommentAuthorInitials = (profile: { first_name: string | null; last_nam
   
   // Fallback to email first letter
   return profile.email?.[0]?.toUpperCase() || 'U';
+};
+
+// Activity Tab Component with real user data
+interface ActivityTabProps {
+  request: DiligenceRequest;
+  teamMembers: Array<{
+    user_id: string;
+    first_name: string | null;
+    last_name: string | null;
+    email: string;
+    role: string;
+    profile_picture_url: string | null;
+  }>;
+}
+
+const ActivityTab: React.FC<ActivityTabProps> = ({ request, teamMembers }) => {
+  // Find the user who created the request
+  const creator = teamMembers.find(m => m.user_id === request.created_by);
+  const creatorName = creator 
+    ? getUserDisplayName(creator.first_name, creator.last_name, creator.email)
+    : 'Unknown User';
+  const creatorColor = getAvatarColor(request.created_by);
+  const creatorInitials = creator 
+    ? getUserInitials(creator.first_name, creator.last_name, creator.email)
+    : '?';
+  
+  // Find assignee if any
+  const assignee = request.assignee_id 
+    ? teamMembers.find(m => m.user_id === request.assignee_id)
+    : null;
+  const assigneeName = assignee 
+    ? getUserDisplayName(assignee.first_name, assignee.last_name, assignee.email)
+    : null;
+  const assigneeRole = assignee ? getRoleDisplayName(assignee.role) : null;
+  
+  // Build activity items
+  const activities: Array<{
+    id: string;
+    type: 'created' | 'status' | 'assigned' | 'updated';
+    icon: React.ReactNode;
+    bgColor: string;
+    content: React.ReactNode;
+    timestamp: string;
+    userId?: string | null;
+  }> = [];
+  
+  // Request created
+  activities.push({
+    id: 'created',
+    type: 'created',
+    icon: <History className="w-4 h-4 text-gray-600" />,
+    bgColor: 'bg-gray-100',
+    content: (
+      <span>
+        <span className="font-medium">Request created</span> by{' '}
+        <span className="font-medium">{creatorName}</span>
+      </span>
+    ),
+    timestamp: request.created_at,
+    userId: request.created_by
+  });
+  
+  // Assignment if exists
+  if (request.assignee_id && assigneeName) {
+    activities.push({
+      id: 'assigned',
+      type: 'assigned',
+      icon: <User className="w-4 h-4 text-blue-600" />,
+      bgColor: 'bg-blue-100',
+      content: (
+        <span>
+          <span className="font-medium">Assigned to</span>{' '}
+          <span className="font-medium">{assigneeName}</span>
+          {assigneeRole && <span className="text-gray-500"> ({assigneeRole})</span>}
+        </span>
+      ),
+      timestamp: request.updated_at,
+      userId: request.assignee_id
+    });
+  }
+  
+  // Status change if different from initial
+  if (request.status !== 'open') {
+    const statusLabels: Record<string, string> = {
+      in_progress: 'In Progress',
+      completed: 'Resolved',
+      blocked: 'Blocked'
+    };
+    const statusColors: Record<string, { icon: string; bg: string }> = {
+      in_progress: { icon: 'text-amber-600', bg: 'bg-amber-100' },
+      completed: { icon: 'text-green-600', bg: 'bg-green-100' },
+      blocked: { icon: 'text-red-600', bg: 'bg-red-100' }
+    };
+    const statusConfig = statusColors[request.status] || { icon: 'text-gray-600', bg: 'bg-gray-100' };
+    
+    activities.push({
+      id: 'status',
+      type: 'status',
+      icon: request.status === 'completed' 
+        ? <CheckCircle2 className={`w-4 h-4 ${statusConfig.icon}`} />
+        : request.status === 'blocked'
+          ? <AlertTriangle className={`w-4 h-4 ${statusConfig.icon}`} />
+          : <Clock className={`w-4 h-4 ${statusConfig.icon}`} />,
+      bgColor: statusConfig.bg,
+      content: (
+        <span>
+          <span className="font-medium">Status changed</span> to{' '}
+          <span className="font-medium">{statusLabels[request.status] || request.status}</span>
+        </span>
+      ),
+      timestamp: request.updated_at,
+      userId: request.updated_by
+    });
+  }
+  
+  // Sort by timestamp descending (most recent first)
+  activities.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+  
+  return (
+    <div className="space-y-4">
+      {activities.map((activity) => (
+        <div key={activity.id} className="flex gap-3">
+          <div className={`w-8 h-8 rounded-full ${activity.bgColor} flex items-center justify-center shrink-0`}>
+            {activity.icon}
+          </div>
+          <div>
+            <div className="text-sm text-gray-900">
+              {activity.content}
+            </div>
+            <div className="text-xs text-gray-500">
+              {formatSmartTimestamp(activity.timestamp)}
+            </div>
+          </div>
+        </div>
+      ))}
+      
+      {activities.length === 0 && (
+        <div className="text-center py-8 text-gray-500 text-sm">
+          <History className="w-8 h-8 mx-auto mb-2 text-gray-300" />
+          No activity recorded yet
+        </div>
+      )}
+    </div>
+  );
 };
 
 const DiligenceRequestPanel: React.FC<DiligenceRequestPanelProps> = ({
@@ -361,14 +511,18 @@ const DiligenceRequestPanel: React.FC<DiligenceRequestPanelProps> = ({
                   <PopoverTrigger asChild>
                     {assignedMember ? (
                       <button className="flex items-center gap-3 bg-gray-50 rounded-lg p-3 border border-gray-200 w-full text-left hover:bg-gray-100 transition-colors">
-                        <Avatar className="w-8 h-8">
-                          <AvatarFallback className="bg-blue-100 text-blue-600 text-sm font-medium">
-                            {getTeamMemberInitials(assignedMember)}
-                          </AvatarFallback>
-                        </Avatar>
-                        <span className="text-gray-900 font-medium flex-1">
-                          {getTeamMemberName(assignedMember)}
-                        </span>
+                        <UserAvatarBadge 
+                          userId={assignedMember.user_id}
+                          firstName={assignedMember.first_name}
+                          lastName={assignedMember.last_name}
+                          email={assignedMember.email}
+                          profilePictureUrl={assignedMember.profile_picture_url}
+                          role={assignedMember.role}
+                          size="md"
+                          showName
+                          showTooltip={false}
+                          className="flex-1"
+                        />
                         <X 
                           className="w-4 h-4 text-gray-400 hover:text-red-500" 
                           onClick={(e) => { e.stopPropagation(); handleAssigneeChange(null); }}
@@ -384,7 +538,7 @@ const DiligenceRequestPanel: React.FC<DiligenceRequestPanelProps> = ({
                       </Button>
                     )}
                   </PopoverTrigger>
-                  <PopoverContent className="w-64 p-2" align="start">
+                  <PopoverContent className="w-72 p-2" align="start">
                     <div className="space-y-1">
                       <p className="text-xs text-gray-500 uppercase tracking-wide px-2 py-1">
                         Team Members
@@ -392,30 +546,36 @@ const DiligenceRequestPanel: React.FC<DiligenceRequestPanelProps> = ({
                       {teamMembers.length === 0 ? (
                         <p className="text-sm text-gray-500 px-2 py-2">No team members found</p>
                       ) : (
-                        teamMembers.map((member) => (
-                          <button
-                            key={member.user_id}
-                            className="flex items-center gap-3 w-full px-2 py-2 rounded-md hover:bg-gray-100 transition-colors text-left"
-                            onClick={() => handleAssigneeChange(member.user_id)}
-                          >
-                            <Avatar className="w-7 h-7">
-                              <AvatarFallback className="bg-blue-100 text-blue-600 text-xs font-medium">
-                                {getTeamMemberInitials(member)}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div className="flex-1 min-w-0">
-                              <div className="text-sm font-medium text-gray-900 truncate">
-                                {getTeamMemberName(member)}
+                        teamMembers.map((member) => {
+                          const color = getAvatarColor(member.user_id);
+                          return (
+                            <button
+                              key={member.user_id}
+                              className="flex items-center gap-3 w-full px-2 py-2 rounded-md hover:bg-gray-100 transition-colors text-left"
+                              onClick={() => handleAssigneeChange(member.user_id)}
+                            >
+                              <Avatar className="w-7 h-7">
+                                {member.profile_picture_url && (
+                                  <AvatarImage src={member.profile_picture_url} alt={getTeamMemberName(member)} />
+                                )}
+                                <AvatarFallback className={`${color.bg} ${color.text} text-xs font-medium`}>
+                                  {getTeamMemberInitials(member)}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div className="flex-1 min-w-0">
+                                <div className="text-sm font-medium text-gray-900 truncate">
+                                  {getTeamMemberName(member)}
+                                </div>
+                                <div className="text-xs text-gray-500 truncate">
+                                  {getRoleDisplayName(member.role)}
+                                </div>
                               </div>
-                              <div className="text-xs text-gray-500 truncate">
-                                {member.email}
-                              </div>
-                            </div>
-                            {member.user_id === request.assignee_id && (
-                              <CheckCircle2 className="w-4 h-4 text-green-600 flex-shrink-0" />
-                            )}
-                          </button>
-                        ))
+                              {member.user_id === request.assignee_id && (
+                                <CheckCircle2 className="w-4 h-4 text-green-600 flex-shrink-0" />
+                              )}
+                            </button>
+                          );
+                        })
                       )}
                     </div>
                   </PopoverContent>
@@ -584,73 +744,37 @@ const DiligenceRequestPanel: React.FC<DiligenceRequestPanelProps> = ({
                     No comments yet. Start the conversation!
                   </div>
                 ) : (
-                  comments.map((comment) => (
-                    <div key={comment.id} className="bg-gray-50 rounded-lg p-3 border border-gray-200">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Avatar className="w-6 h-6">
-                          <AvatarFallback className="bg-blue-100 text-blue-600 text-xs font-medium">
-                            {getCommentAuthorInitials(comment.profile)}
-                          </AvatarFallback>
-                        </Avatar>
-                        <span className="text-sm font-medium text-gray-900">
-                          {getCommentAuthorName(comment.profile)}
-                        </span>
-                        <span className="text-xs text-gray-400">·</span>
-                        <span className="text-xs text-gray-400">
-                          {formatCompactTimestamp(comment.created_at)}
-                        </span>
+                  comments.map((comment) => {
+                    const commentColor = getAvatarColor(comment.user_id);
+                    return (
+                      <div key={comment.id} className="bg-gray-50 rounded-lg p-3 border border-gray-200">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Avatar className="w-6 h-6">
+                            <AvatarFallback className={`${commentColor.bg} ${commentColor.text} text-xs font-medium`}>
+                              {getCommentAuthorInitials(comment.profile)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <span className="text-sm font-medium text-gray-900">
+                            {getCommentAuthorName(comment.profile)}
+                          </span>
+                          <span className="text-xs text-gray-400">·</span>
+                          <span className="text-xs text-gray-400">
+                            {formatCompactTimestamp(comment.created_at)}
+                          </span>
+                        </div>
+                        <p className="text-sm text-gray-700 pl-8">{comment.content}</p>
                       </div>
-                      <p className="text-sm text-gray-700 pl-8">{comment.content}</p>
-                    </div>
-                  ))
+                    );
+                  })
                 )}
               </div>
             </TabsContent>
             
             <TabsContent value="activity" className="p-4 mt-0">
-              <div className="space-y-4">
-                <div className="flex gap-3">
-                  <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center shrink-0">
-                    <CheckCircle2 className="w-4 h-4 text-green-600" />
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-900">
-                      <span className="font-medium">Status changed</span> to Resolved
-                    </div>
-                    <div className="text-xs text-gray-500">
-                      {formatSmartTimestamp(request.updated_at)}
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="flex gap-3">
-                  <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
-                    <User className="w-4 h-4 text-blue-600" />
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-900">
-                      <span className="font-medium">Assigned</span> to John Doe
-                    </div>
-                    <div className="text-xs text-gray-500">
-                      {formatSmartTimestamp(request.created_at)}
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="flex gap-3">
-                  <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
-                    <History className="w-4 h-4 text-gray-600" />
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-900">
-                      <span className="font-medium">Request created</span>
-                    </div>
-                    <div className="text-xs text-gray-500">
-                      {formatSmartTimestamp(request.created_at)}
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <ActivityTab 
+                request={request} 
+                teamMembers={teamMembers} 
+              />
             </TabsContent>
           </ScrollArea>
         </Tabs>
