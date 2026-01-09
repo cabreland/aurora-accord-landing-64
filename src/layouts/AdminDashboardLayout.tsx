@@ -12,7 +12,8 @@ import {
   FileCheck,
   ChevronDown,
   ChevronRight,
-  Menu
+  Menu,
+  ClipboardCheck
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -60,6 +61,9 @@ const AdminDashboardLayout = ({ children, activeTab = 'dashboard', breadcrumbs }
     if (path === '/documents') {
       return location.pathname === '/documents' || location.pathname.startsWith('/documents');
     }
+    if (path === '/dashboard/diligence-tracker') {
+      return location.pathname.startsWith('/dashboard/diligence-tracker');
+    }
     if (path === '/dashboard/access-requests') {
       return location.pathname.includes('access-requests');
     }
@@ -72,10 +76,11 @@ const AdminDashboardLayout = ({ children, activeTab = 'dashboard', breadcrumbs }
     return location.pathname === path;
   };
 
-  // Admin/Broker navigation (7 items) - ALWAYS show admin nav
+  // Admin/Broker navigation (8 items) - ALWAYS show admin nav
   const navigationItems: NavItem[] = [
     { id: 'dashboard', label: 'Dashboard', icon: Home, path: '/dashboard' },
     { id: 'deals', label: 'Deals', icon: BarChart3, path: '/deals' },
+    { id: 'diligence-tracker', label: 'Diligence Tracker', icon: ClipboardCheck, path: '/dashboard/diligence-tracker' },
     { id: 'documents', label: 'Documents', icon: FileText, path: '/documents' },
     { id: 'access-requests', label: 'Access Requests', icon: Lock, path: '/dashboard/access-requests', badge: pendingAccessCount, badgeColor: 'bg-orange-500' },
     { id: 'ndas', label: 'Signed NDAs', icon: FileCheck, path: '/dashboard/ndas' },
