@@ -12,6 +12,8 @@ import TrackerKanbanView from './dashboard/TrackerKanbanView';
 import TrackerCardSkeleton from './dashboard/TrackerCardSkeleton';
 import AnalyticsWidgets from './dashboard/AnalyticsWidgets';
 import AdvancedFilters, { ViewMode } from './dashboard/AdvancedFilters';
+import ExportDropdown from './dashboard/ExportDropdown';
+import DiligenceActivityFeed from './dashboard/DiligenceActivityFeed';
 import { isPast, isToday, differenceInDays, addDays } from 'date-fns';
 
 const DiligenceTrackerDashboard: React.FC = () => {
@@ -229,6 +231,11 @@ const DiligenceTrackerDashboard: React.FC = () => {
           <p className="text-gray-500 mt-1">Manage due diligence workflows across all deals</p>
         </div>
         <div className="flex items-center gap-3">
+          <ExportDropdown 
+            deals={filteredDeals}
+            requests={allRequests}
+            categories={categories}
+          />
           <Button 
             variant="outline" 
             size="sm"
@@ -404,11 +411,18 @@ const DiligenceTrackerDashboard: React.FC = () => {
         )}
       </div>
       
-      {/* Analytics Widgets */}
+      {/* Analytics Widgets & Activity Feed */}
       {deals.length > 0 && (
         <div>
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Analytics & Insights</h2>
-          <AnalyticsWidgets {...analyticsData} />
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
+            <div className="lg:col-span-4">
+              <AnalyticsWidgets {...analyticsData} />
+            </div>
+            <div className="lg:col-span-1">
+              <DiligenceActivityFeed onViewAll={() => console.log('View all activity')} />
+            </div>
+          </div>
         </div>
       )}
       
