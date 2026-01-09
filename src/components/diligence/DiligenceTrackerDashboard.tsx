@@ -361,6 +361,10 @@ const DiligenceTrackerDashboard: React.FC = () => {
           <TrackerKanbanView 
             deals={filteredDeals}
             onCreateTracker={() => setCreateDialogOpen(true)}
+            onStageChange={(dealId, newStage) => {
+              // In a real app, this would update the database
+              console.log('Stage change:', dealId, newStage);
+            }}
           />
         )}
       </div>
