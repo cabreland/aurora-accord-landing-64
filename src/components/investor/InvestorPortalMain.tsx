@@ -16,7 +16,7 @@ import { useInvestorContext } from '@/hooks/useInvestorContext';
 import { useInvestorDeals } from '@/hooks/useInvestorDeals';
 import DealCard from '@/components/investor/DealCard';
 import { getDealDetailRoute } from '@/lib/data/dealRouting';
-import DashboardLayout from '@/components/investor/DashboardLayout';
+import InvestorPortalLayout from '@/layouts/InvestorPortalLayout';
 
 const InvestorPortalMain = () => {
   const navigate = useNavigate();
@@ -59,7 +59,7 @@ const InvestorPortalMain = () => {
   };
 
   return (
-    <DashboardLayout>
+    <InvestorPortalLayout>
       <div className="space-y-8">
         {/* Header Section */}
         <Card className="bg-gradient-to-r from-[#0A0F0F] to-[#1A1F2E] border-[#D4AF37]/30">
@@ -257,7 +257,7 @@ const InvestorPortalMain = () => {
           )}
         </div>
       </div>
-    </DashboardLayout>
+    </InvestorPortalLayout>
   );
 };
 

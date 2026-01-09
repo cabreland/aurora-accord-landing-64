@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CheckCircle, XCircle, Clock, User, Building2, Lock } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import DashboardLayout from '@/components/investor/DashboardLayout';
+import AdminDashboardLayout from '@/layouts/AdminDashboardLayout';
 
 interface AccessRequest {
   id: string;
@@ -169,7 +169,7 @@ const AccessRequests = () => {
   };
 
   return (
-    <DashboardLayout activeTab="access-requests">
+    <AdminDashboardLayout activeTab="access-requests">
       <div className="container mx-auto p-6 space-y-6">
         <div>
           <h1 className="text-3xl font-bold mb-2">Access Requests</h1>
@@ -341,7 +341,7 @@ const AccessRequests = () => {
           </DialogContent>
         </Dialog>
       </div>
-    </DashboardLayout>
+    </AdminDashboardLayout>
   );
 };
 

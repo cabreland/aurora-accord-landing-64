@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import InvestorInviteDialog from '@/components/admin/InvestorInviteDialog';
 import InvestorInvitationsTable from '@/components/admin/InvestorInvitationsTable';
-import DashboardLayout from '@/components/investor/DashboardLayout';
+import AdminDashboardLayout from '@/layouts/AdminDashboardLayout';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -56,16 +56,16 @@ const InvestorInvitations = () => {
 
   if (loading) {
     return (
-      <DashboardLayout activeTab="investor-invitations">
+      <AdminDashboardLayout activeTab="investor-invitations">
         <div className="flex items-center justify-center h-64">
           <div className="text-center">Loading deals...</div>
         </div>
-      </DashboardLayout>
+      </AdminDashboardLayout>
     );
   }
 
   return (
-    <DashboardLayout activeTab="investor-invitations">
+    <AdminDashboardLayout activeTab="investor-invitations">
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <div>
@@ -157,7 +157,7 @@ const InvestorInvitations = () => {
           </TabsContent>
         </Tabs>
       </div>
-    </DashboardLayout>
+    </AdminDashboardLayout>
   );
 };
 

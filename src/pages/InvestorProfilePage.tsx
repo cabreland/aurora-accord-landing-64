@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import DashboardLayout from '@/components/investor/DashboardLayout';
+import InvestorPortalLayout from '@/layouts/InvestorPortalLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card } from '@/components/ui/card';
 import { Loader2, LayoutGrid, Target, Heart, DollarSign, Clock, Settings } from 'lucide-react';
@@ -59,16 +59,16 @@ const InvestorProfilePage = () => {
 
   if (loading) {
     return (
-      <DashboardLayout>
+      <InvestorPortalLayout>
         <div className="flex items-center justify-center min-h-[60vh]">
           <Loader2 className="w-8 h-8 animate-spin text-[hsl(var(--primary))]" />
         </div>
-      </DashboardLayout>
+      </InvestorPortalLayout>
     );
   }
 
   return (
-    <DashboardLayout>
+    <InvestorPortalLayout>
       <div className="min-h-screen bg-muted/30">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6">
           {/* Profile Header Card */}
@@ -178,7 +178,7 @@ const InvestorProfilePage = () => {
           </Tabs>
         </div>
       </div>
-    </DashboardLayout>
+    </InvestorPortalLayout>
   );
 };
 

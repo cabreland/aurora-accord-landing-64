@@ -11,7 +11,7 @@ import { Switch } from '@/components/ui/switch';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { FileText, Settings as SettingsIcon, Clock, Mail } from 'lucide-react';
-import DashboardLayout from '@/components/investor/DashboardLayout';
+import AdminDashboardLayout from '@/layouts/AdminDashboardLayout';
 
 export const NDASettings = () => {
   const navigate = useNavigate();
@@ -68,7 +68,7 @@ export const NDASettings = () => {
   };
 
   return (
-    <DashboardLayout activeTab="nda-settings">
+    <AdminDashboardLayout activeTab="nda-settings">
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
@@ -403,7 +403,7 @@ export const NDASettings = () => {
           </TabsContent>
         </Tabs>
       </div>
-    </DashboardLayout>
+    </AdminDashboardLayout>
   );
 };
 

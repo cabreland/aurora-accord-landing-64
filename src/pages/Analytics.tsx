@@ -1,12 +1,12 @@
 import React from 'react';
-import DashboardLayout from '@/components/investor/DashboardLayout';
+import AdminDashboardLayout from '@/layouts/AdminDashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TrendingUp, DollarSign, Target, Activity } from 'lucide-react';
 
 
 const Analytics = () => {
   return (
-    <DashboardLayout>
+    <AdminDashboardLayout activeTab="analytics">
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold text-foreground mb-2">Deal Analytics</h1>
@@ -72,7 +72,7 @@ const Analytics = () => {
           </CardContent>
         </Card>
       </div>
-    </DashboardLayout>
+    </AdminDashboardLayout>
   );
 };
 
