@@ -815,6 +815,218 @@ export type Database = {
           },
         ]
       }
+      diligence_categories: {
+        Row: {
+          color: string | null
+          created_at: string
+          icon: string | null
+          id: string
+          name: string
+          order_index: number | null
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          icon?: string | null
+          id?: string
+          name: string
+          order_index?: number | null
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          icon?: string | null
+          id?: string
+          name?: string
+          order_index?: number | null
+        }
+        Relationships: []
+      }
+      diligence_comments: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          request_id: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          request_id: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          request_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "diligence_comments_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "diligence_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      diligence_requests: {
+        Row: {
+          assignee_id: string | null
+          category_id: string
+          completion_date: string | null
+          created_at: string
+          created_by: string
+          deal_id: string
+          description: string | null
+          document_ids: string[] | null
+          due_date: string | null
+          id: string
+          notes: string | null
+          order_index: number | null
+          priority: Database["public"]["Enums"]["diligence_priority"]
+          reviewer_ids: string[] | null
+          status: Database["public"]["Enums"]["diligence_status"]
+          subcategory_id: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          assignee_id?: string | null
+          category_id: string
+          completion_date?: string | null
+          created_at?: string
+          created_by: string
+          deal_id: string
+          description?: string | null
+          document_ids?: string[] | null
+          due_date?: string | null
+          id?: string
+          notes?: string | null
+          order_index?: number | null
+          priority?: Database["public"]["Enums"]["diligence_priority"]
+          reviewer_ids?: string[] | null
+          status?: Database["public"]["Enums"]["diligence_status"]
+          subcategory_id?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          assignee_id?: string | null
+          category_id?: string
+          completion_date?: string | null
+          created_at?: string
+          created_by?: string
+          deal_id?: string
+          description?: string | null
+          document_ids?: string[] | null
+          due_date?: string | null
+          id?: string
+          notes?: string | null
+          order_index?: number | null
+          priority?: Database["public"]["Enums"]["diligence_priority"]
+          reviewer_ids?: string[] | null
+          status?: Database["public"]["Enums"]["diligence_status"]
+          subcategory_id?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "diligence_requests_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "diligence_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "diligence_requests_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "diligence_requests_subcategory_id_fkey"
+            columns: ["subcategory_id"]
+            isOneToOne: false
+            referencedRelation: "diligence_subcategories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      diligence_subcategories: {
+        Row: {
+          category_id: string
+          created_at: string
+          id: string
+          name: string
+          order_index: number | null
+        }
+        Insert: {
+          category_id: string
+          created_at?: string
+          id?: string
+          name: string
+          order_index?: number | null
+        }
+        Update: {
+          category_id?: string
+          created_at?: string
+          id?: string
+          name?: string
+          order_index?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "diligence_subcategories_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "diligence_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      diligence_templates: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          deal_type: string | null
+          description: string | null
+          id: string
+          industry: string | null
+          is_default: boolean | null
+          name: string
+          template_data: Json
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          deal_type?: string | null
+          description?: string | null
+          id?: string
+          industry?: string | null
+          is_default?: boolean | null
+          name: string
+          template_data?: Json
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          deal_type?: string | null
+          description?: string | null
+          id?: string
+          industry?: string | null
+          is_default?: boolean | null
+          name?: string
+          template_data?: Json
+        }
+        Relationships: []
+      }
       document_views: {
         Row: {
           action: string
@@ -2037,6 +2249,8 @@ export type Database = {
       business_type: "saas" | "ecom" | "agency" | "other"
       company_stage: "teaser" | "discovery" | "dd" | "closing"
       deal_status: "active" | "archived" | "draft"
+      diligence_priority: "high" | "medium" | "low"
+      diligence_status: "open" | "in_progress" | "completed" | "blocked"
       document_tag:
         | "cim"
         | "nda"
@@ -2185,6 +2399,8 @@ export const Constants = {
       business_type: ["saas", "ecom", "agency", "other"],
       company_stage: ["teaser", "discovery", "dd", "closing"],
       deal_status: ["active", "archived", "draft"],
+      diligence_priority: ["high", "medium", "low"],
+      diligence_status: ["open", "in_progress", "completed", "blocked"],
       document_tag: [
         "cim",
         "nda",
