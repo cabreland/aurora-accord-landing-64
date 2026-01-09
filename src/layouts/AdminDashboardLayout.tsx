@@ -80,7 +80,7 @@ const AdminDashboardLayout = ({ children, activeTab = 'dashboard', breadcrumbs }
   const navigationItems: NavItem[] = [
     { id: 'dashboard', label: 'Dashboard', icon: Home, path: '/dashboard' },
     { id: 'deals', label: 'Deals', icon: BarChart3, path: '/deals' },
-    { id: 'diligence-tracker', label: 'Diligence Tracker', icon: ClipboardCheck, path: '/dashboard/diligence-tracker' },
+    { id: 'diligence-tracker', label: 'Due Diligence', icon: ClipboardCheck, path: '/dashboard/diligence-tracker' },
     { id: 'documents', label: 'Documents', icon: FileText, path: '/documents' },
     { id: 'access-requests', label: 'Access Requests', icon: Lock, path: '/dashboard/access-requests', badge: pendingAccessCount, badgeColor: 'bg-orange-500' },
     { id: 'ndas', label: 'Signed NDAs', icon: FileCheck, path: '/dashboard/ndas' },

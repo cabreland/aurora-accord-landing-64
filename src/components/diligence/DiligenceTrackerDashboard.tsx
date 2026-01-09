@@ -1,11 +1,12 @@
 import React, { useState, useMemo } from 'react';
-import { Plus, Settings, Building2, BarChart3, ClipboardList, Search, RefreshCw, Loader2 } from 'lucide-react';
+import { Plus, Settings, Building2, Search, RefreshCw, Loader2, Briefcase, FileText, CheckCircle, AlertTriangle, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useDealsWithDiligence, useDiligenceRequests, useDiligenceCategories } from '@/hooks/useDiligenceTracker';
 import { useDebounce } from '@/hooks/useDebounce';
 import CreateTrackerDialog from './CreateTrackerDialog';
-import ExecutiveSummary from './dashboard/ExecutiveSummary';
+import ClickableMetricCard from './dashboard/ClickableMetricCard';
+import PriorityInsightsBar from './dashboard/PriorityInsightsBar';
 import UrgentItemsPanel from './dashboard/UrgentItemsPanel';
 import EnhancedTrackerCard from './dashboard/EnhancedTrackerCard';
 import TrackerTableView from './dashboard/TrackerTableView';
@@ -15,11 +16,11 @@ import AnalyticsWidgets from './dashboard/AnalyticsWidgets';
 import AdvancedFilters, { ViewMode } from './dashboard/AdvancedFilters';
 import ExportDropdown from './dashboard/ExportDropdown';
 import DiligenceActivityFeed from './dashboard/DiligenceActivityFeed';
-import { isPast, isToday, differenceInDays, addDays } from 'date-fns';
+import { isPast, isToday, differenceInDays } from 'date-fns';
 
 const DiligenceTrackerDashboard: React.FC = () => {
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
-  const [viewMode, setViewMode] = useState<ViewMode>('cards');
+  const [viewMode, setViewMode] = useState<ViewMode>('table'); // Default to table/list view
   const [selectedDeals, setSelectedDeals] = useState<string[]>([]);
   
   // Filter states
@@ -33,6 +34,9 @@ const DiligenceTrackerDashboard: React.FC = () => {
   const [highPriorityOnly, setHighPriorityOnly] = useState(false);
   const [assignedToMe, setAssignedToMe] = useState(false);
   
+  // Active metric filter (for clickable cards)
+  const [activeMetricFilter, setActiveMetricFilter] = useState<string | null>(null);
+  
   const { data: deals = [], isLoading: dealsLoading } = useDealsWithDiligence();
   const { data: allRequests = [] } = useDiligenceRequests();
   const { data: categories = [] } = useDiligenceCategories();
@@ -42,7 +46,6 @@ const DiligenceTrackerDashboard: React.FC = () => {
   
   // Calculate comprehensive statistics
   const stats = useMemo(() => {
-    const now = new Date();
     const openRequests = allRequests.filter(r => r.status !== 'completed').length;
     const completedRequests = allRequests.filter(r => r.status === 'completed').length;
     const overdueRequests = allRequests.filter(r => {
@@ -51,16 +54,27 @@ const DiligenceTrackerDashboard: React.FC = () => {
       return isPast(dueDate) && !isToday(dueDate);
     }).length;
     
+    // Priority counts
+    const highPriority = allRequests.filter(r => r.priority === 'high' && r.status !== 'completed').length;
+    const mediumPriority = allRequests.filter(r => r.priority === 'medium' && r.status !== 'completed').length;
+    const lowPriority = allRequests.filter(r => r.priority === 'low' && r.status !== 'completed').length;
+    
+    // Final review count (requests that are in progress and have approved answers could be "ready for review")
+    const finalReviewCount = 0; // TODO: Implement when final_review status is added
+    
     return {
-      activeTrackers: deals.length,
+      activeDeals: deals.length,
       openRequests,
-      completedRequests,
+      completedRequests, // Now "Satisfied"
       overdueRequests,
       totalRequests: allRequests.length,
       completionRate: allRequests.length > 0 
         ? Math.round((completedRequests / allRequests.length) * 100) 
         : 0,
-      weeklyProgress: 12 // Mock - would need historical data
+      highPriority,
+      mediumPriority,
+      lowPriority,
+      finalReviewCount
     };
   }, [allRequests, deals]);
   
@@ -168,6 +182,42 @@ const DiligenceTrackerDashboard: React.FC = () => {
     return sortedStages[0]?.[0] || 'early';
   };
 
+  // Metric click handlers
+  const handleMetricClick = (metricType: string) => {
+    if (activeMetricFilter === metricType) {
+      // Clear filter if clicking same metric
+      setActiveMetricFilter(null);
+      resetFilters();
+    } else {
+      setActiveMetricFilter(metricType);
+      
+      // Apply appropriate filter based on metric type
+      switch (metricType) {
+        case 'active':
+          setStatusFilter('all');
+          setHasOverdue(false);
+          break;
+        case 'open':
+          setStatusFilter('active');
+          setHasOverdue(false);
+          break;
+        case 'satisfied':
+          setStatusFilter('completed');
+          setHasOverdue(false);
+          break;
+        case 'overdue':
+          setHasOverdue(true);
+          setStatusFilter('all');
+          break;
+      }
+    }
+  };
+
+  const handlePriorityFilter = (priority: 'high' | 'medium' | 'low') => {
+    setHighPriorityOnly(priority === 'high');
+    // Could extend to support medium/low filtering
+  };
+
   // Apply filters
   const filteredDeals = useMemo(() => {
     return dealsWithCategories.filter(deal => {
@@ -245,6 +295,7 @@ const DiligenceTrackerDashboard: React.FC = () => {
     setHasOverdue(false);
     setHighPriorityOnly(false);
     setAssignedToMe(false);
+    setActiveMetricFilter(null);
   };
   
   // Selection handlers
@@ -297,11 +348,10 @@ const DiligenceTrackerDashboard: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
+      {/* Header - Simplified */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Diligence Tracker</h1>
-          <p className="text-gray-500 mt-1">Manage due diligence workflows across all deals</p>
+          <h1 className="text-2xl font-bold text-gray-900">Due Diligence Workstream</h1>
         </div>
         <div className="flex items-center gap-3">
           <ExportDropdown 
@@ -322,19 +372,89 @@ const DiligenceTrackerDashboard: React.FC = () => {
             className="bg-blue-600 hover:bg-blue-700 text-white"
           >
             <Plus className="w-4 h-4 mr-2" />
-            New Tracker
+            Add Deal
           </Button>
         </div>
       </div>
       
-      {/* Executive Summary */}
-      <ExecutiveSummary stats={stats} />
+      {/* Clickable Metrics - Replaced ExecutiveSummary */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <ClickableMetricCard
+          icon={Briefcase}
+          value={stats.activeDeals}
+          label="Active Deals"
+          description="Companies in DD"
+          color="blue"
+          onClick={() => handleMetricClick('active')}
+          isActive={activeMetricFilter === 'active'}
+        />
+        <ClickableMetricCard
+          icon={FileText}
+          value={stats.openRequests}
+          label="Open Requests"
+          description="Pending information"
+          color="amber"
+          onClick={() => handleMetricClick('open')}
+          isActive={activeMetricFilter === 'open'}
+        />
+        <ClickableMetricCard
+          icon={CheckCircle}
+          value={stats.completedRequests}
+          label="Satisfied"
+          description="Requests fulfilled"
+          color="green"
+          onClick={() => handleMetricClick('satisfied')}
+          isActive={activeMetricFilter === 'satisfied'}
+        />
+        <ClickableMetricCard
+          icon={AlertTriangle}
+          value={stats.overdueRequests}
+          label="Overdue"
+          description="Past due date"
+          color="red"
+          onClick={() => handleMetricClick('overdue')}
+          isActive={activeMetricFilter === 'overdue'}
+        />
+      </div>
+
+      {/* Clear Filter Button - Show when metric filter is active */}
+      {activeMetricFilter && (
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-gray-600">
+            Filtering by: <span className="font-medium capitalize">{activeMetricFilter}</span>
+          </span>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              setActiveMetricFilter(null);
+              resetFilters();
+            }}
+            className="h-7 px-2 text-gray-500 hover:text-gray-700"
+          >
+            <X className="w-4 h-4 mr-1" />
+            Clear
+          </Button>
+        </div>
+      )}
       
-      {/* Urgent Items */}
-      <UrgentItemsPanel 
-        items={urgentItems} 
-        totalCount={urgentItems.length} 
+      {/* Priority Insights Bar - Replaces "All Clear" banner */}
+      <PriorityInsightsBar
+        highCount={stats.highPriority}
+        mediumCount={stats.mediumPriority}
+        lowCount={stats.lowPriority}
+        overdueCount={stats.overdueRequests}
+        finalReviewCount={stats.finalReviewCount}
+        onFilterPriority={handlePriorityFilter}
       />
+      
+      {/* Urgent Items - Only show if there are urgent items */}
+      {urgentItems.length > 0 && (
+        <UrgentItemsPanel 
+          items={urgentItems} 
+          totalCount={urgentItems.length} 
+        />
+      )}
       
       {/* Advanced Filters */}
       <AdvancedFilters
@@ -366,7 +486,7 @@ const DiligenceTrackerDashboard: React.FC = () => {
       {viewMode === 'cards' && selectedDeals.length > 0 && (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 flex items-center justify-between">
           <span className="text-sm text-blue-700 font-medium">
-            {selectedDeals.length} tracker{selectedDeals.length > 1 ? 's' : ''} selected
+            {selectedDeals.length} deal{selectedDeals.length > 1 ? 's' : ''} selected
           </span>
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" className="border-blue-300 text-blue-700 hover:bg-blue-100">
@@ -398,7 +518,7 @@ const DiligenceTrackerDashboard: React.FC = () => {
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
             <Building2 className="w-5 h-5 text-blue-600" />
-            Active Trackers ({filteredDeals.length})
+            Active Deals ({filteredDeals.length})
           </h2>
         </div>
         
@@ -407,7 +527,7 @@ const DiligenceTrackerDashboard: React.FC = () => {
           <div className="space-y-4">
             <div className="flex items-center justify-center gap-3 py-4">
               <Loader2 className="w-5 h-5 text-blue-600 animate-spin" />
-              <span className="text-gray-600">Loading trackers...</span>
+              <span className="text-gray-600">Loading deals...</span>
             </div>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {[1, 2, 3, 4, 5, 6].map((i) => (
@@ -422,7 +542,7 @@ const DiligenceTrackerDashboard: React.FC = () => {
               <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Search className="w-8 h-8 text-gray-400" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">No trackers match your filters</h3>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">No deals match your filters</h3>
               <p className="text-gray-500 mb-6 max-w-md mx-auto">
                 Try adjusting your search criteria or removing some filters to see more results
               </p>
@@ -437,22 +557,22 @@ const DiligenceTrackerDashboard: React.FC = () => {
             </CardContent>
           </Card>
         ) : filteredDeals.length === 0 ? (
-          /* Empty State - No Trackers Yet */
+          /* Empty State - No Deals Yet */
           <Card className="bg-white border-gray-200 border-dashed">
             <CardContent className="p-16 text-center">
               <div className="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-6">
-                <ClipboardList className="w-10 h-10 text-blue-500" />
+                <Briefcase className="w-10 h-10 text-blue-500" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">No Diligence Trackers Yet</h3>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">No Deals in Due Diligence</h3>
               <p className="text-gray-500 mb-6 max-w-md mx-auto">
-                Create your first tracker to start managing due diligence workflows for your M&A deals
+                Add your first deal to start managing due diligence workflows
               </p>
               <Button 
                 onClick={() => setCreateDialogOpen(true)}
                 className="bg-blue-600 hover:bg-blue-700 text-white"
               >
                 <Plus className="w-4 h-4 mr-2" />
-                Create First Tracker
+                Add First Deal
               </Button>
               <p className="text-xs text-gray-400 mt-4">
                 Templates available: SaaS, E-commerce, Digital Agency, and more

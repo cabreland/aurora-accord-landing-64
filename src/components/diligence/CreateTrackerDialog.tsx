@@ -96,7 +96,7 @@ const CreateTrackerDialog: React.FC<CreateTrackerDialogProps> = ({ open, onOpenC
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="bg-white border-gray-200 text-gray-900 max-w-2xl">
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold text-gray-900">Create Diligence Tracker</DialogTitle>
+          <DialogTitle className="text-xl font-bold text-gray-900">Add Deal to Due Diligence</DialogTitle>
         </DialogHeader>
         
         {/* Step Indicators */}
