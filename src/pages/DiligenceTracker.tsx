@@ -9,11 +9,11 @@ const DiligenceTracker = () => {
 
   const breadcrumbs = dealId 
     ? [
-        { label: 'Diligence Tracker', href: '/dashboard/diligence-tracker' },
+        { label: 'Due Diligence', href: '/dashboard/diligence-tracker' },
         { label: 'Deal Tracker' }
       ]
     : [
-        { label: 'Diligence Tracker' }
+        { label: 'Due Diligence' }
       ];
 
   return (

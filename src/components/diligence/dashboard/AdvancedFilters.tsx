@@ -340,8 +340,8 @@ const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({
             </SelectItem>
             <SelectItem value="completed">
               <span className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-blue-500" />
-                Completed
+                <span className="w-2 h-2 rounded-full bg-green-500" />
+                Satisfied
               </span>
             </SelectItem>
           </SelectContent>
