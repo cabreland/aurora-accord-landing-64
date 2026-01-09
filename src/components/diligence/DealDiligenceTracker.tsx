@@ -438,6 +438,7 @@ const DealDiligenceTracker: React.FC = () => {
               onSelectRequest={setSelectedRequest}
               isLoading={isLoading}
               dealId={dealId}
+              onAddRequest={() => setAddRequestOpen(true)}
             />
           </div>
         </div>
