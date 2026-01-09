@@ -850,8 +850,11 @@ export type Database = {
           content: string
           created_at: string
           id: string
+          is_from_customer: boolean
           parent_comment_id: string | null
           request_id: string
+          sent_to_customer: boolean
+          sent_to_customer_at: string | null
           updated_at: string
           user_id: string
         }
@@ -862,8 +865,11 @@ export type Database = {
           content: string
           created_at?: string
           id?: string
+          is_from_customer?: boolean
           parent_comment_id?: string | null
           request_id: string
+          sent_to_customer?: boolean
+          sent_to_customer_at?: string | null
           updated_at?: string
           user_id: string
         }
@@ -874,8 +880,11 @@ export type Database = {
           content?: string
           created_at?: string
           id?: string
+          is_from_customer?: boolean
           parent_comment_id?: string | null
           request_id?: string
+          sent_to_customer?: boolean
+          sent_to_customer_at?: string | null
           updated_at?: string
           user_id?: string
         }
