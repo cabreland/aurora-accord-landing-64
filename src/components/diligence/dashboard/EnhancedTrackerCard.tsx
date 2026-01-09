@@ -102,11 +102,19 @@ const EnhancedTrackerCard: React.FC<EnhancedTrackerCardProps> = ({ deal, onTeamM
     }
   };
 
-  const getProgressColor = (progress: number) => {
-    if (progress === 100) return 'bg-green-500';
-    if (progress >= 50) return 'bg-blue-500';
-    if (progress >= 25) return 'bg-amber-500';
-    return 'bg-gray-300';
+  const getProgressGradient = (progress: number) => {
+    if (progress >= 75) return 'bg-gradient-to-r from-emerald-400 to-emerald-600';
+    if (progress >= 50) return 'bg-gradient-to-r from-blue-400 to-blue-600';
+    if (progress >= 25) return 'bg-gradient-to-r from-amber-400 to-amber-600';
+    if (progress > 0) return 'bg-gradient-to-r from-red-400 to-red-500';
+    return 'bg-gray-200';
+  };
+
+  const getLeftBorderColor = () => {
+    if (deal.progress_percentage === 100) return 'border-l-emerald-500';
+    if ((deal.overdueCount || 0) > 0) return 'border-l-red-500';
+    if (deal.progress_percentage < 25 && deal.total_requests > 0) return 'border-l-amber-500';
+    return 'border-l-blue-500';
   };
 
   const getCategoryStatus = (cat: CategoryProgress) => {
@@ -147,7 +155,7 @@ const EnhancedTrackerCard: React.FC<EnhancedTrackerCardProps> = ({ deal, onTeamM
   return (
     <TooltipProvider>
       <div 
-        className={`bg-white rounded-xl border border-gray-200 transition-all duration-300 cursor-pointer group relative overflow-hidden
+        className={`bg-white rounded-xl border border-gray-200 border-l-4 ${getLeftBorderColor()} transition-all duration-300 cursor-pointer group relative overflow-hidden
           ${isHovered ? 'shadow-lg -translate-y-1 border-blue-300' : 'hover:border-blue-200 hover:shadow-md'}`}
         onClick={() => navigate(`/dashboard/diligence-tracker/${deal.id}`)}
         onMouseEnter={() => setIsHovered(true)}
@@ -263,16 +271,25 @@ const EnhancedTrackerCard: React.FC<EnhancedTrackerCardProps> = ({ deal, onTeamM
           {/* Progress Bar */}
           <div className="mb-4">
             <div className="flex items-center justify-between mb-1.5">
-              <span className="text-sm text-gray-600">
+              <span className="text-sm text-gray-600 tabular-nums">
                 {deal.completed_requests}/{deal.total_requests} Complete
               </span>
-              <span className="text-sm font-semibold text-gray-900">{deal.progress_percentage}%</span>
+              <span className="text-2xl font-bold text-gray-900 tabular-nums">{deal.progress_percentage}%</span>
             </div>
-            <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+            <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden relative">
               <div 
-                className={`h-full rounded-full transition-all duration-500 ${getProgressColor(deal.progress_percentage)}`}
+                className={`h-full rounded-full transition-all duration-500 ${getProgressGradient(deal.progress_percentage)}`}
                 style={{ width: `${deal.progress_percentage}%` }}
               />
+              {/* Shimmer effect for active progress */}
+              {deal.progress_percentage > 0 && deal.progress_percentage < 100 && (
+                <div 
+                  className="absolute inset-0 overflow-hidden rounded-full"
+                  style={{ width: `${deal.progress_percentage}%` }}
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer" />
+                </div>
+              )}
             </div>
           </div>
           
