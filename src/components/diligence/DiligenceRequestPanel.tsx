@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { format } from 'date-fns';
+import { useDropzone } from 'react-dropzone';
 import { 
   X, 
   User,
@@ -15,7 +16,9 @@ import {
   Paperclip,
   Download,
   Trash2,
-  History
+  History,
+  Loader2,
+  File
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -44,6 +47,13 @@ import {
   useDiligenceComments,
   useAddDiligenceComment
 } from '@/hooks/useDiligenceTracker';
+import {
+  useDiligenceDocuments,
+  useUploadDiligenceDocument,
+  useDeleteDiligenceDocument,
+  useDownloadDiligenceDocument,
+  formatFileSize
+} from '@/hooks/useDiligenceDocuments';
 
 interface DiligenceRequestPanelProps {
   request: DiligenceRequest | null;
@@ -111,6 +121,67 @@ const DiligenceRequestPanel: React.FC<DiligenceRequestPanelProps> = ({
   const updateRequest = useUpdateDiligenceRequest();
   const { data: comments = [], refetch: refetchComments } = useDiligenceComments(request?.id || '');
   const addComment = useAddDiligenceComment();
+  
+  // Document hooks
+  const { data: documents = [], refetch: refetchDocuments } = useDiligenceDocuments(request?.id || '');
+  const uploadDocument = useUploadDiligenceDocument();
+  const deleteDocument = useDeleteDiligenceDocument();
+  const downloadDocument = useDownloadDiligenceDocument();
+  
+  // Dropzone for file upload
+  const onDrop = useCallback(async (acceptedFiles: File[]) => {
+    if (!request?.id) return;
+    
+    for (const file of acceptedFiles) {
+      await uploadDocument.mutateAsync({
+        requestId: request.id,
+        file
+      });
+    }
+    refetchDocuments();
+  }, [request?.id, uploadDocument, refetchDocuments]);
+  
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: {
+      'application/pdf': ['.pdf'],
+      'application/msword': ['.doc'],
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],
+      'application/vnd.ms-excel': ['.xls'],
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'],
+      'image/png': ['.png'],
+      'image/jpeg': ['.jpg', '.jpeg'],
+      'text/plain': ['.txt'],
+      'text/csv': ['.csv']
+    },
+    maxSize: 52428800 // 50MB
+  });
+  
+  const handleDeleteDocument = async (doc: { id: string; storage_path: string }) => {
+    if (!request?.id) return;
+    await deleteDocument.mutateAsync({
+      documentId: doc.id,
+      storagePath: doc.storage_path,
+      requestId: request.id
+    });
+  };
+  
+  const handleDownloadDocument = (doc: { storage_path: string; file_name: string }) => {
+    downloadDocument.mutate({
+      storagePath: doc.storage_path,
+      fileName: doc.file_name
+    });
+  };
+  
+  // Get file icon based on type
+  const getFileIcon = (fileType: string | null) => {
+    if (!fileType) return <File className="w-8 h-8 text-gray-400" />;
+    if (fileType.includes('pdf')) return <FileText className="w-8 h-8 text-red-500" />;
+    if (fileType.includes('word') || fileType.includes('document')) return <FileText className="w-8 h-8 text-blue-600" />;
+    if (fileType.includes('excel') || fileType.includes('sheet')) return <FileText className="w-8 h-8 text-green-600" />;
+    if (fileType.includes('image')) return <FileText className="w-8 h-8 text-purple-500" />;
+    return <FileText className="w-8 h-8 text-gray-500" />;
+  };
   
   if (!request) return null;
   
@@ -244,7 +315,7 @@ const DiligenceRequestPanel: React.FC<DiligenceRequestPanelProps> = ({
               Details
             </TabsTrigger>
             <TabsTrigger value="documents" className="text-sm data-[state=active]:bg-white">
-              Documents
+              Documents {documents.length > 0 && `(${documents.length})`}
             </TabsTrigger>
             <TabsTrigger value="comments" className="text-sm data-[state=active]:bg-white">
               Comments ({comments.length})
@@ -315,47 +386,99 @@ const DiligenceRequestPanel: React.FC<DiligenceRequestPanelProps> = ({
             
             <TabsContent value="documents" className="p-4 mt-0">
               {/* Upload Zone */}
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-400 hover:bg-blue-50/50 transition-colors cursor-pointer mb-4">
-                <Upload className="w-10 h-10 text-gray-400 mx-auto mb-3" />
-                <p className="text-sm font-medium text-gray-700 mb-1">
-                  Drag and drop files here
-                </p>
-                <p className="text-xs text-gray-500 mb-3">
-                  or click to browse from your computer
-                </p>
-                <Button size="sm" variant="outline" className="border-gray-300">
-                  <Paperclip className="w-4 h-4 mr-2" />
-                  Upload Files
-                </Button>
+              <div 
+                {...getRootProps()} 
+                className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer mb-4 ${
+                  isDragActive 
+                    ? 'border-blue-500 bg-blue-50' 
+                    : 'border-gray-300 hover:border-blue-400 hover:bg-blue-50/50'
+                } ${uploadDocument.isPending ? 'opacity-50 pointer-events-none' : ''}`}
+              >
+                <input {...getInputProps()} />
+                {uploadDocument.isPending ? (
+                  <>
+                    <Loader2 className="w-10 h-10 text-blue-500 mx-auto mb-3 animate-spin" />
+                    <p className="text-sm font-medium text-blue-600 mb-1">
+                      Uploading...
+                    </p>
+                  </>
+                ) : isDragActive ? (
+                  <>
+                    <Upload className="w-10 h-10 text-blue-500 mx-auto mb-3" />
+                    <p className="text-sm font-medium text-blue-600 mb-1">
+                      Drop files here
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <Upload className="w-10 h-10 text-gray-400 mx-auto mb-3" />
+                    <p className="text-sm font-medium text-gray-700 mb-1">
+                      Drag and drop files here
+                    </p>
+                    <p className="text-xs text-gray-500 mb-3">
+                      PDF, Word, Excel, images up to 50MB
+                    </p>
+                    <Button size="sm" variant="outline" className="border-gray-300" type="button">
+                      <Paperclip className="w-4 h-4 mr-2" />
+                      Browse Files
+                    </Button>
+                  </>
+                )}
               </div>
               
               {/* Document List */}
-              {request.document_ids?.length > 0 ? (
+              {documents.length > 0 ? (
                 <div className="space-y-2">
                   <h4 className="text-xs text-gray-500 uppercase tracking-wide mb-2">
-                    Uploaded Files ({request.document_ids.length})
+                    Uploaded Files ({documents.length})
                   </h4>
-                  {/* Placeholder for document list */}
-                  <div className="bg-gray-50 rounded-lg p-3 border border-gray-200 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <FileText className="w-8 h-8 text-blue-500" />
-                      <div>
-                        <div className="text-sm font-medium text-gray-900">Document.pdf</div>
-                        <div className="text-xs text-gray-500">2.4 MB • Uploaded Jan 5</div>
+                  {documents.map((doc) => (
+                    <div key={doc.id} className="bg-gray-50 rounded-lg p-3 border border-gray-200 flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        {getFileIcon(doc.file_type)}
+                        <div>
+                          <div className="text-sm font-medium text-gray-900 truncate max-w-[200px]">
+                            {doc.file_name}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            {formatFileSize(doc.file_size)} • {format(new Date(doc.created_at), 'MMM d, yyyy')}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-8 w-8 text-gray-400 hover:text-gray-600"
+                          onClick={() => handleDownloadDocument(doc)}
+                          disabled={downloadDocument.isPending}
+                        >
+                          {downloadDocument.isPending ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <Download className="w-4 h-4" />
+                          )}
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-8 w-8 text-gray-400 hover:text-red-600"
+                          onClick={() => handleDeleteDocument(doc)}
+                          disabled={deleteDocument.isPending}
+                        >
+                          {deleteDocument.isPending ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <Trash2 className="w-4 h-4" />
+                          )}
+                        </Button>
                       </div>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 hover:text-gray-600">
-                        <Download className="w-4 h-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 hover:text-red-600">
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
+                  ))}
                 </div>
               ) : (
                 <div className="text-center py-6 text-gray-500 text-sm">
+                  <FileText className="w-8 h-8 mx-auto mb-2 text-gray-300" />
                   No documents uploaded yet
                 </div>
               )}
