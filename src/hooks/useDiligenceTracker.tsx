@@ -39,6 +39,10 @@ export interface DiligenceRequest {
   created_by: string;
   created_at: string;
   updated_at: string;
+  // New columns from migration
+  last_activity_at: string | null;
+  risk_score: number | null;
+  stage: 'early' | 'due_diligence' | 'final_review' | 'closed' | null;
   // Joined data
   category?: DiligenceCategory;
   subcategory?: DiligenceSubcategory;
