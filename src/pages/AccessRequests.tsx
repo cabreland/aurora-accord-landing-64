@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CheckCircle, XCircle, Clock, User, Building2, Lock } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import DashboardLayout from '@/components/investor/DashboardLayout';
 
 interface AccessRequest {
   id: string;
@@ -168,177 +169,179 @@ const AccessRequests = () => {
   };
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold mb-2">Access Requests</h1>
-        <p className="text-muted-foreground">Review and manage investor data room access requests</p>
-      </div>
+    <DashboardLayout activeTab="access-requests">
+      <div className="container mx-auto p-6 space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold mb-2">Access Requests</h1>
+          <p className="text-muted-foreground">Review and manage investor data room access requests</p>
+        </div>
 
-      <Tabs value={selectedStatus} onValueChange={(v) => setSelectedStatus(v as any)}>
-        <TabsList>
-          <TabsTrigger value="pending" className="flex items-center gap-2">
-            <Clock className="h-4 w-4" />
-            Pending
-          </TabsTrigger>
-          <TabsTrigger value="approved" className="flex items-center gap-2">
-            <CheckCircle className="h-4 w-4" />
-            Approved
-          </TabsTrigger>
-          <TabsTrigger value="denied" className="flex items-center gap-2">
-            <XCircle className="h-4 w-4" />
-            Denied
-          </TabsTrigger>
-        </TabsList>
+        <Tabs value={selectedStatus} onValueChange={(v) => setSelectedStatus(v as any)}>
+          <TabsList>
+            <TabsTrigger value="pending" className="flex items-center gap-2">
+              <Clock className="h-4 w-4" />
+              Pending
+            </TabsTrigger>
+            <TabsTrigger value="approved" className="flex items-center gap-2">
+              <CheckCircle className="h-4 w-4" />
+              Approved
+            </TabsTrigger>
+            <TabsTrigger value="denied" className="flex items-center gap-2">
+              <XCircle className="h-4 w-4" />
+              Denied
+            </TabsTrigger>
+          </TabsList>
 
-        <TabsContent value={selectedStatus} className="space-y-4 mt-6">
-          {isLoading ? (
-            <Card>
-              <CardContent className="py-12 text-center">
-                <p className="text-muted-foreground">Loading requests...</p>
-              </CardContent>
-            </Card>
-          ) : requests.length === 0 ? (
-            <Card>
-              <CardContent className="py-12 text-center">
-                <p className="text-muted-foreground">No {selectedStatus} requests</p>
-              </CardContent>
-            </Card>
-          ) : (
-            requests.map((request) => (
-              <Card key={request.id}>
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div className="space-y-1 flex-1">
-                      <div className="flex items-center gap-2">
-                        <User className="h-4 w-4 text-muted-foreground" />
-                        <CardTitle className="text-lg">{request.user_name}</CardTitle>
-                        <Badge variant="outline">{request.user_email}</Badge>
-                      </div>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Building2 className="h-4 w-4" />
-                        <span>{request.company_name}</span>
-                      </div>
-                    </div>
-                    <Badge variant={selectedStatus === 'pending' ? 'default' : selectedStatus === 'approved' ? 'secondary' : 'destructive'}>
-                      {getStatusIcon(selectedStatus)}
-                      <span className="ml-1 capitalize">{selectedStatus}</span>
-                    </Badge>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-2">
-                      <Lock className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm text-muted-foreground">Current:</span>
-                      <Badge className={getLevelBadgeColor(request.current_level)}>
-                        {request.current_level}
-                      </Badge>
-                    </div>
-                    <span className="text-muted-foreground">→</span>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm text-muted-foreground">Requested:</span>
-                      <Badge className={getLevelBadgeColor(request.requested_level)}>
-                        {request.requested_level}
-                      </Badge>
-                    </div>
-                  </div>
-
-                  <div>
-                    <p className="text-sm font-medium mb-1">Reason:</p>
-                    <p className="text-sm text-muted-foreground bg-muted p-3 rounded-md">
-                      {request.reason}
-                    </p>
-                  </div>
-
-                  {request.review_notes && (
-                    <div>
-                      <p className="text-sm font-medium mb-1">Review Notes:</p>
-                      <p className="text-sm text-muted-foreground bg-muted p-3 rounded-md">
-                        {request.review_notes}
-                      </p>
-                    </div>
-                  )}
-
-                  <div className="flex items-center justify-between pt-2">
-                    <p className="text-xs text-muted-foreground">
-                      Requested {new Date(request.requested_at).toLocaleDateString()} at{' '}
-                      {new Date(request.requested_at).toLocaleTimeString()}
-                      {request.reviewed_at && (
-                        <> • Reviewed {new Date(request.reviewed_at).toLocaleDateString()}</>
-                      )}
-                    </p>
-
-                    {selectedStatus === 'pending' && (
-                      <div className="flex gap-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleReview(request, 'deny')}
-                          disabled={reviewMutation.isPending}
-                        >
-                          <XCircle className="h-4 w-4 mr-1" />
-                          Deny
-                        </Button>
-                        <Button
-                          size="sm"
-                          onClick={() => handleReview(request, 'approve')}
-                          disabled={reviewMutation.isPending}
-                        >
-                          <CheckCircle className="h-4 w-4 mr-1" />
-                          Approve
-                        </Button>
-                      </div>
-                    )}
-                  </div>
+          <TabsContent value={selectedStatus} className="space-y-4 mt-6">
+            {isLoading ? (
+              <Card>
+                <CardContent className="py-12 text-center">
+                  <p className="text-muted-foreground">Loading requests...</p>
                 </CardContent>
               </Card>
-            ))
-          )}
-        </TabsContent>
-      </Tabs>
+            ) : requests.length === 0 ? (
+              <Card>
+                <CardContent className="py-12 text-center">
+                  <p className="text-muted-foreground">No {selectedStatus} requests</p>
+                </CardContent>
+              </Card>
+            ) : (
+              requests.map((request) => (
+                <Card key={request.id}>
+                  <CardHeader>
+                    <div className="flex items-start justify-between">
+                      <div className="space-y-1 flex-1">
+                        <div className="flex items-center gap-2">
+                          <User className="h-4 w-4 text-muted-foreground" />
+                          <CardTitle className="text-lg">{request.user_name}</CardTitle>
+                          <Badge variant="outline">{request.user_email}</Badge>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Building2 className="h-4 w-4" />
+                          <span>{request.company_name}</span>
+                        </div>
+                      </div>
+                      <Badge variant={selectedStatus === 'pending' ? 'default' : selectedStatus === 'approved' ? 'secondary' : 'destructive'}>
+                        {getStatusIcon(selectedStatus)}
+                        <span className="ml-1 capitalize">{selectedStatus}</span>
+                      </Badge>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-2">
+                        <Lock className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-sm text-muted-foreground">Current:</span>
+                        <Badge className={getLevelBadgeColor(request.current_level)}>
+                          {request.current_level}
+                        </Badge>
+                      </div>
+                      <span className="text-muted-foreground">→</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm text-muted-foreground">Requested:</span>
+                        <Badge className={getLevelBadgeColor(request.requested_level)}>
+                          {request.requested_level}
+                        </Badge>
+                      </div>
+                    </div>
 
-      <Dialog open={reviewDialog.open} onOpenChange={(open) => setReviewDialog({ open })}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>
-              {reviewDialog.action === 'approve' ? 'Approve' : 'Deny'} Access Request
-            </DialogTitle>
-            <DialogDescription>
-              {reviewDialog.action === 'approve'
-                ? `Grant ${reviewDialog.request?.user_name} ${reviewDialog.request?.requested_level} access to ${reviewDialog.request?.company_name}?`
-                : `Deny ${reviewDialog.request?.user_name}'s request for ${reviewDialog.request?.requested_level} access?`}
-            </DialogDescription>
-          </DialogHeader>
+                    <div>
+                      <p className="text-sm font-medium mb-1">Reason:</p>
+                      <p className="text-sm text-muted-foreground bg-muted p-3 rounded-md">
+                        {request.reason}
+                      </p>
+                    </div>
 
-          <div className="space-y-4">
-            <div>
-              <label className="text-sm font-medium mb-2 block">
-                Review Notes (Optional)
-              </label>
-              <Textarea
-                placeholder="Add any notes about this decision..."
-                value={reviewNotes}
-                onChange={(e) => setReviewNotes(e.target.value)}
-                rows={3}
-              />
+                    {request.review_notes && (
+                      <div>
+                        <p className="text-sm font-medium mb-1">Review Notes:</p>
+                        <p className="text-sm text-muted-foreground bg-muted p-3 rounded-md">
+                          {request.review_notes}
+                        </p>
+                      </div>
+                    )}
+
+                    <div className="flex items-center justify-between pt-2">
+                      <p className="text-xs text-muted-foreground">
+                        Requested {new Date(request.requested_at).toLocaleDateString()} at{' '}
+                        {new Date(request.requested_at).toLocaleTimeString()}
+                        {request.reviewed_at && (
+                          <> • Reviewed {new Date(request.reviewed_at).toLocaleDateString()}</>
+                        )}
+                      </p>
+
+                      {selectedStatus === 'pending' && (
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleReview(request, 'deny')}
+                            disabled={reviewMutation.isPending}
+                          >
+                            <XCircle className="h-4 w-4 mr-1" />
+                            Deny
+                          </Button>
+                          <Button
+                            size="sm"
+                            onClick={() => handleReview(request, 'approve')}
+                            disabled={reviewMutation.isPending}
+                          >
+                            <CheckCircle className="h-4 w-4 mr-1" />
+                            Approve
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            )}
+          </TabsContent>
+        </Tabs>
+
+        <Dialog open={reviewDialog.open} onOpenChange={(open) => setReviewDialog({ open })}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>
+                {reviewDialog.action === 'approve' ? 'Approve' : 'Deny'} Access Request
+              </DialogTitle>
+              <DialogDescription>
+                {reviewDialog.action === 'approve'
+                  ? `Grant ${reviewDialog.request?.user_name} ${reviewDialog.request?.requested_level} access to ${reviewDialog.request?.company_name}?`
+                  : `Deny ${reviewDialog.request?.user_name}'s request for ${reviewDialog.request?.requested_level} access?`}
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium mb-2 block">
+                  Review Notes (Optional)
+                </label>
+                <Textarea
+                  placeholder="Add any notes about this decision..."
+                  value={reviewNotes}
+                  onChange={(e) => setReviewNotes(e.target.value)}
+                  rows={3}
+                />
+              </div>
             </div>
-          </div>
 
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setReviewDialog({ open: false })}>
-              Cancel
-            </Button>
-            <Button
-              onClick={confirmReview}
-              disabled={reviewMutation.isPending}
-              variant={reviewDialog.action === 'approve' ? 'default' : 'destructive'}
-            >
-              {reviewMutation.isPending ? 'Processing...' : reviewDialog.action === 'approve' ? 'Approve' : 'Deny'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setReviewDialog({ open: false })}>
+                Cancel
+              </Button>
+              <Button
+                onClick={confirmReview}
+                disabled={reviewMutation.isPending}
+                variant={reviewDialog.action === 'approve' ? 'default' : 'destructive'}
+              >
+                {reviewMutation.isPending ? 'Processing...' : reviewDialog.action === 'approve' ? 'Approve' : 'Deny'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
+    </DashboardLayout>
   );
 };
 
