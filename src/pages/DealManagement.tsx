@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useMyDeals } from '@/hooks/useMyDeals';
 import { useUserProfile } from '@/hooks/useUserProfile';
-import DashboardLayout from '@/components/investor/DashboardLayout';
+import AdminDashboardLayout from '@/layouts/AdminDashboardLayout';
 import { DealMetricsBar } from '@/components/deals/DealMetricsBar';
 import { DealFilters } from '@/components/deals/DealFilters';
 import { DealCardsView } from '@/components/deals/DealCardsView';
@@ -104,7 +104,7 @@ const DealManagement: React.FC = () => {
   };
 
   return (
-    <DashboardLayout>
+    <AdminDashboardLayout activeTab="deals">
       <div className="flex h-screen bg-background">
         {/* Main Content Area */}
         <div className={`flex-1 flex flex-col ${selectedDealId ? 'mr-96' : ''} transition-all duration-300`}>
@@ -204,7 +204,7 @@ const DealManagement: React.FC = () => {
           onDealCreated={refresh}
         />
       </div>
-    </DashboardLayout>
+    </AdminDashboardLayout>
   );
 };
 

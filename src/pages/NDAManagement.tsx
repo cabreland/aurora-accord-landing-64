@@ -12,7 +12,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { format, differenceInDays } from 'date-fns';
 import { Eye, XCircle, Search, Calendar, Send, RefreshCw, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
-import DashboardLayout from '@/components/investor/DashboardLayout';
+import AdminDashboardLayout from '@/layouts/AdminDashboardLayout';
 
 interface NDARecord {
   id: string;
@@ -236,7 +236,7 @@ const NDAManagement = () => {
   const expiredCount = ndas.filter(n => n.status === 'expired').length;
 
   return (
-    <DashboardLayout activeTab="ndas">
+    <AdminDashboardLayout activeTab="ndas">
       <div className="p-8 space-y-6">
         <div className="flex justify-between items-start">
           <div>
@@ -566,7 +566,7 @@ const NDAManagement = () => {
           </DialogContent>
         </Dialog>
       </div>
-    </DashboardLayout>
+    </AdminDashboardLayout>
   );
 };
 

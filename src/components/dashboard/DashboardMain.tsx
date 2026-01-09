@@ -1,5 +1,5 @@
 import React from 'react';
-import DashboardLayout from '@/components/investor/DashboardLayout';
+import AdminDashboardLayout from '@/layouts/AdminDashboardLayout';
 import { MyDealsWidget } from './widgets/MyDealsWidget';
 import { QuickActionsWidget } from './widgets/QuickActionsWidget';
 import { MetricsHeader } from './MetricsHeader';
@@ -133,7 +133,7 @@ const DashboardMain = () => {
   };
 
   return (
-    <DashboardLayout activeTab="dashboard">
+    <AdminDashboardLayout activeTab="dashboard">
       <div className="p-8 space-y-8">
         {/* Page Header */}
         <div className="mb-12">
@@ -163,7 +163,7 @@ const DashboardMain = () => {
           </div>
         </div>
       </div>
-    </DashboardLayout>
+    </AdminDashboardLayout>
   );
 };
 

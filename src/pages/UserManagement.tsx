@@ -1,12 +1,12 @@
 import React from 'react';
-import DashboardLayout from '@/components/investor/DashboardLayout';
+import AdminDashboardLayout from '@/layouts/AdminDashboardLayout';
 import UserManagement from '@/components/admin/UserManagement';
 
 const UserManagementPage = () => {
   return (
-    <DashboardLayout activeTab="users">
+    <AdminDashboardLayout activeTab="users">
       <UserManagement />
-    </DashboardLayout>
+    </AdminDashboardLayout>
   );
 };
 

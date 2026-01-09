@@ -9,7 +9,7 @@ import UploadDebugger from '@/components/debug/UploadDebugger';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Building2, Bug } from 'lucide-react';
-import DashboardLayout from '@/components/investor/DashboardLayout';
+import AdminDashboardLayout from '@/layouts/AdminDashboardLayout';
 
 const Documents = () => {
   const [selectedDealId, setSelectedDealId] = useState<string>('all');
@@ -68,7 +68,7 @@ const Documents = () => {
   }
 
   return (
-    <DashboardLayout breadcrumbs={breadcrumbs}>
+    <AdminDashboardLayout breadcrumbs={breadcrumbs}>
       <div className="space-y-6">
         {/* Page Header */}
         <div className="flex items-center justify-between">
@@ -122,7 +122,7 @@ const Documents = () => {
           }}
         />
       </div>
-    </DashboardLayout>
+    </AdminDashboardLayout>
   );
 };
 
