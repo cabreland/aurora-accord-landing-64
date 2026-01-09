@@ -555,6 +555,310 @@ export type Database = {
           },
         ]
       }
+      data_room_activity: {
+        Row: {
+          action_type: string
+          created_at: string | null
+          deal_id: string | null
+          details: Json | null
+          document_id: string | null
+          folder_id: string | null
+          id: string
+          user_id: string | null
+        }
+        Insert: {
+          action_type: string
+          created_at?: string | null
+          deal_id?: string | null
+          details?: Json | null
+          document_id?: string | null
+          folder_id?: string | null
+          id?: string
+          user_id?: string | null
+        }
+        Update: {
+          action_type?: string
+          created_at?: string | null
+          deal_id?: string | null
+          details?: Json | null
+          document_id?: string | null
+          folder_id?: string | null
+          id?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "data_room_activity_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "data_room_activity_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "data_room_documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "data_room_activity_folder_id_fkey"
+            columns: ["folder_id"]
+            isOneToOne: false
+            referencedRelation: "data_room_folders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      data_room_categories: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          icon: string | null
+          id: string
+          index_number: number
+          is_active: boolean | null
+          name: string
+          sort_order: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          index_number: number
+          is_active?: boolean | null
+          name: string
+          sort_order?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          index_number?: number
+          is_active?: boolean | null
+          name?: string
+          sort_order?: number | null
+        }
+        Relationships: []
+      }
+      data_room_documents: {
+        Row: {
+          approved_at: string | null
+          created_at: string | null
+          deal_id: string | null
+          file_name: string
+          file_path: string
+          file_size: number | null
+          file_type: string | null
+          file_url: string | null
+          folder_id: string | null
+          id: string
+          index_number: string | null
+          metadata: Json | null
+          mime_type: string | null
+          rejection_reason: string | null
+          reviewed_by: string | null
+          status: string | null
+          updated_at: string | null
+          uploaded_by: string | null
+          version: number | null
+        }
+        Insert: {
+          approved_at?: string | null
+          created_at?: string | null
+          deal_id?: string | null
+          file_name: string
+          file_path: string
+          file_size?: number | null
+          file_type?: string | null
+          file_url?: string | null
+          folder_id?: string | null
+          id?: string
+          index_number?: string | null
+          metadata?: Json | null
+          mime_type?: string | null
+          rejection_reason?: string | null
+          reviewed_by?: string | null
+          status?: string | null
+          updated_at?: string | null
+          uploaded_by?: string | null
+          version?: number | null
+        }
+        Update: {
+          approved_at?: string | null
+          created_at?: string | null
+          deal_id?: string | null
+          file_name?: string
+          file_path?: string
+          file_size?: number | null
+          file_type?: string | null
+          file_url?: string | null
+          folder_id?: string | null
+          id?: string
+          index_number?: string | null
+          metadata?: Json | null
+          mime_type?: string | null
+          rejection_reason?: string | null
+          reviewed_by?: string | null
+          status?: string | null
+          updated_at?: string | null
+          uploaded_by?: string | null
+          version?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "data_room_documents_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "data_room_documents_folder_id_fkey"
+            columns: ["folder_id"]
+            isOneToOne: false
+            referencedRelation: "data_room_folders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      data_room_folders: {
+        Row: {
+          category_id: string | null
+          created_at: string | null
+          deal_id: string | null
+          description: string | null
+          id: string
+          index_number: string
+          is_required: boolean | null
+          name: string
+          parent_folder_id: string | null
+          sort_order: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          category_id?: string | null
+          created_at?: string | null
+          deal_id?: string | null
+          description?: string | null
+          id?: string
+          index_number: string
+          is_required?: boolean | null
+          name: string
+          parent_folder_id?: string | null
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          category_id?: string | null
+          created_at?: string | null
+          deal_id?: string | null
+          description?: string | null
+          id?: string
+          index_number?: string
+          is_required?: boolean | null
+          name?: string
+          parent_folder_id?: string | null
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "data_room_folders_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "data_room_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "data_room_folders_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "data_room_folders_parent_folder_id_fkey"
+            columns: ["parent_folder_id"]
+            isOneToOne: false
+            referencedRelation: "data_room_folders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      data_room_permissions: {
+        Row: {
+          can_approve: boolean | null
+          can_delete: boolean | null
+          can_download: boolean | null
+          can_upload: boolean | null
+          created_at: string | null
+          deal_id: string | null
+          id: string
+          role: string
+          user_id: string | null
+        }
+        Insert: {
+          can_approve?: boolean | null
+          can_delete?: boolean | null
+          can_download?: boolean | null
+          can_upload?: boolean | null
+          created_at?: string | null
+          deal_id?: string | null
+          id?: string
+          role: string
+          user_id?: string | null
+        }
+        Update: {
+          can_approve?: boolean | null
+          can_delete?: boolean | null
+          can_download?: boolean | null
+          can_upload?: boolean | null
+          created_at?: string | null
+          deal_id?: string | null
+          id?: string
+          role?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "data_room_permissions_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      data_room_templates: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          folder_structure: Json
+          id: string
+          is_active: boolean | null
+          name: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          folder_structure: Json
+          id?: string
+          is_active?: boolean | null
+          name: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          folder_structure?: Json
+          id?: string
+          is_active?: boolean | null
+          name?: string
+        }
+        Relationships: []
+      }
       deal_assignments: {
         Row: {
           assigned_by: string
@@ -2364,6 +2668,10 @@ export type Database = {
       can_access_document: {
         Args: { p_document_id: string; p_user_id: string }
         Returns: boolean
+      }
+      create_data_room_from_template: {
+        Args: { p_deal_id: string; p_template_name: string }
+        Returns: undefined
       }
       create_diligence_notification: {
         Args: {
