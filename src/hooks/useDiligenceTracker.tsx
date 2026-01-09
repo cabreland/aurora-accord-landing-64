@@ -266,11 +266,25 @@ export const useCreateDiligenceRequest = () => {
         .single();
       
       if (error) throw error;
+      
+      // Create notification if assigned to someone
+      if (request.assignee_id && request.assignee_id !== user?.id) {
+        await supabase.from('diligence_notifications').insert({
+          user_id: request.assignee_id,
+          request_id: data.id,
+          deal_id: request.deal_id,
+          type: 'assignment',
+          title: 'New Assignment',
+          message: `You've been assigned to "${request.title}"`
+        });
+      }
+      
       return data;
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['diligence-requests', variables.deal_id] });
       queryClient.invalidateQueries({ queryKey: ['deals-with-diligence'] });
+      queryClient.invalidateQueries({ queryKey: ['diligence-request-counts', variables.deal_id] });
       toast.success('Request created successfully');
     },
     onError: (error) => {
@@ -282,9 +296,17 @@ export const useCreateDiligenceRequest = () => {
 
 export const useUpdateDiligenceRequest = () => {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
   
   return useMutation({
     mutationFn: async ({ id, ...updates }: Partial<DiligenceRequest> & { id: string }) => {
+      // Get original request to check for changes
+      const { data: original } = await supabase
+        .from('diligence_requests')
+        .select('assignee_id, status, title, deal_id')
+        .eq('id', id)
+        .single();
+      
       const { data, error } = await supabase
         .from('diligence_requests')
         .update(updates)
@@ -293,11 +315,53 @@ export const useUpdateDiligenceRequest = () => {
         .single();
       
       if (error) throw error;
+      
+      // Create notifications for changes
+      const notifications: Array<{
+        user_id: string;
+        request_id: string;
+        deal_id: string | null;
+        type: string;
+        title: string;
+        message: string;
+      }> = [];
+      
+      // Notify if assignee changed
+      if (updates.assignee_id && updates.assignee_id !== original?.assignee_id && updates.assignee_id !== user?.id) {
+        notifications.push({
+          user_id: updates.assignee_id,
+          request_id: id,
+          deal_id: data.deal_id,
+          type: 'assignment',
+          title: 'New Assignment',
+          message: `You've been assigned to "${original?.title || data.title}"`
+        });
+      }
+      
+      // Notify if status changed (notify assignee)
+      if (updates.status && updates.status !== original?.status && data.assignee_id && data.assignee_id !== user?.id) {
+        notifications.push({
+          user_id: data.assignee_id,
+          request_id: id,
+          deal_id: data.deal_id,
+          type: 'status_change',
+          title: 'Status Changed',
+          message: `Status changed to "${updates.status}" on "${original?.title || data.title}"`
+        });
+      }
+      
+      // Insert all notifications
+      if (notifications.length > 0) {
+        await supabase.from('diligence_notifications').insert(notifications);
+      }
+      
       return data;
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['diligence-requests', data.deal_id] });
       queryClient.invalidateQueries({ queryKey: ['deals-with-diligence'] });
+      queryClient.invalidateQueries({ queryKey: ['diligence-notifications'] });
+      queryClient.invalidateQueries({ queryKey: ['diligence-notifications-unread-count'] });
       toast.success('Request updated successfully');
     },
     onError: (error) => {
@@ -338,6 +402,13 @@ export const useAddDiligenceComment = () => {
   
   return useMutation({
     mutationFn: async ({ requestId, content }: { requestId: string; content: string }) => {
+      // Get request details for notification
+      const { data: request } = await supabase
+        .from('diligence_requests')
+        .select('title, assignee_id, deal_id, created_by')
+        .eq('id', requestId)
+        .single();
+      
       const { data, error } = await supabase
         .from('diligence_comments')
         .insert({
@@ -349,10 +420,63 @@ export const useAddDiligenceComment = () => {
         .single();
       
       if (error) throw error;
+      
+      // Get all previous commenters to notify
+      const { data: previousComments } = await supabase
+        .from('diligence_comments')
+        .select('user_id')
+        .eq('request_id', requestId)
+        .neq('user_id', user?.id);
+      
+      const usersToNotify = new Set<string>();
+      
+      // Add assignee
+      if (request?.assignee_id && request.assignee_id !== user?.id) {
+        usersToNotify.add(request.assignee_id);
+      }
+      
+      // Add creator
+      if (request?.created_by && request.created_by !== user?.id) {
+        usersToNotify.add(request.created_by);
+      }
+      
+      // Add previous commenters
+      previousComments?.forEach(c => {
+        if (c.user_id !== user?.id) {
+          usersToNotify.add(c.user_id);
+        }
+      });
+      
+      // Get current user's name
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('first_name, last_name')
+        .eq('user_id', user?.id)
+        .single();
+      
+      const commenterName = profile ? `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'Someone' : 'Someone';
+      
+      // Create notifications
+      const notifications = Array.from(usersToNotify).map(userId => ({
+        user_id: userId,
+        request_id: requestId,
+        deal_id: request?.deal_id || null,
+        type: 'comment',
+        title: 'New Comment',
+        message: `${commenterName} commented on "${request?.title || 'a request'}"`
+      }));
+      
+      if (notifications.length > 0) {
+        await supabase.from('diligence_notifications').insert(notifications);
+      }
+      
       return data;
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['diligence-comments', variables.requestId] });
+      queryClient.invalidateQueries({ queryKey: ['diligence-request-counts'] });
+      queryClient.invalidateQueries({ queryKey: ['diligence-notifications'] });
+      queryClient.invalidateQueries({ queryKey: ['diligence-notifications-unread-count'] });
       toast.success('Comment added');
     },
     onError: (error) => {

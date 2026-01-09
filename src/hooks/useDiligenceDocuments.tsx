@@ -45,6 +45,13 @@ export const useUploadDiligenceDocument = () => {
     }) => {
       if (!user?.id) throw new Error('User not authenticated');
       
+      // Get request details for notification
+      const { data: request } = await supabase
+        .from('diligence_requests')
+        .select('title, assignee_id, deal_id, created_by')
+        .eq('id', requestId)
+        .single();
+      
       // Generate a unique file path
       const fileExt = file.name.split('.').pop();
       const fileName = `${requestId}/${Date.now()}-${file.name}`;
@@ -81,10 +88,34 @@ export const useUploadDiligenceDocument = () => {
         throw dbError;
       }
       
+      // Create notification for assignee
+      if (request?.assignee_id && request.assignee_id !== user.id) {
+        // Get uploader's name
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('first_name, last_name')
+          .eq('user_id', user.id)
+          .single();
+        
+        const uploaderName = profile ? `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'Someone' : 'Someone';
+        
+        await supabase.from('diligence_notifications').insert({
+          user_id: request.assignee_id,
+          request_id: requestId,
+          deal_id: request.deal_id,
+          type: 'document',
+          title: 'Document Uploaded',
+          message: `${uploaderName} uploaded "${file.name}" to "${request.title}"`
+        });
+      }
+      
       return data;
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['diligence-documents', variables.requestId] });
+      queryClient.invalidateQueries({ queryKey: ['diligence-request-counts'] });
+      queryClient.invalidateQueries({ queryKey: ['diligence-notifications'] });
+      queryClient.invalidateQueries({ queryKey: ['diligence-notifications-unread-count'] });
       toast.success('Document uploaded successfully');
     },
     onError: (error) => {

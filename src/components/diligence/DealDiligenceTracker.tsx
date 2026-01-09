@@ -437,6 +437,7 @@ const DealDiligenceTracker: React.FC = () => {
               subcategories={subcategories}
               onSelectRequest={setSelectedRequest}
               isLoading={isLoading}
+              dealId={dealId}
             />
           </div>
         </div>

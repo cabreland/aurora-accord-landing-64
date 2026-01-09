@@ -915,6 +915,57 @@ export type Database = {
           },
         ]
       }
+      diligence_notifications: {
+        Row: {
+          created_at: string | null
+          deal_id: string | null
+          id: string
+          message: string
+          read: boolean | null
+          request_id: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          deal_id?: string | null
+          id?: string
+          message: string
+          read?: boolean | null
+          request_id?: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          deal_id?: string | null
+          id?: string
+          message?: string
+          read?: boolean | null
+          request_id?: string | null
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "diligence_notifications_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "diligence_notifications_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "diligence_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       diligence_requests: {
         Row: {
           assignee_id: string | null
@@ -2247,6 +2298,17 @@ export type Database = {
       can_access_document: {
         Args: { p_document_id: string; p_user_id: string }
         Returns: boolean
+      }
+      create_diligence_notification: {
+        Args: {
+          p_deal_id: string
+          p_message: string
+          p_request_id: string
+          p_title: string
+          p_type: string
+          p_user_id: string
+        }
+        Returns: string
       }
       get_user_access_level: {
         Args: { p_company_id: string; p_user_id: string }
