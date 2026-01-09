@@ -19,22 +19,24 @@ interface MetricCardProps {
 
 const MetricCard = ({ title, value, change, icon: Icon, trend, onClick, showBadge }: MetricCardProps) => {
   const trendColors = {
-    up: 'text-[#22C55E]',
-    down: 'text-[#EF4444]',
-    neutral: 'text-[#F4E4BC]'
+    up: 'text-success',
+    down: 'text-destructive',
+    neutral: 'text-muted-foreground'
   };
 
   return (
     <Card 
-      className="bg-gradient-to-b from-[#2A2F3A] to-[#1A1F2E] border-[#D4AF37]/30 hover:border-[#D4AF37]/50 hover:shadow-lg hover:-translate-y-1 transition-all duration-200 min-h-[120px] cursor-pointer rounded-lg"
+      className="bg-card border border-border hover:border-primary/30 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 min-h-[120px] cursor-pointer"
       onClick={onClick}
     >
       <CardContent className="p-6">
         <div className="flex items-center justify-between mb-4">
           <div className="relative">
-            <Icon className="w-7 h-7 text-[#D4AF37]" />
+            <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+              <Icon className="w-6 h-6 text-primary" />
+            </div>
             {showBadge && parseInt(value) > 0 && (
-              <div className="absolute -top-1 -right-1 w-3 h-3 bg-[#F28C38] rounded-full" />
+              <div className="absolute -top-1 -right-1 w-3 h-3 bg-warning rounded-full" />
             )}
           </div>
           {change && (
@@ -44,8 +46,8 @@ const MetricCard = ({ title, value, change, icon: Icon, trend, onClick, showBadg
           )}
         </div>
         <div>
-          <div className="text-3xl font-bold text-[#FAFAFA] mb-2">{value}</div>
-          <p className="text-sm text-[#F4E4BC]/70 font-medium">{title}</p>
+          <div className="text-3xl font-bold text-foreground mb-2">{value}</div>
+          <p className="text-sm text-muted-foreground font-medium">{title}</p>
         </div>
       </CardContent>
     </Card>
@@ -107,8 +109,6 @@ export const MetricsHeader: React.FC = () => {
         }
       });
 
-      console.log('[Dashboard Metrics] Pipeline Value:', pipelineValue, 'from', dealsData?.length, 'deals');
-
       // 2. Active Deals: COUNT(*) FROM deals WHERE status='active'
       let activeQuery = supabase
         .from('deals')
@@ -120,11 +120,6 @@ export const MetricsHeader: React.FC = () => {
       }
 
       const { count: activeDeals, error: activeError } = await activeQuery;
-      
-      if (activeError) {
-        console.error('[Dashboard Metrics] Active Deals error:', activeError);
-      }
-      console.log('[Dashboard Metrics] Active Deals:', activeDeals);
 
       // 3. NDAs Pending: COUNT(*) FROM access_requests WHERE status='pending'
       const { count: pendingNDAs, error: ndaError } = await supabase
@@ -132,16 +127,7 @@ export const MetricsHeader: React.FC = () => {
         .select('*', { count: 'exact', head: true })
         .eq('status', 'pending');
 
-      if (ndaError) {
-        console.error('[Dashboard Metrics] NDAs Pending error:', ndaError);
-      }
-      console.log('[Dashboard Metrics] NDAs Pending:', pendingNDAs);
-
-      // 4. Closing This Month: COUNT(*) FROM deals WHERE status='active' AND expected_close_date is this month
-      const now = new Date();
-      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-      const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString();
-
+      // 4. Closing This Month
       let closingQuery = supabase
         .from('deals')
         .select('*', { count: 'exact', head: true })
@@ -153,16 +139,11 @@ export const MetricsHeader: React.FC = () => {
 
       const { count: closingThisMonth, error: closingError } = await closingQuery;
 
-      if (closingError) {
-        console.error('[Dashboard Metrics] Closing This Month error:', closingError);
-      }
-      console.log('[Dashboard Metrics] Closing This Month:', closingThisMonth);
-
       setMetrics({
         pipelineValue,
         activeDeals: activeDeals || 0,
         pendingNDAs: pendingNDAs || 0,
-        closingThisMonth: Math.ceil((closingThisMonth || 0) * 0.3) // Estimate 30% closing this month
+        closingThisMonth: Math.ceil((closingThisMonth || 0) * 0.3)
       });
 
     } catch (error) {
@@ -176,7 +157,6 @@ export const MetricsHeader: React.FC = () => {
     if (user && profile) {
       fetchMetrics();
       
-      // Refresh every 30 seconds
       const interval = setInterval(fetchMetrics, 30000);
       return () => clearInterval(interval);
     }
@@ -186,10 +166,10 @@ export const MetricsHeader: React.FC = () => {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {[...Array(4)].map((_, i) => (
-          <Card key={i} className="bg-gradient-to-b from-[#2A2F3A] to-[#1A1F2E] border-[#D4AF37]/30 min-h-[120px] rounded-lg">
+          <Card key={i} className="bg-card border border-border min-h-[120px]">
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
-                <Skeleton className="w-7 h-7" />
+                <Skeleton className="w-12 h-12 rounded-lg" />
                 <Skeleton className="w-12 h-4" />
               </div>
               <Skeleton className="w-16 h-8 mb-2" />

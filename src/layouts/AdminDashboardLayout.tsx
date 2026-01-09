@@ -206,8 +206,8 @@ const AdminDashboardLayout = ({ children, activeTab = 'dashboard', breadcrumbs }
   );
 
   return (
-    <div className="min-h-screen bg-[#1C2526] flex">
-      {/* Desktop Sidebar - Fixed position */}
+    <div className="min-h-screen bg-background flex">
+      {/* Desktop Sidebar - Fixed position - KEEP DARK */}
       <div className="w-64 bg-gradient-to-b from-[#0A0F0F] to-[#1A1F2E] border-r border-[#D4AF37]/30 hidden lg:block fixed left-0 top-0 h-screen overflow-y-auto z-40">
         <SidebarContent />
       </div>
@@ -231,9 +231,9 @@ const AdminDashboardLayout = ({ children, activeTab = 'dashboard', breadcrumbs }
       </div>
 
       {/* Main Content - With left margin for sidebar */}
-      <div className="flex-1 lg:ml-64 overflow-auto">
-        {/* Header with Notification Bell and User Menu */}
-        <div className="bg-gradient-to-b from-[#0A0F0F] to-[#1A1F2E] border-b border-[#D4AF37]/30 p-4 lg:p-6 sticky top-0 z-30">
+      <div className="flex-1 lg:ml-64 overflow-auto bg-background">
+        {/* Header - Light theme */}
+        <div className="bg-card border-b border-border p-4 lg:p-6 sticky top-0 z-30">
           <div className="flex justify-end items-center">
             <div className="flex items-center gap-3">
               <NotificationBell />
@@ -243,12 +243,12 @@ const AdminDashboardLayout = ({ children, activeTab = 'dashboard', breadcrumbs }
         </div>
         
         {/* Breadcrumbs - Below header, above page content */}
-        <div className="px-4 lg:px-6 pt-4 lg:pt-6">
+        <div className="px-4 lg:px-6 pt-4 lg:pt-6 bg-background">
           <Breadcrumbs items={breadcrumbs} />
         </div>
         
         {/* Page Content */}
-        <div className="p-4 lg:p-6 pt-0 lg:pt-0">
+        <div className="p-4 lg:p-6 pt-0 lg:pt-0 bg-background">
           {children}
         </div>
       </div>

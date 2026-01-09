@@ -237,10 +237,10 @@ const NDAManagement = () => {
 
   return (
     <AdminDashboardLayout activeTab="ndas">
-      <div className="p-8 space-y-6">
+      <div className="space-y-6">
         <div className="flex justify-between items-start">
           <div>
-            <h1 className="text-3xl font-bold">NDA Management</h1>
+            <h1 className="text-3xl font-bold text-foreground">NDA Management</h1>
             <p className="text-muted-foreground">Track and manage all signed NDAs</p>
           </div>
           <Button 
@@ -256,31 +256,31 @@ const NDAManagement = () => {
 
         {/* Stats */}
         <div className="grid grid-cols-4 gap-4">
-          <Card>
+          <Card className="bg-card border-border">
             <CardContent className="pt-6">
-              <div className="text-3xl font-bold">{activeCount}</div>
+              <div className="text-3xl font-bold text-foreground">{activeCount}</div>
               <p className="text-sm text-muted-foreground">Active</p>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="bg-card border-border">
             <CardContent className="pt-6">
-              <div className="text-3xl font-bold text-orange-500">
+              <div className="text-3xl font-bold text-warning">
                 {expiringSoonCount}
               </div>
               <p className="text-sm text-muted-foreground">Expiring Soon</p>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="bg-card border-border">
             <CardContent className="pt-6">
-              <div className="text-3xl font-bold text-red-500">
+              <div className="text-3xl font-bold text-destructive">
                 {expiredCount}
               </div>
               <p className="text-sm text-muted-foreground">Expired</p>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="bg-card border-border">
             <CardContent className="pt-6">
-              <div className="text-3xl font-bold">{ndas.length}</div>
+              <div className="text-3xl font-bold text-foreground">{ndas.length}</div>
               <p className="text-sm text-muted-foreground">Total</p>
             </CardContent>
           </Card>
@@ -294,11 +294,11 @@ const NDAManagement = () => {
               placeholder="Search by name, email, or deal..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-9"
+              className="pl-9 bg-background border-border"
             />
           </div>
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-[200px]">
+            <SelectTrigger className="w-[200px] bg-background border-border">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -311,7 +311,7 @@ const NDAManagement = () => {
         </div>
 
         {/* Table */}
-        <Card>
+        <Card className="bg-card border-border">
           <Table>
             <TableHeader>
               <TableRow>

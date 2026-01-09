@@ -4,107 +4,111 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Professional Light Theme - M&A Portal */
+    --background: 0 0% 100%;              /* #FFFFFF - Primary white background */
+    --foreground: 220 13% 17%;            /* #1F2937 - Dark charcoal text */
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;                    /* #FFFFFF - White cards */
+    --card-foreground: 220 13% 17%;       /* #1F2937 - Dark text on cards */
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 220 13% 17%;
 
-    /* M&A Portal Color Palette */
-    --primary: 45 84% 54%;  /* Gold #D4AF37 */
-    --primary-foreground: 162 14% 4%;  /* Dark #0A0F0F */
+    /* Primary Action Color - Blue */
+    --primary: 217 91% 60%;               /* #3B82F6 - Blue primary */
+    --primary-foreground: 0 0% 100%;      /* White text on primary */
 
-    --secondary: 23 85% 59%;  /* Orange #F28C38 */
-    --secondary-foreground: 162 14% 4%;  /* Dark #0A0F0F */
+    /* Secondary - Light gray backgrounds */
+    --secondary: 213 27% 97%;             /* #F7F9FB - Light gray */
+    --secondary-foreground: 220 13% 17%;  /* Dark text */
 
-    --tertiary: 45 85% 81%;  /* Light Gold #F4E4BC */
-    --tertiary-foreground: 162 14% 4%;  /* Dark #0A0F0F */
+    /* Muted - Subtle backgrounds and text */
+    --muted: 213 27% 97%;                 /* #F7F9FB */
+    --muted-foreground: 215 16% 47%;      /* #6B7280 - Medium gray text */
 
-    --accent: 45 84% 54%;  /* Gold accent */
-    --accent-foreground: 162 14% 4%;
+    /* Accent - Subtle highlight */
+    --accent: 213 27% 97%;                /* #F7F9FB */
+    --accent-foreground: 220 13% 17%;
 
-    --success: 141 76% 47%;  /* Green #22C55E */
-    --success-foreground: 0 0% 98%;
+    /* Success, Warning, Danger */
+    --success: 160 84% 39%;               /* #10B981 - Green */
+    --success-foreground: 0 0% 100%;
+    
+    --warning: 38 92% 50%;                /* #F59E0B - Amber/Yellow */
+    --warning-foreground: 220 13% 17%;
 
-    --warning: 23 85% 59%;  /* Orange #F28C38 */
-    --warning-foreground: 162 14% 4%;
+    --destructive: 0 84% 60%;             /* #EF4444 - Red */
+    --destructive-foreground: 0 0% 100%;
 
-    /* Portal backgrounds */
-    --portal-bg: 191 14% 16%;  /* #1C2526 */
-    --portal-dark: 162 14% 4%;  /* #0A0F0F */
-    --portal-card: 211 18% 14%;  /* #1A1F2E */
-    --portal-card-light: 210 16% 20%;  /* #2A2F3A */
+    --info: 262 83% 58%;                  /* #8B5CF6 - Purple */
+    --info-foreground: 0 0% 100%;
+
+    /* Borders */
+    --border: 220 13% 90%;                /* #E5E7EB - Light border */
+    --input: 220 13% 90%;                 /* #E5E7EB */
+    --ring: 217 91% 60%;                  /* Blue focus ring */
+
+    --radius: 0.5rem;
+
+    /* Sidebar - Keep dark for visual hierarchy */
+    --sidebar-background: 222 47% 6%;     /* #0A0F0F - Dark sidebar */
+    --sidebar-foreground: 45 68% 85%;     /* #F4E4BC - Light gold text */
+    --sidebar-primary: 45 84% 54%;        /* #D4AF37 - Gold */
+    --sidebar-primary-foreground: 222 47% 6%;
+    --sidebar-accent: 220 17% 17%;        /* #1A1F2E */
+    --sidebar-accent-foreground: 45 68% 85%;
+    --sidebar-border: 45 84% 54% / 0.3;   /* Gold border with opacity */
+    --sidebar-ring: 45 84% 54%;           /* Gold focus */
+
+    /* Legacy portal variables for gradual migration */
+    --portal-bg: 213 27% 97%;             /* #F7F9FB */
+    --portal-dark: 220 13% 17%;           /* #1F2937 */
+    --portal-card: 0 0% 100%;             /* #FFFFFF */
+    --portal-card-light: 213 27% 97%;     /* #F7F9FB */
 
     /* Text colors */
-    --text-primary: 0 0% 98%;  /* #FAFAFA */
-    --text-secondary: 45 68% 85%;  /* #F4E4BC */
-
-    --muted: 220 14% 96%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 45 84% 54%;
-
-    --radius: 0.75rem;
-
-    /* Portal gradients */
-    --gradient-gold: linear-gradient(135deg, hsl(45 84% 54%), hsl(45 85% 81%));
-    --gradient-dark: linear-gradient(135deg, hsl(162 14% 4%), hsl(211 18% 14%));
-    --gradient-card: linear-gradient(135deg, hsl(210 16% 20%), hsl(211 18% 14%));
-
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --text-primary: 220 13% 17%;          /* #1F2937 */
+    --text-secondary: 215 16% 47%;        /* #6B7280 */
+    --text-muted: 215 14% 62%;            /* #9CA3AF */
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
+    --background: 222 47% 6%;
     --foreground: 210 40% 98%;
 
-    --card: 222.2 84% 4.9%;
+    --card: 222 47% 8%;
     --card-foreground: 210 40% 98%;
 
-    --popover: 222.2 84% 4.9%;
+    --popover: 222 47% 8%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 217 91% 60%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 217.2 32.6% 17.5%;
+    --secondary: 217 33% 17%;
     --secondary-foreground: 210 40% 98%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 217 33% 17%;
+    --muted-foreground: 215 20% 65%;
 
-    --accent: 217.2 32.6% 17.5%;
+    --accent: 217 33% 17%;
     --accent-foreground: 210 40% 98%;
 
-    --destructive: 0 62.8% 30.6%;
+    --destructive: 0 63% 31%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --border: 217 33% 17%;
+    --input: 217 33% 17%;
+    --ring: 212 27% 84%;
+    
+    --sidebar-background: 222 47% 6%;
+    --sidebar-foreground: 45 68% 85%;
+    --sidebar-primary: 45 84% 54%;
+    --sidebar-primary-foreground: 222 47% 6%;
+    --sidebar-accent: 220 17% 17%;
+    --sidebar-accent-foreground: 45 68% 85%;
+    --sidebar-border: 45 84% 54% / 0.3;
+    --sidebar-ring: 45 84% 54%;
   }
 }
 
@@ -119,30 +123,32 @@
 }
 
 @layer utilities {
-  /* Friendly gradients */
-  .gradient-primary {
-    background: linear-gradient(135deg, hsl(var(--gradient-start)), hsl(var(--gradient-middle)));
+  /* Status badge utilities */
+  .badge-success {
+    @apply bg-success/10 text-success border-success/20;
   }
   
-  .gradient-secondary {
-    background: linear-gradient(135deg, hsl(var(--gradient-middle)), hsl(var(--gradient-end)));
+  .badge-warning {
+    @apply bg-warning/10 text-warning border-warning/20;
   }
   
-  .gradient-warm {
-    background: linear-gradient(135deg, hsl(var(--tertiary)), hsl(var(--accent)));
+  .badge-destructive {
+    @apply bg-destructive/10 text-destructive border-destructive/20;
   }
   
-  .gradient-cool {
-    background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--secondary)));
+  .badge-info {
+    @apply bg-info/10 text-info border-info/20;
   }
-  
-  .gradient-rainbow {
-    background: linear-gradient(135deg, 
-      hsl(var(--primary)), 
-      hsl(var(--gradient-middle)), 
-      hsl(var(--secondary)), 
-      hsl(var(--tertiary))
-    );
+
+  /* Card hover effect */
+  .card-hover {
+    @apply hover:shadow-lg hover:border-primary/20 transition-all duration-200;
+  }
+
+  /* Light background patterns */
+  .bg-dots {
+    background-image: radial-gradient(circle, hsl(var(--border)) 1px, transparent 1px);
+    background-size: 24px 24px;
   }
 
   /* Friendly animations */
@@ -161,12 +167,5 @@
     50% {
       transform: translateY(-10px);
     }
-  }
-
-  /* Glass effect */
-  .glass {
-    backdrop-filter: blur(10px);
-    background: rgba(255, 255, 255, 0.25);
-    border: 1px solid rgba(255, 255, 255, 0.18);
   }
 }

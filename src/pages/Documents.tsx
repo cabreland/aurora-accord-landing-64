@@ -74,11 +74,11 @@ const Documents = () => {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-3">
-              <h1 className="text-3xl font-bold text-[#FAFAFA]">Document Management</h1>
+              <h1 className="text-3xl font-bold text-foreground">Document Management</h1>
               {dealInfo && (
                 <div className="flex items-center gap-2">
-                  <Building2 className="w-5 h-5 text-[#F4E4BC]/60" />
-                  <Badge variant="outline" className="bg-[#D4AF37]/10 text-[#D4AF37] border-[#D4AF37]/20">
+                  <Building2 className="w-5 h-5 text-muted-foreground" />
+                  <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">
                     {dealInfo.title} • {dealInfo.company_name}
                   </Badge>
                 </div>
@@ -92,7 +92,7 @@ const Documents = () => {
               variant="outline"
               size="sm"
               onClick={() => setShowDebugger(!showDebugger)}
-              className="gap-2 border-[#D4AF37]/30 text-[#D4AF37] hover:bg-[#D4AF37]/10"
+              className="gap-2"
             >
               <Bug className="w-4 h-4" />
               {showDebugger ? 'Hide' : 'Debug Storage'}
@@ -117,7 +117,6 @@ const Documents = () => {
           dealId={selectedDealId}
           refreshTrigger={refreshTrigger}
           onRefresh={() => {
-            console.log('🔄 Documents.tsx onRefresh called - incrementing refreshTrigger from', refreshTrigger, 'to', refreshTrigger + 1);
             setRefreshTrigger(prev => prev + 1);
           }}
         />

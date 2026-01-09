@@ -20,14 +20,14 @@ export const WidgetContainer = ({
 }: WidgetContainerProps) => {
   return (
     <Card className={cn(
-      "bg-gradient-to-b from-[#2A2F3A] to-[#1A1F2E] border-[#D4AF37]/30 hover:border-[#D4AF37]/40 transition-all duration-200 shadow-md hover:shadow-lg rounded-lg",
+      "bg-card border border-border hover:border-primary/20 transition-all duration-200 shadow-sm hover:shadow-md",
       className
     )}>
       <CardHeader className="pb-4">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-[#FAFAFA] flex items-center gap-3 text-lg font-bold">
-            <div className="w-10 h-10 rounded-full bg-[#D4AF37]/20 flex items-center justify-center">
-              <Icon className="w-5 h-5 text-[#D4AF37]" />
+          <CardTitle className="text-foreground flex items-center gap-3 text-lg font-bold">
+            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+              <Icon className="w-5 h-5 text-primary" />
             </div>
             {title}
           </CardTitle>
