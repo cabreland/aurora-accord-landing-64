@@ -1,11 +1,15 @@
 import React from 'react';
-import { format, isPast, isToday, addDays } from 'date-fns';
+import { format, isPast, isToday, addDays, differenceInHours } from 'date-fns';
 import { 
   AlertTriangle,
   FileText,
   MessageSquare,
   MoreHorizontal,
-  Sparkles
+  Sparkles,
+  Check,
+  Clock,
+  Circle,
+  AlertCircle
 } from 'lucide-react';
 import {
   Table,
@@ -27,7 +31,7 @@ import {
 import { DiligenceRequest, DiligenceCategory, DiligenceSubcategory } from '@/hooks/useDiligenceTracker';
 import { useTeamMembers } from '@/hooks/useTeamMembers';
 import { useDiligenceRequestCounts } from '@/hooks/useDiligenceRequestCounts';
-import { useRequestViews, hasUnreadUpdates, isRecentlyUpdated } from '@/hooks/useRequestViews';
+import { useRequestViews, hasUnreadUpdates } from '@/hooks/useRequestViews';
 import StackedAvatars, { AssigneeInfo } from '@/components/common/StackedAvatars';
 
 interface DiligenceRequestTableProps {
@@ -39,11 +43,28 @@ interface DiligenceRequestTableProps {
   dealId?: string;
 }
 
+// Status badge configuration with icons and proper colors
 const statusConfig = {
-  open: { label: 'Open', color: 'text-blue-600', bg: 'bg-blue-50 border-blue-200', dotColor: 'bg-blue-500' },
-  in_progress: { label: 'In Progress', color: 'text-amber-600', bg: 'bg-amber-50 border-amber-200', dotColor: 'bg-amber-500' },
-  completed: { label: 'Resolved', color: 'text-green-600', bg: 'bg-green-50 border-green-200', dotColor: 'bg-green-500' },
-  blocked: { label: 'Blocked', color: 'text-red-600', bg: 'bg-red-100 border-red-300', dotColor: 'bg-red-500' },
+  open: { 
+    label: 'Open', 
+    icon: Circle,
+    className: 'bg-gray-100 text-gray-700 border-gray-200 hover:bg-gray-100'
+  },
+  in_progress: { 
+    label: 'In Progress', 
+    icon: Clock,
+    className: 'bg-blue-100 text-blue-700 border-blue-200 hover:bg-blue-100'
+  },
+  completed: { 
+    label: 'Resolved', 
+    icon: Check,
+    className: 'bg-green-100 text-green-700 border-green-200 hover:bg-green-100'
+  },
+  blocked: { 
+    label: 'Blocked', 
+    icon: AlertCircle,
+    className: 'bg-red-100 text-red-700 border-red-200 hover:bg-red-100'
+  },
 };
 
 const priorityConfig = {
@@ -60,9 +81,42 @@ const DiligenceRequestTable: React.FC<DiligenceRequestTableProps> = ({
   isLoading,
   dealId
 }) => {
+  const [selectedRequests, setSelectedRequests] = React.useState<string[]>([]);
   const { data: teamMembers = [] } = useTeamMembers();
   const { data: requestCounts = {} } = useDiligenceRequestCounts(dealId);
   const { data: viewMap = {} } = useRequestViews(dealId);
+  
+  // Toggle selection for bulk actions
+  const toggleSelection = (requestId: string) => {
+    setSelectedRequests(prev => 
+      prev.includes(requestId) 
+        ? prev.filter(id => id !== requestId)
+        : [...prev, requestId]
+    );
+  };
+
+  // Toggle all selection
+  const toggleAllSelection = () => {
+    if (selectedRequests.length === requests.length) {
+      setSelectedRequests([]);
+    } else {
+      setSelectedRequests(requests.map(r => r.id));
+    }
+  };
+
+  // Check if "NEW" badge should show
+  // Shows when: created < 24 hours ago AND no assignee AND no comments AND status is open
+  const shouldShowNewBadge = (request: DiligenceRequest, commentCount: number): boolean => {
+    const createdAt = new Date(request.created_at);
+    const hoursSinceCreation = differenceInHours(new Date(), createdAt);
+    const isRecent = hoursSinceCreation < 24;
+    
+    const hasAssignee = (request.assignee_ids?.length > 0) || !!request.assignee_id;
+    const hasComments = commentCount > 0;
+    const isStillOpen = request.status === 'open';
+    
+    return isRecent && !hasAssignee && !hasComments && isStillOpen;
+  };
   
   // Get assignees for a request (supports both single and multiple)
   const getAssignees = (request: DiligenceRequest): AssigneeInfo[] => {
@@ -84,6 +138,7 @@ const DiligenceRequestTable: React.FC<DiligenceRequestTableProps> = ({
         role: m.role,
       }));
   };
+
   const getCategoryName = (categoryId: string) => {
     return categories.find(c => c.id === categoryId)?.name || '';
   };
@@ -109,6 +164,15 @@ const DiligenceRequestTable: React.FC<DiligenceRequestTableProps> = ({
     
     return 'normal';
   };
+
+  // Sort requests: non-resolved first, then resolved at bottom
+  const sortedRequests = React.useMemo(() => {
+    return [...requests].sort((a, b) => {
+      if (a.status === 'completed' && b.status !== 'completed') return 1;
+      if (a.status !== 'completed' && b.status === 'completed') return -1;
+      return 0;
+    });
+  }, [requests]);
   
   if (isLoading) {
     return (
@@ -134,10 +198,14 @@ const DiligenceRequestTable: React.FC<DiligenceRequestTableProps> = ({
         <TableHeader>
           <TableRow className="bg-gray-50 border-b border-gray-200 hover:bg-gray-50">
             <TableHead className="w-[40px] py-3">
-              <Checkbox className="border-gray-300" />
+              <Checkbox 
+                checked={selectedRequests.length === requests.length && requests.length > 0}
+                onCheckedChange={toggleAllSelection}
+                className="border-gray-300" 
+              />
             </TableHead>
-            <TableHead className="text-gray-600 font-medium py-3 w-[50px]">Status</TableHead>
             <TableHead className="text-gray-600 font-medium py-3">Request Name</TableHead>
+            <TableHead className="text-gray-600 font-medium py-3 w-[120px]">Status</TableHead>
             <TableHead className="text-gray-600 font-medium py-3 w-[150px]">Assigned To</TableHead>
             <TableHead className="text-gray-600 font-medium py-3 w-[100px]">Due Date</TableHead>
             <TableHead className="text-gray-600 font-medium py-3 w-[60px] text-center">Docs</TableHead>
@@ -146,43 +214,45 @@ const DiligenceRequestTable: React.FC<DiligenceRequestTableProps> = ({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {requests.map((request) => {
+          {sortedRequests.map((request) => {
             const status = statusConfig[request.status];
+            const StatusIcon = status.icon;
             const dueDateStatus = getDueDateStatus(request.due_date, request.status);
             const categoryName = getCategoryName(request.category_id);
             const subcategoryName = getSubcategoryName(request.subcategory_id);
             const counts = requestCounts[request.id] || { documentCount: 0, commentCount: 0 };
             const assignees = getAssignees(request);
             const isUnread = hasUnreadUpdates(request.id, request.last_activity_at, viewMap);
-            const isNew = isRecentlyUpdated(request.last_activity_at);
+            const showNewBadge = shouldShowNewBadge(request, counts.commentCount);
+            const isResolved = request.status === 'completed';
             
             return (
               <TableRow 
                 key={request.id}
-                className={`border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors ${isUnread ? 'bg-blue-50/30' : ''}`}
+                className={`border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors ${
+                  isResolved ? 'bg-green-50/30' : isUnread ? 'bg-blue-50/30' : ''
+                }`}
                 onClick={() => onSelectRequest(request)}
               >
+                {/* Clean checkbox - selection only, no status connection */}
                 <TableCell onClick={(e) => e.stopPropagation()} className="py-3">
-                  <div className="relative">
-                    <Checkbox 
-                      checked={request.status === 'completed'}
-                      className="border-gray-300" 
-                    />
-                    {isUnread && (
-                      <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-red-500 rounded-full" />
-                    )}
-                  </div>
+                  <Checkbox 
+                    checked={selectedRequests.includes(request.id)}
+                    onCheckedChange={() => toggleSelection(request.id)}
+                    className="border-gray-300" 
+                  />
                 </TableCell>
-                <TableCell className="py-3">
-                  <div className={`w-3 h-3 rounded-full ${status.dotColor}`} title={status.label} />
-                </TableCell>
+
+                {/* Request Name with optional NEW badge */}
                 <TableCell className="py-3">
                   <div className="flex items-center gap-2">
                     <div className="flex-1">
-                      <div className="font-medium text-gray-900 flex items-center gap-2">
+                      <div className={`font-medium flex items-center gap-2 ${
+                        isResolved ? 'text-gray-500 line-through' : 'text-gray-900'
+                      }`}>
                         {request.title}
-                        {isNew && (
-                          <Badge variant="secondary" className="bg-blue-100 text-blue-700 text-[10px] px-1.5 py-0 font-medium">
+                        {showNewBadge && (
+                          <Badge variant="secondary" className="bg-purple-100 text-purple-700 border-purple-200 text-[10px] px-1.5 py-0 font-medium">
                             <Sparkles className="w-3 h-3 mr-0.5" />
                             NEW
                           </Badge>
@@ -195,6 +265,19 @@ const DiligenceRequestTable: React.FC<DiligenceRequestTableProps> = ({
                     </div>
                   </div>
                 </TableCell>
+
+                {/* Status Badge - Clear and self-explanatory */}
+                <TableCell className="py-3">
+                  <Badge 
+                    variant="outline" 
+                    className={`text-xs font-medium ${status.className}`}
+                  >
+                    <StatusIcon className="w-3 h-3 mr-1" />
+                    {status.label}
+                  </Badge>
+                </TableCell>
+
+                {/* Assigned To */}
                 <TableCell className="py-3">
                   <StackedAvatars
                     assignees={assignees}
@@ -203,6 +286,8 @@ const DiligenceRequestTable: React.FC<DiligenceRequestTableProps> = ({
                     showTooltip
                   />
                 </TableCell>
+
+                {/* Due Date */}
                 <TableCell className="py-3">
                   {request.due_date ? (
                     <span className={`text-sm font-medium ${
@@ -221,18 +306,24 @@ const DiligenceRequestTable: React.FC<DiligenceRequestTableProps> = ({
                     <span className="text-sm text-gray-400">—</span>
                   )}
                 </TableCell>
+
+                {/* Docs Count */}
                 <TableCell className="py-3 text-center">
                   <div className={`flex items-center justify-center gap-1 ${counts.documentCount > 0 ? 'text-primary' : 'text-gray-400'}`}>
                     <FileText className="w-4 h-4" />
                     <span className="text-xs font-medium">{counts.documentCount}</span>
                   </div>
                 </TableCell>
+
+                {/* Chat Count */}
                 <TableCell className="py-3 text-center">
                   <div className={`flex items-center justify-center gap-1 ${counts.commentCount > 0 ? 'text-primary' : 'text-gray-400'}`}>
                     <MessageSquare className="w-4 h-4" />
                     <span className="text-xs font-medium">{counts.commentCount}</span>
                   </div>
                 </TableCell>
+
+                {/* Actions Menu */}
                 <TableCell className="py-3" onClick={(e) => e.stopPropagation()}>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
