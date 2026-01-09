@@ -202,9 +202,9 @@ const TrackerTableView: React.FC<TrackerTableViewProps> = ({
           </div>
         )}
 
-        {/* Table */}
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-          <Table>
+        {/* Table - Responsive wrapper */}
+        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden overflow-x-auto">
+          <Table className="min-w-[800px]">
             <TableHeader>
               <TableRow className="bg-gray-50 hover:bg-gray-50">
                 <TableHead className="w-12">
