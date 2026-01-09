@@ -46,10 +46,9 @@ import {
   DiligenceRequest, 
   DiligenceCategory, 
   DiligenceSubcategory,
-  useUpdateDiligenceRequest,
-  useDiligenceComments,
-  useAddDiligenceComment
+  useUpdateDiligenceRequest
 } from '@/hooks/useDiligenceTracker';
+import ThreadedCommentsSection from './ThreadedCommentsSection';
 import {
   useTeamMembers,
   getTeamMemberName,
@@ -281,7 +280,6 @@ const DiligenceRequestPanel: React.FC<DiligenceRequestPanelProps> = ({
   subcategories,
   onClose
 }) => {
-  const [newComment, setNewComment] = useState('');
   const [activeTab, setActiveTab] = useState('details');
   const [assigneePopoverOpen, setAssigneePopoverOpen] = useState(false);
   const [dueDateOpen, setDueDateOpen] = useState(false);
@@ -299,8 +297,6 @@ const DiligenceRequestPanel: React.FC<DiligenceRequestPanelProps> = ({
   }, [request?.id]);
   
   const updateRequest = useUpdateDiligenceRequest();
-  const { data: comments = [], refetch: refetchComments } = useDiligenceComments(request?.id || '');
-  const addComment = useAddDiligenceComment();
   const { data: teamMembers = [] } = useTeamMembers();
   
   // Document hooks
@@ -445,21 +441,7 @@ const DiligenceRequestPanel: React.FC<DiligenceRequestPanelProps> = ({
     setAssigneePopoverOpen(false);
   };
   
-  const handleAddComment = async () => {
-    if (!newComment.trim()) return;
-    
-    try {
-      await addComment.mutateAsync({ 
-        requestId: request.id, 
-        content: newComment.trim() 
-      });
-      setNewComment('');
-      // Refetch comments to update count and list
-      refetchComments();
-    } catch (error) {
-      // Error is handled in the mutation
-    }
-  };
+  // Comment handling is now in ThreadedCommentsSection
   
   const handleMarkComplete = () => {
     updateRequest.mutate({
@@ -558,7 +540,7 @@ const DiligenceRequestPanel: React.FC<DiligenceRequestPanelProps> = ({
               Documents {documents.length > 0 && `(${documents.length})`}
             </TabsTrigger>
             <TabsTrigger value="comments" className="text-sm data-[state=active]:bg-white">
-              Comments ({comments.length})
+              Comments
             </TabsTrigger>
             <TabsTrigger value="activity" className="text-sm data-[state=active]:bg-white">
               Activity
@@ -753,60 +735,7 @@ const DiligenceRequestPanel: React.FC<DiligenceRequestPanelProps> = ({
             </TabsContent>
             
             <TabsContent value="comments" className="p-4 mt-0">
-              {/* Comment Input */}
-              <div className="mb-4">
-                <Textarea
-                  placeholder="Add a comment..."
-                  value={newComment}
-                  onChange={(e) => setNewComment(e.target.value)}
-                  className="bg-white border-gray-200 text-gray-900 placeholder:text-gray-400 resize-none mb-2"
-                  rows={3}
-                />
-                <div className="flex justify-end">
-                  <Button 
-                    size="sm"
-                    onClick={handleAddComment}
-                    disabled={!newComment.trim() || addComment.isPending}
-                    className="bg-blue-600 hover:bg-blue-700 text-white"
-                  >
-                    <Send className="w-4 h-4 mr-2" />
-                    Post Comment
-                  </Button>
-                </div>
-              </div>
-              
-              {/* Comments List */}
-              <div className="space-y-3">
-                {comments.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500 text-sm">
-                    <MessageSquare className="w-8 h-8 mx-auto mb-2 text-gray-300" />
-                    No comments yet. Start the conversation!
-                  </div>
-                ) : (
-                  comments.map((comment) => {
-                    const commentColor = getAvatarColor(comment.user_id);
-                    return (
-                      <div key={comment.id} className="bg-gray-50 rounded-lg p-3 border border-gray-200">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Avatar className="w-6 h-6">
-                            <AvatarFallback className={`${commentColor.bg} ${commentColor.text} text-xs font-medium`}>
-                              {getCommentAuthorInitials(comment.profile)}
-                            </AvatarFallback>
-                          </Avatar>
-                          <span className="text-sm font-medium text-gray-900">
-                            {getCommentAuthorName(comment.profile)}
-                          </span>
-                          <span className="text-xs text-gray-400">·</span>
-                          <span className="text-xs text-gray-400">
-                            {formatCompactTimestamp(comment.created_at)}
-                          </span>
-                        </div>
-                        <p className="text-sm text-gray-700 pl-8">{comment.content}</p>
-                      </div>
-                    );
-                  })
-                )}
-              </div>
+              <ThreadedCommentsSection requestId={request.id} />
             </TabsContent>
             
             <TabsContent value="activity" className="p-4 mt-0">
