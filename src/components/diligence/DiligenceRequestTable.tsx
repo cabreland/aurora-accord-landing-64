@@ -4,7 +4,8 @@ import {
   AlertTriangle,
   FileText,
   MessageSquare,
-  MoreHorizontal
+  MoreHorizontal,
+  Sparkles
 } from 'lucide-react';
 import {
   Table,
@@ -16,6 +17,7 @@ import {
 } from '@/components/ui/table';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,7 +27,8 @@ import {
 import { DiligenceRequest, DiligenceCategory, DiligenceSubcategory } from '@/hooks/useDiligenceTracker';
 import { useTeamMembers } from '@/hooks/useTeamMembers';
 import { useDiligenceRequestCounts } from '@/hooks/useDiligenceRequestCounts';
-import UserAvatarBadge from '@/components/common/UserAvatarBadge';
+import { useRequestViews, hasUnreadUpdates, isRecentlyUpdated } from '@/hooks/useRequestViews';
+import StackedAvatars, { AssigneeInfo } from '@/components/common/StackedAvatars';
 
 interface DiligenceRequestTableProps {
   requests: DiligenceRequest[];
@@ -59,21 +62,27 @@ const DiligenceRequestTable: React.FC<DiligenceRequestTableProps> = ({
 }) => {
   const { data: teamMembers = [] } = useTeamMembers();
   const { data: requestCounts = {} } = useDiligenceRequestCounts(dealId);
+  const { data: viewMap = {} } = useRequestViews(dealId);
   
-  const getAssignee = (assigneeId: string | null) => {
-    if (!assigneeId) return null;
-    return teamMembers.find(m => m.user_id === assigneeId) || null;
-  };
-  
-  const getRoleDisplayName = (role: string) => {
-    const roleNames: Record<string, string> = {
-      super_admin: 'Super Administrator',
-      admin: 'Administrator',
-      editor: 'Editor',
-      viewer: 'Viewer',
-      investor: 'Investor',
-    };
-    return roleNames[role] || role;
+  // Get assignees for a request (supports both single and multiple)
+  const getAssignees = (request: DiligenceRequest): AssigneeInfo[] => {
+    const assigneeIds = request.assignee_ids?.length > 0 
+      ? request.assignee_ids 
+      : request.assignee_id 
+        ? [request.assignee_id] 
+        : [];
+    
+    return assigneeIds
+      .map(id => teamMembers.find(m => m.user_id === id))
+      .filter((m): m is (typeof teamMembers)[number] => m !== undefined)
+      .map(m => ({
+        user_id: m.user_id,
+        first_name: m.first_name,
+        last_name: m.last_name,
+        email: m.email,
+        profile_picture_url: m.profile_picture_url,
+        role: m.role,
+      }));
   };
   const getCategoryName = (categoryId: string) => {
     return categories.find(c => c.id === categoryId)?.name || '';
@@ -143,42 +152,55 @@ const DiligenceRequestTable: React.FC<DiligenceRequestTableProps> = ({
             const categoryName = getCategoryName(request.category_id);
             const subcategoryName = getSubcategoryName(request.subcategory_id);
             const counts = requestCounts[request.id] || { documentCount: 0, commentCount: 0 };
-            const assignee = getAssignee(request.assignee_id);
+            const assignees = getAssignees(request);
+            const isUnread = hasUnreadUpdates(request.id, request.last_activity_at, viewMap);
+            const isNew = isRecentlyUpdated(request.last_activity_at);
             
             return (
               <TableRow 
                 key={request.id}
-                className="border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors"
+                className={`border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors ${isUnread ? 'bg-blue-50/30' : ''}`}
                 onClick={() => onSelectRequest(request)}
               >
                 <TableCell onClick={(e) => e.stopPropagation()} className="py-3">
-                  <Checkbox 
-                    checked={request.status === 'completed'}
-                    className="border-gray-300" 
-                  />
+                  <div className="relative">
+                    <Checkbox 
+                      checked={request.status === 'completed'}
+                      className="border-gray-300" 
+                    />
+                    {isUnread && (
+                      <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-red-500 rounded-full" />
+                    )}
+                  </div>
                 </TableCell>
                 <TableCell className="py-3">
                   <div className={`w-3 h-3 rounded-full ${status.dotColor}`} title={status.label} />
                 </TableCell>
                 <TableCell className="py-3">
-                  <div>
-                    <div className="font-medium text-gray-900">{request.title}</div>
-                    <div className="text-xs text-gray-500 mt-0.5">
-                      {categoryName}
-                      {subcategoryName && ` › ${subcategoryName}`}
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1">
+                      <div className="font-medium text-gray-900 flex items-center gap-2">
+                        {request.title}
+                        {isNew && (
+                          <Badge variant="secondary" className="bg-blue-100 text-blue-700 text-[10px] px-1.5 py-0 font-medium">
+                            <Sparkles className="w-3 h-3 mr-0.5" />
+                            NEW
+                          </Badge>
+                        )}
+                      </div>
+                      <div className="text-xs text-gray-500 mt-0.5">
+                        {categoryName}
+                        {subcategoryName && ` › ${subcategoryName}`}
+                      </div>
                     </div>
                   </div>
                 </TableCell>
                 <TableCell className="py-3">
-                  <UserAvatarBadge
-                    userId={assignee?.user_id}
-                    firstName={assignee?.first_name}
-                    lastName={assignee?.last_name}
-                    email={assignee?.email}
-                    profilePictureUrl={assignee?.profile_picture_url}
-                    role={assignee?.role}
+                  <StackedAvatars
+                    assignees={assignees}
+                    maxVisible={3}
                     size="sm"
-                    showName
+                    showTooltip
                   />
                 </TableCell>
                 <TableCell className="py-3">

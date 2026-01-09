@@ -29,7 +29,8 @@ export interface DiligenceRequest {
   description: string | null;
   priority: 'high' | 'medium' | 'low';
   status: 'open' | 'in_progress' | 'completed' | 'blocked';
-  assignee_id: string | null;
+  assignee_id: string | null; // Legacy - kept for backwards compatibility
+  assignee_ids: string[]; // New: multiple assignees
   reviewer_ids: string[];
   due_date: string | null;
   completion_date: string | null;
@@ -303,7 +304,7 @@ export const useUpdateDiligenceRequest = () => {
       // Get original request to check for changes
       const { data: original } = await supabase
         .from('diligence_requests')
-        .select('assignee_id, status, title, deal_id')
+        .select('assignee_id, assignee_ids, status, title, deal_id')
         .eq('id', id)
         .single();
       
@@ -326,7 +327,28 @@ export const useUpdateDiligenceRequest = () => {
         message: string;
       }> = [];
       
-      // Notify if assignee changed
+      // Handle multiple assignees notifications
+      if (updates.assignee_ids) {
+        const originalIds = original?.assignee_ids || [];
+        const newIds = updates.assignee_ids || [];
+        
+        // Find newly added assignees
+        const addedAssignees = newIds.filter(id => !originalIds.includes(id) && id !== user?.id);
+        
+        // Create notification for each new assignee
+        for (const assigneeId of addedAssignees) {
+          notifications.push({
+            user_id: assigneeId,
+            request_id: id,
+            deal_id: data.deal_id,
+            type: 'assignment',
+            title: 'New Assignment',
+            message: `You've been assigned to "${original?.title || data.title}"`
+          });
+        }
+      }
+      
+      // Legacy: single assignee support
       if (updates.assignee_id && updates.assignee_id !== original?.assignee_id && updates.assignee_id !== user?.id) {
         notifications.push({
           user_id: updates.assignee_id,
@@ -338,16 +360,21 @@ export const useUpdateDiligenceRequest = () => {
         });
       }
       
-      // Notify if status changed (notify assignee)
-      if (updates.status && updates.status !== original?.status && data.assignee_id && data.assignee_id !== user?.id) {
-        notifications.push({
-          user_id: data.assignee_id,
-          request_id: id,
-          deal_id: data.deal_id,
-          type: 'status_change',
-          title: 'Status Changed',
-          message: `Status changed to "${updates.status}" on "${original?.title || data.title}"`
-        });
+      // Notify if status changed (notify all assignees)
+      if (updates.status && updates.status !== original?.status) {
+        const assigneeIds = data.assignee_ids || [];
+        const assigneesToNotify = assigneeIds.filter((id: string) => id !== user?.id);
+        
+        for (const assigneeId of assigneesToNotify) {
+          notifications.push({
+            user_id: assigneeId,
+            request_id: id,
+            deal_id: data.deal_id,
+            type: 'status_change',
+            title: 'Status Changed',
+            message: `Status changed to "${updates.status}" on "${original?.title || data.title}"`
+          });
+        }
       }
       
       // Insert all notifications
