@@ -40,10 +40,10 @@ interface DiligenceRequestTableProps {
 }
 
 const statusConfig = {
-  open: { label: 'Open', color: 'text-red-600', bg: 'bg-red-50 border-red-200', dotColor: 'bg-red-500' },
+  open: { label: 'Open', color: 'text-blue-600', bg: 'bg-blue-50 border-blue-200', dotColor: 'bg-blue-500' },
   in_progress: { label: 'In Progress', color: 'text-amber-600', bg: 'bg-amber-50 border-amber-200', dotColor: 'bg-amber-500' },
   completed: { label: 'Resolved', color: 'text-green-600', bg: 'bg-green-50 border-green-200', dotColor: 'bg-green-500' },
-  blocked: { label: 'Blocked', color: 'text-gray-600', bg: 'bg-gray-100 border-gray-300', dotColor: 'bg-gray-500' },
+  blocked: { label: 'Blocked', color: 'text-red-600', bg: 'bg-red-100 border-red-300', dotColor: 'bg-red-500' },
 };
 
 const priorityConfig = {
