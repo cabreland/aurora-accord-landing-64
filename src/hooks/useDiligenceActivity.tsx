@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { formatDistanceToNow } from 'date-fns';
+import { formatActivityTimestamp } from '@/lib/formatTimestamp';
 
 export interface DiligenceActivity {
   id: string;
@@ -86,7 +86,7 @@ export const useDiligenceActivity = (limit: number = 10) => {
       // Add request activities
       for (const req of requests || []) {
         const dealName = dealMap.get(req.deal_id) || 'Unknown Deal';
-        const timeAgo = formatDistanceToNow(new Date(req.updated_at), { addSuffix: true });
+        const timeAgo = formatActivityTimestamp(req.updated_at);
         
         // Determine activity type based on status
         let type: DiligenceActivity['type'] = 'updated';
@@ -122,7 +122,7 @@ export const useDiligenceActivity = (limit: number = 10) => {
         if (!request) continue;
 
         const dealName = dealMap.get(request.deal_id) || 'Unknown Deal';
-        const timeAgo = formatDistanceToNow(new Date(comment.created_at), { addSuffix: true });
+        const timeAgo = formatActivityTimestamp(comment.created_at);
 
         activities.push({
           id: `comment-${comment.id}`,
