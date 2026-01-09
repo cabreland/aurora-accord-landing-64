@@ -22,6 +22,7 @@ import {
   Loader2,
   File
 } from 'lucide-react';
+import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
@@ -84,10 +85,10 @@ interface DiligenceRequestPanelProps {
 }
 
 const statusConfig = {
-  open: { label: 'Open', color: 'text-red-600', bg: 'bg-red-50 border-red-200' },
+  open: { label: 'Open', color: 'text-blue-600', bg: 'bg-blue-50 border-blue-200' },
   in_progress: { label: 'In Progress', color: 'text-amber-600', bg: 'bg-amber-50 border-amber-200' },
   completed: { label: 'Resolved', color: 'text-green-600', bg: 'bg-green-50 border-green-200' },
-  blocked: { label: 'Blocked', color: 'text-gray-600', bg: 'bg-gray-100 border-gray-300' },
+  blocked: { label: 'Blocked', color: 'text-red-600', bg: 'bg-red-100 border-red-300' },
 };
 
 const priorityConfig = {
@@ -283,6 +284,19 @@ const DiligenceRequestPanel: React.FC<DiligenceRequestPanelProps> = ({
   const [newComment, setNewComment] = useState('');
   const [activeTab, setActiveTab] = useState('details');
   const [assigneePopoverOpen, setAssigneePopoverOpen] = useState(false);
+  const [dueDateOpen, setDueDateOpen] = useState(false);
+  
+  // Local state for optimistic UI updates
+  const [localStatus, setLocalStatus] = useState<string | null>(null);
+  const [localPriority, setLocalPriority] = useState<string | null>(null);
+  const [localDueDate, setLocalDueDate] = useState<Date | undefined>(undefined);
+  
+  // Reset local state when request changes
+  useEffect(() => {
+    setLocalStatus(null);
+    setLocalPriority(null);
+    setLocalDueDate(undefined);
+  }, [request?.id]);
   
   const updateRequest = useUpdateDiligenceRequest();
   const { data: comments = [], refetch: refetchComments } = useDiligenceComments(request?.id || '');
@@ -385,10 +399,18 @@ const DiligenceRequestPanel: React.FC<DiligenceRequestPanelProps> = ({
   
   const category = categories.find(c => c.id === request.category_id);
   const subcategory = subcategories.find(s => s.id === request.subcategory_id);
-  const status = statusConfig[request.status];
-  const priority = priorityConfig[request.priority];
+  
+  // Use local state for immediate UI feedback, fallback to request data
+  const currentStatus = (localStatus || request.status) as keyof typeof statusConfig;
+  const currentPriority = (localPriority || request.priority) as keyof typeof priorityConfig;
+  const currentDueDate = localDueDate || (request.due_date ? new Date(request.due_date) : undefined);
+  
+  const status = statusConfig[currentStatus];
+  const priority = priorityConfig[currentPriority];
   
   const handleStatusChange = (newStatus: string) => {
+    // Optimistically update local state
+    setLocalStatus(newStatus);
     updateRequest.mutate({
       id: request.id,
       status: newStatus as DiligenceRequest['status'],
@@ -397,9 +419,20 @@ const DiligenceRequestPanel: React.FC<DiligenceRequestPanelProps> = ({
   };
   
   const handlePriorityChange = (newPriority: string) => {
+    // Optimistically update local state
+    setLocalPriority(newPriority);
     updateRequest.mutate({
       id: request.id,
       priority: newPriority as DiligenceRequest['priority']
+    });
+  };
+  
+  const handleDueDateChange = (date: Date | undefined) => {
+    setLocalDueDate(date);
+    setDueDateOpen(false);
+    updateRequest.mutate({
+      id: request.id,
+      due_date: date ? date.toISOString().split('T')[0] : null
     });
   };
   
@@ -467,7 +500,7 @@ const DiligenceRequestPanel: React.FC<DiligenceRequestPanelProps> = ({
           <div className="flex items-center gap-3">
             <div className="flex-1">
               <label className="text-xs text-gray-500 block mb-1.5">Status</label>
-              <Select value={request.status} onValueChange={handleStatusChange}>
+              <Select value={currentStatus} onValueChange={handleStatusChange}>
                 <SelectTrigger className="bg-white border-gray-200 h-9">
                   <Badge 
                     variant="outline" 
@@ -476,7 +509,7 @@ const DiligenceRequestPanel: React.FC<DiligenceRequestPanelProps> = ({
                     {status.label}
                   </Badge>
                 </SelectTrigger>
-                <SelectContent className="bg-white border-gray-200">
+                <SelectContent className="bg-white border-gray-200 z-50">
                   {Object.entries(statusConfig).map(([key, config]) => (
                     <SelectItem key={key} value={key}>
                       <Badge 
@@ -493,14 +526,14 @@ const DiligenceRequestPanel: React.FC<DiligenceRequestPanelProps> = ({
             
             <div className="flex-1">
               <label className="text-xs text-gray-500 block mb-1.5">Priority</label>
-              <Select value={request.priority} onValueChange={handlePriorityChange}>
+              <Select value={currentPriority} onValueChange={handlePriorityChange}>
                 <SelectTrigger className="bg-white border-gray-200 h-9">
                   <div className="flex items-center gap-2">
                     <div className={`w-2 h-2 rounded-full ${priority.dot}`} />
                     <span className={`text-sm ${priority.color}`}>{priority.label}</span>
                   </div>
                 </SelectTrigger>
-                <SelectContent className="bg-white border-gray-200">
+                <SelectContent className="bg-white border-gray-200 z-50">
                   {Object.entries(priorityConfig).map(([key, config]) => (
                     <SelectItem key={key} value={key}>
                       <div className="flex items-center gap-2">
@@ -578,12 +611,28 @@ const DiligenceRequestPanel: React.FC<DiligenceRequestPanelProps> = ({
                   <Calendar className="w-3.5 h-3.5 inline mr-1.5" />
                   Due Date
                 </label>
-                <div className="bg-gray-50 rounded-lg p-3 border border-gray-200 text-gray-900">
-                  {request.due_date 
-                    ? format(new Date(request.due_date), 'MMMM d, yyyy')
-                    : 'No due date set'
-                  }
-                </div>
+                <Popover open={dueDateOpen} onOpenChange={setDueDateOpen}>
+                  <PopoverTrigger asChild>
+                    <Button 
+                      variant="outline" 
+                      className="w-full justify-start text-left font-normal bg-gray-50 border-gray-200 hover:bg-gray-100 h-auto py-3"
+                    >
+                      {currentDueDate 
+                        ? format(currentDueDate, 'MMMM d, yyyy')
+                        : <span className="text-gray-500">No due date set - click to add</span>
+                      }
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0 z-50" align="start">
+                    <CalendarComponent
+                      mode="single"
+                      selected={currentDueDate}
+                      onSelect={handleDueDateChange}
+                      initialFocus
+                      className="p-3 pointer-events-auto"
+                    />
+                  </PopoverContent>
+                </Popover>
               </div>
               
               {/* Description */}
