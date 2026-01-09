@@ -3,6 +3,7 @@ import { Plus, Settings, Building2, BarChart3, ClipboardList, Search, RefreshCw,
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useDealsWithDiligence, useDiligenceRequests, useDiligenceCategories } from '@/hooks/useDiligenceTracker';
+import { useDebounce } from '@/hooks/useDebounce';
 import CreateTrackerDialog from './CreateTrackerDialog';
 import ExecutiveSummary from './dashboard/ExecutiveSummary';
 import UrgentItemsPanel from './dashboard/UrgentItemsPanel';
@@ -35,6 +36,9 @@ const DiligenceTrackerDashboard: React.FC = () => {
   const { data: deals = [], isLoading: dealsLoading } = useDealsWithDiligence();
   const { data: allRequests = [] } = useDiligenceRequests();
   const { data: categories = [] } = useDiligenceCategories();
+  
+  // Debounce search query for performance (300ms delay)
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
   
   // Calculate comprehensive statistics
   const stats = useMemo(() => {
@@ -167,9 +171,9 @@ const DiligenceTrackerDashboard: React.FC = () => {
   // Apply filters
   const filteredDeals = useMemo(() => {
     return dealsWithCategories.filter(deal => {
-      // Search filter
-      if (searchQuery) {
-        const query = searchQuery.toLowerCase();
+      // Search filter (using debounced query)
+      if (debouncedSearchQuery) {
+        const query = debouncedSearchQuery.toLowerCase();
         if (!deal.company_name.toLowerCase().includes(query) && 
             !deal.title.toLowerCase().includes(query)) {
           return false;
@@ -215,7 +219,7 @@ const DiligenceTrackerDashboard: React.FC = () => {
       
       return true;
     });
-  }, [dealsWithCategories, searchQuery, statusFilter, stageFilter, riskFilter, progressFilter, hasOverdue, allRequests]);
+  }, [dealsWithCategories, debouncedSearchQuery, statusFilter, stageFilter, riskFilter, progressFilter, hasOverdue, allRequests]);
   
   // Count active filters
   const activeFilterCount = useMemo(() => {
@@ -411,7 +415,7 @@ const DiligenceTrackerDashboard: React.FC = () => {
               ))}
             </div>
           </div>
-        ) : filteredDeals.length === 0 && (searchQuery || activeFilterCount > 0) ? (
+        ) : filteredDeals.length === 0 && (debouncedSearchQuery || activeFilterCount > 0) ? (
           /* No Results from Filters */
           <Card className="bg-white border-gray-200 border-dashed">
             <CardContent className="p-16 text-center">
