@@ -281,8 +281,8 @@ const DiligenceTrackerDashboard: React.FC = () => {
         onResetFilters={resetFilters}
       />
       
-      {/* Bulk Actions Bar */}
-      {selectedDeals.length > 0 && (
+      {/* Bulk Actions Bar - Only show for card view */}
+      {viewMode === 'cards' && selectedDeals.length > 0 && (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 flex items-center justify-between">
           <span className="text-sm text-blue-700 font-medium">
             {selectedDeals.length} tracker{selectedDeals.length > 1 ? 's' : ''} selected
@@ -299,6 +299,14 @@ const DiligenceTrackerDashboard: React.FC = () => {
             </Button>
             <Button variant="outline" size="sm" className="border-blue-300 text-blue-700 hover:bg-blue-100">
               Archive
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="text-gray-600 hover:text-gray-800"
+              onClick={() => setSelectedDeals([])}
+            >
+              Cancel
             </Button>
           </div>
         </div>
