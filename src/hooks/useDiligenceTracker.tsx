@@ -76,13 +76,26 @@ export interface DiligenceComment {
   request_id: string;
   user_id: string;
   content: string;
+  comment_type: 'internal' | 'approved';
+  parent_comment_id: string | null;
+  approved_by: string | null;
+  approved_at: string | null;
   created_at: string;
+  updated_at: string;
   // Joined profile data
   profile?: {
     first_name: string | null;
     last_name: string | null;
     email: string;
   } | null;
+  // Approver profile for approved comments
+  approver_profile?: {
+    first_name: string | null;
+    last_name: string | null;
+    email: string;
+  } | null;
+  // Nested replies for threading
+  replies?: DiligenceComment[];
 }
 
 export interface DealWithDiligence {
@@ -170,12 +183,12 @@ export const useDiligenceComments = (requestId: string) => {
   return useQuery({
     queryKey: ['diligence-comments', requestId],
     queryFn: async () => {
-      // Fetch comments
+      // Fetch all comments including new fields
       const { data: comments, error } = await supabase
         .from('diligence_comments')
         .select('*')
         .eq('request_id', requestId)
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: true });
       
       if (error) throw error;
       
@@ -183,22 +196,51 @@ export const useDiligenceComments = (requestId: string) => {
         return [] as DiligenceComment[];
       }
       
-      // Get unique user IDs from comments
-      const userIds = [...new Set(comments.map(c => c.user_id))];
+      // Get unique user IDs from comments (authors and approvers)
+      const userIds = new Set<string>();
+      comments.forEach(c => {
+        userIds.add(c.user_id);
+        if (c.approved_by) userIds.add(c.approved_by);
+      });
       
       // Fetch profiles for those users
       const { data: profiles } = await supabase
         .from('profiles')
         .select('user_id, first_name, last_name, email')
-        .in('user_id', userIds);
+        .in('user_id', Array.from(userIds));
       
-      // Map profiles to comments
+      // Map profiles
       const profileMap = new Map(profiles?.map(p => [p.user_id, p]) || []);
       
-      return comments.map(comment => ({
-        ...comment,
-        profile: profileMap.get(comment.user_id) || null
-      })) as DiligenceComment[];
+      // Separate top-level comments and replies
+      const topLevelComments: DiligenceComment[] = [];
+      const repliesMap = new Map<string, DiligenceComment[]>();
+      
+      comments.forEach(comment => {
+        const commentType: 'internal' | 'approved' = comment.comment_type === 'approved' ? 'approved' : 'internal';
+        const enrichedComment: DiligenceComment = {
+          ...comment,
+          comment_type: commentType,
+          profile: profileMap.get(comment.user_id) || null,
+          approver_profile: comment.approved_by ? profileMap.get(comment.approved_by) || null : null,
+          replies: []
+        };
+        
+        if (comment.parent_comment_id) {
+          const parentReplies = repliesMap.get(comment.parent_comment_id) || [];
+          parentReplies.push(enrichedComment);
+          repliesMap.set(comment.parent_comment_id, parentReplies);
+        } else {
+          topLevelComments.push(enrichedComment);
+        }
+      });
+      
+      // Attach replies to parent comments
+      topLevelComments.forEach(comment => {
+        comment.replies = repliesMap.get(comment.id) || [];
+      });
+      
+      return topLevelComments;
     },
     enabled: !!requestId
   });
@@ -428,7 +470,19 @@ export const useAddDiligenceComment = () => {
   const { user } = useAuth();
   
   return useMutation({
-    mutationFn: async ({ requestId, content }: { requestId: string; content: string }) => {
+    mutationFn: async ({ 
+      requestId, 
+      content, 
+      commentType = 'internal',
+      parentCommentId = null,
+      approveImmediately = false 
+    }: { 
+      requestId: string; 
+      content: string;
+      commentType?: 'internal' | 'approved';
+      parentCommentId?: string | null;
+      approveImmediately?: boolean;
+    }) => {
       // Get request details for notification
       const { data: request } = await supabase
         .from('diligence_requests')
@@ -436,13 +490,19 @@ export const useAddDiligenceComment = () => {
         .eq('id', requestId)
         .single();
       
+      const insertData = {
+        request_id: requestId,
+        user_id: user?.id,
+        content,
+        comment_type: approveImmediately ? 'approved' : commentType,
+        parent_comment_id: parentCommentId,
+        approved_by: approveImmediately ? user?.id : null,
+        approved_at: approveImmediately ? new Date().toISOString() : null
+      };
+      
       const { data, error } = await supabase
         .from('diligence_comments')
-        .insert({
-          request_id: requestId,
-          user_id: user?.id,
-          content
-        })
+        .insert(insertData)
         .select()
         .single();
       
@@ -484,13 +544,15 @@ export const useAddDiligenceComment = () => {
       const commenterName = profile ? `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'Someone' : 'Someone';
       
       // Create notifications
+      const notificationType = approveImmediately ? 'approved_answer' : 'comment';
+      const notificationTitle = approveImmediately ? 'Approved Answer' : 'New Comment';
       const notifications = Array.from(usersToNotify).map(userId => ({
         user_id: userId,
         request_id: requestId,
         deal_id: request?.deal_id || null,
-        type: 'comment',
-        title: 'New Comment',
-        message: `${commenterName} commented on "${request?.title || 'a request'}"`
+        type: notificationType,
+        title: notificationTitle,
+        message: `${commenterName} ${approveImmediately ? 'approved an answer on' : 'commented on'} "${request?.title || 'a request'}"`
       }));
       
       if (notifications.length > 0) {
@@ -504,10 +566,121 @@ export const useAddDiligenceComment = () => {
       queryClient.invalidateQueries({ queryKey: ['diligence-request-counts'] });
       queryClient.invalidateQueries({ queryKey: ['diligence-notifications'] });
       queryClient.invalidateQueries({ queryKey: ['diligence-notifications-unread-count'] });
-      toast.success('Comment added');
+      toast.success(variables.approveImmediately ? 'Approved answer posted' : 'Comment added');
     },
     onError: (error) => {
       toast.error('Failed to add comment');
+      console.error(error);
+    }
+  });
+};
+
+export const useApproveComment = () => {
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
+  
+  return useMutation({
+    mutationFn: async ({ commentId, requestId }: { commentId: string; requestId: string }) => {
+      const { data, error } = await supabase
+        .from('diligence_comments')
+        .update({
+          comment_type: 'approved',
+          approved_by: user?.id,
+          approved_at: new Date().toISOString()
+        })
+        .eq('id', commentId)
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return { data, requestId };
+    },
+    onSuccess: (result) => {
+      queryClient.invalidateQueries({ queryKey: ['diligence-comments', result.requestId] });
+      toast.success('Comment approved as answer');
+    },
+    onError: (error) => {
+      toast.error('Failed to approve comment');
+      console.error(error);
+    }
+  });
+};
+
+export const useUnapproveComment = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async ({ commentId, requestId }: { commentId: string; requestId: string }) => {
+      const { data, error } = await supabase
+        .from('diligence_comments')
+        .update({
+          comment_type: 'internal',
+          approved_by: null,
+          approved_at: null
+        })
+        .eq('id', commentId)
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return { data, requestId };
+    },
+    onSuccess: (result) => {
+      queryClient.invalidateQueries({ queryKey: ['diligence-comments', result.requestId] });
+      toast.success('Answer unapproved');
+    },
+    onError: (error) => {
+      toast.error('Failed to unapprove comment');
+      console.error(error);
+    }
+  });
+};
+
+export const useUpdateComment = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async ({ commentId, content, requestId }: { commentId: string; content: string; requestId: string }) => {
+      const { data, error } = await supabase
+        .from('diligence_comments')
+        .update({ content })
+        .eq('id', commentId)
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return { data, requestId };
+    },
+    onSuccess: (result) => {
+      queryClient.invalidateQueries({ queryKey: ['diligence-comments', result.requestId] });
+      toast.success('Comment updated');
+    },
+    onError: (error) => {
+      toast.error('Failed to update comment');
+      console.error(error);
+    }
+  });
+};
+
+export const useDeleteComment = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async ({ commentId, requestId }: { commentId: string; requestId: string }) => {
+      const { error } = await supabase
+        .from('diligence_comments')
+        .delete()
+        .eq('id', commentId);
+      
+      if (error) throw error;
+      return { requestId };
+    },
+    onSuccess: (result) => {
+      queryClient.invalidateQueries({ queryKey: ['diligence-comments', result.requestId] });
+      toast.success('Comment deleted');
+    },
+    onError: (error) => {
+      toast.error('Failed to delete comment');
       console.error(error);
     }
   });

@@ -844,27 +844,49 @@ export type Database = {
       }
       diligence_comments: {
         Row: {
+          approved_at: string | null
+          approved_by: string | null
+          comment_type: string
           content: string
           created_at: string
           id: string
+          parent_comment_id: string | null
           request_id: string
+          updated_at: string
           user_id: string
         }
         Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          comment_type?: string
           content: string
           created_at?: string
           id?: string
+          parent_comment_id?: string | null
           request_id: string
+          updated_at?: string
           user_id: string
         }
         Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          comment_type?: string
           content?: string
           created_at?: string
           id?: string
+          parent_comment_id?: string | null
           request_id?: string
+          updated_at?: string
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "diligence_comments_parent_comment_id_fkey"
+            columns: ["parent_comment_id"]
+            isOneToOne: false
+            referencedRelation: "diligence_comments"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "diligence_comments_request_id_fkey"
             columns: ["request_id"]
