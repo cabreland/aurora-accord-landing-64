@@ -13,7 +13,8 @@ import {
   ChevronDown,
   ChevronRight,
   Menu,
-  ClipboardCheck
+  ClipboardCheck,
+  FolderOpen
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -61,6 +62,9 @@ const AdminDashboardLayout = ({ children, activeTab = 'dashboard', breadcrumbs }
     if (path === '/documents') {
       return location.pathname === '/documents' || location.pathname.startsWith('/documents');
     }
+    if (path === '/data-room') {
+      return location.pathname.startsWith('/data-room');
+    }
     if (path === '/dashboard/diligence-tracker') {
       return location.pathname.startsWith('/dashboard/diligence-tracker');
     }
@@ -81,6 +85,7 @@ const AdminDashboardLayout = ({ children, activeTab = 'dashboard', breadcrumbs }
     { id: 'dashboard', label: 'Dashboard', icon: Home, path: '/dashboard' },
     { id: 'deals', label: 'Deals', icon: BarChart3, path: '/deals' },
     { id: 'diligence-tracker', label: 'Due Diligence', icon: ClipboardCheck, path: '/dashboard/diligence-tracker' },
+    { id: 'data-room', label: 'Data Room', icon: FolderOpen, path: '/data-room' },
     { id: 'documents', label: 'Documents', icon: FileText, path: '/documents' },
     { id: 'access-requests', label: 'Access Requests', icon: Lock, path: '/dashboard/access-requests', badge: pendingAccessCount, badgeColor: 'bg-orange-500' },
     { id: 'ndas', label: 'Signed NDAs', icon: FileCheck, path: '/dashboard/ndas' },
