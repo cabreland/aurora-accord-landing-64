@@ -49,6 +49,16 @@ import {
   useAddDiligenceComment
 } from '@/hooks/useDiligenceTracker';
 import {
+  useTeamMembers,
+  getTeamMemberName,
+  getTeamMemberInitials
+} from '@/hooks/useTeamMembers';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import {
   useDiligenceDocuments,
   useUploadDiligenceDocument,
   useDeleteDiligenceDocument,
@@ -118,16 +128,21 @@ const DiligenceRequestPanel: React.FC<DiligenceRequestPanelProps> = ({
 }) => {
   const [newComment, setNewComment] = useState('');
   const [activeTab, setActiveTab] = useState('details');
+  const [assigneePopoverOpen, setAssigneePopoverOpen] = useState(false);
   
   const updateRequest = useUpdateDiligenceRequest();
   const { data: comments = [], refetch: refetchComments } = useDiligenceComments(request?.id || '');
   const addComment = useAddDiligenceComment();
+  const { data: teamMembers = [] } = useTeamMembers();
   
   // Document hooks
   const { data: documents = [], refetch: refetchDocuments } = useDiligenceDocuments(request?.id || '');
   const uploadDocument = useUploadDiligenceDocument();
   const deleteDocument = useDeleteDiligenceDocument();
   const downloadDocument = useDownloadDiligenceDocument();
+  
+  // Find assigned team member
+  const assignedMember = teamMembers.find(m => m.user_id === request?.assignee_id);
   
   // Dropzone for file upload
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
@@ -204,6 +219,14 @@ const DiligenceRequestPanel: React.FC<DiligenceRequestPanelProps> = ({
       id: request.id,
       priority: newPriority as DiligenceRequest['priority']
     });
+  };
+  
+  const handleAssigneeChange = (userId: string | null) => {
+    updateRequest.mutate({
+      id: request.id,
+      assignee_id: userId
+    });
+    setAssigneePopoverOpen(false);
   };
   
   const handleAddComment = async () => {
@@ -334,24 +357,69 @@ const DiligenceRequestPanel: React.FC<DiligenceRequestPanelProps> = ({
                   <User className="w-3.5 h-3.5 inline mr-1.5" />
                   Assigned To
                 </label>
-                {request.assignee_id ? (
-                  <div className="flex items-center gap-3 bg-gray-50 rounded-lg p-3 border border-gray-200">
-                    <Avatar className="w-8 h-8">
-                      <AvatarFallback className="bg-blue-100 text-blue-600">
-                        <User className="w-4 h-4" />
-                      </AvatarFallback>
-                    </Avatar>
-                    <span className="text-gray-900 font-medium">Assigned User</span>
-                  </div>
-                ) : (
-                  <Button 
-                    variant="outline" 
-                    className="w-full border-dashed border-gray-300 text-gray-500 hover:bg-gray-50 justify-start"
-                  >
-                    <User className="w-4 h-4 mr-2" />
-                    Click to assign someone
-                  </Button>
-                )}
+                <Popover open={assigneePopoverOpen} onOpenChange={setAssigneePopoverOpen}>
+                  <PopoverTrigger asChild>
+                    {assignedMember ? (
+                      <button className="flex items-center gap-3 bg-gray-50 rounded-lg p-3 border border-gray-200 w-full text-left hover:bg-gray-100 transition-colors">
+                        <Avatar className="w-8 h-8">
+                          <AvatarFallback className="bg-blue-100 text-blue-600 text-sm font-medium">
+                            {getTeamMemberInitials(assignedMember)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span className="text-gray-900 font-medium flex-1">
+                          {getTeamMemberName(assignedMember)}
+                        </span>
+                        <X 
+                          className="w-4 h-4 text-gray-400 hover:text-red-500" 
+                          onClick={(e) => { e.stopPropagation(); handleAssigneeChange(null); }}
+                        />
+                      </button>
+                    ) : (
+                      <Button 
+                        variant="outline" 
+                        className="w-full border-dashed border-gray-300 text-gray-500 hover:bg-gray-50 justify-start"
+                      >
+                        <User className="w-4 h-4 mr-2" />
+                        Click to assign someone
+                      </Button>
+                    )}
+                  </PopoverTrigger>
+                  <PopoverContent className="w-64 p-2" align="start">
+                    <div className="space-y-1">
+                      <p className="text-xs text-gray-500 uppercase tracking-wide px-2 py-1">
+                        Team Members
+                      </p>
+                      {teamMembers.length === 0 ? (
+                        <p className="text-sm text-gray-500 px-2 py-2">No team members found</p>
+                      ) : (
+                        teamMembers.map((member) => (
+                          <button
+                            key={member.user_id}
+                            className="flex items-center gap-3 w-full px-2 py-2 rounded-md hover:bg-gray-100 transition-colors text-left"
+                            onClick={() => handleAssigneeChange(member.user_id)}
+                          >
+                            <Avatar className="w-7 h-7">
+                              <AvatarFallback className="bg-blue-100 text-blue-600 text-xs font-medium">
+                                {getTeamMemberInitials(member)}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1 min-w-0">
+                              <div className="text-sm font-medium text-gray-900 truncate">
+                                {getTeamMemberName(member)}
+                              </div>
+                              <div className="text-xs text-gray-500 truncate">
+                                {member.email}
+                              </div>
+                            </div>
+                            {member.user_id === request.assignee_id && (
+                              <CheckCircle2 className="w-4 h-4 text-green-600 flex-shrink-0" />
+                            )}
+                          </button>
+                        ))
+                      )}
+                    </div>
+                  </PopoverContent>
+                </Popover>
               </div>
               
               {/* Due Date */}
