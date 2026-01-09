@@ -21,7 +21,8 @@ import {
   useApproveComment,
   useUnapproveComment,
   useUpdateComment,
-  useDeleteComment
+  useDeleteComment,
+  useSendToCustomer
 } from '@/hooks/useDiligenceTracker';
 import { useAuth } from '@/hooks/useAuth';
 import { getAvatarColor } from '@/components/common/UserAvatarBadge';
@@ -144,6 +145,16 @@ const SingleComment: React.FC<SingleCommentProps> = ({
               {isApproved && (
                 <Badge className="bg-green-600 text-white text-xs">
                   ✓ Approved
+                </Badge>
+              )}
+              {comment.sent_to_customer && (
+                <Badge className="bg-blue-100 text-blue-700 border-blue-200 text-xs">
+                  📧 Sent
+                </Badge>
+              )}
+              {comment.is_from_customer && (
+                <Badge className="bg-purple-100 text-purple-700 border-purple-200 text-xs">
+                  👤 Customer
                 </Badge>
               )}
               <span className="text-xs text-gray-400">·</span>
@@ -302,6 +313,7 @@ const ThreadedCommentsSection: React.FC<ThreadedCommentsSectionProps> = ({ reque
   
   const { data: comments = [], isLoading } = useDiligenceComments(requestId);
   const addComment = useAddDiligenceComment();
+  const sendToCustomer = useSendToCustomer();
   
   // Separate approved and internal comments
   const { approvedComments, internalComments } = useMemo(() => {
@@ -351,8 +363,9 @@ const ThreadedCommentsSection: React.FC<ThreadedCommentsSectionProps> = ({ reque
     setReplyContent('');
   };
   
-  const handleSendToCustomer = () => {
-    toast.info('Send to customer functionality coming soon');
+  const handleSendToCustomer = (commentId: string) => {
+    sendToCustomer.mutate({ commentId, requestId });
+    toast.success('Response marked as sent to customer');
   };
   
   if (isLoading) {
@@ -389,15 +402,33 @@ const ThreadedCommentsSection: React.FC<ThreadedCommentsSectionProps> = ({ reque
                   onReply={handleReply}
                 />
                 {/* Send to Customer Action */}
-                <div className="mt-2 flex justify-end">
-                  <Button 
-                    size="sm" 
-                    onClick={handleSendToCustomer}
-                    className="bg-green-600 hover:bg-green-700"
-                  >
-                    <Mail className="w-4 h-4 mr-2" />
-                    Send to Customer
-                  </Button>
+                <div className="mt-2 flex items-center justify-between">
+                  {comment.sent_to_customer ? (
+                    <div className="flex items-center gap-2 text-sm text-blue-600">
+                      <Mail className="w-4 h-4" />
+                      <span>
+                        Sent to customer {comment.sent_to_customer_at ? formatCompactTimestamp(comment.sent_to_customer_at) : ''}
+                      </span>
+                    </div>
+                  ) : (
+                    <div />
+                  )}
+                  {!comment.sent_to_customer && (
+                    <Button 
+                      size="sm" 
+                      onClick={() => handleSendToCustomer(comment.id)}
+                      disabled={sendToCustomer.isPending}
+                      className="bg-green-600 hover:bg-green-700"
+                    >
+                      <Mail className="w-4 h-4 mr-2" />
+                      Send to Customer
+                    </Button>
+                  )}
+                  {comment.sent_to_customer && (
+                    <Badge className="bg-blue-100 text-blue-700 border-blue-200">
+                      📧 Sent
+                    </Badge>
+                  )}
                 </div>
               </div>
             ))}

@@ -80,6 +80,9 @@ export interface DiligenceComment {
   parent_comment_id: string | null;
   approved_by: string | null;
   approved_at: string | null;
+  sent_to_customer: boolean;
+  sent_to_customer_at: string | null;
+  is_from_customer: boolean;
   created_at: string;
   updated_at: string;
   // Joined profile data
@@ -682,6 +685,45 @@ export const useDeleteComment = () => {
     onError: (error) => {
       toast.error('Failed to delete comment');
       console.error(error);
+    }
+  });
+};
+
+export const useSendToCustomer = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async ({ commentId, requestId }: { commentId: string; requestId: string }) => {
+      const { data, error } = await supabase
+        .from('diligence_comments')
+        .update({
+          sent_to_customer: true,
+          sent_to_customer_at: new Date().toISOString()
+        })
+        .eq('id', commentId)
+        .select()
+        .single();
+      
+      if (error) throw error;
+      
+      // Update request status to awaiting_response (if we add that status later)
+      // For now, just log the action
+      await supabase.from('diligence_notifications').insert({
+        user_id: (await supabase.auth.getUser()).data.user?.id || '',
+        request_id: requestId,
+        type: 'sent_to_customer',
+        title: 'Response Sent',
+        message: 'Approved answer was sent to the customer'
+      });
+      
+      return { data, requestId };
+    },
+    onSuccess: (result) => {
+      queryClient.invalidateQueries({ queryKey: ['diligence-comments', result.requestId] });
+      queryClient.invalidateQueries({ queryKey: ['diligence-notifications'] });
+    },
+    onError: (error) => {
+      console.error('Failed to mark as sent:', error);
     }
   });
 };
