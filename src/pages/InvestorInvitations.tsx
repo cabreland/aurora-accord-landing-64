@@ -69,7 +69,7 @@ const InvestorInvitations = () => {
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Investor Invitations</h1>
+            <h1 className="text-3xl font-bold tracking-tight text-foreground">Investor Invitations</h1>
             <p className="text-muted-foreground">
               Manage investor invitations and access to your deals
             </p>

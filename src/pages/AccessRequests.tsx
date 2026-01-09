@@ -170,9 +170,9 @@ const AccessRequests = () => {
 
   return (
     <AdminDashboardLayout activeTab="access-requests">
-      <div className="container mx-auto p-6 space-y-6">
+      <div className="container mx-auto space-y-6">
         <div>
-          <h1 className="text-3xl font-bold mb-2">Access Requests</h1>
+          <h1 className="text-3xl font-bold text-foreground mb-2">Access Requests</h1>
           <p className="text-muted-foreground">Review and manage investor data room access requests</p>
         </div>
 
