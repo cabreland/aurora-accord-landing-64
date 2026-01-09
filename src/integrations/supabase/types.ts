@@ -966,9 +966,42 @@ export type Database = {
           },
         ]
       }
+      diligence_request_views: {
+        Row: {
+          created_at: string
+          id: string
+          last_viewed_at: string
+          request_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_viewed_at?: string
+          request_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_viewed_at?: string
+          request_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "diligence_request_views_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "diligence_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       diligence_requests: {
         Row: {
           assignee_id: string | null
+          assignee_ids: string[] | null
           category_id: string
           completion_date: string | null
           created_at: string
@@ -993,6 +1026,7 @@ export type Database = {
         }
         Insert: {
           assignee_id?: string | null
+          assignee_ids?: string[] | null
           category_id: string
           completion_date?: string | null
           created_at?: string
@@ -1017,6 +1051,7 @@ export type Database = {
         }
         Update: {
           assignee_id?: string | null
+          assignee_ids?: string[] | null
           category_id?: string
           completion_date?: string | null
           created_at?: string
@@ -2341,6 +2376,21 @@ export type Database = {
           p_resource_type?: string
         }
         Returns: string
+      }
+      mark_diligence_request_viewed: {
+        Args: { p_request_id: string }
+        Returns: undefined
+      }
+      notify_all_assignees: {
+        Args: {
+          p_deal_id: string
+          p_exclude_user_id?: string
+          p_message: string
+          p_request_id: string
+          p_title: string
+          p_type: string
+        }
+        Returns: undefined
       }
       record_security_event: {
         Args: { p_event_data?: Json; p_event_type: string; p_severity?: string }
