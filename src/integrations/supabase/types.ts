@@ -886,10 +886,13 @@ export type Database = {
           document_ids: string[] | null
           due_date: string | null
           id: string
+          last_activity_at: string | null
           notes: string | null
           order_index: number | null
           priority: Database["public"]["Enums"]["diligence_priority"]
           reviewer_ids: string[] | null
+          risk_score: number | null
+          stage: string | null
           status: Database["public"]["Enums"]["diligence_status"]
           subcategory_id: string | null
           title: string
@@ -906,10 +909,13 @@ export type Database = {
           document_ids?: string[] | null
           due_date?: string | null
           id?: string
+          last_activity_at?: string | null
           notes?: string | null
           order_index?: number | null
           priority?: Database["public"]["Enums"]["diligence_priority"]
           reviewer_ids?: string[] | null
+          risk_score?: number | null
+          stage?: string | null
           status?: Database["public"]["Enums"]["diligence_status"]
           subcategory_id?: string | null
           title: string
@@ -926,10 +932,13 @@ export type Database = {
           document_ids?: string[] | null
           due_date?: string | null
           id?: string
+          last_activity_at?: string | null
           notes?: string | null
           order_index?: number | null
           priority?: Database["public"]["Enums"]["diligence_priority"]
           reviewer_ids?: string[] | null
+          risk_score?: number | null
+          stage?: string | null
           status?: Database["public"]["Enums"]["diligence_status"]
           subcategory_id?: string | null
           title?: string
