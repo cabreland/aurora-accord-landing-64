@@ -39,6 +39,7 @@ export interface DiligenceRequest {
   created_by: string;
   created_at: string;
   updated_at: string;
+  updated_by: string | null;
   // New columns from migration
   last_activity_at: string | null;
   risk_score: number | null;

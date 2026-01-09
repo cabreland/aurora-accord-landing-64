@@ -938,6 +938,7 @@ export type Database = {
           subcategory_id: string | null
           title: string
           updated_at: string
+          updated_by: string | null
         }
         Insert: {
           assignee_id?: string | null
@@ -961,6 +962,7 @@ export type Database = {
           subcategory_id?: string | null
           title: string
           updated_at?: string
+          updated_by?: string | null
         }
         Update: {
           assignee_id?: string | null
@@ -984,6 +986,7 @@ export type Database = {
           subcategory_id?: string | null
           title?: string
           updated_at?: string
+          updated_by?: string | null
         }
         Relationships: [
           {
