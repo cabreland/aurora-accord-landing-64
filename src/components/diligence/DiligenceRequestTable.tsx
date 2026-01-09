@@ -2,7 +2,6 @@ import React from 'react';
 import { format, isPast, isToday, addDays } from 'date-fns';
 import { 
   AlertTriangle,
-  User,
   FileText,
   MessageSquare,
   MoreHorizontal
@@ -25,6 +24,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { DiligenceRequest, DiligenceCategory, DiligenceSubcategory } from '@/hooks/useDiligenceTracker';
 import { useTeamMembers } from '@/hooks/useTeamMembers';
+import { useDiligenceRequestCounts } from '@/hooks/useDiligenceRequestCounts';
 import UserAvatarBadge from '@/components/common/UserAvatarBadge';
 
 interface DiligenceRequestTableProps {
@@ -33,6 +33,7 @@ interface DiligenceRequestTableProps {
   subcategories: DiligenceSubcategory[];
   onSelectRequest: (request: DiligenceRequest) => void;
   isLoading: boolean;
+  dealId?: string;
 }
 
 const statusConfig = {
@@ -53,9 +54,11 @@ const DiligenceRequestTable: React.FC<DiligenceRequestTableProps> = ({
   categories,
   subcategories,
   onSelectRequest,
-  isLoading
+  isLoading,
+  dealId
 }) => {
   const { data: teamMembers = [] } = useTeamMembers();
+  const { data: requestCounts = {} } = useDiligenceRequestCounts(dealId);
   
   const getAssignee = (assigneeId: string | null) => {
     if (!assigneeId) return null;
@@ -139,7 +142,7 @@ const DiligenceRequestTable: React.FC<DiligenceRequestTableProps> = ({
             const dueDateStatus = getDueDateStatus(request.due_date, request.status);
             const categoryName = getCategoryName(request.category_id);
             const subcategoryName = getSubcategoryName(request.subcategory_id);
-            const documentCount = request.document_ids?.length || 0;
+            const counts = requestCounts[request.id] || { documentCount: 0, commentCount: 0 };
             const assignee = getAssignee(request.assignee_id);
             
             return (
@@ -197,15 +200,15 @@ const DiligenceRequestTable: React.FC<DiligenceRequestTableProps> = ({
                   )}
                 </TableCell>
                 <TableCell className="py-3 text-center">
-                  <div className="flex items-center justify-center gap-1 text-gray-500">
+                  <div className={`flex items-center justify-center gap-1 ${counts.documentCount > 0 ? 'text-primary' : 'text-gray-400'}`}>
                     <FileText className="w-4 h-4" />
-                    <span className="text-xs">{documentCount}</span>
+                    <span className="text-xs font-medium">{counts.documentCount}</span>
                   </div>
                 </TableCell>
                 <TableCell className="py-3 text-center">
-                  <div className="flex items-center justify-center gap-1 text-gray-500">
+                  <div className={`flex items-center justify-center gap-1 ${counts.commentCount > 0 ? 'text-primary' : 'text-gray-400'}`}>
                     <MessageSquare className="w-4 h-4" />
-                    <span className="text-xs">0</span>
+                    <span className="text-xs font-medium">{counts.commentCount}</span>
                   </div>
                 </TableCell>
                 <TableCell className="py-3" onClick={(e) => e.stopPropagation()}>
