@@ -65,6 +65,40 @@ const priorityConfig = {
   low: { label: 'Low', color: 'text-gray-600', bg: 'bg-gray-100 border-gray-300', dot: 'bg-gray-400' },
 };
 
+// Helper to get display name from profile
+const getCommentAuthorName = (profile: { first_name: string | null; last_name: string | null; email: string } | null | undefined): string => {
+  if (!profile) return 'Unknown User';
+  
+  const firstName = profile.first_name?.trim();
+  const lastName = profile.last_name?.trim();
+  
+  if (firstName && lastName) {
+    return `${firstName} ${lastName}`;
+  }
+  if (firstName) return firstName;
+  if (lastName) return lastName;
+  
+  // Fallback to email username
+  return profile.email?.split('@')[0] || 'Unknown User';
+};
+
+// Helper to get initials for avatar
+const getCommentAuthorInitials = (profile: { first_name: string | null; last_name: string | null; email: string } | null | undefined): string => {
+  if (!profile) return 'U';
+  
+  const firstName = profile.first_name?.trim();
+  const lastName = profile.last_name?.trim();
+  
+  if (firstName && lastName) {
+    return `${firstName[0]}${lastName[0]}`.toUpperCase();
+  }
+  if (firstName) return firstName[0].toUpperCase();
+  if (lastName) return lastName[0].toUpperCase();
+  
+  // Fallback to email first letter
+  return profile.email?.[0]?.toUpperCase() || 'U';
+};
+
 const DiligenceRequestPanel: React.FC<DiligenceRequestPanelProps> = ({
   request,
   categories,
@@ -75,7 +109,7 @@ const DiligenceRequestPanel: React.FC<DiligenceRequestPanelProps> = ({
   const [activeTab, setActiveTab] = useState('details');
   
   const updateRequest = useUpdateDiligenceRequest();
-  const { data: comments = [] } = useDiligenceComments(request?.id || '');
+  const { data: comments = [], refetch: refetchComments } = useDiligenceComments(request?.id || '');
   const addComment = useAddDiligenceComment();
   
   if (!request) return null;
@@ -100,14 +134,20 @@ const DiligenceRequestPanel: React.FC<DiligenceRequestPanelProps> = ({
     });
   };
   
-  const handleAddComment = () => {
+  const handleAddComment = async () => {
     if (!newComment.trim()) return;
     
-    addComment.mutate({ 
-      requestId: request.id, 
-      content: newComment.trim() 
-    });
-    setNewComment('');
+    try {
+      await addComment.mutateAsync({ 
+        requestId: request.id, 
+        content: newComment.trim() 
+      });
+      setNewComment('');
+      // Refetch comments to update count and list
+      refetchComments();
+    } catch (error) {
+      // Error is handled in the mutation
+    }
   };
   
   const handleMarkComplete = () => {
@@ -356,11 +396,14 @@ const DiligenceRequestPanel: React.FC<DiligenceRequestPanelProps> = ({
                     <div key={comment.id} className="bg-gray-50 rounded-lg p-3 border border-gray-200">
                       <div className="flex items-center gap-2 mb-2">
                         <Avatar className="w-6 h-6">
-                          <AvatarFallback className="bg-blue-100 text-blue-600 text-xs">
-                            <User className="w-3 h-3" />
+                          <AvatarFallback className="bg-blue-100 text-blue-600 text-xs font-medium">
+                            {getCommentAuthorInitials(comment.profile)}
                           </AvatarFallback>
                         </Avatar>
-                        <span className="text-sm font-medium text-gray-900">User</span>
+                        <span className="text-sm font-medium text-gray-900">
+                          {getCommentAuthorName(comment.profile)}
+                        </span>
+                        <span className="text-xs text-gray-400">·</span>
                         <span className="text-xs text-gray-400">
                           {format(new Date(comment.created_at), 'MMM d, h:mm a')}
                         </span>

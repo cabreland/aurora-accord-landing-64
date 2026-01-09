@@ -75,6 +75,12 @@ export interface DiligenceComment {
   user_id: string;
   content: string;
   created_at: string;
+  // Joined profile data
+  profile?: {
+    first_name: string | null;
+    last_name: string | null;
+    email: string;
+  } | null;
 }
 
 export interface DealWithDiligence {
@@ -162,14 +168,35 @@ export const useDiligenceComments = (requestId: string) => {
   return useQuery({
     queryKey: ['diligence-comments', requestId],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // Fetch comments
+      const { data: comments, error } = await supabase
         .from('diligence_comments')
         .select('*')
         .eq('request_id', requestId)
         .order('created_at', { ascending: false });
       
       if (error) throw error;
-      return data as DiligenceComment[];
+      
+      if (!comments || comments.length === 0) {
+        return [] as DiligenceComment[];
+      }
+      
+      // Get unique user IDs from comments
+      const userIds = [...new Set(comments.map(c => c.user_id))];
+      
+      // Fetch profiles for those users
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('user_id, first_name, last_name, email')
+        .in('user_id', userIds);
+      
+      // Map profiles to comments
+      const profileMap = new Map(profiles?.map(p => [p.user_id, p]) || []);
+      
+      return comments.map(comment => ({
+        ...comment,
+        profile: profileMap.get(comment.user_id) || null
+      })) as DiligenceComment[];
     },
     enabled: !!requestId
   });
