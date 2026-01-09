@@ -37,7 +37,7 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
 import DiligenceRequestTable from './DiligenceRequestTable';
-import DiligenceRequestPanel from './DiligenceRequestPanel';
+import DiligenceRequestModal from './DiligenceRequestModal';
 import AddRequestDialog from './AddRequestDialog';
 
 const iconMap: Record<string, React.ComponentType<any>> = {
@@ -443,8 +443,8 @@ const DealDiligenceTracker: React.FC = () => {
         </div>
       </div>
       
-      {/* Request Detail Panel */}
-      <DiligenceRequestPanel
+      {/* Request Detail Modal */}
+      <DiligenceRequestModal
         request={selectedRequest}
         categories={categories}
         subcategories={subcategories}
