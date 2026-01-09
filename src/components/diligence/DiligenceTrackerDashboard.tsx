@@ -119,6 +119,51 @@ const DiligenceTrackerDashboard: React.FC = () => {
     });
   }, [deals, allRequests, categories]);
   
+  // Helper to calculate deal status based on requests
+  const getDealStatus = (deal: typeof dealsWithCategories[0]) => {
+    const dealRequests = allRequests.filter(r => r.deal_id === deal.id);
+    if (dealRequests.length === 0) return 'active';
+    
+    const allCompleted = dealRequests.every(r => r.status === 'completed');
+    if (allCompleted) return 'completed';
+    
+    const hasBlocked = dealRequests.some(r => r.status === 'blocked');
+    if (hasBlocked) return 'blocked';
+    
+    const hasOverdueItems = deal.overdueCount > 0;
+    const hasHighRisk = dealRequests.some(r => (r.risk_score || 0) >= 70);
+    if (hasOverdueItems || hasHighRisk) return 'at_risk';
+    
+    return 'active';
+  };
+
+  // Helper to get deal risk level
+  const getDealRiskLevel = (deal: typeof dealsWithCategories[0]) => {
+    const dealRequests = allRequests.filter(r => r.deal_id === deal.id);
+    if (dealRequests.length === 0) return 'low';
+    
+    const avgRisk = dealRequests.reduce((sum, r) => sum + (r.risk_score || 0), 0) / dealRequests.length;
+    if (avgRisk >= 70) return 'high';
+    if (avgRisk >= 40) return 'medium';
+    return 'low';
+  };
+
+  // Helper to get deal stage (from requests or default)
+  const getDealStage = (deal: typeof dealsWithCategories[0]) => {
+    const dealRequests = allRequests.filter(r => r.deal_id === deal.id);
+    if (dealRequests.length === 0) return 'early';
+    
+    // Get the most common stage from requests
+    const stages = dealRequests.map(r => r.stage || 'early');
+    const stageCounts = stages.reduce((acc, stage) => {
+      acc[stage] = (acc[stage] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+    
+    const sortedStages = Object.entries(stageCounts).sort((a, b) => (b[1] as number) - (a[1] as number));
+    return sortedStages[0]?.[0] || 'early';
+  };
+
   // Apply filters
   const filteredDeals = useMemo(() => {
     return dealsWithCategories.filter(deal => {
@@ -127,6 +172,30 @@ const DiligenceTrackerDashboard: React.FC = () => {
         const query = searchQuery.toLowerCase();
         if (!deal.company_name.toLowerCase().includes(query) && 
             !deal.title.toLowerCase().includes(query)) {
+          return false;
+        }
+      }
+      
+      // Status filter
+      if (statusFilter !== 'all') {
+        const dealStatus = getDealStatus(deal);
+        if (dealStatus !== statusFilter) {
+          return false;
+        }
+      }
+      
+      // Stage filter
+      if (stageFilter !== 'all') {
+        const dealStage = getDealStage(deal);
+        if (dealStage !== stageFilter) {
+          return false;
+        }
+      }
+      
+      // Risk filter
+      if (riskFilter !== 'all') {
+        const dealRisk = getDealRiskLevel(deal);
+        if (dealRisk !== riskFilter) {
           return false;
         }
       }
@@ -146,7 +215,7 @@ const DiligenceTrackerDashboard: React.FC = () => {
       
       return true;
     });
-  }, [dealsWithCategories, searchQuery, progressFilter, hasOverdue]);
+  }, [dealsWithCategories, searchQuery, statusFilter, stageFilter, riskFilter, progressFilter, hasOverdue, allRequests]);
   
   // Count active filters
   const activeFilterCount = useMemo(() => {
