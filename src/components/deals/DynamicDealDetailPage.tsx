@@ -35,6 +35,7 @@ import { useCompanyAccessLevel } from '@/hooks/useCompanyAccessLevel';
 import { DataRoomSection } from './DataRoomSection';
 import { NDADialog } from './NDADialog';
 import { AccessRequestDialog } from './AccessRequestDialog';
+import { Breadcrumbs } from '@/components/navigation/Breadcrumbs';
 
 interface DynamicDealDetailPageProps {
   dealId?: string;
@@ -50,6 +51,7 @@ export const DynamicDealDetailPage = ({ dealId }: DynamicDealDetailPageProps) =>
   const [showNDAModal, setShowNDAModal] = useState(false);
   const [showAccessRequest, setShowAccessRequest] = useState(false);
   const [documents, setDocuments] = useState<any[]>([]);
+  const [activeTab, setActiveTab] = useState('overview');
   const { toast } = useToast();
   
   // Data room hooks
@@ -273,21 +275,17 @@ export const DynamicDealDetailPage = ({ dealId }: DynamicDealDetailPageProps) =>
 
       {/* Main Content */}
       <div className="ml-64 p-6">
+        {/* Breadcrumb Navigation */}
+        <Breadcrumbs 
+          dealName={deal.company_name} 
+          currentTab={activeTab !== 'overview' ? activeTab : undefined} 
+        />
+
         {/* Header Section */}
         <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-4">
-            <Button
-              onClick={handleBack}
-              variant="outline"
-              className="border-[#D4AF37] text-[#D4AF37] hover:bg-[#D4AF37] hover:text-[#0A0F0F]"
-            >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Deals
-            </Button>
-            <div>
-              <h1 className="text-4xl font-bold text-[#FAFAFA] mb-2">{deal.company_name}</h1>
-              <p className="text-lg text-[#F4E4BC]">{deal.industry || 'Business'} • {deal.location || 'Location TBD'}</p>
-            </div>
+          <div>
+            <h1 className="text-4xl font-bold text-[#FAFAFA] mb-2">{deal.company_name}</h1>
+            <p className="text-lg text-[#F4E4BC]">{deal.industry || 'Business'} • {deal.location || 'Location TBD'}</p>
           </div>
           <div className="flex items-center gap-3">
             {canEdit && (
@@ -306,7 +304,7 @@ export const DynamicDealDetailPage = ({ dealId }: DynamicDealDetailPageProps) =>
         </div>
 
         {/* Two Column Layout with Tabs */}
-        <Tabs defaultValue="overview" className="w-full">
+        <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full max-w-md grid-cols-3 bg-[#2A2F3A] border border-[#D4AF37]/20">
             <TabsTrigger value="overview" className="data-[state=active]:bg-[#D4AF37] data-[state=active]:text-[#0A0F0F]">
               Overview
