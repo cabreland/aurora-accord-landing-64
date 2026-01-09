@@ -107,22 +107,22 @@ export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({ items, dealName, curre
   }
 
   return (
-    <nav aria-label="Breadcrumb" className="flex items-center space-x-2 text-sm mb-6">
-      <Home className="w-4 h-4 text-primary" />
+    <nav aria-label="Breadcrumb" className="flex items-center space-x-2 text-sm">
+      <Home className="w-4 h-4 text-[#D4AF37]" />
       {breadcrumbItems.map((item, index) => (
         <React.Fragment key={index}>
           {index > 0 && (
-            <ChevronRight className="w-4 h-4 text-muted-foreground/60" />
+            <span className="text-gray-600 mx-1">&gt;</span>
           )}
           {item.path ? (
             <Link 
               to={item.path}
-              className="text-muted-foreground hover:text-primary transition-colors"
+              className="text-gray-400 hover:text-[#D4AF37] transition-colors"
             >
               {item.label}
             </Link>
           ) : (
-            <span className="text-foreground font-medium">
+            <span className="text-white font-medium">
               {item.label}
             </span>
           )}

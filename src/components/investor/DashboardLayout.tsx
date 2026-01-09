@@ -279,22 +279,23 @@ const DashboardLayout = ({ children, activeTab = 'dashboard', onTabChange, bread
 
       {/* Main Content - With left margin for sidebar */}
       <div className="flex-1 lg:ml-64 overflow-auto">
-        {/* Header with Breadcrumbs, Notification Bell and User Menu */}
+        {/* Header with Notification Bell and User Menu */}
         <div className="bg-gradient-to-b from-[#0A0F0F] to-[#1A1F2E] border-b border-[#D4AF37]/30 p-4 lg:p-6 sticky top-0 z-30">
-          <div className="flex justify-between items-center">
-            {/* Breadcrumbs - Auto-generated if not provided */}
-            <div className="hidden lg:block">
-              <Breadcrumbs items={breadcrumbs} />
-            </div>
-            <div className="flex items-center gap-3 ml-auto">
+          <div className="flex justify-end items-center">
+            <div className="flex items-center gap-3">
               <NotificationBell />
               <UserMenuDropdown />
             </div>
           </div>
         </div>
         
+        {/* Breadcrumbs - Below header, above page content */}
+        <div className="px-4 lg:px-6 pt-4 lg:pt-6">
+          <Breadcrumbs items={breadcrumbs} />
+        </div>
+        
         {/* Page Content */}
-        <div className="p-4 lg:p-6">
+        <div className="p-4 lg:p-6 pt-0 lg:pt-0">
           {children}
         </div>
       </div>
