@@ -47,6 +47,7 @@ const NDAManagement = lazy(() => import("./pages/NDAManagement"));
 const AccessRequests = lazy(() => import("./pages/AccessRequests"));
 const NDASettings = lazy(() => import("./pages/NDASettings"));
 const InvestorProfile = lazy(() => import("./pages/InvestorProfilePage"));
+const DiligenceTracker = lazy(() => import("./pages/DiligenceTracker"));
 
 // Wrap protected components with authentication
 const ProtectedDashboard = withAuth('investor')(Dashboard);
@@ -69,6 +70,7 @@ const ProtectedNDAManagement = withAuth('admin')(NDAManagement);
 const ProtectedAccessRequests = withAuth('admin')(AccessRequests);
 const ProtectedNDASettings = withAuth('admin')(NDASettings);
 const ProtectedInvestorProfile = withAuth('investor')(InvestorProfile);
+const ProtectedDiligenceTracker = withAuth('admin')(DiligenceTracker);
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -127,6 +129,8 @@ const AppContent = () => {
               <Route path="/dashboard/ndas" element={<ProtectedNDAManagement />} />
               <Route path="/dashboard/access-requests" element={<ProtectedAccessRequests />} />
               <Route path="/dashboard/nda-settings" element={<ProtectedNDASettings />} />
+              <Route path="/dashboard/diligence-tracker" element={<ProtectedDiligenceTracker />} />
+              <Route path="/dashboard/diligence-tracker/:dealId" element={<ProtectedDiligenceTracker />} />
               <Route path="/investor-portal/profile" element={<ProtectedInvestorProfile />} />
               <Route path="/investor/profile" element={<Navigate to="/investor-portal/profile" replace />} />
               <Route path="/403" element={<Forbidden />} />
