@@ -270,7 +270,7 @@ const AddRequestDialog: React.FC<AddRequestDialogProps> = ({
           
           <div className="grid gap-2">
             <Label className="text-sm font-medium text-gray-700">Assign To</Label>
-            <Select value={assigneeId} onValueChange={setAssigneeId}>
+            <Select value={assigneeId || 'unassigned'} onValueChange={(v) => setAssigneeId(v === 'unassigned' ? '' : v)}>
               <SelectTrigger className="bg-white border-gray-300">
                 <SelectValue placeholder="Select team member...">
                   {assigneeId ? (
@@ -301,7 +301,7 @@ const AddRequestDialog: React.FC<AddRequestDialogProps> = ({
                 </SelectValue>
               </SelectTrigger>
               <SelectContent className="bg-white border-gray-200 max-h-60">
-                <SelectItem value="">
+                <SelectItem value="unassigned">
                   <div className="flex items-center gap-2 text-gray-500">
                     <div className="w-5 h-5 rounded-full border border-dashed border-gray-300 flex items-center justify-center">
                       <User className="w-3 h-3 text-gray-400" />
