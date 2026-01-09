@@ -3,10 +3,11 @@ import DashboardLayout from '@/components/investor/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TrendingUp, DollarSign, Target, Activity } from 'lucide-react';
 
+
 const Analytics = () => {
   return (
     <DashboardLayout>
-      <div className="p-6 space-y-6">
+      <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold text-foreground mb-2">Deal Analytics</h1>
           <p className="text-muted-foreground">Performance metrics and investment insights</p>

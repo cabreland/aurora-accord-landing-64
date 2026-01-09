@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Plus, Search, Filter, MoreVertical } from 'lucide-react';
@@ -17,6 +16,7 @@ import { DealListView } from '@/components/deals/DealListView';
 import { DealKanbanView } from '@/components/deals/DealKanbanView';
 import { DealDetailPanel } from '@/components/deals/DealDetailPanel';
 import { DealWizard } from '@/components/deals/wizard/DealWizard';
+
 
 type ViewType = 'cards' | 'list' | 'kanban';
 
