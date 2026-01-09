@@ -258,7 +258,8 @@ export const useCreateDiligenceRequest = () => {
           status: request.status || 'open',
           due_date: request.due_date || null,
           order_index: request.order_index || 0,
-          created_by: user?.id!
+          created_by: user?.id!,
+          assignee_id: request.assignee_id || null
         })
         .select()
         .single();
