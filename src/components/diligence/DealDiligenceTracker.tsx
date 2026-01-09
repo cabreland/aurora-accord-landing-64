@@ -8,26 +8,31 @@ import {
   ChevronRight,
   BarChart3,
   Scale,
-  Receipt,
   Users,
   Settings,
   Cpu,
-  ShoppingCart,
   Leaf,
-  Folder
+  Folder,
+  CheckCircle,
+  AlertCircle,
+  Filter,
+  FileText
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent } from '@/components/ui/card';
-import { Checkbox } from '@/components/ui/checkbox';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { 
   useDiligenceRequests, 
   useDiligenceCategories, 
   useDiligenceSubcategories,
   DiligenceRequest,
-  DiligenceCategory
 } from '@/hooks/useDiligenceTracker';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
@@ -38,11 +43,9 @@ import AddRequestDialog from './AddRequestDialog';
 const iconMap: Record<string, React.ComponentType<any>> = {
   'bar-chart-3': BarChart3,
   'scale': Scale,
-  'receipt': Receipt,
   'users': Users,
   'settings': Settings,
   'cpu': Cpu,
-  'shopping-cart': ShoppingCart,
   'leaf': Leaf,
   'folder': Folder,
 };
@@ -55,8 +58,9 @@ const DealDiligenceTracker: React.FC = () => {
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
   const [selectedRequest, setSelectedRequest] = useState<DiligenceRequest | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [priorityFilter, setPriorityFilter] = useState<string>('all');
   const [addRequestOpen, setAddRequestOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState('requests');
   
   const { data: deal } = useQuery({
     queryKey: ['deal', dealId],
@@ -76,6 +80,13 @@ const DealDiligenceTracker: React.FC = () => {
   const { data: requests = [], isLoading } = useDiligenceRequests(dealId);
   const { data: categories = [] } = useDiligenceCategories();
   const { data: subcategories = [] } = useDiligenceSubcategories();
+  
+  // Expand all categories by default
+  React.useEffect(() => {
+    if (categories.length > 0 && expandedCategories.size === 0) {
+      setExpandedCategories(new Set(categories.map(c => c.id)));
+    }
+  }, [categories]);
   
   // Calculate counts per category and subcategory
   const categoryCounts = useMemo(() => {
@@ -119,6 +130,16 @@ const DealDiligenceTracker: React.FC = () => {
         return false;
       }
       
+      // Status filter
+      if (statusFilter !== 'all' && request.status !== statusFilter) {
+        return false;
+      }
+      
+      // Priority filter
+      if (priorityFilter !== 'all' && request.priority !== priorityFilter) {
+        return false;
+      }
+      
       // Search filter
       if (searchQuery) {
         const query = searchQuery.toLowerCase();
@@ -128,7 +149,7 @@ const DealDiligenceTracker: React.FC = () => {
       
       return true;
     });
-  }, [requests, selectedCategoryId, selectedSubcategoryId, searchQuery]);
+  }, [requests, selectedCategoryId, selectedSubcategoryId, statusFilter, priorityFilter, searchQuery]);
   
   const toggleCategory = (categoryId: string) => {
     setExpandedCategories(prev => {
@@ -160,202 +181,256 @@ const DealDiligenceTracker: React.FC = () => {
   const completedRequests = requests.filter(r => r.status === 'completed').length;
   const progressPercentage = totalRequests > 0 ? Math.round((completedRequests / totalRequests) * 100) : 0;
 
+  // Get category progress indicator
+  const getCategoryProgressIndicator = (categoryId: string) => {
+    const count = categoryCounts[categoryId] || { total: 0, completed: 0 };
+    if (count.total === 0) return null;
+    
+    const pct = (count.completed / count.total) * 100;
+    
+    if (pct === 100) {
+      return <CheckCircle className="w-4 h-4 text-green-500" />;
+    } else if (pct > 0) {
+      return <div className="w-2 h-2 rounded-full bg-amber-500" />;
+    } else {
+      return <div className="w-2 h-2 rounded-full bg-red-500" />;
+    }
+  };
+
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
       {/* Header */}
-      <div className="mb-6">
-        <Button
-          variant="ghost"
-          onClick={() => navigate('/dashboard/diligence-tracker')}
-          className="text-gray-400 hover:text-white mb-4"
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Dashboard
-        </Button>
-        
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div>
-            <h1 className="text-2xl font-bold text-white">{deal?.company_name || 'Loading...'}</h1>
-            <p className="text-gray-400">Due Diligence Tracker</p>
+      <div className="bg-white border-b border-gray-200 p-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate('/dashboard/diligence-tracker')}
+              className="text-gray-600 hover:text-gray-900"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back
+            </Button>
+            <div className="h-6 w-px bg-gray-200" />
+            <div>
+              <h1 className="text-lg font-semibold text-gray-900">{deal?.company_name || 'Loading...'}</h1>
+              <p className="text-sm text-gray-500">Due Diligence Tracker</p>
+            </div>
           </div>
           
           <div className="flex items-center gap-4">
-            <div className="text-right">
-              <div className="text-sm text-gray-400">Overall Progress</div>
-              <div className="text-xl font-bold text-[#D4AF37]">{progressPercentage}%</div>
+            {/* Progress Circle */}
+            <div className="flex items-center gap-3">
+              <div className="relative w-12 h-12">
+                <svg className="w-12 h-12 transform -rotate-90">
+                  <circle
+                    cx="24"
+                    cy="24"
+                    r="20"
+                    stroke="#E5E7EB"
+                    strokeWidth="4"
+                    fill="none"
+                  />
+                  <circle
+                    cx="24"
+                    cy="24"
+                    r="20"
+                    stroke="#10B981"
+                    strokeWidth="4"
+                    fill="none"
+                    strokeDasharray={`${progressPercentage * 1.25} 125`}
+                    strokeLinecap="round"
+                  />
+                </svg>
+                <span className="absolute inset-0 flex items-center justify-center text-xs font-semibold text-gray-900">
+                  {progressPercentage}%
+                </span>
+              </div>
+              <div className="text-right">
+                <div className="text-sm font-medium text-gray-900">{completedRequests}/{totalRequests}</div>
+                <div className="text-xs text-gray-500">Resolved</div>
+              </div>
             </div>
-            <div className="w-24 h-2 bg-[#2A2F3A] rounded-full overflow-hidden">
-              <div 
-                className="h-full bg-[#D4AF37] transition-all"
-                style={{ width: `${progressPercentage}%` }}
-              />
-            </div>
+            
+            <Button 
+              onClick={() => setAddRequestOpen(true)}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Add Request
+            </Button>
           </div>
         </div>
       </div>
       
-      {/* Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
-        <TabsList className="bg-[#1A1F2E] border border-[#2A2F3A] mb-4 w-fit">
-          <TabsTrigger value="overview" className="data-[state=active]:bg-[#D4AF37]/20 data-[state=active]:text-[#D4AF37]">
-            Overview
-          </TabsTrigger>
-          <TabsTrigger value="requests" className="data-[state=active]:bg-[#D4AF37]/20 data-[state=active]:text-[#D4AF37]">
-            Requests
-          </TabsTrigger>
-          <TabsTrigger value="timeline" className="data-[state=active]:bg-[#D4AF37]/20 data-[state=active]:text-[#D4AF37]">
-            Timeline
-          </TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="overview" className="flex-1">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            {categories.slice(0, 8).map((cat) => {
-              const count = categoryCounts[cat.id] || { total: 0, completed: 0 };
-              const Icon = iconMap[cat.icon] || Folder;
-              const pct = count.total > 0 ? Math.round((count.completed / count.total) * 100) : 0;
-              
-              return (
-                <Card 
-                  key={cat.id}
-                  className="bg-[#1A1F2E] border-[#2A2F3A] hover:border-[#D4AF37]/50 cursor-pointer"
-                  onClick={() => {
-                    selectCategory(cat.id);
-                    setActiveTab('requests');
-                  }}
-                >
-                  <CardContent className="p-4">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div 
-                        className="w-10 h-10 rounded-lg flex items-center justify-center"
-                        style={{ backgroundColor: `${cat.color}20` }}
-                      >
-                        <Icon className="w-5 h-5" style={{ color: cat.color }} />
-                      </div>
-                      <div>
-                        <div className="font-medium text-white">{cat.name}</div>
-                        <div className="text-xs text-gray-400">{count.completed}/{count.total}</div>
-                      </div>
-                    </div>
-                    <div className="w-full h-1.5 bg-[#2A2F3A] rounded-full overflow-hidden">
-                      <div 
-                        className="h-full transition-all"
-                        style={{ width: `${pct}%`, backgroundColor: cat.color }}
-                      />
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="requests" className="flex-1 flex gap-6">
-          {/* Left Panel - Category Tree */}
-          <div className="w-64 shrink-0 space-y-2">
+      <div className="flex-1 flex overflow-hidden">
+        {/* Left Sidebar - Category Tree */}
+        <div className="w-72 bg-gray-50 border-r border-gray-200 overflow-y-auto">
+          <div className="p-4">
+            <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
+              Categories
+            </h2>
+            
+            {/* All requests button */}
             <button
               onClick={() => selectCategory(null)}
-              className={`w-full flex items-center justify-between px-4 py-2 rounded-lg transition-colors ${
+              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg transition-colors mb-2 ${
                 !selectedCategoryId 
-                  ? 'bg-[#D4AF37]/20 text-[#D4AF37]' 
-                  : 'text-gray-300 hover:bg-[#2A2F3A]'
+                  ? 'bg-blue-50 text-blue-700 border border-blue-200' 
+                  : 'text-gray-700 hover:bg-gray-100'
               }`}
             >
-              <span className="font-medium">All</span>
-              <Badge variant="outline" className="text-xs">{totalRequests}</Badge>
+              <div className="flex items-center gap-2">
+                <Folder className="w-4 h-4" />
+                <span className="font-medium text-sm">All Requests</span>
+              </div>
+              <Badge variant="secondary" className="text-xs bg-gray-200 text-gray-700">
+                {totalRequests}
+              </Badge>
             </button>
             
-            {categories.map((cat) => {
-              const count = categoryCounts[cat.id] || { total: 0, completed: 0 };
-              const Icon = iconMap[cat.icon] || Folder;
-              const isExpanded = expandedCategories.has(cat.id);
-              const catSubs = subcategories.filter(s => s.category_id === cat.id);
-              const hasSubcategories = catSubs.length > 0 && catSubs.some(s => (subcategoryCounts[s.id]?.total || 0) > 0);
-              
-              if (count.total === 0) return null;
-              
-              return (
-                <div key={cat.id}>
-                  <div className="flex items-center">
-                    {hasSubcategories && (
-                      <button
-                        onClick={() => toggleCategory(cat.id)}
-                        className="p-1 text-gray-400 hover:text-white"
-                      >
-                        {isExpanded ? (
-                          <ChevronDown className="w-4 h-4" />
-                        ) : (
-                          <ChevronRight className="w-4 h-4" />
-                        )}
-                      </button>
-                    )}
-                    <button
-                      onClick={() => selectCategory(cat.id)}
-                      className={`flex-1 flex items-center gap-2 px-2 py-2 rounded-lg transition-colors ${
-                        selectedCategoryId === cat.id && !selectedSubcategoryId
-                          ? 'bg-[#D4AF37]/20 text-[#D4AF37]' 
-                          : 'text-gray-300 hover:bg-[#2A2F3A]'
-                      } ${!hasSubcategories ? 'ml-5' : ''}`}
+            <div className="h-px bg-gray-200 my-3" />
+            
+            {/* Category list */}
+            <div className="space-y-1">
+              {categories.map((cat) => {
+                const count = categoryCounts[cat.id] || { total: 0, completed: 0 };
+                const Icon = iconMap[cat.icon || 'folder'] || Folder;
+                const isExpanded = expandedCategories.has(cat.id);
+                const catSubs = subcategories.filter(s => s.category_id === cat.id);
+                const hasSubcategories = catSubs.length > 0;
+                const isSelected = selectedCategoryId === cat.id && !selectedSubcategoryId;
+                
+                return (
+                  <div key={cat.id}>
+                    <div 
+                      className={`flex items-center rounded-lg transition-colors ${
+                        isSelected 
+                          ? 'bg-blue-50 border border-blue-200' 
+                          : 'hover:bg-gray-100'
+                      }`}
                     >
-                      <Icon className="w-4 h-4" style={{ color: cat.color }} />
-                      <span className="flex-1 text-left text-sm">{cat.name}</span>
-                      <span className="text-xs text-gray-500">
-                        ({count.completed}/{count.total})
-                      </span>
-                    </button>
-                  </div>
-                  
-                  {isExpanded && hasSubcategories && (
-                    <div className="ml-9 space-y-1 mt-1">
-                      {catSubs.map((sub) => {
-                        const subCount = subcategoryCounts[sub.id] || { total: 0, completed: 0 };
-                        if (subCount.total === 0) return null;
-                        
-                        return (
-                          <button
-                            key={sub.id}
-                            onClick={() => selectSubcategory(sub.id)}
-                            className={`w-full flex items-center justify-between px-3 py-1.5 rounded text-sm transition-colors ${
-                              selectedSubcategoryId === sub.id
-                                ? 'bg-[#D4AF37]/10 text-[#D4AF37]' 
-                                : 'text-gray-400 hover:text-white hover:bg-[#2A2F3A]/50'
-                            }`}
-                          >
-                            <span>{sub.name}</span>
-                            <span className="text-xs">
-                              ({subCount.completed}/{subCount.total})
-                            </span>
-                          </button>
-                        );
-                      })}
+                      {hasSubcategories && (
+                        <button
+                          onClick={() => toggleCategory(cat.id)}
+                          className="p-2 text-gray-400 hover:text-gray-600"
+                        >
+                          {isExpanded ? (
+                            <ChevronDown className="w-4 h-4" />
+                          ) : (
+                            <ChevronRight className="w-4 h-4" />
+                          )}
+                        </button>
+                      )}
+                      <button
+                        onClick={() => selectCategory(cat.id)}
+                        className={`flex-1 flex items-center gap-2 py-2.5 pr-3 ${
+                          !hasSubcategories ? 'pl-3' : ''
+                        }`}
+                      >
+                        <Icon 
+                          className="w-4 h-4" 
+                          style={{ color: cat.color || '#6B7280' }} 
+                        />
+                        <span className={`flex-1 text-left text-sm font-medium ${
+                          isSelected ? 'text-blue-700' : 'text-gray-700'
+                        }`}>
+                          {cat.name}
+                        </span>
+                        <div className="flex items-center gap-2">
+                          {getCategoryProgressIndicator(cat.id)}
+                          <span className={`text-xs ${
+                            isSelected ? 'text-blue-600' : 'text-gray-500'
+                          }`}>
+                            {count.completed}/{count.total}
+                          </span>
+                        </div>
+                      </button>
                     </div>
-                  )}
-                </div>
-              );
-            })}
+                    
+                    {isExpanded && hasSubcategories && (
+                      <div className="ml-6 mt-1 space-y-0.5 border-l border-gray-200 pl-3">
+                        {catSubs.map((sub) => {
+                          const subCount = subcategoryCounts[sub.id] || { total: 0, completed: 0 };
+                          const isSubSelected = selectedSubcategoryId === sub.id;
+                          
+                          return (
+                            <button
+                              key={sub.id}
+                              onClick={() => selectSubcategory(sub.id)}
+                              className={`w-full flex items-center justify-between px-3 py-1.5 rounded text-sm transition-colors ${
+                                isSubSelected
+                                  ? 'bg-blue-50 text-blue-700' 
+                                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                              }`}
+                            >
+                              <span>{sub.name}</span>
+                              <span className="text-xs text-gray-400">
+                                {subCount.completed}/{subCount.total}
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           </div>
-          
-          {/* Main Content - Request Table */}
-          <div className="flex-1 space-y-4">
-            <div className="flex items-center gap-4">
-              <div className="relative flex-1">
+        </div>
+        
+        {/* Main Content */}
+        <div className="flex-1 flex flex-col overflow-hidden bg-white">
+          {/* Filter Bar */}
+          <div className="p-4 border-b border-gray-200 bg-gray-50">
+            <div className="flex items-center gap-3">
+              <div className="relative flex-1 max-w-md">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <Input
                   placeholder="Search requests..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 bg-[#1A1F2E] border-[#2A2F3A] text-white"
+                  className="pl-10 bg-white border-gray-300 text-gray-900 placeholder:text-gray-400"
                 />
               </div>
-              <Button 
-                onClick={() => setAddRequestOpen(true)}
-                className="bg-[#D4AF37] hover:bg-[#B4941F] text-[#0A0F0F]"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Add Request
-              </Button>
+              
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-[140px] bg-white border-gray-300">
+                  <div className="flex items-center gap-2">
+                    <Filter className="w-4 h-4 text-gray-400" />
+                    <SelectValue placeholder="Status" />
+                  </div>
+                </SelectTrigger>
+                <SelectContent className="bg-white border-gray-200">
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="open">Open</SelectItem>
+                  <SelectItem value="in_progress">In Progress</SelectItem>
+                  <SelectItem value="completed">Resolved</SelectItem>
+                  <SelectItem value="blocked">Blocked</SelectItem>
+                </SelectContent>
+              </Select>
+              
+              <Select value={priorityFilter} onValueChange={setPriorityFilter}>
+                <SelectTrigger className="w-[140px] bg-white border-gray-300">
+                  <div className="flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 text-gray-400" />
+                    <SelectValue placeholder="Priority" />
+                  </div>
+                </SelectTrigger>
+                <SelectContent className="bg-white border-gray-200">
+                  <SelectItem value="all">All Priority</SelectItem>
+                  <SelectItem value="high">High</SelectItem>
+                  <SelectItem value="medium">Medium</SelectItem>
+                  <SelectItem value="low">Low</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-            
+          </div>
+          
+          {/* Request Table */}
+          <div className="flex-1 overflow-auto p-4">
             <DiligenceRequestTable 
               requests={filteredRequests}
               categories={categories}
@@ -364,16 +439,8 @@ const DealDiligenceTracker: React.FC = () => {
               isLoading={isLoading}
             />
           </div>
-        </TabsContent>
-        
-        <TabsContent value="timeline" className="flex-1">
-          <Card className="bg-[#1A1F2E] border-[#2A2F3A]">
-            <CardContent className="p-12 text-center">
-              <p className="text-gray-400">Timeline view coming soon</p>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+        </div>
+      </div>
       
       {/* Request Detail Panel */}
       <DiligenceRequestPanel
