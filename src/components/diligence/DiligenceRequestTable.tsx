@@ -44,16 +44,17 @@ interface DiligenceRequestTableProps {
 }
 
 // Status badge configuration with icons and proper colors
+// Open = Blue, In Progress = Amber/Yellow, Resolved = Green, Blocked = Red
 const statusConfig = {
   open: { 
     label: 'Open', 
     icon: Circle,
-    className: 'bg-gray-100 text-gray-700 border-gray-200 hover:bg-gray-100'
+    className: 'bg-blue-100 text-blue-700 border-blue-200 hover:bg-blue-100'
   },
   in_progress: { 
     label: 'In Progress', 
     icon: Clock,
-    className: 'bg-blue-100 text-blue-700 border-blue-200 hover:bg-blue-100'
+    className: 'bg-amber-100 text-amber-700 border-amber-200 hover:bg-amber-100'
   },
   completed: { 
     label: 'Resolved', 
@@ -68,9 +69,9 @@ const statusConfig = {
 };
 
 const priorityConfig = {
-  high: { label: 'High', color: 'text-red-600', bg: 'bg-red-50' },
-  medium: { label: 'Medium', color: 'text-amber-600', bg: 'bg-amber-50' },
-  low: { label: 'Low', color: 'text-gray-600', bg: 'bg-gray-100' },
+  high: { label: 'High', color: 'text-red-700', bg: 'bg-red-100' },
+  medium: { label: 'Medium', color: 'text-amber-700', bg: 'bg-amber-100' },
+  low: { label: 'Low', color: 'text-gray-700', bg: 'bg-gray-100' },
 };
 
 const DiligenceRequestTable: React.FC<DiligenceRequestTableProps> = ({

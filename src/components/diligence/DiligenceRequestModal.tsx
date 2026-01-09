@@ -18,7 +18,8 @@ import {
   Trash2,
   History,
   Loader2,
-  File
+  File,
+  RotateCcw
 } from 'lucide-react';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { Button } from '@/components/ui/button';
@@ -41,6 +42,16 @@ import {
   DialogTitle,
   DialogDescription
 } from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { 
   DiligenceRequest, 
   DiligenceCategory, 
@@ -77,6 +88,7 @@ import StackedAvatars, { AssigneeInfo } from '@/components/common/StackedAvatars
 import MultiAssigneeSelector from '@/components/common/MultiAssigneeSelector';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { useRequestActivity } from '@/hooks/useRequestActivity';
 
 interface DiligenceRequestModalProps {
   request: DiligenceRequest | null;
@@ -86,132 +98,74 @@ interface DiligenceRequestModalProps {
 }
 
 const statusConfig = {
-  open: { label: 'Open', color: 'text-blue-600', bg: 'bg-blue-50 border-blue-200' },
-  in_progress: { label: 'In Progress', color: 'text-amber-600', bg: 'bg-amber-50 border-amber-200' },
-  completed: { label: 'Resolved', color: 'text-green-600', bg: 'bg-green-50 border-green-200' },
-  blocked: { label: 'Blocked', color: 'text-red-600', bg: 'bg-red-100 border-red-300' },
+  open: { label: 'Open', color: 'text-blue-700', bg: 'bg-blue-100 border-blue-200', dot: 'bg-blue-500' },
+  in_progress: { label: 'In Progress', color: 'text-amber-700', bg: 'bg-amber-100 border-amber-200', dot: 'bg-amber-500' },
+  completed: { label: 'Resolved', color: 'text-green-700', bg: 'bg-green-100 border-green-200', dot: 'bg-green-500' },
+  blocked: { label: 'Blocked', color: 'text-red-700', bg: 'bg-red-100 border-red-200', dot: 'bg-red-500' },
 };
 
 const priorityConfig = {
-  high: { label: 'High', color: 'text-red-600', bg: 'bg-red-50 border-red-200', dot: 'bg-red-500' },
-  medium: { label: 'Medium', color: 'text-amber-600', bg: 'bg-amber-50 border-amber-200', dot: 'bg-amber-500' },
-  low: { label: 'Low', color: 'text-gray-600', bg: 'bg-gray-100 border-gray-300', dot: 'bg-gray-400' },
+  high: { label: 'High', color: 'text-red-700', bg: 'bg-red-100 border-red-200', dot: 'bg-red-500' },
+  medium: { label: 'Medium', color: 'text-amber-700', bg: 'bg-amber-100 border-amber-200', dot: 'bg-amber-500' },
+  low: { label: 'Low', color: 'text-gray-700', bg: 'bg-gray-100 border-gray-300', dot: 'bg-gray-400' },
 };
 
-// Activity Tab Component
+// Activity Tab Component with real-time comment tracking
 interface ActivityTabProps {
   request: DiligenceRequest;
-  teamMembers: Array<{
-    user_id: string;
-    first_name: string | null;
-    last_name: string | null;
-    email: string;
-    role: string;
-    profile_picture_url: string | null;
-  }>;
 }
 
-const ActivityTab: React.FC<ActivityTabProps> = ({ request, teamMembers }) => {
-  const creator = teamMembers.find(m => m.user_id === request.created_by);
-  const creatorName = creator 
-    ? getUserDisplayName(creator.first_name, creator.last_name, creator.email)
-    : 'Unknown User';
+const ActivityTab: React.FC<ActivityTabProps> = ({ request }) => {
+  const { data: activities = [], isLoading } = useRequestActivity(request.id);
   
-  const assignee = request.assignee_id 
-    ? teamMembers.find(m => m.user_id === request.assignee_id)
-    : null;
-  const assigneeName = assignee 
-    ? getUserDisplayName(assignee.first_name, assignee.last_name, assignee.email)
-    : null;
-  const assigneeRole = assignee ? getRoleDisplayName(assignee.role) : null;
+  const getActivityIcon = (type: string) => {
+    switch (type) {
+      case 'created':
+        return { icon: <History className="w-4 h-4 text-gray-600" />, bg: 'bg-gray-100' };
+      case 'assigned':
+        return { icon: <User className="w-4 h-4 text-blue-600" />, bg: 'bg-blue-100' };
+      case 'status':
+        return { icon: <Clock className="w-4 h-4 text-amber-600" />, bg: 'bg-amber-100' };
+      case 'resolved':
+        return { icon: <CheckCircle2 className="w-4 h-4 text-green-600" />, bg: 'bg-green-100' };
+      case 'comment':
+        return { icon: <MessageSquare className="w-4 h-4 text-blue-600" />, bg: 'bg-blue-100' };
+      case 'reply':
+        return { icon: <MessageSquare className="w-4 h-4 text-purple-600" />, bg: 'bg-purple-100' };
+      default:
+        return { icon: <History className="w-4 h-4 text-gray-600" />, bg: 'bg-gray-100' };
+    }
+  };
   
-  const activities: Array<{
-    id: string;
-    type: 'created' | 'status' | 'assigned' | 'updated';
-    icon: React.ReactNode;
-    bgColor: string;
-    content: React.ReactNode;
-    timestamp: string;
-  }> = [];
-  
-  activities.push({
-    id: 'created',
-    type: 'created',
-    icon: <History className="w-4 h-4 text-gray-600" />,
-    bgColor: 'bg-gray-100',
-    content: (
-      <span>
-        <span className="font-medium">Request created</span> by{' '}
-        <span className="font-medium">{creatorName}</span>
-      </span>
-    ),
-    timestamp: request.created_at
-  });
-  
-  if (request.assignee_id && assigneeName) {
-    activities.push({
-      id: 'assigned',
-      type: 'assigned',
-      icon: <User className="w-4 h-4 text-blue-600" />,
-      bgColor: 'bg-blue-100',
-      content: (
-        <span>
-          <span className="font-medium">Assigned to</span>{' '}
-          <span className="font-medium">{assigneeName}</span>
-          {assigneeRole && <span className="text-gray-500"> ({assigneeRole})</span>}
-        </span>
-      ),
-      timestamp: request.updated_at
-    });
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <Loader2 className="w-6 h-6 text-blue-600 animate-spin" />
+      </div>
+    );
   }
-  
-  if (request.status !== 'open') {
-    const statusLabels: Record<string, string> = {
-      in_progress: 'In Progress',
-      completed: 'Resolved',
-      blocked: 'Blocked'
-    };
-    const statusColors: Record<string, { icon: string; bg: string }> = {
-      in_progress: { icon: 'text-amber-600', bg: 'bg-amber-100' },
-      completed: { icon: 'text-green-600', bg: 'bg-green-100' },
-      blocked: { icon: 'text-red-600', bg: 'bg-red-100' }
-    };
-    const config = statusColors[request.status] || { icon: 'text-gray-600', bg: 'bg-gray-100' };
-    
-    activities.push({
-      id: 'status',
-      type: 'status',
-      icon: request.status === 'completed' 
-        ? <CheckCircle2 className={`w-4 h-4 ${config.icon}`} />
-        : request.status === 'blocked'
-          ? <AlertTriangle className={`w-4 h-4 ${config.icon}`} />
-          : <Clock className={`w-4 h-4 ${config.icon}`} />,
-      bgColor: config.bg,
-      content: (
-        <span>
-          <span className="font-medium">Status changed</span> to{' '}
-          <span className="font-medium">{statusLabels[request.status] || request.status}</span>
-        </span>
-      ),
-      timestamp: request.updated_at
-    });
-  }
-  
-  activities.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
   
   return (
     <div className="space-y-4">
-      {activities.map((activity) => (
-        <div key={activity.id} className="flex gap-3">
-          <div className={`w-8 h-8 rounded-full ${activity.bgColor} flex items-center justify-center shrink-0`}>
-            {activity.icon}
+      {activities.map((activity) => {
+        const { icon, bg } = getActivityIcon(activity.type);
+        return (
+          <div key={activity.id} className="flex gap-3">
+            <div className={`w-8 h-8 rounded-full ${bg} flex items-center justify-center shrink-0`}>
+              {icon}
+            </div>
+            <div>
+              <div className="text-sm text-gray-900">
+                <span className="font-medium">{activity.content}</span>
+                {activity.userName !== 'System' && (
+                  <> by <span className="font-medium">{activity.userName}</span></>
+                )}
+              </div>
+              <div className="text-xs text-gray-500">{activity.formattedTime}</div>
+            </div>
           </div>
-          <div>
-            <div className="text-sm text-gray-900">{activity.content}</div>
-            <div className="text-xs text-gray-500">{formatSmartTimestamp(activity.timestamp)}</div>
-          </div>
-        </div>
-      ))}
+        );
+      })}
       
       {activities.length === 0 && (
         <div className="text-center py-8 text-gray-500 text-sm">
@@ -222,6 +176,7 @@ const ActivityTab: React.FC<ActivityTabProps> = ({ request, teamMembers }) => {
     </div>
   );
 };
+
 
 const DiligenceRequestModal: React.FC<DiligenceRequestModalProps> = ({
   request,
@@ -234,6 +189,10 @@ const DiligenceRequestModal: React.FC<DiligenceRequestModalProps> = ({
   const [dueDateOpen, setDueDateOpen] = useState(false);
   const [isEditingDescription, setIsEditingDescription] = useState(false);
   const [editedDescription, setEditedDescription] = useState('');
+  const [originalDescription, setOriginalDescription] = useState('');
+  const [isSavingDescription, setIsSavingDescription] = useState(false);
+  const [showReopenConfirm, setShowReopenConfirm] = useState(false);
+  const [showResolveConfirm, setShowResolveConfirm] = useState(false);
   const descriptionRef = useRef<HTMLTextAreaElement>(null);
   
   // Local state for optimistic UI updates
@@ -246,6 +205,8 @@ const DiligenceRequestModal: React.FC<DiligenceRequestModalProps> = ({
     setLocalPriority(null);
     setLocalDueDate(undefined);
     setEditedDescription(request?.description || '');
+    setOriginalDescription(request?.description || '');
+    setIsEditingDescription(false);
   }, [request?.id]);
   
   const updateRequest = useUpdateDiligenceRequest();
@@ -391,25 +352,71 @@ const DiligenceRequestModal: React.FC<DiligenceRequestModalProps> = ({
     setAssigneePopoverOpen(false);
   };
   
-  const handleDescriptionBlur = () => {
-    if (editedDescription !== (request.description || '')) {
-      updateRequest.mutate({
+  const handleDescriptionSave = async () => {
+    if (editedDescription === originalDescription) {
+      setIsEditingDescription(false);
+      return;
+    }
+    
+    setIsSavingDescription(true);
+    try {
+      await updateRequest.mutateAsync({
         id: request.id,
         description: editedDescription.trim() || null
       });
+      setOriginalDescription(editedDescription);
+      setIsEditingDescription(false);
       toast.success('Description saved');
+    } catch (error) {
+      toast.error('Failed to save description');
+    } finally {
+      setIsSavingDescription(false);
     }
+  };
+  
+  const handleDescriptionCancel = () => {
+    setEditedDescription(originalDescription);
     setIsEditingDescription(false);
   };
   
+  const handleDescriptionKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      handleDescriptionCancel();
+    }
+  };
+  
   const handleMarkComplete = () => {
+    setShowResolveConfirm(true);
+  };
+  
+  const confirmResolve = () => {
+    setLocalStatus('completed');
     updateRequest.mutate({
       id: request.id,
       status: 'completed',
       completion_date: new Date().toISOString().split('T')[0]
     });
+    setShowResolveConfirm(false);
     toast.success('Request marked as resolved');
   };
+  
+  const handleReopen = () => {
+    setShowReopenConfirm(true);
+  };
+  
+  const confirmReopen = () => {
+    setLocalStatus('in_progress');
+    updateRequest.mutate({
+      id: request.id,
+      status: 'in_progress',
+      completion_date: null
+    });
+    setShowReopenConfirm(false);
+    toast.success('Request reopened');
+  };
+
+  const hasDescriptionChanges = editedDescription !== originalDescription;
 
   return (
     <Dialog open={!!request} onOpenChange={(open) => !open && onClose()}>
@@ -427,13 +434,22 @@ const DiligenceRequestModal: React.FC<DiligenceRequestModalProps> = ({
         aria-describedby="request-modal-description"
       >
         {/* Header */}
-        <div className="p-4 md:p-6 border-b border-gray-200 bg-gray-50 shrink-0">
+        <div className={cn(
+          "p-4 md:p-6 border-b border-gray-200 shrink-0 transition-colors",
+          currentStatus === 'completed' ? 'bg-green-50/50' : 'bg-gray-50'
+        )}>
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-3 mb-2">
+              <div className="flex items-center gap-3 mb-2 flex-wrap">
                 <DialogTitle className="text-xl font-semibold text-gray-900 truncate">
                   {request.title}
                 </DialogTitle>
+                {currentStatus === 'completed' && (
+                  <Badge className="bg-green-600 text-white shrink-0">
+                    <CheckCircle2 className="w-3 h-3 mr-1" />
+                    Resolved
+                  </Badge>
+                )}
                 <Badge variant="outline" className="shrink-0 bg-gray-100 text-gray-700 border-gray-300">
                   {category?.name || 'Uncategorized'}
                 </Badge>
@@ -587,29 +603,58 @@ const DiligenceRequestModal: React.FC<DiligenceRequestModalProps> = ({
                   Description
                 </label>
                 {isEditingDescription ? (
-                  <Textarea
-                    ref={descriptionRef}
-                    value={editedDescription}
-                    onChange={(e) => setEditedDescription(e.target.value)}
-                    onBlur={handleDescriptionBlur}
-                    placeholder="Add a description..."
-                    className="bg-white border-gray-200 min-h-[120px] text-sm resize-none"
-                    autoFocus
-                  />
+                  <div className="space-y-2">
+                    <Textarea
+                      ref={descriptionRef}
+                      value={editedDescription}
+                      onChange={(e) => setEditedDescription(e.target.value)}
+                      onKeyDown={handleDescriptionKeyDown}
+                      placeholder="Add a description..."
+                      className="bg-white border-blue-400 ring-2 ring-blue-100 min-h-[120px] text-sm resize-none focus:ring-2 focus:ring-blue-200"
+                      autoFocus
+                    />
+                    <div className="flex gap-2">
+                      <Button 
+                        size="sm"
+                        onClick={handleDescriptionSave}
+                        disabled={!hasDescriptionChanges || isSavingDescription}
+                        className="bg-blue-600 hover:bg-blue-700"
+                      >
+                        {isSavingDescription ? (
+                          <>
+                            <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                            Saving...
+                          </>
+                        ) : 'Save'}
+                      </Button>
+                      <Button 
+                        size="sm"
+                        variant="outline"
+                        onClick={handleDescriptionCancel}
+                        disabled={isSavingDescription}
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                    <p className="text-xs text-gray-400">Press ESC to cancel</p>
+                  </div>
                 ) : (
                   <div 
                     onClick={() => {
                       setIsEditingDescription(true);
                       setEditedDescription(request.description || '');
+                      setOriginalDescription(request.description || '');
                     }}
                     className={cn(
-                      "rounded-lg p-3 border text-sm cursor-pointer transition-colors min-h-[80px]",
+                      "rounded-lg p-3 border text-sm cursor-pointer transition-all min-h-[80px] group",
                       request.description 
-                        ? "bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100 hover:border-gray-300"
-                        : "bg-gray-50 border-dashed border-gray-300 text-gray-400 italic hover:bg-gray-100 hover:border-gray-400"
+                        ? "bg-gray-50 border-gray-200 text-gray-700 hover:bg-blue-50/50 hover:border-blue-300"
+                        : "bg-gray-50 border-dashed border-gray-300 text-gray-400 italic hover:bg-blue-50/50 hover:border-blue-300"
                     )}
+                    title="Click to edit"
                   >
-                    {request.description || 'Click to add description...'}
+                    <span className="whitespace-pre-wrap">{request.description || 'Click to add description...'}</span>
+                    <span className="text-xs text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity ml-2">Click to edit</span>
                   </div>
                 )}
               </div>
@@ -716,26 +761,40 @@ const DiligenceRequestModal: React.FC<DiligenceRequestModalProps> = ({
             </TabsContent>
             
             <TabsContent value="activity" className="py-4 mt-0">
-              <ActivityTab 
-                request={request} 
-                teamMembers={teamMembers} 
-              />
+              <ActivityTab request={request} />
             </TabsContent>
           </ScrollArea>
         </Tabs>
         
         {/* Footer Actions */}
-        <div className="p-4 md:p-6 border-t border-gray-200 bg-gray-50 shrink-0">
+        <div className={cn(
+          "p-4 md:p-6 border-t border-gray-200 shrink-0 transition-colors",
+          currentStatus === 'completed' ? 'bg-green-50/50' : 'bg-gray-50'
+        )}>
           <div className="flex gap-3 justify-between">
-            {(request.status === 'open' || request.status === 'in_progress') && (
+            {currentStatus === 'completed' ? (
+              <Button 
+                onClick={handleReopen}
+                variant="outline"
+                className="border-gray-300 text-gray-700 hover:bg-gray-100"
+              >
+                <RotateCcw className="w-4 h-4 mr-2" />
+                Reopen Request
+              </Button>
+            ) : (currentStatus === 'open' || currentStatus === 'in_progress') ? (
               <Button 
                 onClick={handleMarkComplete}
                 className="bg-green-600 hover:bg-green-700 text-white"
+                disabled={updateRequest.isPending}
               >
-                <CheckCircle2 className="w-4 h-4 mr-2" />
+                {updateRequest.isPending ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <CheckCircle2 className="w-4 h-4 mr-2" />
+                )}
                 Mark as Resolved
               </Button>
-            )}
+            ) : null}
             <div className="flex-1" />
             <Button 
               variant="outline"
@@ -746,6 +805,45 @@ const DiligenceRequestModal: React.FC<DiligenceRequestModalProps> = ({
             </Button>
           </div>
         </div>
+        
+        {/* Resolve Confirmation Dialog */}
+        <AlertDialog open={showResolveConfirm} onOpenChange={setShowResolveConfirm}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Mark as Resolved?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to mark this request as resolved? Team members will be notified.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction 
+                onClick={confirmResolve}
+                className="bg-green-600 hover:bg-green-700"
+              >
+                Mark as Resolved
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+        
+        {/* Reopen Confirmation Dialog */}
+        <AlertDialog open={showReopenConfirm} onOpenChange={setShowReopenConfirm}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Reopen Request?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to reopen this request? It will be set back to "In Progress" status.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={confirmReopen}>
+                Reopen Request
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </DialogContent>
     </Dialog>
   );
