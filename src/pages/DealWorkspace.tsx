@@ -332,7 +332,7 @@ const DealWorkspace: React.FC = () => {
         )}
 
         {activeTab === 'requests' && deal && (
-          <DealDiligenceTracker dealId={deal.id} />
+          <DealDiligenceTracker />
         )}
 
         {activeTab === 'activity' && (
