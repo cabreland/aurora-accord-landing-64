@@ -2584,6 +2584,65 @@ export type Database = {
         }
         Relationships: []
       }
+      team_invitations: {
+        Row: {
+          accepted_at: string | null
+          created_at: string
+          deal_id: string | null
+          expires_at: string
+          id: string
+          invitation_token: string
+          invitee_email: string
+          invitee_name: string | null
+          inviter_id: string
+          permissions: Json | null
+          personal_message: string | null
+          role: string
+          status: Database["public"]["Enums"]["team_invitation_status"]
+          updated_at: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          created_at?: string
+          deal_id?: string | null
+          expires_at?: string
+          id?: string
+          invitation_token?: string
+          invitee_email: string
+          invitee_name?: string | null
+          inviter_id: string
+          permissions?: Json | null
+          personal_message?: string | null
+          role?: string
+          status?: Database["public"]["Enums"]["team_invitation_status"]
+          updated_at?: string
+        }
+        Update: {
+          accepted_at?: string | null
+          created_at?: string
+          deal_id?: string | null
+          expires_at?: string
+          id?: string
+          invitation_token?: string
+          invitee_email?: string
+          invitee_name?: string | null
+          inviter_id?: string
+          permissions?: Json | null
+          personal_message?: string | null
+          role?: string
+          status?: Database["public"]["Enums"]["team_invitation_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_invitations_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_activity_log: {
         Row: {
           action: string
@@ -2987,6 +3046,7 @@ export type Database = {
         }
         Returns: string
       }
+      expire_team_invitations: { Args: never; Returns: undefined }
       get_user_access_level: {
         Args: { p_company_id: string; p_user_id: string }
         Returns: string
@@ -3114,6 +3174,7 @@ export type Database = {
       invitation_status: "pending" | "accepted" | "expired" | "revoked"
       priority_level: "low" | "medium" | "high"
       referral_source: "referral" | "social_media" | "search" | "other"
+      team_invitation_status: "pending" | "accepted" | "expired" | "revoked"
       user_role: "admin" | "editor" | "viewer" | "super_admin"
     }
     CompositeTypes: {
@@ -3293,6 +3354,7 @@ export const Constants = {
       invitation_status: ["pending", "accepted", "expired", "revoked"],
       priority_level: ["low", "medium", "high"],
       referral_source: ["referral", "social_media", "search", "other"],
+      team_invitation_status: ["pending", "accepted", "expired", "revoked"],
       user_role: ["admin", "editor", "viewer", "super_admin"],
     },
   },
