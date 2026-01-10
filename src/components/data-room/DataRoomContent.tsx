@@ -1,52 +1,18 @@
-import React, { useCallback, useState } from 'react';
-import { useDropzone } from 'react-dropzone';
-import {
-  Upload,
-  FileText,
-  MoreVertical,
-  Download,
-  Trash2,
-  CheckCircle,
-  XCircle,
-  Clock,
-  Eye,
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import { DataRoomDocument, DataRoomFolder } from '@/hooks/useDataRoom';
-import { format } from 'date-fns';
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
+import React, { useState, useRef } from 'react';
+import { DataRoomDocument, DataRoomFolder, DataRoomCategory } from '@/hooks/useDataRoom';
+import { DataRoomBreadcrumb } from './DataRoomBreadcrumb';
+import { DataRoomUploadZone } from './DataRoomUploadZone';
+import { DataRoomDocumentTable } from './DataRoomDocumentTable';
+import { DataRoomEmptyContent } from './DataRoomEmptyContent';
+import { DataRoomFilters } from './DataRoomFilters';
+import { DataRoomBulkActions } from './DataRoomBulkActions';
 
 interface DataRoomContentProps {
   documents: DataRoomDocument[];
   folders: DataRoomFolder[];
+  categories: DataRoomCategory[];
   selectedFolderId: string | null;
+  selectedCategoryId: string | null;
   currentLocation: string;
   onUpload: (file: File) => Promise<unknown>;
   onDelete: (documentId: string) => Promise<boolean>;
@@ -55,243 +21,146 @@ interface DataRoomContentProps {
     status: 'approved' | 'rejected',
     reason?: string
   ) => Promise<boolean>;
+  onNavigateHome: () => void;
+  onNavigateCategory: (categoryId: string) => void;
 }
-
-const STATUS_CONFIG = {
-  pending_review: {
-    label: 'Pending Review',
-    icon: Clock,
-    className: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
-  },
-  approved: {
-    label: 'Approved',
-    icon: CheckCircle,
-    className: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-  },
-  rejected: {
-    label: 'Rejected',
-    icon: XCircle,
-    className: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
-  },
-};
 
 export const DataRoomContent: React.FC<DataRoomContentProps> = ({
   documents,
   folders,
+  categories,
   selectedFolderId,
+  selectedCategoryId,
   currentLocation,
   onUpload,
   onDelete,
   onUpdateStatus,
+  onNavigateHome,
+  onNavigateCategory,
 }) => {
-  const [uploading, setUploading] = useState(false);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [documentToDelete, setDocumentToDelete] = useState<string | null>(null);
+  const [selectedDocuments, setSelectedDocuments] = useState<Set<string>>(new Set());
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const uploadRef = useRef<HTMLDivElement>(null);
 
-  const onDrop = useCallback(
-    async (acceptedFiles: File[]) => {
-      setUploading(true);
-      for (const file of acceptedFiles) {
-        await onUpload(file);
-      }
-      setUploading(false);
-    },
-    [onUpload]
-  );
+  // Get selected folder and category objects
+  const selectedFolder = selectedFolderId
+    ? folders.find((f) => f.id === selectedFolderId) || null
+    : null;
+  const selectedCategory = selectedCategoryId
+    ? categories.find((c) => c.id === selectedCategoryId) || null
+    : null;
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    multiple: true,
+  // Filter documents
+  const filteredDocuments = documents.filter((doc) => {
+    const matchesSearch =
+      !searchQuery ||
+      doc.file_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      doc.index_number?.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesStatus = statusFilter === 'all' || doc.status === statusFilter;
+    return matchesSearch && matchesStatus;
   });
 
-  const handleDownload = async (document: DataRoomDocument) => {
-    try {
-      const { data, error } = await supabase.storage
-        .from('data-room-documents')
-        .createSignedUrl(document.file_path, 60);
+  const handleSelectDocument = (docId: string, selected: boolean) => {
+    setSelectedDocuments((prev) => {
+      const next = new Set(prev);
+      if (selected) {
+        next.add(docId);
+      } else {
+        next.delete(docId);
+      }
+      return next;
+    });
+  };
 
-      if (error) throw error;
-
-      window.open(data.signedUrl, '_blank');
-    } catch (err) {
-      console.error('Error downloading document:', err);
-      toast.error('Failed to download document');
+  const handleSelectAll = (selected: boolean) => {
+    if (selected) {
+      setSelectedDocuments(new Set(filteredDocuments.map((d) => d.id)));
+    } else {
+      setSelectedDocuments(new Set());
     }
   };
 
-  const handleDeleteConfirm = async () => {
-    if (documentToDelete) {
-      await onDelete(documentToDelete);
-      setDocumentToDelete(null);
+  const handleBulkApprove = async (ids: string[]) => {
+    for (const id of ids) {
+      await onUpdateStatus(id, 'approved');
     }
-    setDeleteDialogOpen(false);
   };
 
-  const getFolderName = (folderId: string | null) => {
-    if (!folderId) return 'Unassigned';
-    const folder = folders.find((f) => f.id === folderId);
-    return folder ? `${folder.index_number} ${folder.name}` : 'Unknown';
+  const handleBulkDelete = async (ids: string[]) => {
+    for (const id of ids) {
+      await onDelete(id);
+    }
   };
 
-  const formatFileSize = (bytes: number | null) => {
-    if (!bytes) return '-';
-    if (bytes < 1024) return `${bytes} B`;
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  const handleClearFilters = () => {
+    setSearchQuery('');
+    setStatusFilter('all');
+  };
+
+  const scrollToUpload = () => {
+    uploadRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
   return (
     <div className="flex-1 space-y-4">
+      {/* Breadcrumb */}
+      <DataRoomBreadcrumb
+        selectedFolder={selectedFolder}
+        selectedCategory={selectedCategory}
+        documentCount={filteredDocuments.length}
+        onNavigateHome={onNavigateHome}
+        onNavigateCategory={onNavigateCategory}
+      />
+
       {/* Upload Zone */}
-      <div
-        {...getRootProps()}
-        className={`
-          border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-colors
-          ${isDragActive ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'}
-          ${uploading ? 'opacity-50 pointer-events-none' : ''}
-        `}
-      >
-        <input {...getInputProps()} />
-        <Upload className="h-8 w-8 mx-auto text-muted-foreground mb-3" />
-        <p className="text-sm text-muted-foreground">
-          {uploading
-            ? 'Uploading...'
-            : isDragActive
-            ? 'Drop files here'
-            : 'Drag & drop files here, or click to browse'}
-        </p>
-        <p className="text-xs text-muted-foreground mt-1">
-          Uploading to: {currentLocation}
-        </p>
+      <div ref={uploadRef}>
+        <DataRoomUploadZone
+          folderName={currentLocation}
+          onUpload={onUpload}
+        />
       </div>
 
-      {/* Documents Table */}
-      <div className="bg-card rounded-xl border border-border overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Document</TableHead>
-              <TableHead>Folder</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Size</TableHead>
-              <TableHead>Uploaded</TableHead>
-              <TableHead className="w-12"></TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {documents.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                  No documents in this location
-                </TableCell>
-              </TableRow>
-            ) : (
-              documents.map((doc) => {
-                const statusConfig = STATUS_CONFIG[doc.status];
-                const StatusIcon = statusConfig.icon;
+      {/* Filters */}
+      {documents.length > 0 && (
+        <DataRoomFilters
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          statusFilter={statusFilter}
+          onStatusFilterChange={setStatusFilter}
+          resultCount={filteredDocuments.length}
+          onClearFilters={handleClearFilters}
+        />
+      )}
 
-                return (
-                  <TableRow key={doc.id}>
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <FileText className="h-5 w-5 text-muted-foreground" />
-                        <div>
-                          <div className="font-medium text-foreground">{doc.file_name}</div>
-                          {doc.index_number && (
-                            <div className="text-xs text-muted-foreground">
-                              Index: {doc.index_number}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
-                      {getFolderName(doc.folder_id)}
-                    </TableCell>
-                    <TableCell>
-                      <Badge className={statusConfig.className}>
-                        <StatusIcon className="h-3 w-3 mr-1" />
-                        {statusConfig.label}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
-                      {formatFileSize(doc.file_size)}
-                    </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
-                      {format(new Date(doc.created_at), 'MMM d, yyyy')}
-                    </TableCell>
-                    <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon">
-                            <MoreVertical className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => handleDownload(doc)}>
-                            <Download className="h-4 w-4 mr-2" />
-                            Download
-                          </DropdownMenuItem>
-                          <DropdownMenuItem>
-                            <Eye className="h-4 w-4 mr-2" />
-                            Preview
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          {doc.status !== 'approved' && (
-                            <DropdownMenuItem
-                              onClick={() => onUpdateStatus(doc.id, 'approved')}
-                            >
-                              <CheckCircle className="h-4 w-4 mr-2 text-green-500" />
-                              Approve
-                            </DropdownMenuItem>
-                          )}
-                          {doc.status !== 'rejected' && (
-                            <DropdownMenuItem
-                              onClick={() => onUpdateStatus(doc.id, 'rejected', 'Rejected by admin')}
-                            >
-                              <XCircle className="h-4 w-4 mr-2 text-red-500" />
-                              Reject
-                            </DropdownMenuItem>
-                          )}
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            className="text-destructive"
-                            onClick={() => {
-                              setDocumentToDelete(doc.id);
-                              setDeleteDialogOpen(true);
-                            }}
-                          >
-                            <Trash2 className="h-4 w-4 mr-2" />
-                            Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                );
-              })
-            )}
-          </TableBody>
-        </Table>
-      </div>
+      {/* Document Table or Empty State */}
+      {filteredDocuments.length === 0 ? (
+        <div className="bg-card rounded-xl border border-border">
+          <DataRoomEmptyContent
+            folderName={currentLocation}
+            onUploadClick={scrollToUpload}
+          />
+        </div>
+      ) : (
+        <DataRoomDocumentTable
+          documents={filteredDocuments}
+          folders={folders}
+          selectedDocuments={selectedDocuments}
+          onSelectDocument={handleSelectDocument}
+          onSelectAll={handleSelectAll}
+          onDelete={onDelete}
+          onUpdateStatus={onUpdateStatus}
+        />
+      )}
 
-      {/* Delete Confirmation Dialog */}
-      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete Document</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete this document? This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteConfirm} className="bg-destructive">
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {/* Bulk Actions */}
+      <DataRoomBulkActions
+        selectedDocuments={selectedDocuments}
+        documents={filteredDocuments}
+        onClearSelection={() => setSelectedDocuments(new Set())}
+        onBulkDelete={handleBulkDelete}
+        onBulkApprove={handleBulkApprove}
+      />
     </div>
   );
 };
