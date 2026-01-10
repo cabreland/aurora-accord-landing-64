@@ -49,6 +49,7 @@ const NDASettings = lazy(() => import("./pages/NDASettings"));
 const InvestorProfile = lazy(() => import("./pages/InvestorProfilePage"));
 const DiligenceTracker = lazy(() => import("./pages/DiligenceTracker"));
 const DataRoom = lazy(() => import("./pages/DataRoom"));
+const DealWorkspace = lazy(() => import("./pages/DealWorkspace"));
 
 // Wrap protected components with authentication
 const ProtectedDashboard = withAuth('investor')(Dashboard);
@@ -73,6 +74,7 @@ const ProtectedNDASettings = withAuth('admin')(NDASettings);
 const ProtectedInvestorProfile = withAuth('investor')(InvestorProfile);
 const ProtectedDiligenceTracker = withAuth('admin')(DiligenceTracker);
 const ProtectedDataRoom = withAuth('staff')(DataRoom);
+const ProtectedDealWorkspace = withAuth('staff')(DealWorkspace);
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -134,6 +136,8 @@ const AppContent = () => {
               <Route path="/dashboard/diligence-tracker" element={<ProtectedDiligenceTracker />} />
               <Route path="/dashboard/diligence-tracker/:dealId" element={<ProtectedDiligenceTracker />} />
               <Route path="/data-room" element={<ProtectedDataRoom />} />
+              {/* Deal Workspace - unified deal management hub */}
+              <Route path="/deals/:dealId" element={<ProtectedDealWorkspace />} />
               <Route path="/investor-portal/profile" element={<ProtectedInvestorProfile />} />
               <Route path="/investor/profile" element={<Navigate to="/investor-portal/profile" replace />} />
               <Route path="/403" element={<Forbidden />} />
