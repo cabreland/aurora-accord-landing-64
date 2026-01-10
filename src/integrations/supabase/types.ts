@@ -648,6 +648,7 @@ export type Database = {
           approved_at: string | null
           created_at: string | null
           deal_id: string | null
+          download_count: number | null
           file_name: string
           file_path: string
           file_size: number | null
@@ -656,6 +657,7 @@ export type Database = {
           folder_id: string | null
           id: string
           index_number: string | null
+          linked_request_ids: string[] | null
           metadata: Json | null
           mime_type: string | null
           rejection_reason: string | null
@@ -664,11 +666,13 @@ export type Database = {
           updated_at: string | null
           uploaded_by: string | null
           version: number | null
+          view_count: number | null
         }
         Insert: {
           approved_at?: string | null
           created_at?: string | null
           deal_id?: string | null
+          download_count?: number | null
           file_name: string
           file_path: string
           file_size?: number | null
@@ -677,6 +681,7 @@ export type Database = {
           folder_id?: string | null
           id?: string
           index_number?: string | null
+          linked_request_ids?: string[] | null
           metadata?: Json | null
           mime_type?: string | null
           rejection_reason?: string | null
@@ -685,11 +690,13 @@ export type Database = {
           updated_at?: string | null
           uploaded_by?: string | null
           version?: number | null
+          view_count?: number | null
         }
         Update: {
           approved_at?: string | null
           created_at?: string | null
           deal_id?: string | null
+          download_count?: number | null
           file_name?: string
           file_path?: string
           file_size?: number | null
@@ -698,6 +705,7 @@ export type Database = {
           folder_id?: string | null
           id?: string
           index_number?: string | null
+          linked_request_ids?: string[] | null
           metadata?: Json | null
           mime_type?: string | null
           rejection_reason?: string | null
@@ -706,6 +714,7 @@ export type Database = {
           updated_at?: string | null
           uploaded_by?: string | null
           version?: number | null
+          view_count?: number | null
         }
         Relationships: [
           {
@@ -727,6 +736,7 @@ export type Database = {
       data_room_folders: {
         Row: {
           category_id: string | null
+          completion_percentage: number | null
           created_at: string | null
           deal_id: string | null
           description: string | null
@@ -740,6 +750,7 @@ export type Database = {
         }
         Insert: {
           category_id?: string | null
+          completion_percentage?: number | null
           created_at?: string | null
           deal_id?: string | null
           description?: string | null
@@ -753,6 +764,7 @@ export type Database = {
         }
         Update: {
           category_id?: string | null
+          completion_percentage?: number | null
           created_at?: string | null
           deal_id?: string | null
           description?: string | null
@@ -859,6 +871,47 @@ export type Database = {
         }
         Relationships: []
       }
+      deal_activities: {
+        Row: {
+          activity_type: Database["public"]["Enums"]["deal_activity_type"]
+          created_at: string
+          deal_id: string
+          entity_id: string | null
+          entity_type: string
+          id: string
+          metadata: Json | null
+          user_id: string | null
+        }
+        Insert: {
+          activity_type: Database["public"]["Enums"]["deal_activity_type"]
+          created_at?: string
+          deal_id: string
+          entity_id?: string | null
+          entity_type: string
+          id?: string
+          metadata?: Json | null
+          user_id?: string | null
+        }
+        Update: {
+          activity_type?: Database["public"]["Enums"]["deal_activity_type"]
+          created_at?: string
+          deal_id?: string
+          entity_id?: string | null
+          entity_type?: string
+          id?: string
+          metadata?: Json | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deal_activities_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       deal_assignments: {
         Row: {
           assigned_by: string
@@ -928,6 +981,47 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "deal_interests_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      deal_team_members: {
+        Row: {
+          added_at: string
+          added_by: string | null
+          deal_id: string
+          id: string
+          last_active: string | null
+          permissions: Json
+          role: Database["public"]["Enums"]["deal_team_role"]
+          user_id: string
+        }
+        Insert: {
+          added_at?: string
+          added_by?: string | null
+          deal_id: string
+          id?: string
+          last_active?: string | null
+          permissions?: Json
+          role?: Database["public"]["Enums"]["deal_team_role"]
+          user_id: string
+        }
+        Update: {
+          added_at?: string
+          added_by?: string | null
+          deal_id?: string
+          id?: string
+          last_active?: string | null
+          permissions?: Json
+          role?: Database["public"]["Enums"]["deal_team_role"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deal_team_members_deal_id_fkey"
             columns: ["deal_id"]
             isOneToOne: false
             referencedRelation: "deals"
@@ -2703,6 +2797,16 @@ export type Database = {
         Args: { p_deal_id: string; p_investor_email: string }
         Returns: boolean
       }
+      log_deal_activity: {
+        Args: {
+          p_activity_type: Database["public"]["Enums"]["deal_activity_type"]
+          p_deal_id: string
+          p_entity_id?: string
+          p_entity_type: string
+          p_metadata?: Json
+        }
+        Returns: string
+      }
       log_security_event: {
         Args: { p_event_data?: Json; p_event_type: string; p_user_id?: string }
         Returns: string
@@ -2752,7 +2856,33 @@ export type Database = {
         | "explore_options"
       business_type: "saas" | "ecom" | "agency" | "other"
       company_stage: "teaser" | "discovery" | "dd" | "closing"
+      deal_activity_type:
+        | "document_uploaded"
+        | "document_deleted"
+        | "document_moved"
+        | "document_approved"
+        | "document_rejected"
+        | "document_downloaded"
+        | "request_created"
+        | "request_updated"
+        | "request_status_changed"
+        | "request_completed"
+        | "comment_added"
+        | "team_member_added"
+        | "team_member_removed"
+        | "permission_changed"
+        | "nda_signed"
+        | "deal_stage_changed"
+        | "deal_created"
+        | "deal_updated"
       deal_status: "active" | "archived" | "draft"
+      deal_team_role:
+        | "deal_lead"
+        | "analyst"
+        | "external_reviewer"
+        | "investor"
+        | "seller"
+        | "advisor"
       diligence_priority: "high" | "medium" | "low"
       diligence_status: "open" | "in_progress" | "completed" | "blocked"
       document_tag:
@@ -2902,7 +3032,35 @@ export const Constants = {
       ],
       business_type: ["saas", "ecom", "agency", "other"],
       company_stage: ["teaser", "discovery", "dd", "closing"],
+      deal_activity_type: [
+        "document_uploaded",
+        "document_deleted",
+        "document_moved",
+        "document_approved",
+        "document_rejected",
+        "document_downloaded",
+        "request_created",
+        "request_updated",
+        "request_status_changed",
+        "request_completed",
+        "comment_added",
+        "team_member_added",
+        "team_member_removed",
+        "permission_changed",
+        "nda_signed",
+        "deal_stage_changed",
+        "deal_created",
+        "deal_updated",
+      ],
       deal_status: ["active", "archived", "draft"],
+      deal_team_role: [
+        "deal_lead",
+        "analyst",
+        "external_reviewer",
+        "investor",
+        "seller",
+        "advisor",
+      ],
       diligence_priority: ["high", "medium", "low"],
       diligence_status: ["open", "in_progress", "completed", "blocked"],
       document_tag: [
