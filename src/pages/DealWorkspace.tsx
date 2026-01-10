@@ -17,6 +17,7 @@ import {
   TeamTab,
   DealTab 
 } from '@/components/deal-workspace';
+import { DealSettingsTab } from '@/components/deals/tabs';
 import { DataRoomSidebar } from '@/components/data-room/DataRoomSidebar';
 import { DataRoomContent } from '@/components/data-room/DataRoomContent';
 import { DataRoomMetricsBar } from '@/components/data-room/DataRoomMetricsBar';
@@ -344,13 +345,7 @@ const DealWorkspace: React.FC = () => {
         )}
 
         {activeTab === 'settings' && (
-          <div className="flex flex-col items-center justify-center py-12 text-center">
-            <Building2 className="h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-medium mb-2">Deal Settings</h3>
-            <p className="text-muted-foreground">
-              Deal settings and configuration coming soon.
-            </p>
-          </div>
+          <DealSettingsTab />
         )}
       </div>
     </div>
