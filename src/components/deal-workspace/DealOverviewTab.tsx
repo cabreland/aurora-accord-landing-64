@@ -25,6 +25,7 @@ import { useDealActivities, getActivityDescription, getActivityIcon, getActivity
 import { useDealTeam, getRoleDisplayName, getRoleColor } from '@/hooks/useDealTeam';
 import { useDiligenceRequests } from '@/hooks/useDiligenceTracker';
 import { useDataRoom } from '@/hooks/useDataRoom';
+import { useDealStageManager, STAGE_ORDER, DealStage as StageType } from '@/hooks/useDealStageManager';
 import { cn } from '@/lib/utils';
 import { DealTab } from './DealWorkspaceTabs';
 import { 
@@ -32,6 +33,7 @@ import {
   DiligenceStageTimeline, 
   BottlenecksWidget, 
   OutstandingItemsWidget,
+  StageProgressionAlert,
   type DiligenceStage,
   type Bottleneck,
   type OutstandingItem 
@@ -84,6 +86,19 @@ export const DealOverviewTab: React.FC<DealOverviewTabProps> = ({ deal, onTabCha
   const { data: teamMembers = [], isLoading: teamLoading } = useDealTeam(deal.id);
   const { data: requests = [], isLoading: requestsLoading } = useDiligenceRequests(deal.id);
   const { folders, documents, loading: dataRoomLoading } = useDataRoom({ dealId: deal.id });
+  
+  // Use the stage manager hook for real stage data
+  const {
+    currentStage: dbCurrentStage,
+    completedStages: dbCompletedStages,
+    daysInCurrentStage: dbDaysInStage,
+    progressionCheck,
+    showProgressionAlert,
+    setShowProgressionAlert,
+    acceptProgressionSuggestion,
+    isProgressing,
+    isLoadingStageInfo
+  } = useDealStageManager(deal.id);
 
   // Calculate comprehensive metrics
   const metrics = useMemo(() => {
@@ -147,28 +162,62 @@ export const DealOverviewTab: React.FC<DealOverviewTabProps> = ({ deal, onTabCha
     };
   }, [folders, documents, requests, teamMembers]);
 
-  // Determine current diligence stage
+  // Determine current diligence stage - use database value if available, otherwise compute
   const currentStage = useMemo((): DiligenceStage => {
+    // Map database stage to DiligenceStage type
+    if (dbCurrentStage) {
+      const stageMap: Record<StageType, DiligenceStage> = {
+        'deal_initiated': 'initiated',
+        'information_request': 'information_request',
+        'analysis': 'analysis',
+        'final_review': 'final_review',
+        'closing': 'closing'
+      };
+      return stageMap[dbCurrentStage] || 'initiated';
+    }
+    // Fallback to computed stage
     if (deal.status === 'closed') return 'closing';
     if (metrics.overallCompletion >= 90) return 'final_review';
     if (metrics.overallCompletion >= 50) return 'analysis';
     if (metrics.overallCompletion > 0) return 'information_request';
     return 'initiated';
-  }, [deal.status, metrics.overallCompletion]);
+  }, [dbCurrentStage, deal.status, metrics.overallCompletion]);
 
   const completedStages = useMemo((): DiligenceStage[] => {
+    // Use database completed stages if available
+    if (dbCompletedStages && dbCompletedStages.length > 0) {
+      return dbCompletedStages.map(s => {
+        const stageMap: Record<StageType, DiligenceStage> = {
+          'deal_initiated': 'initiated',
+          'information_request': 'information_request',
+          'analysis': 'analysis',
+          'final_review': 'final_review',
+          'closing': 'closing'
+        };
+        return stageMap[s] || 'initiated';
+      });
+    }
+    // Fallback to computed stages
     const stages: DiligenceStage[] = [];
     if (currentStage !== 'initiated') stages.push('initiated');
     if (['analysis', 'final_review', 'closing'].includes(currentStage)) stages.push('information_request');
     if (['final_review', 'closing'].includes(currentStage)) stages.push('analysis');
     if (currentStage === 'closing') stages.push('final_review');
     return stages;
-  }, [currentStage]);
+  }, [dbCompletedStages, currentStage]);
 
-  // Calculate days in current stage
+  // Calculate days in current stage - use database value if available
   const daysInCurrentStage = useMemo(() => {
+    if (dbDaysInStage !== undefined) return dbDaysInStage;
     return differenceInDays(new Date(), parseISO(deal.created_at));
-  }, [deal.created_at]);
+  }, [dbDaysInStage, deal.created_at]);
+
+  // Show progression alert when trigger is met
+  React.useEffect(() => {
+    if (progressionCheck?.should_progress && !showProgressionAlert) {
+      setShowProgressionAlert(true);
+    }
+  }, [progressionCheck?.should_progress, showProgressionAlert, setShowProgressionAlert]);
 
   // Generate bottlenecks
   const bottlenecks = useMemo((): Bottleneck[] => {
@@ -295,6 +344,18 @@ export const DealOverviewTab: React.FC<DealOverviewTabProps> = ({ deal, onTabCha
 
   return (
     <div className="space-y-6">
+      {/* Stage Progression Alert - Show when trigger is met */}
+      {showProgressionAlert && progressionCheck?.should_progress && progressionCheck.suggested_stage && dbCurrentStage && (
+        <StageProgressionAlert
+          currentStage={dbCurrentStage}
+          suggestedStage={progressionCheck.suggested_stage}
+          triggerEvent={progressionCheck.trigger_event}
+          onAccept={acceptProgressionSuggestion}
+          onDismiss={() => setShowProgressionAlert(false)}
+          isProgressing={isProgressing}
+        />
+      )}
+
       {/* Deal Health Scorecard */}
       <DealHealthScorecard
         overallScore={metrics.overallCompletion}

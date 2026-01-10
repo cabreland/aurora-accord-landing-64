@@ -1041,6 +1041,53 @@ export type Database = {
           },
         ]
       }
+      deal_stage_history: {
+        Row: {
+          created_at: string
+          deal_id: string
+          duration_days: number | null
+          entered_at: string
+          exited_at: string | null
+          id: string
+          stage: string
+          trigger_event: string | null
+          triggered_by: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          deal_id: string
+          duration_days?: number | null
+          entered_at?: string
+          exited_at?: string | null
+          id?: string
+          stage: string
+          trigger_event?: string | null
+          triggered_by?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          deal_id?: string
+          duration_days?: number | null
+          entered_at?: string
+          exited_at?: string | null
+          id?: string
+          stage?: string
+          trigger_event?: string | null
+          triggered_by?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deal_stage_history_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       deal_team_members: {
         Row: {
           added_at: string
@@ -1136,14 +1183,19 @@ export type Database = {
         Row: {
           asking_price: string | null
           cac_ltv_ratio: string | null
+          closed_at: string | null
           company_id: string | null
           company_name: string
           company_overview: string | null
           created_at: string
           created_by: string
+          current_stage: string | null
           customer_count: string | null
+          deal_published_at: string | null
+          deal_status: string | null
           description: string | null
           ebitda: string | null
+          first_nda_signed_at: string | null
           founded_year: number | null
           founder_name: string | null
           founder_title: string | null
@@ -1155,13 +1207,17 @@ export type Database = {
           industry: string | null
           is_test_data: boolean | null
           location: string | null
+          loi_accepted_at: string | null
+          loi_submitted_at: string | null
           market_trends_alignment: string | null
           priority: string
           profit_margin: string | null
+          purchase_agreement_signed_at: string | null
           reason_for_sale: string | null
           recurring_revenue: string | null
           revenue: string | null
           rollup_potential: string | null
+          stage_entered_at: string | null
           status: Database["public"]["Enums"]["deal_status"]
           team_size: string | null
           title: string
@@ -1170,14 +1226,19 @@ export type Database = {
         Insert: {
           asking_price?: string | null
           cac_ltv_ratio?: string | null
+          closed_at?: string | null
           company_id?: string | null
           company_name: string
           company_overview?: string | null
           created_at?: string
           created_by: string
+          current_stage?: string | null
           customer_count?: string | null
+          deal_published_at?: string | null
+          deal_status?: string | null
           description?: string | null
           ebitda?: string | null
+          first_nda_signed_at?: string | null
           founded_year?: number | null
           founder_name?: string | null
           founder_title?: string | null
@@ -1189,13 +1250,17 @@ export type Database = {
           industry?: string | null
           is_test_data?: boolean | null
           location?: string | null
+          loi_accepted_at?: string | null
+          loi_submitted_at?: string | null
           market_trends_alignment?: string | null
           priority?: string
           profit_margin?: string | null
+          purchase_agreement_signed_at?: string | null
           reason_for_sale?: string | null
           recurring_revenue?: string | null
           revenue?: string | null
           rollup_potential?: string | null
+          stage_entered_at?: string | null
           status?: Database["public"]["Enums"]["deal_status"]
           team_size?: string | null
           title: string
@@ -1204,14 +1269,19 @@ export type Database = {
         Update: {
           asking_price?: string | null
           cac_ltv_ratio?: string | null
+          closed_at?: string | null
           company_id?: string | null
           company_name?: string
           company_overview?: string | null
           created_at?: string
           created_by?: string
+          current_stage?: string | null
           customer_count?: string | null
+          deal_published_at?: string | null
+          deal_status?: string | null
           description?: string | null
           ebitda?: string | null
+          first_nda_signed_at?: string | null
           founded_year?: number | null
           founder_name?: string | null
           founder_title?: string | null
@@ -1223,13 +1293,17 @@ export type Database = {
           industry?: string | null
           is_test_data?: boolean | null
           location?: string | null
+          loi_accepted_at?: string | null
+          loi_submitted_at?: string | null
           market_trends_alignment?: string | null
           priority?: string
           profit_margin?: string | null
+          purchase_agreement_signed_at?: string | null
           reason_for_sale?: string | null
           recurring_revenue?: string | null
           revenue?: string | null
           rollup_potential?: string | null
+          stage_entered_at?: string | null
           status?: Database["public"]["Enums"]["deal_status"]
           team_size?: string | null
           title?: string
@@ -2897,6 +2971,7 @@ export type Database = {
         Args: { p_document_id: string; p_user_id: string }
         Returns: boolean
       }
+      check_deal_stage_triggers: { Args: { p_deal_id: string }; Returns: Json }
       create_data_room_from_template: {
         Args: { p_deal_id: string; p_template_name: string }
         Returns: undefined
@@ -2968,6 +3043,15 @@ export type Database = {
           p_type: string
         }
         Returns: undefined
+      }
+      progress_deal_stage: {
+        Args: {
+          p_deal_id: string
+          p_new_stage: string
+          p_trigger_event?: string
+          p_triggered_by?: string
+        }
+        Returns: Json
       }
       record_security_event: {
         Args: { p_event_data?: Json; p_event_type: string; p_severity?: string }
