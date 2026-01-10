@@ -988,6 +988,59 @@ export type Database = {
           },
         ]
       }
+      deal_requests: {
+        Row: {
+          asked_by: string | null
+          assigned_to: string | null
+          category: string
+          created_at: string
+          deal_id: string
+          description: string | null
+          due_date: string | null
+          id: string
+          priority: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          asked_by?: string | null
+          assigned_to?: string | null
+          category?: string
+          created_at?: string
+          deal_id: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          priority?: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          asked_by?: string | null
+          assigned_to?: string | null
+          category?: string
+          created_at?: string
+          deal_id?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          priority?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deal_requests_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       deal_team_members: {
         Row: {
           added_at: string
@@ -2252,6 +2305,87 @@ export type Database = {
           updated_by?: string | null
         }
         Relationships: []
+      }
+      request_documents: {
+        Row: {
+          attached_by: string | null
+          created_at: string
+          data_room_document_id: string | null
+          document_id: string | null
+          id: string
+          request_id: string
+        }
+        Insert: {
+          attached_by?: string | null
+          created_at?: string
+          data_room_document_id?: string | null
+          document_id?: string | null
+          id?: string
+          request_id: string
+        }
+        Update: {
+          attached_by?: string | null
+          created_at?: string
+          data_room_document_id?: string | null
+          document_id?: string | null
+          id?: string
+          request_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "request_documents_data_room_document_id_fkey"
+            columns: ["data_room_document_id"]
+            isOneToOne: false
+            referencedRelation: "data_room_documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "request_documents_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "request_documents_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "deal_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      request_responses: {
+        Row: {
+          created_at: string
+          id: string
+          request_id: string
+          response_text: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          request_id: string
+          response_text: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          request_id?: string
+          response_text?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "request_responses_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "deal_requests"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       security_audit_log: {
         Row: {
