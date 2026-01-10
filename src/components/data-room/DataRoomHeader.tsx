@@ -19,6 +19,7 @@ interface DataRoomHeaderProps {
   templates: DataRoomTemplate[];
   onApplyTemplate: (templateName: string) => Promise<boolean>;
   foldersExist: boolean;
+  hideBackButton?: boolean;
 }
 
 export const DataRoomHeader: React.FC<DataRoomHeaderProps> = ({
@@ -30,6 +31,7 @@ export const DataRoomHeader: React.FC<DataRoomHeaderProps> = ({
   templates,
   onApplyTemplate,
   foldersExist,
+  hideBackButton = false,
 }) => {
   const [applyingTemplate, setApplyingTemplate] = useState(false);
 
@@ -42,9 +44,11 @@ export const DataRoomHeader: React.FC<DataRoomHeaderProps> = ({
   return (
     <div className="flex items-center justify-between gap-4">
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" onClick={onBackToDeals}>
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
+        {!hideBackButton && (
+          <Button variant="ghost" size="icon" onClick={onBackToDeals}>
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+        )}
         <div>
           <h1 className="text-2xl font-bold text-foreground">Data Room</h1>
           <p className="text-muted-foreground text-sm">{currentLocation}</p>
