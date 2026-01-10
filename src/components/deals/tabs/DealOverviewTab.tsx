@@ -1,73 +1,30 @@
-import React from 'react';
-import { useParams } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
+import { useParams, useNavigate } from "react-router-dom";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { Skeleton } from "@/components/ui/skeleton";
 import { 
   FileText, 
-  ClipboardList, 
-  CheckCircle, 
-  Users,
+  Clock, 
+  Users, 
+  TrendingUp, 
+  Upload, 
+  Plus,
   Building2,
   MapPin,
   Calendar,
   DollarSign
-} from 'lucide-react';
-import { useDiligenceRequests } from '@/hooks/useDiligenceTracker';
-import { useDealTeam } from '@/hooks/useDealTeam';
+} from "lucide-react";
+import { useDealMetrics, useDealById } from "@/hooks/useDeals";
 
 export const DealOverviewTab = () => {
   const { dealId } = useParams();
+  const navigate = useNavigate();
+  const { data: metrics, isLoading: metricsLoading } = useDealMetrics(dealId!);
+  const { data: deal, isLoading: dealLoading } = useDealById(dealId!);
 
-  // Fetch deal details
-  const { data: deal, isLoading: dealLoading } = useQuery({
-    queryKey: ['deal-detail', dealId],
-    queryFn: async () => {
-      if (!dealId) return null;
-      const { data, error } = await supabase
-        .from('deals')
-        .select('*')
-        .eq('id', dealId)
-        .single();
-      
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!dealId
-  });
-
-  // Fetch related data
-  const { data: requests } = useDiligenceRequests(dealId);
-  const { data: teamMembers } = useDealTeam(dealId);
-
-  // Fetch documents count
-  const { data: documentsCount } = useQuery({
-    queryKey: ['deal-documents-count', dealId],
-    queryFn: async () => {
-      if (!dealId) return 0;
-      const { count, error } = await supabase
-        .from('data_room_documents')
-        .select('*', { count: 'exact', head: true })
-        .eq('deal_id', dealId);
-      
-      if (error) throw error;
-      return count || 0;
-    },
-    enabled: !!dealId
-  });
-
-  // Calculate metrics
-  const totalRequests = requests?.length || 0;
-  const completedRequests = requests?.filter(r => r.status === 'completed').length || 0;
-  const completionPercentage = totalRequests > 0 
-    ? Math.round((completedRequests / totalRequests) * 100) 
-    : 0;
-  const totalDocuments = documentsCount || 0;
-  const totalTeamMembers = teamMembers?.length || 0;
-
-  if (dealLoading) {
+  if (metricsLoading || dealLoading) {
     return (
       <div className="p-6 space-y-6">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -80,152 +37,160 @@ export const DealOverviewTab = () => {
             </Card>
           ))}
         </div>
-        <Card>
-          <CardContent className="p-6">
-            <Skeleton className="h-6 w-48 mb-4" />
-            <div className="grid grid-cols-2 gap-4">
-              {[...Array(6)].map((_, i) => (
-                <Skeleton key={i} className="h-12" />
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  if (!deal) {
-    return (
-      <div className="p-6">
-        <Card>
-          <CardContent className="p-12 text-center">
-            <p className="text-muted-foreground">Deal not found</p>
-          </CardContent>
-        </Card>
       </div>
     );
   }
 
   return (
     <div className="p-6 space-y-6">
-      {/* Metrics Grid */}
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <h2 className="text-xl font-semibold">Deal Overview</h2>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={() => navigate(`/deals/${dealId}/data-room`)}>
+            <Upload className="h-4 w-4 mr-2" />
+            Upload
+          </Button>
+          <Button size="sm" onClick={() => navigate(`/deals/${dealId}/requests`)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Add Request
+          </Button>
+        </div>
+      </div>
+
+      {/* Metrics Grid - Clickable Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card>
+        <Card 
+          className="cursor-pointer hover:border-primary/50 transition-colors"
+          onClick={() => navigate(`/deals/${dealId}/data-room`)}
+        >
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
               <div className="h-10 w-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
                 <FileText className="h-5 w-5 text-blue-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{totalDocuments}</p>
+                <p className="text-2xl font-bold">{metrics?.documents || 0}</p>
                 <p className="text-sm text-muted-foreground">Documents</p>
               </div>
             </div>
+            <p className="text-xs text-primary mt-2">→ Data Room</p>
           </CardContent>
         </Card>
-        
-        <Card>
+
+        <Card 
+          className="cursor-pointer hover:border-primary/50 transition-colors"
+          onClick={() => navigate(`/deals/${dealId}/requests`)}
+        >
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
               <div className="h-10 w-10 rounded-lg bg-amber-500/10 flex items-center justify-center">
-                <ClipboardList className="h-5 w-5 text-amber-600" />
+                <Clock className="h-5 w-5 text-amber-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{totalRequests}</p>
-                <p className="text-sm text-muted-foreground">Requests</p>
+                <p className="text-2xl font-bold">{metrics?.openRequests || 0}</p>
+                <p className="text-sm text-muted-foreground">Open Requests</p>
               </div>
             </div>
+            <p className="text-xs text-primary mt-2">→ Requests</p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
               <div className="h-10 w-10 rounded-lg bg-emerald-500/10 flex items-center justify-center">
-                <CheckCircle className="h-5 w-5 text-emerald-600" />
+                <TrendingUp className="h-5 w-5 text-emerald-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{completionPercentage}%</p>
+                <p className="text-2xl font-bold">{metrics?.completion || 0}%</p>
                 <p className="text-sm text-muted-foreground">Completion</p>
               </div>
             </div>
+            <Progress value={metrics?.completion || 0} className="mt-2 h-1.5" />
           </CardContent>
         </Card>
-        
-        <Card>
+
+        <Card 
+          className="cursor-pointer hover:border-primary/50 transition-colors"
+          onClick={() => navigate(`/deals/${dealId}/team`)}
+        >
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
               <div className="h-10 w-10 rounded-lg bg-purple-500/10 flex items-center justify-center">
                 <Users className="h-5 w-5 text-purple-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{totalTeamMembers}</p>
-                <p className="text-sm text-muted-foreground">Team Members</p>
+                <p className="text-2xl font-bold">{metrics?.teamMembers || 0}</p>
+                <p className="text-sm text-muted-foreground">Team</p>
               </div>
             </div>
+            <p className="text-xs text-primary mt-2">→ Team</p>
           </CardContent>
         </Card>
       </div>
 
       {/* Deal Info */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Building2 className="h-5 w-5" />
-            Deal Information
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div className="space-y-1">
-              <p className="text-sm text-muted-foreground">Company</p>
-              <p className="font-medium">{deal.company_name}</p>
-            </div>
-            
-            <div className="space-y-1">
-              <p className="text-sm text-muted-foreground">Deal Title</p>
-              <p className="font-medium">{deal.title}</p>
-            </div>
-            
-            <div className="space-y-1">
-              <p className="text-sm text-muted-foreground">Status</p>
-              <Badge variant="outline" className="capitalize">
-                {deal.status}
-              </Badge>
-            </div>
-            
-            {deal.industry && (
+      {deal && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Building2 className="h-5 w-5" />
+              Deal Information
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               <div className="space-y-1">
-                <p className="text-sm text-muted-foreground">Industry</p>
-                <p className="font-medium">{deal.industry}</p>
+                <p className="text-sm text-muted-foreground">Company</p>
+                <p className="font-medium">{deal.company_name}</p>
               </div>
-            )}
-            
-            {deal.location && (
+              
+              <div className="space-y-1">
+                <p className="text-sm text-muted-foreground">Deal Title</p>
+                <p className="font-medium">{deal.title}</p>
+              </div>
+              
+              <div className="space-y-1">
+                <p className="text-sm text-muted-foreground">Status</p>
+                <Badge variant="outline" className="capitalize">
+                  {deal.status}
+                </Badge>
+              </div>
+              
+              {deal.industry && (
+                <div className="space-y-1">
+                  <p className="text-sm text-muted-foreground">Industry</p>
+                  <p className="font-medium">{deal.industry}</p>
+                </div>
+              )}
+              
+              {deal.location && (
+                <div className="space-y-1">
+                  <p className="text-sm text-muted-foreground flex items-center gap-1">
+                    <MapPin className="h-3.5 w-3.5" />
+                    Location
+                  </p>
+                  <p className="font-medium">{deal.location}</p>
+                </div>
+              )}
+              
               <div className="space-y-1">
                 <p className="text-sm text-muted-foreground flex items-center gap-1">
-                  <MapPin className="h-3.5 w-3.5" />
-                  Location
+                  <Calendar className="h-3.5 w-3.5" />
+                  Created
                 </p>
-                <p className="font-medium">{deal.location}</p>
+                <p className="font-medium">
+                  {new Date(deal.created_at).toLocaleDateString()}
+                </p>
               </div>
-            )}
-            
-            <div className="space-y-1">
-              <p className="text-sm text-muted-foreground flex items-center gap-1">
-                <Calendar className="h-3.5 w-3.5" />
-                Created
-              </p>
-              <p className="font-medium">
-                {new Date(deal.created_at).toLocaleDateString()}
-              </p>
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Financial Summary */}
-      {(deal.revenue || deal.ebitda || deal.asking_price) && (
+      {deal && (deal.revenue || deal.ebitda || deal.asking_price) && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -261,7 +226,7 @@ export const DealOverviewTab = () => {
       )}
 
       {/* Description */}
-      {deal.description && (
+      {deal?.description && (
         <Card>
           <CardHeader>
             <CardTitle>Description</CardTitle>
