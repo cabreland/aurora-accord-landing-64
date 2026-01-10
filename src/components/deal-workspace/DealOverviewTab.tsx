@@ -391,7 +391,6 @@ export const DealOverviewTab: React.FC<DealOverviewTabProps> = ({ deal, onTabCha
         currentStage={currentStage}
         completedStages={completedStages}
         daysInCurrentStage={daysInCurrentStage}
-        onStageClick={handleStageClick}
       />
 
       {/* Two Column Layout */}
