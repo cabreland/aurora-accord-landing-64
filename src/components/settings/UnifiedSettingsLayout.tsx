@@ -34,10 +34,10 @@ import SystemOverviewTab from './SystemOverviewTab';
 import BrandingTab from './BrandingTab';
 import SystemSettingsTab from './SystemSettingsTab';
 import UserManagementTab from './UserManagementTab';
+import TeamManagementTab from './TeamManagementTab';
 import SessionMonitoringTab from './SessionMonitoringTab';
 import UserActivityTab from './UserActivityTab';
 import { EmailTemplatesTab } from './EmailTemplatesTab';
-import AccessPolicyTab from './AccessPolicyTab';
 import CustomFieldsTab from './CustomFieldsTab';
 import DataRetentionTab from './DataRetentionTab';
 import ChatWidgetSettingsTab from './ChatWidgetSettingsTab';
@@ -84,6 +84,7 @@ const settingsGroups: SettingsGroup[] = [
     title: 'USER MANAGEMENT',
     defaultOpen: false,
     sections: [
+      { key: 'team', title: 'Team Management', icon: Users, component: TeamManagementTab, requiredRole: 'admin' },
       { key: 'users', title: 'User Accounts', icon: Users, component: UserManagementTab, requiredRole: 'admin' },
       { key: 'roles', title: 'Role & Permissions', icon: Shield, component: RolePermissionsTab, requiredRole: 'admin' },
       { key: 'sessions', title: 'Session Monitoring', icon: Activity, component: SessionMonitoringTab, requiredRole: 'admin' },
