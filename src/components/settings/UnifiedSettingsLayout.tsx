@@ -42,7 +42,7 @@ import CustomFieldsTab from './CustomFieldsTab';
 import DataRetentionTab from './DataRetentionTab';
 import ChatWidgetSettingsTab from './ChatWidgetSettingsTab';
 import InvestorSubmissionsTab from './InvestorSubmissionsTab';
-import AccessPolicyTab from './AccessPolicyTab';
+import { default as AccessPolicyTab } from './AccessPolicyTab';
 import {
   RolePermissionsTab,
   RegistrationConfigTab,
