@@ -24,7 +24,6 @@ interface DiligenceStageTimelineProps {
   completedStages: DiligenceStage[];
   daysInCurrentStage?: number;
   expectedCompletionDates?: Partial<Record<DiligenceStage, string>>;
-  onStageClick?: (stage: DiligenceStage) => void;
 }
 
 export const DiligenceStageTimeline: React.FC<DiligenceStageTimelineProps> = ({
@@ -32,7 +31,6 @@ export const DiligenceStageTimeline: React.FC<DiligenceStageTimelineProps> = ({
   completedStages,
   daysInCurrentStage = 0,
   expectedCompletionDates = {},
-  onStageClick,
 }) => {
   const getStageStatus = (stageId: DiligenceStage): 'completed' | 'active' | 'upcoming' => {
     if (completedStages.includes(stageId)) return 'completed';
@@ -66,18 +64,13 @@ export const DiligenceStageTimeline: React.FC<DiligenceStageTimelineProps> = ({
           
           {/* Stages */}
           <div className="relative flex justify-between">
-            {STAGES.map((stage, index) => {
+          {STAGES.map((stage) => {
               const status = getStageStatus(stage.id);
-              const isClickable = !!onStageClick;
               
               return (
                 <div
                   key={stage.id}
-                  className={cn(
-                    'flex flex-col items-center text-center',
-                    isClickable && 'cursor-pointer group'
-                  )}
-                  onClick={() => onStageClick?.(stage.id)}
+                  className="flex flex-col items-center text-center"
                 >
                   {/* Stage indicator */}
                   <div
@@ -85,8 +78,7 @@ export const DiligenceStageTimeline: React.FC<DiligenceStageTimelineProps> = ({
                       'relative z-10 flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all duration-300',
                       status === 'completed' && 'bg-primary border-primary',
                       status === 'active' && 'bg-background border-primary ring-4 ring-primary/20',
-                      status === 'upcoming' && 'bg-background border-muted',
-                      isClickable && 'group-hover:scale-110'
+                      status === 'upcoming' && 'bg-background border-muted'
                     )}
                   >
                     {status === 'completed' ? (
