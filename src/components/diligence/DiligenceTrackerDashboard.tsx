@@ -6,7 +6,7 @@ import { useDealsWithDiligence, useDiligenceRequests, useDiligenceCategories } f
 import { useDebounce } from '@/hooks/useDebounce';
 import CreateTrackerDialog from './CreateTrackerDialog';
 import ClickableMetricCard from './dashboard/ClickableMetricCard';
-import PriorityInsightsBar from './dashboard/PriorityInsightsBar';
+
 import UrgentItemsPanel from './dashboard/UrgentItemsPanel';
 import EnhancedTrackerCard from './dashboard/EnhancedTrackerCard';
 import TrackerTableView from './dashboard/TrackerTableView';
@@ -54,14 +54,6 @@ const DiligenceTrackerDashboard: React.FC = () => {
       return isPast(dueDate) && !isToday(dueDate);
     }).length;
     
-    // Priority counts
-    const highPriority = allRequests.filter(r => r.priority === 'high' && r.status !== 'completed').length;
-    const mediumPriority = allRequests.filter(r => r.priority === 'medium' && r.status !== 'completed').length;
-    const lowPriority = allRequests.filter(r => r.priority === 'low' && r.status !== 'completed').length;
-    
-    // Final review count (requests that are in progress and have approved answers could be "ready for review")
-    const finalReviewCount = 0; // TODO: Implement when final_review status is added
-    
     return {
       activeDeals: deals.length,
       openRequests,
@@ -70,11 +62,7 @@ const DiligenceTrackerDashboard: React.FC = () => {
       totalRequests: allRequests.length,
       completionRate: allRequests.length > 0 
         ? Math.round((completedRequests / allRequests.length) * 100) 
-        : 0,
-      highPriority,
-      mediumPriority,
-      lowPriority,
-      finalReviewCount
+        : 0
     };
   }, [allRequests, deals]);
   
@@ -213,10 +201,6 @@ const DiligenceTrackerDashboard: React.FC = () => {
     }
   };
 
-  const handlePriorityFilter = (priority: 'high' | 'medium' | 'low') => {
-    setHighPriorityOnly(priority === 'high');
-    // Could extend to support medium/low filtering
-  };
 
   // Apply filters
   const filteredDeals = useMemo(() => {
@@ -438,15 +422,6 @@ const DiligenceTrackerDashboard: React.FC = () => {
         </div>
       )}
       
-      {/* Priority Insights Bar - Replaces "All Clear" banner */}
-      <PriorityInsightsBar
-        highCount={stats.highPriority}
-        mediumCount={stats.mediumPriority}
-        lowCount={stats.lowPriority}
-        overdueCount={stats.overdueRequests}
-        finalReviewCount={stats.finalReviewCount}
-        onFilterPriority={handlePriorityFilter}
-      />
       
       {/* Urgent Items - Only show if there are urgent items */}
       {urgentItems.length > 0 && (
