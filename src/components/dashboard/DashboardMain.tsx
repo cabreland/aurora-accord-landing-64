@@ -20,61 +20,51 @@ const DashboardMain = () => {
 
   return (
     <AdminDashboardLayout activeTab="dashboard">
-      <div className="min-h-screen bg-secondary/30">
-        <div className="p-6 lg:p-8 space-y-6 max-w-[1600px] mx-auto">
+      <div className="min-h-screen bg-[#FAFBFC]">
+        <div className="p-8 lg:p-10 space-y-8 max-w-[1600px] mx-auto">
           {/* Page Header */}
           <div className="mb-2">
-            <h1 className="text-3xl font-bold text-foreground mb-1">
+            <h1 className="text-3xl font-bold text-gray-900 tracking-tight">
               Mission Control
             </h1>
-            <p className="text-base text-muted-foreground">
+            <p className="text-base text-gray-500 mt-1">
               Monitor deal health, track urgent items, and manage your M&A pipeline
             </p>
           </div>
 
           {/* Priority Metrics Section - Top Row */}
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-            {/* Pipeline Health Score - Larger card */}
-            <div className="lg:col-span-1">
-              <PipelineHealthWidget 
-                pipelineHealth={pipelineHealth} 
-                loading={loading} 
-              />
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* Pipeline Health Score */}
+            <PipelineHealthWidget 
+              pipelineHealth={pipelineHealth} 
+              loading={loading} 
+            />
             
             {/* Deals Requiring Action */}
-            <div className="lg:col-span-1">
-              <DealsRequiringActionWidget 
-                deals={dealsRequiringAction} 
-                loading={loading} 
-              />
-            </div>
+            <DealsRequiringActionWidget 
+              deals={dealsRequiringAction} 
+              loading={loading} 
+            />
             
             {/* This Week's Closings */}
-            <div className="lg:col-span-1">
-              <ThisWeeksClosingsWidget 
-                deals={thisWeeksClosings}
-                totalPipelineValue={totalPipelineValue}
-                loading={loading} 
-              />
-            </div>
+            <ThisWeeksClosingsWidget 
+              deals={thisWeeksClosings}
+              totalPipelineValue={totalPipelineValue}
+              loading={loading} 
+            />
 
-            {/* Recent Activity Feed with Quick Actions */}
-            <div className="lg:col-span-1">
-              <RecentActivityFeedWidget 
-                activities={recentActivities} 
-                loading={loading} 
-              />
-            </div>
-          </div>
-
-          {/* Active Deals Section - Main Content */}
-          <div>
-            <ActiveDealsWidget 
-              deals={dealHealthData} 
+            {/* Recent Activity Feed */}
+            <RecentActivityFeedWidget 
+              activities={recentActivities} 
               loading={loading} 
             />
           </div>
+
+          {/* Active Deals Section - Main Content */}
+          <ActiveDealsWidget 
+            deals={dealHealthData} 
+            loading={loading} 
+          />
         </div>
       </div>
     </AdminDashboardLayout>

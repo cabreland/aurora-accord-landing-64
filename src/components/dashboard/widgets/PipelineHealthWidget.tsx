@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { TrendingUp, TrendingDown, Minus, Activity } from 'lucide-react';
+import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import { PipelineHealth } from '@/hooks/useMissionControl';
 
 interface PipelineHealthWidgetProps {
@@ -14,34 +14,59 @@ export const PipelineHealthWidget: React.FC<PipelineHealthWidgetProps> = ({
   loading
 }) => {
   const getScoreColor = (score: number) => {
-    if (score >= 80) return 'text-success';
-    if (score >= 60) return 'text-warning';
-    return 'text-destructive';
+    if (score >= 80) return 'text-emerald-600';
+    if (score >= 60) return 'text-amber-500';
+    return 'text-red-500';
   };
 
-  const getScoreBgColor = (score: number) => {
-    if (score >= 80) return 'bg-success/10 border-success/20';
-    if (score >= 60) return 'bg-warning/10 border-warning/20';
-    return 'bg-destructive/10 border-destructive/20';
+  const getProgressColor = (score: number) => {
+    if (score >= 80) return 'bg-emerald-500';
+    if (score >= 60) return 'bg-amber-500';
+    return 'bg-red-500';
+  };
+
+  const getProgressBgColor = (score: number) => {
+    if (score >= 80) return 'bg-emerald-100';
+    if (score >= 60) return 'bg-amber-100';
+    return 'bg-red-100';
   };
 
   const getTrendIcon = (trend: 'up' | 'down' | 'stable') => {
     switch (trend) {
-      case 'up': return <TrendingUp className="w-5 h-5 text-success" />;
-      case 'down': return <TrendingDown className="w-5 h-5 text-destructive" />;
-      default: return <Minus className="w-5 h-5 text-muted-foreground" />;
+      case 'up': 
+        return (
+          <div className="flex items-center gap-1 text-emerald-600">
+            <TrendingUp className="w-4 h-4" />
+            <span className="text-xs font-medium">Improving</span>
+          </div>
+        );
+      case 'down': 
+        return (
+          <div className="flex items-center gap-1 text-red-500">
+            <TrendingDown className="w-4 h-4" />
+            <span className="text-xs font-medium">Declining</span>
+          </div>
+        );
+      default: 
+        return (
+          <div className="flex items-center gap-1 text-gray-500">
+            <Minus className="w-4 h-4" />
+            <span className="text-xs font-medium">Stable</span>
+          </div>
+        );
     }
   };
 
   if (loading) {
     return (
-      <Card className="p-6 bg-card border border-border shadow-sm">
-        <div className="flex items-center gap-3 mb-4">
-          <Skeleton className="w-10 h-10 rounded-full" />
-          <Skeleton className="h-6 w-40" />
+      <Card className="p-6 bg-white border border-gray-200 shadow-sm rounded-xl h-full">
+        <Skeleton className="h-4 w-24 mb-6" />
+        <Skeleton className="h-12 w-24 mb-4" />
+        <Skeleton className="h-2 w-full mb-6" />
+        <div className="flex gap-8">
+          <Skeleton className="h-10 w-20" />
+          <Skeleton className="h-10 w-20" />
         </div>
-        <Skeleton className="h-24 w-full mb-4" />
-        <Skeleton className="h-4 w-48" />
       </Card>
     );
   }
@@ -49,68 +74,45 @@ export const PipelineHealthWidget: React.FC<PipelineHealthWidgetProps> = ({
   const { overall_score, trend, deals_on_track, deals_need_attention, total_deals } = pipelineHealth;
 
   return (
-    <Card className={`p-6 border shadow-sm ${getScoreBgColor(overall_score)}`}>
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-            <Activity className="w-5 h-5 text-primary" />
-          </div>
-          <div>
-            <h3 className="font-semibold text-foreground">Pipeline Health</h3>
-            <p className="text-xs text-muted-foreground">Overall deal performance</p>
-          </div>
+    <Card className="p-6 bg-white border border-gray-200 shadow-sm rounded-xl h-full flex flex-col">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
+        <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+          Pipeline Health
+        </span>
+        {getTrendIcon(trend)}
+      </div>
+
+      {/* Large Score Display */}
+      <div className="mb-4">
+        <span className={`text-5xl font-bold tracking-tight ${getScoreColor(overall_score)}`}>
+          {overall_score}%
+        </span>
+      </div>
+
+      {/* Progress Bar */}
+      <div className={`h-2 rounded-full ${getProgressBgColor(overall_score)} mb-6`}>
+        <div 
+          className={`h-full rounded-full ${getProgressColor(overall_score)} transition-all duration-500`}
+          style={{ width: `${overall_score}%` }}
+        />
+      </div>
+
+      {/* Stats Row */}
+      <div className="flex items-center gap-8 mt-auto">
+        <div>
+          <p className="text-2xl font-bold text-gray-900">{deals_on_track}</p>
+          <p className="text-sm text-gray-500">On track</p>
         </div>
-        <div className="flex items-center gap-1">
-          {getTrendIcon(trend)}
+        <div className="w-px h-10 bg-gray-200" />
+        <div>
+          <p className="text-2xl font-bold text-gray-900">{deals_need_attention}</p>
+          <p className="text-sm text-gray-500">Need attention</p>
         </div>
       </div>
 
-      <div className="flex items-center justify-center my-6">
-        <div className="relative">
-          {/* Circular progress indicator */}
-          <svg className="w-32 h-32 transform -rotate-90">
-            <circle
-              cx="64"
-              cy="64"
-              r="56"
-              stroke="currentColor"
-              strokeWidth="12"
-              fill="none"
-              className="text-muted/30"
-            />
-            <circle
-              cx="64"
-              cy="64"
-              r="56"
-              stroke="currentColor"
-              strokeWidth="12"
-              fill="none"
-              strokeDasharray={`${(overall_score / 100) * 352} 352`}
-              strokeLinecap="round"
-              className={getScoreColor(overall_score)}
-            />
-          </svg>
-          <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className={`text-4xl font-bold ${getScoreColor(overall_score)}`}>
-              {overall_score}%
-            </span>
-            <span className="text-xs text-muted-foreground">Score</span>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-4 pt-4 border-t border-border/50">
-        <div className="text-center">
-          <p className="text-2xl font-bold text-success">{deals_on_track}</p>
-          <p className="text-xs text-muted-foreground">On Track</p>
-        </div>
-        <div className="text-center">
-          <p className="text-2xl font-bold text-warning">{deals_need_attention}</p>
-          <p className="text-xs text-muted-foreground">Need Attention</p>
-        </div>
-      </div>
-
-      <p className="text-sm text-center text-muted-foreground mt-4">
+      {/* Footer */}
+      <p className="text-xs text-gray-400 mt-4 pt-4 border-t border-gray-100">
         {total_deals} active deal{total_deals !== 1 ? 's' : ''} in pipeline
       </p>
     </Card>
