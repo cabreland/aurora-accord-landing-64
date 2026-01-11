@@ -101,19 +101,22 @@ const statusConfig: Record<string, { label: string; icon: React.ComponentType<an
 type SortField = 'title' | 'status' | 'priority' | 'due_date' | 'last_activity_at';
 type SortDirection = 'asc' | 'desc';
 
-// Default column configuration
+// Default column configuration - matching reference design
 const defaultColumns: ColumnConfig[] = [
-  { id: 'priority', label: 'Priority', visible: true },
-  { id: 'title', label: 'Request Name', visible: true, required: true },
+  { id: 'priority', label: 'PR', visible: true },
+  { id: 'title', label: 'Title', visible: true, required: true },
   { id: 'status', label: 'Status', visible: true },
-  { id: 'assignee', label: 'Assigned To', visible: true },
+  { id: 'assignee', label: 'Assignee', visible: true },
   { id: 'reviewers', label: 'Reviewers', visible: true },
-  { id: 'start_date', label: 'Start Date', visible: true },
-  { id: 'due_date', label: 'Due Date', visible: true },
-  { id: 'docs', label: 'Documents', visible: true },
-  { id: 'comments', label: 'Comments', visible: true },
+  { id: 'docs', label: 'Files', visible: true },
+  { id: 'comments', label: 'Reply', visible: true },
+  { id: 'start_date', label: 'Start date', visible: true },
+  { id: 'due_date', label: 'Due date', visible: true },
   { id: 'updated', label: 'Updated', visible: true },
 ];
+
+// Shared cell classes for column dividers
+const cellDivider = "border-r border-border/40";
 
 const DiligenceRequestTable: React.FC<DiligenceRequestTableProps> = ({
   requests,
@@ -461,38 +464,39 @@ const DiligenceRequestTable: React.FC<DiligenceRequestTableProps> = ({
           <ColumnVisibilityDropdown columns={columns} onToggleColumn={toggleColumn} />
         </div>
         
-        <div className="max-h-[calc(100vh-380px)] overflow-auto">
-          <Table>
+        {/* Full-width table without horizontal scroll */}
+        <div className="overflow-y-auto max-h-[calc(100vh-380px)]">
+          <Table className="w-full table-fixed">
             <TableHeader className="sticky top-0 z-10 bg-muted/80 backdrop-blur-sm shadow-[0_1px_3px_rgba(0,0,0,0.08)]">
               <TableRow className="border-b hover:bg-transparent">
                 {/* Checkbox */}
-                <TableHead className="w-[40px] py-3 bg-muted/80">
+                <TableHead className={`w-10 py-2.5 bg-muted/80 ${cellDivider}`}>
                   <Checkbox 
                     checked={selectedRequests.length === requests.length && requests.length > 0}
                     onCheckedChange={toggleAllSelection}
                   />
                 </TableHead>
                 
-                {/* Priority Flag */}
+                {/* Priority Flag - PR */}
                 {isVisible('priority') && (
                   <TableHead 
-                    className="w-[40px] py-3 bg-muted/80 cursor-pointer hover:bg-muted"
+                    className={`w-10 py-2.5 bg-muted/80 cursor-pointer hover:bg-muted ${cellDivider}`}
                     onClick={() => handleSort('priority')}
                   >
-                    <div className="flex items-center text-muted-foreground font-medium">
+                    <div className="flex items-center text-xs text-muted-foreground font-medium">
                       PR
                       {getSortIcon('priority')}
                     </div>
                   </TableHead>
                 )}
                 
-                {/* Request Name */}
+                {/* Title */}
                 <TableHead 
-                  className="py-3 bg-muted/80 cursor-pointer hover:bg-muted"
+                  className={`py-2.5 bg-muted/80 cursor-pointer hover:bg-muted ${cellDivider}`}
                   onClick={() => handleSort('title')}
                 >
-                  <div className="flex items-center text-muted-foreground font-medium">
-                    Request Name
+                  <div className="flex items-center text-xs text-muted-foreground font-medium">
+                    Title
                     {getSortIcon('title')}
                   </div>
                 </TableHead>
@@ -500,89 +504,79 @@ const DiligenceRequestTable: React.FC<DiligenceRequestTableProps> = ({
                 {/* Status */}
                 {isVisible('status') && (
                   <TableHead 
-                    className="w-[120px] py-3 bg-muted/80 cursor-pointer hover:bg-muted"
+                    className={`w-24 py-2.5 bg-muted/80 cursor-pointer hover:bg-muted ${cellDivider}`}
                     onClick={() => handleSort('status')}
                   >
-                    <div className="flex items-center text-muted-foreground font-medium">
+                    <div className="flex items-center text-xs text-muted-foreground font-medium">
                       Status
                       {getSortIcon('status')}
                     </div>
                   </TableHead>
                 )}
                 
-                {/* Assigned To */}
+                {/* Assignee */}
                 {isVisible('assignee') && (
-                  <TableHead className="w-[160px] py-3 bg-muted/80 text-muted-foreground font-medium">
-                    Assigned To
+                  <TableHead className={`w-32 py-2.5 bg-muted/80 text-xs text-muted-foreground font-medium ${cellDivider}`}>
+                    Assignee
                   </TableHead>
                 )}
                 
                 {/* Reviewers */}
                 {isVisible('reviewers') && (
-                  <TableHead className="w-[100px] py-3 bg-muted/80 text-muted-foreground font-medium">
+                  <TableHead className={`w-28 py-2.5 bg-muted/80 text-xs text-muted-foreground font-medium ${cellDivider}`}>
                     Reviewers
                   </TableHead>
                 )}
                 
-                {/* Start Date */}
-                {isVisible('start_date') && (
-                  <TableHead className="w-[90px] py-3 bg-muted/80 text-muted-foreground font-medium">
-                    Start Date
+                {/* Files */}
+                {isVisible('docs') && (
+                  <TableHead className={`w-12 py-2.5 text-center bg-muted/80 ${cellDivider}`}>
+                    <span className="text-xs text-muted-foreground font-medium">Files</span>
                   </TableHead>
                 )}
                 
-                {/* Due Date */}
+                {/* Reply */}
+                {isVisible('comments') && (
+                  <TableHead className={`w-12 py-2.5 text-center bg-muted/80 ${cellDivider}`}>
+                    <span className="text-xs text-muted-foreground font-medium">Reply</span>
+                  </TableHead>
+                )}
+                
+                {/* Start date */}
+                {isVisible('start_date') && (
+                  <TableHead className={`w-20 py-2.5 bg-muted/80 text-xs text-muted-foreground font-medium ${cellDivider}`}>
+                    Start date
+                  </TableHead>
+                )}
+                
+                {/* Due date */}
                 {isVisible('due_date') && (
                   <TableHead 
-                    className="w-[100px] py-3 bg-muted/80 cursor-pointer hover:bg-muted"
+                    className={`w-20 py-2.5 bg-muted/80 cursor-pointer hover:bg-muted ${cellDivider}`}
                     onClick={() => handleSort('due_date')}
                   >
-                    <div className="flex items-center text-muted-foreground font-medium">
-                      Due Date
+                    <div className="flex items-center text-xs text-muted-foreground font-medium">
+                      Due date
                       {getSortIcon('due_date')}
                     </div>
-                  </TableHead>
-                )}
-                
-                {/* Docs */}
-                {isVisible('docs') && (
-                  <TableHead className="w-[50px] py-3 text-center bg-muted/80">
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Paperclip className="w-4 h-4 text-muted-foreground mx-auto" />
-                      </TooltipTrigger>
-                      <TooltipContent>Documents</TooltipContent>
-                    </Tooltip>
-                  </TableHead>
-                )}
-                
-                {/* Comments */}
-                {isVisible('comments') && (
-                  <TableHead className="w-[50px] py-3 text-center bg-muted/80">
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <MessageSquare className="w-4 h-4 text-muted-foreground mx-auto" />
-                      </TooltipTrigger>
-                      <TooltipContent>Comments</TooltipContent>
-                    </Tooltip>
                   </TableHead>
                 )}
                 
                 {/* Updated */}
                 {isVisible('updated') && (
                   <TableHead 
-                    className="w-[90px] py-3 bg-muted/80 cursor-pointer hover:bg-muted"
+                    className={`w-20 py-2.5 bg-muted/80 cursor-pointer hover:bg-muted ${cellDivider}`}
                     onClick={() => handleSort('last_activity_at')}
                   >
-                    <div className="flex items-center text-muted-foreground font-medium">
+                    <div className="flex items-center text-xs text-muted-foreground font-medium">
                       Updated
                       {getSortIcon('last_activity_at')}
                     </div>
                   </TableHead>
                 )}
                 
-                {/* Actions */}
-                <TableHead className="w-[50px] py-3 bg-muted/80"></TableHead>
+                {/* Actions - no divider on last column */}
+                <TableHead className="w-10 py-2.5 bg-muted/80"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -622,7 +616,7 @@ const DiligenceRequestTable: React.FC<DiligenceRequestTableProps> = ({
                           onClick={() => onSelectRequest(request)}
                         >
                           {/* Checkbox */}
-                          <TableCell onClick={(e) => e.stopPropagation()} className="py-3">
+                          <TableCell onClick={(e) => e.stopPropagation()} className={`py-2.5 ${cellDivider}`}>
                             <Checkbox 
                               checked={isSelected}
                               onCheckedChange={() => toggleSelection(request.id)}
@@ -631,16 +625,16 @@ const DiligenceRequestTable: React.FC<DiligenceRequestTableProps> = ({
 
                           {/* Priority Flag */}
                           {isVisible('priority') && (
-                            <TableCell className="py-3" onClick={(e) => e.stopPropagation()}>
+                            <TableCell className={`py-2.5 ${cellDivider}`} onClick={(e) => e.stopPropagation()}>
                               <PriorityFlagCell requestId={request.id} priority={request.priority} />
                             </TableCell>
                           )}
 
-                          {/* Request Name with optional NEW badge - simplified without category */}
-                          <TableCell className="py-3">
+                          {/* Title with optional NEW badge */}
+                          <TableCell className={`py-2.5 ${cellDivider}`}>
                             <div className="flex items-center gap-2">
                               <div className="flex-1 min-w-0">
-                                <div className={`font-medium flex items-center gap-2 ${
+                                <div className={`text-sm font-medium flex items-center gap-2 ${
                                   isResolved ? 'text-muted-foreground line-through' : 'text-foreground'
                                 }`}>
                                   <span className="truncate">{request.title}</span>
@@ -661,45 +655,45 @@ const DiligenceRequestTable: React.FC<DiligenceRequestTableProps> = ({
                             </div>
                           </TableCell>
 
-                    {/* Status Badge */}
-                    {isVisible('status') && (
-                      <TableCell className="py-3" onClick={(e) => e.stopPropagation()}>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Badge 
-                                  variant="outline" 
-                                  className={`text-xs font-medium cursor-pointer ${status.className}`}
-                                >
-                                  <StatusIcon className="w-3 h-3 mr-1" />
-                                  {status.label}
-                                </Badge>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="start" className="bg-popover">
-                                {Object.entries(statusConfig).map(([key, config]) => (
-                                  <DropdownMenuItem
-                                    key={key}
-                                    onClick={() => updateRequest.mutate({ id: request.id, status: key as any })}
-                                    className="text-sm"
-                                  >
-                                    <config.icon className="w-3 h-3 mr-2" />
-                                    {config.label}
-                                  </DropdownMenuItem>
-                                ))}
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </TooltipTrigger>
-                          <TooltipContent side="top" className="bg-popover text-popover-foreground">
-                            {status.description}
-                          </TooltipContent>
-                        </Tooltip>
-                      </TableCell>
-                    )}
+                          {/* Status Badge */}
+                          {isVisible('status') && (
+                            <TableCell className={`py-2.5 ${cellDivider}`} onClick={(e) => e.stopPropagation()}>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                      <Badge 
+                                        variant="outline" 
+                                        className={`text-xs font-medium cursor-pointer ${status.className}`}
+                                      >
+                                        <StatusIcon className="w-3 h-3 mr-1" />
+                                        {status.label}
+                                      </Badge>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="start" className="bg-popover">
+                                      {Object.entries(statusConfig).map(([key, config]) => (
+                                        <DropdownMenuItem
+                                          key={key}
+                                          onClick={() => updateRequest.mutate({ id: request.id, status: key as any })}
+                                          className="text-sm"
+                                        >
+                                          <config.icon className="w-3 h-3 mr-2" />
+                                          {config.label}
+                                        </DropdownMenuItem>
+                                      ))}
+                                    </DropdownMenuContent>
+                                  </DropdownMenu>
+                                </TooltipTrigger>
+                                <TooltipContent side="top" className="bg-popover text-popover-foreground">
+                                  {status.description}
+                                </TooltipContent>
+                              </Tooltip>
+                            </TableCell>
+                          )}
 
-                    {/* Assigned To - Enhanced with name */}
-                    {isVisible('assignee') && (
-                      <TableCell className="py-3">
+                          {/* Assignee */}
+                          {isVisible('assignee') && (
+                            <TableCell className={`py-2.5 ${cellDivider}`}>
                         {assignees.length === 0 ? (
                           <Button
                             variant="ghost"
@@ -753,93 +747,88 @@ const DiligenceRequestTable: React.FC<DiligenceRequestTableProps> = ({
                             </TooltipContent>
                           </Tooltip>
                         )}
-                      </TableCell>
-                    )}
-
-                    {/* Reviewers */}
-                    {isVisible('reviewers') && (
-                      <TableCell className="py-3" onClick={(e) => e.stopPropagation()}>
-                        <ReviewersCell 
-                          reviewerIds={request.reviewer_ids || []}
-                          onAddReviewers={() => onSelectRequest(request)}
-                        />
-                      </TableCell>
-                    )}
-
-                    {/* Start Date */}
-                    {isVisible('start_date') && (
-                      <TableCell className="py-3">
-                        <span className="text-sm text-foreground">
-                          {isThisYear(new Date(request.created_at)) 
-                            ? format(new Date(request.created_at), 'MMM d')
-                            : format(new Date(request.created_at), 'MMM d, yyyy')}
-                        </span>
-                      </TableCell>
-                    )}
-
-                    {/* Due Date */}
-                    {isVisible('due_date') && (
-                      <TableCell className="py-3">
-                        {request.due_date ? (
-                          <span className={`text-sm font-medium ${
-                            dueDateStatus === 'overdue' 
-                              ? 'text-destructive' 
-                              : dueDateStatus === 'due-soon' 
-                                ? 'text-amber-600' 
-                                : 'text-foreground'
-                          }`}>
-                            {format(new Date(request.due_date), 'MMM d')}
-                            {dueDateStatus === 'overdue' && (
-                              <AlertTriangle className="w-3 h-3 inline ml-1" />
-                            )}
-                          </span>
-                        ) : (
-                          <span className="text-sm text-muted-foreground">—</span>
-                        )}
-                      </TableCell>
-                    )}
-
-                    {/* Docs Count */}
-                    {isVisible('docs') && (
-                      <TableCell className="py-3 text-center">
-                        <div className={`flex items-center justify-center gap-0.5 ${counts.documentCount > 0 ? 'text-primary' : 'text-muted-foreground/50'}`}>
-                          <Paperclip className="w-3.5 h-3.5" />
-                          <span className="text-xs font-medium tabular-nums">{counts.documentCount || ''}</span>
-                        </div>
-                      </TableCell>
-                    )}
-
-                    {/* Comments Count with unread indicator */}
-                    {isVisible('comments') && (
-                      <TableCell className="py-3 text-center">
-                        <div className={`flex items-center justify-center gap-0.5 relative ${
-                          isUnread && counts.commentCount > 0 
-                            ? 'text-amber-500' 
-                            : counts.commentCount > 0 
-                              ? 'text-primary' 
-                              : 'text-muted-foreground/50'
-                        }`}>
-                          <MessageSquare className={`w-3.5 h-3.5 ${isUnread && counts.commentCount > 0 ? 'animate-pulse' : ''}`} />
-                          <span className="text-xs font-medium tabular-nums">{counts.commentCount || ''}</span>
-                          {isUnread && counts.commentCount > 0 && (
-                            <span className="absolute -top-1 -right-1 w-1.5 h-1.5 bg-amber-500 rounded-full" />
+                            </TableCell>
                           )}
-                        </div>
-                      </TableCell>
-                    )}
 
-                    {/* Last Updated */}
-                    {isVisible('updated') && (
-                      <TableCell className="py-3">
-                        <LastUpdatedCell 
-                          lastActivityAt={request.last_activity_at} 
-                          updatedBy={request.updated_by || undefined}
-                        />
-                      </TableCell>
-                    )}
+                          {/* Reviewers */}
+                          {isVisible('reviewers') && (
+                            <TableCell className={`py-2.5 ${cellDivider}`} onClick={(e) => e.stopPropagation()}>
+                              <ReviewersCell 
+                                reviewerIds={request.reviewer_ids || []}
+                                onAddReviewers={() => onSelectRequest(request)}
+                              />
+                            </TableCell>
+                          )}
 
-                    {/* Actions Menu */}
-                    <TableCell className="py-3" onClick={(e) => e.stopPropagation()}>
+                          {/* Files Count */}
+                          {isVisible('docs') && (
+                            <TableCell className={`py-2.5 text-center ${cellDivider}`}>
+                              {counts.documentCount > 0 ? (
+                                <span className="text-xs font-medium text-primary tabular-nums">{counts.documentCount}</span>
+                              ) : (
+                                <span className="text-xs text-muted-foreground/50">—</span>
+                              )}
+                            </TableCell>
+                          )}
+
+                          {/* Reply Count */}
+                          {isVisible('comments') && (
+                            <TableCell className={`py-2.5 text-center ${cellDivider}`}>
+                              {counts.commentCount > 0 ? (
+                                <span className={`text-xs font-medium tabular-nums ${isUnread ? 'text-amber-500' : 'text-primary'}`}>
+                                  {counts.commentCount}
+                                </span>
+                              ) : (
+                                <span className="text-xs text-muted-foreground/50">—</span>
+                              )}
+                            </TableCell>
+                          )}
+
+                          {/* Start Date */}
+                          {isVisible('start_date') && (
+                            <TableCell className={`py-2.5 ${cellDivider}`}>
+                              <span className="text-xs text-foreground">
+                                {isThisYear(new Date(request.created_at)) 
+                                  ? format(new Date(request.created_at), 'MMM d')
+                                  : format(new Date(request.created_at), 'MMM d, yyyy')}
+                              </span>
+                            </TableCell>
+                          )}
+
+                          {/* Due Date */}
+                          {isVisible('due_date') && (
+                            <TableCell className={`py-2.5 ${cellDivider}`}>
+                              {request.due_date ? (
+                                <span className={`text-xs font-medium ${
+                                  dueDateStatus === 'overdue' 
+                                    ? 'text-destructive' 
+                                    : dueDateStatus === 'due-soon' 
+                                      ? 'text-amber-600' 
+                                      : 'text-foreground'
+                                }`}>
+                                  {format(new Date(request.due_date), 'MMM d')}
+                                  {dueDateStatus === 'overdue' && (
+                                    <AlertTriangle className="w-3 h-3 inline ml-1" />
+                                  )}
+                                </span>
+                              ) : (
+                                <span className="text-xs text-muted-foreground">—</span>
+                              )}
+                            </TableCell>
+                          )}
+
+                          {/* Updated */}
+                          {isVisible('updated') && (
+                            <TableCell className={`py-2.5 ${cellDivider}`}>
+                              <LastUpdatedCell 
+                                lastActivityAt={request.last_activity_at} 
+                                updatedBy={request.updated_by || undefined}
+                              />
+                            </TableCell>
+                          )}
+
+                          {/* Actions Menu */}
+                          <TableCell className="py-2.5" onClick={(e) => e.stopPropagation()}>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button 
