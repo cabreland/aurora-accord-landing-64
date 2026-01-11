@@ -36,68 +36,54 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   useEffect(() => {
     const loadTheme = async () => {
       try {
-        // Load active theme from settings
-        const { data: themeData } = await supabase
-          .from('settings')
-          .select('value')
-          .eq('key', 'active_theme')
-          .maybeSingle();
+        // Load active theme from settings - with timeout to prevent blocking UI
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Theme load timeout')), 3000)
+        );
 
-        // Load custom colors from settings
-        const { data: customColorsData } = await supabase
-          .from('settings')
-          .select('value')
-          .eq('key', 'custom_theme_colors')
-          .maybeSingle();
+        const loadPromise = async () => {
+          const [themeData, customColorsData, primaryColorData, secondaryColorData, accentColorData] = 
+            await Promise.all([
+              supabase.from('settings').select('value').eq('key', 'active_theme').maybeSingle(),
+              supabase.from('settings').select('value').eq('key', 'custom_theme_colors').maybeSingle(),
+              supabase.from('settings').select('value').eq('key', 'primary_color').maybeSingle(),
+              supabase.from('settings').select('value').eq('key', 'secondary_color').maybeSingle(),
+              supabase.from('settings').select('value').eq('key', 'accent_color').maybeSingle(),
+            ]);
 
-        // Load brand colors from settings
-        const { data: primaryColorData } = await supabase
-          .from('settings')
-          .select('value')
-          .eq('key', 'primary_color')
-          .maybeSingle();
+          // Apply saved theme if exists
+          if (themeData?.data?.value) {
+            console.log('Loading saved theme:', themeData.data.value);
+          }
 
-        const { data: secondaryColorData } = await supabase
-          .from('settings')
-          .select('value')
-          .eq('key', 'secondary_color')
-          .maybeSingle();
+          // Apply custom colors if they exist
+          const colorsToApply: Record<string, string> = {};
 
-        const { data: accentColorData } = await supabase
-          .from('settings')
-          .select('value')
-          .eq('key', 'accent_color')
-          .maybeSingle();
+          if (customColorsData?.data?.value && typeof customColorsData.data.value === 'object') {
+            Object.assign(colorsToApply, customColorsData.data.value);
+          }
 
-        // Apply saved theme if exists
-        if (themeData?.value) {
-          console.log('Loading saved theme:', themeData.value);
-        }
+          // Override with specific brand colors if they exist
+          if (primaryColorData?.data?.value) {
+            colorsToApply.primary = primaryColorData.data.value as string;
+          }
+          if (secondaryColorData?.data?.value) {
+            colorsToApply.secondary = secondaryColorData.data.value as string;
+          }
+          if (accentColorData?.data?.value) {
+            colorsToApply.accent = accentColorData.data.value as string;
+          }
 
-        // Apply custom colors if they exist
-        const colorsToApply: Record<string, string> = {};
+          // Apply all colors to CSS variables
+          if (Object.keys(colorsToApply).length > 0) {
+            applyTheme(colorsToApply);
+          }
+        };
 
-        if (customColorsData?.value && typeof customColorsData.value === 'object') {
-          Object.assign(colorsToApply, customColorsData.value);
-        }
-
-        // Override with specific brand colors if they exist
-        if (primaryColorData?.value) {
-          colorsToApply.primary = primaryColorData.value as string;
-        }
-        if (secondaryColorData?.value) {
-          colorsToApply.secondary = secondaryColorData.value as string;
-        }
-        if (accentColorData?.value) {
-          colorsToApply.accent = accentColorData.value as string;
-        }
-
-        // Apply all colors to CSS variables
-        if (Object.keys(colorsToApply).length > 0) {
-          applyTheme(colorsToApply);
-        }
+        await Promise.race([loadPromise(), timeoutPromise]);
       } catch (error) {
-        console.error('Error loading theme:', error);
+        // Log but don't block - theme loading is non-critical
+        console.warn('Theme loading skipped:', error);
       } finally {
         setLoading(false);
       }
@@ -106,13 +92,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     loadTheme();
   }, []);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-foreground">Loading theme...</div>
-      </div>
-    );
-  }
+  // Theme loading is now non-blocking - don't show loading state
 
   return (
     <ThemeContext.Provider value={{ updateThemeColor, applyTheme }}>
