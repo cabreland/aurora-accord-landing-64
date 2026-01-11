@@ -3066,6 +3066,10 @@ export type Database = {
         Args: { p_deal_id: string; p_investor_email: string }
         Returns: boolean
       }
+      is_on_same_deal_team: {
+        Args: { _target_user_id: string; _user_id: string }
+        Returns: boolean
+      }
       log_deal_activity: {
         Args: {
           p_activity_type: Database["public"]["Enums"]["deal_activity_type"]
