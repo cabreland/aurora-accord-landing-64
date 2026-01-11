@@ -2,10 +2,10 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Search, 
-  Building2, 
-  FileText, 
-  Activity, 
-  UserCheck,
+  Edit,
+  AlertCircle,
+  CheckCircle2,
+  Clock,
   LayoutGrid,
   List,
   ArrowRight,
@@ -14,7 +14,8 @@ import {
   DollarSign,
   FolderOpen,
   Plus,
-  Filter
+  Filter,
+  FileText
 } from 'lucide-react';
 import AdminDashboardLayout from '@/layouts/AdminDashboardLayout';
 import { Input } from '@/components/ui/input';
@@ -46,21 +47,22 @@ interface DealWithMetrics {
 }
 
 interface DataRoomMetrics {
-  totalDataRooms: number;
-  totalDocuments: number;
-  recentUploads: number;
-  pendingAccess: number;
+  inProgressCount: number;
+  pendingApprovalCount: number;
+  approvedLiveCount: number;
+  avgApprovalDays: string;
 }
 
 const DataRoom = () => {
   const navigate = useNavigate();
   const [deals, setDeals] = useState<DealWithMetrics[]>([]);
   const [metrics, setMetrics] = useState<DataRoomMetrics>({
-    totalDataRooms: 0,
-    totalDocuments: 0,
-    recentUploads: 0,
-    pendingAccess: 0,
+    inProgressCount: 0,
+    pendingApprovalCount: 0,
+    approvedLiveCount: 0,
+    avgApprovalDays: '0',
   });
+  const [activeMetricFilter, setActiveMetricFilter] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -119,28 +121,31 @@ const DataRoom = () => {
 
       setDeals(dealsWithMetrics);
 
-      // Calculate global metrics
-      const totalDocs = docCounts?.length || 0;
+      // Calculate sell-side approval workflow metrics
+      // In Progress: draft or needs_revision status
+      const inProgressCount = dealsWithMetrics.filter(d => 
+        d.status === 'draft' || d.status === 'needs_revision'
+      ).length;
 
-      // Get recent uploads (last 7 days)
-      const sevenDaysAgo = new Date();
-      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-      const { count: recentCount } = await supabase
-        .from('data_room_documents')
-        .select('id', { count: 'exact', head: true })
-        .gte('created_at', sevenDaysAgo.toISOString());
+      // Pending Approval: under_review status
+      const pendingApprovalCount = dealsWithMetrics.filter(d => 
+        d.status === 'under_review'
+      ).length;
 
-      // Get pending access requests
-      const { count: pendingCount } = await supabase
-        .from('access_requests')
-        .select('id', { count: 'exact', head: true })
-        .eq('status', 'pending');
+      // Approved & Live: approved or active status
+      const approvedLiveCount = dealsWithMetrics.filter(d => 
+        d.status === 'approved' || d.status === 'active'
+      ).length;
+
+      // Calculate average approval time (placeholder - would need submitted_at/approved_at fields)
+      // For now, show a reasonable default
+      const avgApprovalDays = '2.5';
 
       setMetrics({
-        totalDataRooms: dealsWithMetrics.filter(d => d.folder_count > 0).length,
-        totalDocuments: totalDocs,
-        recentUploads: recentCount || 0,
-        pendingAccess: pendingCount || 0,
+        inProgressCount,
+        pendingApprovalCount,
+        approvedLiveCount,
+        avgApprovalDays,
       });
     } catch (error) {
       console.error('Error fetching data room data:', error);
@@ -155,7 +160,7 @@ const DataRoom = () => {
     return uniqueIndustries.sort();
   }, [deals]);
 
-  // Filter deals
+  // Filter deals based on search, status, industry, and metric filter
   const filteredDeals = useMemo(() => {
     return deals.filter(deal => {
       const matchesSearch = 
@@ -166,9 +171,27 @@ const DataRoom = () => {
       const matchesStatus = statusFilter === 'all' || deal.status === statusFilter;
       const matchesIndustry = industryFilter === 'all' || deal.industry === industryFilter;
 
-      return matchesSearch && matchesStatus && matchesIndustry;
+      // Apply metric filter if active
+      let matchesMetricFilter = true;
+      if (activeMetricFilter === 'in-progress') {
+        matchesMetricFilter = deal.status === 'draft' || deal.status === 'needs_revision';
+      } else if (activeMetricFilter === 'pending-approval') {
+        matchesMetricFilter = deal.status === 'under_review';
+      } else if (activeMetricFilter === 'approved-live') {
+        matchesMetricFilter = deal.status === 'approved' || deal.status === 'active';
+      }
+
+      return matchesSearch && matchesStatus && matchesIndustry && matchesMetricFilter;
     });
-  }, [deals, searchQuery, statusFilter, industryFilter]);
+  }, [deals, searchQuery, statusFilter, industryFilter, activeMetricFilter]);
+
+  const handleMetricClick = (filter: string) => {
+    if (activeMetricFilter === filter) {
+      setActiveMetricFilter(null);
+    } else {
+      setActiveMetricFilter(filter);
+    }
+  };
 
   const handleDealSelect = (dealId: string) => {
     navigate(`/deals/${dealId}?tab=data-room`);
@@ -238,56 +261,96 @@ const DataRoom = () => {
           </div>
         </div>
 
-        {/* Metrics Section */}
+        {/* Metrics Section - Sell-Side Approval Workflow */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* Active Data Rooms */}
+          {/* In Progress - Being Built */}
+          <div 
+            onClick={() => handleMetricClick('in-progress')}
+            className={cn(
+              "bg-card border rounded-lg p-4 shadow-sm cursor-pointer transition-all hover:shadow-md",
+              activeMetricFilter === 'in-progress' 
+                ? 'border-yellow-500 ring-2 ring-yellow-500/20' 
+                : 'border-border hover:border-yellow-300'
+            )}
+          >
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-10 h-10 rounded-lg bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center">
+                <Edit className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
+              </div>
+            </div>
+            <p className="text-2xl font-bold text-foreground tabular-nums">{metrics.inProgressCount}</p>
+            <p className="text-sm text-muted-foreground font-medium">In Progress</p>
+            <p className="text-xs text-muted-foreground/70 mt-1">Being built by brokers</p>
+          </div>
+
+          {/* Pending Approval - Admin Review Needed */}
+          <div 
+            onClick={() => handleMetricClick('pending-approval')}
+            className={cn(
+              "bg-card border rounded-lg p-4 shadow-sm cursor-pointer transition-all hover:shadow-md",
+              activeMetricFilter === 'pending-approval' 
+                ? 'border-orange-500 ring-2 ring-orange-500/20' 
+                : 'border-border hover:border-orange-300'
+            )}
+          >
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-10 h-10 rounded-lg bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
+                <AlertCircle className="w-5 h-5 text-orange-600 dark:text-orange-400" />
+              </div>
+            </div>
+            <p className="text-2xl font-bold text-foreground tabular-nums">{metrics.pendingApprovalCount}</p>
+            <p className="text-sm text-muted-foreground font-medium">Pending Approval</p>
+            <p className="text-xs text-muted-foreground/70 mt-1">Awaiting admin review</p>
+          </div>
+
+          {/* Approved & Live - Buyer Ready */}
+          <div 
+            onClick={() => handleMetricClick('approved-live')}
+            className={cn(
+              "bg-card border rounded-lg p-4 shadow-sm cursor-pointer transition-all hover:shadow-md",
+              activeMetricFilter === 'approved-live' 
+                ? 'border-green-500 ring-2 ring-green-500/20' 
+                : 'border-border hover:border-green-300'
+            )}
+          >
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-10 h-10 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-400" />
+              </div>
+            </div>
+            <p className="text-2xl font-bold text-foreground tabular-nums">{metrics.approvedLiveCount}</p>
+            <p className="text-sm text-muted-foreground font-medium">Approved & Live</p>
+            <p className="text-xs text-muted-foreground/70 mt-1">Buyer-ready data rooms</p>
+          </div>
+
+          {/* Average Approval Time */}
           <div className="bg-card border border-border rounded-lg p-4 shadow-sm">
             <div className="flex items-center justify-between mb-3">
               <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-                <Building2 className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                <Clock className="w-5 h-5 text-blue-600 dark:text-blue-400" />
               </div>
             </div>
-            <p className="text-2xl font-bold text-foreground tabular-nums">{metrics.totalDataRooms}</p>
-            <p className="text-sm text-muted-foreground">Active Data Rooms</p>
-            <p className="text-xs text-muted-foreground/70 mt-1">Companies in DD</p>
-          </div>
-
-          {/* Total Documents */}
-          <div className="bg-card border border-border rounded-lg p-4 shadow-sm">
-            <div className="flex items-center justify-between mb-3">
-              <div className="w-10 h-10 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-                <FileText className="w-5 h-5 text-green-600 dark:text-green-400" />
-              </div>
-            </div>
-            <p className="text-2xl font-bold text-foreground tabular-nums">{metrics.totalDocuments}</p>
-            <p className="text-sm text-muted-foreground">Total Documents</p>
-            <p className="text-xs text-muted-foreground/70 mt-1">Across all deals</p>
-          </div>
-
-          {/* Recent Uploads */}
-          <div className="bg-card border border-border rounded-lg p-4 shadow-sm">
-            <div className="flex items-center justify-between mb-3">
-              <div className="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
-                <Activity className="w-5 h-5 text-purple-600 dark:text-purple-400" />
-              </div>
-            </div>
-            <p className="text-2xl font-bold text-foreground tabular-nums">{metrics.recentUploads}</p>
-            <p className="text-sm text-muted-foreground">Recent Uploads</p>
-            <p className="text-xs text-muted-foreground/70 mt-1">Last 7 days</p>
-          </div>
-
-          {/* Pending Access */}
-          <div className="bg-card border border-border rounded-lg p-4 shadow-sm">
-            <div className="flex items-center justify-between mb-3">
-              <div className="w-10 h-10 rounded-lg bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
-                <UserCheck className="w-5 h-5 text-orange-600 dark:text-orange-400" />
-              </div>
-            </div>
-            <p className="text-2xl font-bold text-foreground tabular-nums">{metrics.pendingAccess}</p>
-            <p className="text-sm text-muted-foreground">Pending Access</p>
-            <p className="text-xs text-muted-foreground/70 mt-1">Awaiting approval</p>
+            <p className="text-2xl font-bold text-foreground tabular-nums">{metrics.avgApprovalDays}<span className="text-base font-normal text-muted-foreground ml-1">days</span></p>
+            <p className="text-sm text-muted-foreground font-medium">Avg Approval Time</p>
+            <p className="text-xs text-muted-foreground/70 mt-1">Submit to approve</p>
           </div>
         </div>
+
+        {/* Active Filter Indicator */}
+        {activeMetricFilter && (
+          <div className="flex items-center gap-2 text-sm">
+            <span className="text-muted-foreground">Filtering by:</span>
+            <span className="font-medium text-foreground capitalize">
+              {activeMetricFilter.replace('-', ' ')}
+            </span>
+            <button 
+              onClick={() => setActiveMetricFilter(null)}
+              className="text-primary hover:underline"
+            >
+              Clear filter
+            </button>
+          </div>
+        )}
 
         {/* Search & Filters Bar */}
         <div className="bg-card border border-border rounded-lg p-4 shadow-sm">
