@@ -11,6 +11,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { MyDeal } from '@/hooks/useMyDeals';
 import { useToast } from '@/hooks/use-toast';
 import { DealEditModal } from './DealEditModal';
+import { cn } from '@/lib/utils';
 
 interface DealDetailPanelProps {
   dealId: string;
@@ -67,7 +68,7 @@ export const DealDetailPanel: React.FC<DealDetailPanelProps> = ({
 
   return (
     <Dialog open={true} onOpenChange={() => onClose()}>
-      <DialogContent className="max-w-2xl max-h-[85vh] overflow-hidden flex flex-col p-0">
+      <DialogContent className="max-w-2xl max-h-[85vh] overflow-hidden flex flex-col p-0 bg-card border border-border shadow-xl">
         {loading ? (
           <div className="p-6 space-y-4">
             <Skeleton className="h-6 w-48" />
@@ -81,22 +82,30 @@ export const DealDetailPanel: React.FC<DealDetailPanelProps> = ({
           </div>
         ) : (
           <>
-            {/* Header */}
-            <DialogHeader className="p-6 pb-4 border-b border-border">
+            {/* Header - Light theme with subtle border */}
+            <DialogHeader className="p-6 pb-4 border-b border-border bg-secondary/30">
               <div className="flex items-center justify-between">
                 <div className="space-y-2">
-                  <DialogTitle className="text-xl font-semibold">
+                  <DialogTitle className="text-xl font-semibold text-foreground">
                     {deal.title}
                   </DialogTitle>
                   <p className="text-sm text-muted-foreground">
                     {deal.company_name}
                   </p>
                   <div className="flex items-center gap-2">
-                    <Badge variant={getStatusVariant(deal.status)}>
+                    <Badge variant={getStatusVariant(deal.status)} className="capitalize">
                       {deal.status}
                     </Badge>
                     {deal.priority && (
-                      <Badge variant="outline">
+                      <Badge 
+                        variant="outline" 
+                        className={cn(
+                          "capitalize",
+                          deal.priority === 'high' && "border-destructive/50 text-destructive bg-destructive/5",
+                          deal.priority === 'medium' && "border-warning/50 text-warning bg-warning/5",
+                          deal.priority === 'low' && "border-muted-foreground/50 text-muted-foreground"
+                        )}
+                      >
                         {deal.priority} priority
                       </Badge>
                     )}
@@ -108,10 +117,11 @@ export const DealDetailPanel: React.FC<DealDetailPanelProps> = ({
                     size="icon"
                     onClick={() => navigate(`/deals/${deal.id}`)}
                     title="Open Deal Workspace"
+                    className="hover:bg-primary/10 hover:text-primary"
                   >
                     <ExternalLink className="w-4 h-4" />
                   </Button>
-                  <Button variant="ghost" size="icon">
+                  <Button variant="ghost" size="icon" className="hover:bg-muted">
                     <MoreVertical className="w-4 h-4" />
                   </Button>
                 </div>
@@ -119,12 +129,12 @@ export const DealDetailPanel: React.FC<DealDetailPanelProps> = ({
             </DialogHeader>
 
             {/* Content */}
-            <div className="flex-1 overflow-auto">
+            <div className="flex-1 overflow-auto bg-card">
               <Tabs defaultValue="overview" className="w-full">
-                <div className="px-6 pt-4">
-                  <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="overview">Overview</TabsTrigger>
-                    <TabsTrigger value="documents">
+                <div className="px-6 pt-4 bg-secondary/20">
+                  <TabsList className="grid w-full grid-cols-2 bg-muted">
+                    <TabsTrigger value="overview" className="data-[state=active]:bg-card">Overview</TabsTrigger>
+                    <TabsTrigger value="documents" className="data-[state=active]:bg-card">
                       <FileText className="w-4 h-4 mr-1" />
                       Docs
                     </TabsTrigger>
@@ -134,60 +144,60 @@ export const DealDetailPanel: React.FC<DealDetailPanelProps> = ({
                 <div className="p-6 pt-4">
                   <TabsContent value="overview" className="space-y-4 mt-0">
                     {/* Key Metrics */}
-                    <Card>
-                      <CardHeader className="pb-3">
-                        <CardTitle className="text-sm">Key Metrics</CardTitle>
+                    <Card className="border border-border shadow-sm">
+                      <CardHeader className="pb-3 border-b border-border/50 bg-secondary/20">
+                        <CardTitle className="text-sm font-medium text-foreground">Key Metrics</CardTitle>
                       </CardHeader>
-                      <CardContent className="space-y-3">
+                      <CardContent className="space-y-3 pt-4">
                         {deal.revenue && (
                           <div className="flex justify-between">
                             <span className="text-sm text-muted-foreground">Revenue</span>
-                            <span className="text-sm font-medium">{deal.revenue}</span>
+                            <span className="text-sm font-semibold text-foreground">{deal.revenue}</span>
                           </div>
                         )}
                         {deal.ebitda && (
                           <div className="flex justify-between">
                             <span className="text-sm text-muted-foreground">EBITDA</span>
-                            <span className="text-sm font-medium">{deal.ebitda}</span>
+                            <span className="text-sm font-semibold text-foreground">{deal.ebitda}</span>
                           </div>
                         )}
                         {deal.industry && (
                           <div className="flex justify-between">
                             <span className="text-sm text-muted-foreground">Industry</span>
-                            <span className="text-sm font-medium">{deal.industry}</span>
+                            <span className="text-sm font-semibold text-foreground">{deal.industry}</span>
                           </div>
                         )}
                         {deal.location && (
                           <div className="flex justify-between">
                             <span className="text-sm text-muted-foreground">Location</span>
-                            <span className="text-sm font-medium">{deal.location}</span>
+                            <span className="text-sm font-semibold text-foreground">{deal.location}</span>
                           </div>
                         )}
                       </CardContent>
                     </Card>
 
                     {/* Deal Information */}
-                    <Card>
-                      <CardHeader className="pb-3">
-                        <CardTitle className="text-sm">Deal Information</CardTitle>
+                    <Card className="border border-border shadow-sm">
+                      <CardHeader className="pb-3 border-b border-border/50 bg-secondary/20">
+                        <CardTitle className="text-sm font-medium text-foreground">Deal Information</CardTitle>
                       </CardHeader>
-                      <CardContent className="space-y-3">
+                      <CardContent className="space-y-3 pt-4">
                         <div className="flex justify-between">
                           <span className="text-sm text-muted-foreground">Created</span>
-                          <span className="text-sm font-medium">
+                          <span className="text-sm font-semibold text-foreground">
                             {new Date(deal.created_at).toLocaleDateString()}
                           </span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-sm text-muted-foreground">Last Updated</span>
-                          <span className="text-sm font-medium">
+                          <span className="text-sm font-semibold text-foreground">
                             {new Date(deal.updated_at).toLocaleDateString()}
                           </span>
                         </div>
                         {(deal as any).current_stage && (
                           <div className="flex justify-between">
                             <span className="text-sm text-muted-foreground">Stage</span>
-                            <span className="text-sm font-medium">{(deal as any).current_stage}</span>
+                            <span className="text-sm font-semibold text-foreground">{(deal as any).current_stage}</span>
                           </div>
                         )}
                       </CardContent>

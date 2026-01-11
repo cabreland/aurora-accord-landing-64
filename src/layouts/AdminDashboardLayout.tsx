@@ -236,9 +236,9 @@ const AdminDashboardLayout = ({ children, activeTab = 'dashboard', breadcrumbs }
       </div>
 
       {/* Main Content - With left margin for sidebar */}
-      <div className="flex-1 lg:ml-64 overflow-auto bg-background">
-        {/* Header - Light theme */}
-        <div className="bg-card border-b border-border p-4 lg:p-6 sticky top-0 z-30">
+      <div className="flex-1 lg:ml-64 overflow-auto bg-secondary/30">
+        {/* Header - Light theme with subtle shadow */}
+        <div className="bg-card border-b border-border shadow-sm p-4 lg:p-6 sticky top-0 z-30">
           <div className="flex justify-end items-center">
             <div className="flex items-center gap-3">
               <NotificationBell />
@@ -248,12 +248,12 @@ const AdminDashboardLayout = ({ children, activeTab = 'dashboard', breadcrumbs }
         </div>
         
         {/* Breadcrumbs - Below header, above page content */}
-        <div className="px-4 lg:px-6 pt-4 lg:pt-6 bg-background">
+        <div className="px-4 lg:px-6 pt-4 lg:pt-6">
           <Breadcrumbs items={breadcrumbs} />
         </div>
         
-        {/* Page Content */}
-        <div className="p-4 lg:p-6 pt-0 lg:pt-0 bg-background">
+        {/* Page Content - Light gray background */}
+        <div className="p-4 lg:p-6 pt-0 lg:pt-0">
           {children}
         </div>
       </div>

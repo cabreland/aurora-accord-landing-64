@@ -78,51 +78,69 @@ const Deals = () => {
 
   return (
     <DashboardLayout activeTab="deals">
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">Deals</h1>
-            <p className="text-muted-foreground">Manage your active deals and track progress</p>
+      <div className="min-h-screen bg-secondary/30">
+        <div className="p-6 lg:p-8 space-y-6 max-w-[1600px] mx-auto">
+          {/* Header */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h1 className="text-3xl font-bold text-foreground">Deals</h1>
+              <p className="text-muted-foreground">Manage your active deals and track progress</p>
+            </div>
+            <Button className="gap-2 shadow-sm">
+              <Plus className="h-4 w-4" />
+              New Deal
+            </Button>
           </div>
-          <Button className="gap-2">
-            <Plus className="h-4 w-4" />
-            New Deal
-          </Button>
-        </div>
 
-        {/* Search */}
-        <div className="relative max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search deals..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
-          />
-        </div>
-
-        {/* Deals Grid */}
-        {isLoading ? (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {[...Array(6)].map((_, i) => (
-              <Card key={i} className="overflow-hidden">
-                <CardContent className="p-6">
-                  <Skeleton className="h-6 w-3/4 mb-2" />
-                  <Skeleton className="h-4 w-1/2 mb-4" />
-                  <div className="flex gap-2 mb-4">
-                    <Skeleton className="h-5 w-16" />
-                    <Skeleton className="h-5 w-16" />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <Skeleton className="h-12" />
-                    <Skeleton className="h-12" />
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+          {/* Search */}
+          <div className="relative max-w-md">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search deals..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 bg-card border-border shadow-sm"
+            />
           </div>
-        ) : filteredDeals.length === 0 ? (
+
+          {/* Deals Grid */}
+          {isLoading ? (
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {[...Array(6)].map((_, i) => (
+                <Card key={i} className="overflow-hidden border border-border shadow-sm bg-card">
+                  <CardContent className="p-6">
+                    <Skeleton className="h-6 w-3/4 mb-2" />
+                    <Skeleton className="h-4 w-1/2 mb-4" />
+                    <div className="flex gap-2 mb-4">
+                      <Skeleton className="h-5 w-16" />
+                      <Skeleton className="h-5 w-16" />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <Skeleton className="h-12" />
+                      <Skeleton className="h-12" />
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : filteredDeals.length === 0 ? (
+            <Card className="border border-border shadow-sm">
+              <CardContent className="p-12 text-center">
+                <Building2 className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-semibold mb-2 text-foreground">No deals found</h3>
+                <p className="text-muted-foreground mb-4">
+                  {searchQuery ? 'Try adjusting your search terms' : 'Get started by creating your first deal'}
+                </p>
+                {!searchQuery && (
+                  <Button className="gap-2 shadow-sm">
+                    <Plus className="h-4 w-4" />
+                    Create Deal
+                  </Button>
+                )}
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           <Card>
             <CardContent className="p-12 text-center">
               <Building2 className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
@@ -139,59 +157,59 @@ const Deals = () => {
             </CardContent>
           </Card>
         ) : (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {filteredDeals.map((deal) => (
-              <Card 
-                key={deal.id} 
-                className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer group"
-                onClick={() => navigate(`/deals/${deal.id}`)}
-              >
-                <CardContent className="p-6">
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-foreground truncate group-hover:text-primary transition-colors">
-                        {deal.company_name}
-                      </h3>
-                      <p className="text-sm text-muted-foreground truncate">{deal.title}</p>
+              {filteredDeals.map((deal) => (
+                <Card 
+                  key={deal.id} 
+                  className="overflow-hidden border border-border bg-card shadow-sm hover:shadow-md hover:border-primary/30 transition-all cursor-pointer group"
+                  onClick={() => navigate(`/deals/${deal.id}`)}
+                >
+                  <CardContent className="p-6">
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-foreground truncate group-hover:text-primary transition-colors">
+                          {deal.company_name}
+                        </h3>
+                        <p className="text-sm text-muted-foreground truncate">{deal.title}</p>
+                      </div>
+                      <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
                     </div>
-                    <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
-                  </div>
 
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    <Badge variant="outline" className={getStatusColor(deal.status)}>
-                      {deal.status}
-                    </Badge>
-                    <Badge variant="outline" className={getPriorityColor(deal.priority)}>
-                      {deal.priority}
-                    </Badge>
-                    {deal.industry && (
-                      <Badge variant="outline" className="bg-muted/50">
-                        {deal.industry}
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      <Badge variant="outline" className={getStatusColor(deal.status)}>
+                        {deal.status}
                       </Badge>
-                    )}
-                  </div>
+                      <Badge variant="outline" className={getPriorityColor(deal.priority)}>
+                        {deal.priority}
+                      </Badge>
+                      {deal.industry && (
+                        <Badge variant="outline" className="bg-muted/50 border-border">
+                          {deal.industry}
+                        </Badge>
+                      )}
+                    </div>
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-muted/30 rounded-lg p-3">
-                      <div className="flex items-center gap-1.5 text-muted-foreground mb-1">
-                        <DollarSign className="h-3.5 w-3.5" />
-                        <span className="text-xs">Revenue</span>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="bg-secondary/50 rounded-lg p-3 border border-border/50">
+                        <div className="flex items-center gap-1.5 text-muted-foreground mb-1">
+                          <DollarSign className="h-3.5 w-3.5" />
+                          <span className="text-xs font-medium">Revenue</span>
+                        </div>
+                        <p className="font-semibold text-sm text-foreground">{deal.revenue || 'N/A'}</p>
                       </div>
-                      <p className="font-medium text-sm">{deal.revenue || 'N/A'}</p>
-                    </div>
-                    <div className="bg-muted/30 rounded-lg p-3">
-                      <div className="flex items-center gap-1.5 text-muted-foreground mb-1">
-                        <TrendingUp className="h-3.5 w-3.5" />
-                        <span className="text-xs">EBITDA</span>
+                      <div className="bg-secondary/50 rounded-lg p-3 border border-border/50">
+                        <div className="flex items-center gap-1.5 text-muted-foreground mb-1">
+                          <TrendingUp className="h-3.5 w-3.5" />
+                          <span className="text-xs font-medium">EBITDA</span>
+                        </div>
+                        <p className="font-semibold text-sm text-foreground">{deal.ebitda || 'N/A'}</p>
                       </div>
-                      <p className="font-medium text-sm">{deal.ebitda || 'N/A'}</p>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </DashboardLayout>
   );
