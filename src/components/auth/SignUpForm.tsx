@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { PasswordStrength } from '@/components/ui/password-strength';
+import { Eye, EyeOff, ArrowRight, Loader2 } from 'lucide-react';
 
 interface SignUpFormProps {
   onSubmit: (email: string, password: string, firstName: string, lastName: string) => void;
@@ -14,6 +15,7 @@ export const SignUpForm = ({ onSubmit, loading }: SignUpFormProps) => {
   const [password, setPassword] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,67 +23,94 @@ export const SignUpForm = ({ onSubmit, loading }: SignUpFormProps) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-5">
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="firstName" className="text-[#F4E4BC] font-medium">First Name</Label>
+          <Label htmlFor="firstName" className="text-sm font-medium text-white/70">
+            First name
+          </Label>
           <Input
             id="firstName"
             type="text"
             value={firstName}
             onChange={(e) => setFirstName(e.target.value)}
             required
-            className="bg-[#1A1F2E] border-[#D4AF37]/30 text-[#FAFAFA] focus:border-[#D4AF37] h-11"
-            placeholder="First name"
+            className="h-11 bg-white/[0.03] border-white/[0.08] text-white placeholder:text-white/30 focus:border-[#D4AF37]/50 focus:ring-1 focus:ring-[#D4AF37]/20 transition-all"
+            placeholder="John"
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="lastName" className="text-[#F4E4BC] font-medium">Last Name</Label>
+          <Label htmlFor="lastName" className="text-sm font-medium text-white/70">
+            Last name
+          </Label>
           <Input
             id="lastName"
             type="text"
             value={lastName}
             onChange={(e) => setLastName(e.target.value)}
             required
-            className="bg-[#1A1F2E] border-[#D4AF37]/30 text-[#FAFAFA] focus:border-[#D4AF37] h-11"
-            placeholder="Last name"
+            className="h-11 bg-white/[0.03] border-white/[0.08] text-white placeholder:text-white/30 focus:border-[#D4AF37]/50 focus:ring-1 focus:ring-[#D4AF37]/20 transition-all"
+            placeholder="Smith"
           />
         </div>
       </div>
+
       <div className="space-y-2">
-        <Label htmlFor="signup-email" className="text-[#F4E4BC] font-medium">Email</Label>
+        <Label htmlFor="signup-email" className="text-sm font-medium text-white/70">
+          Work email
+        </Label>
         <Input
           id="signup-email"
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-          className="bg-[#1A1F2E] border-[#D4AF37]/30 text-[#FAFAFA] focus:border-[#D4AF37] h-11"
-          placeholder="Enter your email"
+          className="h-11 bg-white/[0.03] border-white/[0.08] text-white placeholder:text-white/30 focus:border-[#D4AF37]/50 focus:ring-1 focus:ring-[#D4AF37]/20 transition-all"
+          placeholder="you@company.com"
         />
       </div>
+
       <div className="space-y-2">
-        <Label htmlFor="signup-password" className="text-[#F4E4BC] font-medium">Password</Label>
-        <Input
-          id="signup-password"
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          className="bg-[#1A1F2E] border-[#D4AF37]/30 text-[#FAFAFA] focus:border-[#D4AF37] h-11"
-          placeholder="Create a strong password"
-        />
-        <PasswordStrength password={password} className="mt-2" />
-        <div className="text-xs text-[#F4E4BC]/70 mt-1">
-          Password must contain at least 8 characters with uppercase, lowercase, numbers, and special characters.
+        <Label htmlFor="signup-password" className="text-sm font-medium text-white/70">
+          Password
+        </Label>
+        <div className="relative">
+          <Input
+            id="signup-password"
+            type={showPassword ? 'text' : 'password'}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            className="h-11 bg-white/[0.03] border-white/[0.08] text-white placeholder:text-white/30 focus:border-[#D4AF37]/50 focus:ring-1 focus:ring-[#D4AF37]/20 pr-10 transition-all"
+            placeholder="Create a strong password"
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/60 transition-colors"
+          >
+            {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+          </button>
         </div>
+        <PasswordStrength password={password} className="mt-2" />
+        <p className="text-xs text-white/40 mt-1">
+          Min 8 characters with uppercase, lowercase, numbers & symbols
+        </p>
       </div>
+
       <Button
         type="submit"
         disabled={loading}
-        className="w-full bg-[#D4AF37] hover:bg-[#F4E4BC] text-[#0A0F0F] font-bold h-11"
+        className="w-full h-11 bg-gradient-to-r from-[#D4AF37] to-[#B8962E] hover:from-[#E5C04A] hover:to-[#D4AF37] text-[#0A0C10] font-semibold shadow-lg shadow-[#D4AF37]/20 transition-all duration-300 group"
       >
-        {loading ? 'Creating account...' : 'Create Account'}
+        {loading ? (
+          <Loader2 className="w-4 h-4 animate-spin" />
+        ) : (
+          <>
+            Create account
+            <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-0.5 transition-transform" />
+          </>
+        )}
       </Button>
     </form>
   );
