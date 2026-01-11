@@ -55,6 +55,7 @@ import BulkActionsToolbar from './BulkActionsToolbar';
 import PriorityFlagCell from './PriorityFlagCell';
 import ReviewersCell from './ReviewersCell';
 import LastUpdatedCell from './LastUpdatedCell';
+import CategoryHeaderRow from './CategoryHeaderRow';
 import ColumnVisibilityDropdown, { useColumnVisibility, ColumnConfig } from './ColumnVisibilityDropdown';
 import { toast } from 'sonner';
 
@@ -368,6 +369,62 @@ const DiligenceRequestTable: React.FC<DiligenceRequestTableProps> = ({
       return sortDirection === 'asc' ? comparison : -comparison;
     });
   }, [requests, sortField, sortDirection]);
+
+  // Group sorted requests by category
+  const groupedRequests = React.useMemo(() => {
+    const groups = new Map<string, { category: DiligenceCategory; requests: DiligenceRequest[] }>();
+    
+    // First, sort categories by order_index or name
+    const sortedCategories = [...categories].sort((a, b) => {
+      if (a.order_index !== undefined && b.order_index !== undefined) {
+        return a.order_index - b.order_index;
+      }
+      return a.name.localeCompare(b.name);
+    });
+    
+    // Initialize groups in category order
+    sortedCategories.forEach(cat => {
+      groups.set(cat.id, { category: cat, requests: [] });
+    });
+    
+    // Distribute requests into groups
+    sortedRequests.forEach(request => {
+      const group = groups.get(request.category_id);
+      if (group) {
+        group.requests.push(request);
+      } else {
+        // Handle case where category might not exist
+        const unknownCat: DiligenceCategory = { 
+          id: request.category_id, 
+          name: 'Other', 
+          created_at: '',
+          icon: null,
+          color: null,
+          order_index: null
+        };
+        groups.set(request.category_id, { category: unknownCat, requests: [request] });
+      }
+    });
+    
+    // Filter out empty groups and convert to array
+    return Array.from(groups.values()).filter(g => g.requests.length > 0);
+  }, [sortedRequests, categories]);
+
+  // Calculate column count for colspan
+  const visibleColumnCount = React.useMemo(() => {
+    let count = 2; // Checkbox + Actions are always visible
+    if (isVisible('priority')) count++;
+    count++; // Title is always visible
+    if (isVisible('status')) count++;
+    if (isVisible('assignee')) count++;
+    if (isVisible('reviewers')) count++;
+    if (isVisible('start_date')) count++;
+    if (isVisible('due_date')) count++;
+    if (isVisible('docs')) count++;
+    if (isVisible('comments')) count++;
+    if (isVisible('updated')) count++;
+    return count;
+  }, [isVisible]);
   
   if (isLoading) {
     return (
@@ -529,65 +586,80 @@ const DiligenceRequestTable: React.FC<DiligenceRequestTableProps> = ({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {sortedRequests.map((request) => {
-                const status = statusConfig[request.status] || statusConfig.open;
-                const StatusIcon = status.icon;
-                const dueDateStatus = getDueDateStatus(request.due_date, request.status);
-                const categoryName = getCategoryName(request.category_id);
-                const subcategoryName = getSubcategoryName(request.subcategory_id);
-                const counts = requestCounts[request.id] || { documentCount: 0, commentCount: 0 };
-                const assignees = getAssignees(request);
-                const assigneeIds = request.assignee_ids || [];
-                const isUnread = hasUnreadUpdates(request.id, request.last_activity_at, viewMap);
-                const showNewBadge = shouldShowNewBadge(request, counts.commentCount);
-                const isResolved = request.status === 'completed';
-                const isSelected = selectedRequests.includes(request.id);
+              {groupedRequests.map(({ category, requests: categoryRequests }) => {
+                const completedCount = categoryRequests.filter(r => r.status === 'completed').length;
                 
                 return (
-                  <TableRow 
-                    key={request.id}
-                    className={`border-b border-border/50 hover:bg-muted/50 cursor-pointer transition-colors group ${
-                      isSelected ? 'bg-primary/5' : isResolved ? 'bg-green-50/30 dark:bg-green-900/10' : isUnread ? 'bg-blue-50/30 dark:bg-blue-900/10' : ''
-                    }`}
-                    onClick={() => onSelectRequest(request)}
-                  >
-                    {/* Checkbox */}
-                    <TableCell onClick={(e) => e.stopPropagation()} className="py-3">
-                      <Checkbox 
-                        checked={isSelected}
-                        onCheckedChange={() => toggleSelection(request.id)}
-                      />
-                    </TableCell>
+                  <React.Fragment key={category.id}>
+                    {/* Category Header Row */}
+                    <CategoryHeaderRow
+                      categoryName={category.name}
+                      completedCount={completedCount}
+                      totalCount={categoryRequests.length}
+                      colSpan={visibleColumnCount}
+                    />
+                    
+                    {/* Request Rows for this Category */}
+                    {categoryRequests.map((request) => {
+                      const status = statusConfig[request.status] || statusConfig.open;
+                      const StatusIcon = status.icon;
+                      const dueDateStatus = getDueDateStatus(request.due_date, request.status);
+                      const subcategoryName = getSubcategoryName(request.subcategory_id);
+                      const counts = requestCounts[request.id] || { documentCount: 0, commentCount: 0 };
+                      const assignees = getAssignees(request);
+                      const assigneeIds = request.assignee_ids || [];
+                      const isUnread = hasUnreadUpdates(request.id, request.last_activity_at, viewMap);
+                      const showNewBadge = shouldShowNewBadge(request, counts.commentCount);
+                      const isResolved = request.status === 'completed';
+                      const isSelected = selectedRequests.includes(request.id);
+                      
+                      return (
+                        <TableRow 
+                          key={request.id}
+                          className={`border-b border-border/50 hover:bg-muted/50 cursor-pointer transition-colors group ${
+                            isSelected ? 'bg-primary/5' : isResolved ? 'bg-green-50/30 dark:bg-green-900/10' : isUnread ? 'bg-blue-50/30 dark:bg-blue-900/10' : ''
+                          }`}
+                          onClick={() => onSelectRequest(request)}
+                        >
+                          {/* Checkbox */}
+                          <TableCell onClick={(e) => e.stopPropagation()} className="py-3">
+                            <Checkbox 
+                              checked={isSelected}
+                              onCheckedChange={() => toggleSelection(request.id)}
+                            />
+                          </TableCell>
 
-                    {/* Priority Flag */}
-                    {isVisible('priority') && (
-                      <TableCell className="py-3" onClick={(e) => e.stopPropagation()}>
-                        <PriorityFlagCell requestId={request.id} priority={request.priority} />
-                      </TableCell>
-                    )}
+                          {/* Priority Flag */}
+                          {isVisible('priority') && (
+                            <TableCell className="py-3" onClick={(e) => e.stopPropagation()}>
+                              <PriorityFlagCell requestId={request.id} priority={request.priority} />
+                            </TableCell>
+                          )}
 
-                    {/* Request Name with optional NEW badge */}
-                    <TableCell className="py-3">
-                      <div className="flex items-center gap-2">
-                        <div className="flex-1 min-w-0">
-                          <div className={`font-medium flex items-center gap-2 ${
-                            isResolved ? 'text-muted-foreground line-through' : 'text-foreground'
-                          }`}>
-                            <span className="truncate">{request.title}</span>
-                            {showNewBadge && (
-                              <Badge variant="secondary" className="bg-purple-100 text-purple-700 border-purple-200 text-[10px] px-1.5 py-0 font-medium shrink-0">
-                                <Sparkles className="w-3 h-3 mr-0.5" />
-                                NEW
-                              </Badge>
-                            )}
-                          </div>
-                          <div className="text-xs text-muted-foreground mt-0.5 truncate">
-                            {categoryName}
-                            {subcategoryName && ` › ${subcategoryName}`}
-                          </div>
-                        </div>
-                      </div>
-                    </TableCell>
+                          {/* Request Name with optional NEW badge - simplified without category */}
+                          <TableCell className="py-3">
+                            <div className="flex items-center gap-2">
+                              <div className="flex-1 min-w-0">
+                                <div className={`font-medium flex items-center gap-2 ${
+                                  isResolved ? 'text-muted-foreground line-through' : 'text-foreground'
+                                }`}>
+                                  <span className="truncate">{request.title}</span>
+                                  {showNewBadge && (
+                                    <Badge variant="secondary" className="bg-purple-100 text-purple-700 border-purple-200 text-[10px] px-1.5 py-0 font-medium shrink-0">
+                                      <Sparkles className="w-3 h-3 mr-0.5" />
+                                      NEW
+                                    </Badge>
+                                  )}
+                                </div>
+                                {/* Only show subcategory if present */}
+                                {subcategoryName && (
+                                  <div className="text-xs text-muted-foreground mt-0.5 truncate">
+                                    {subcategoryName}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </TableCell>
 
                     {/* Status Badge */}
                     {isVisible('status') && (
@@ -843,6 +915,9 @@ const DiligenceRequestTable: React.FC<DiligenceRequestTableProps> = ({
                       </DropdownMenu>
                     </TableCell>
                   </TableRow>
+                      );
+                    })}
+                  </React.Fragment>
                 );
               })}
             </TableBody>
