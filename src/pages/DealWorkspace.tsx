@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, Building2, Edit } from 'lucide-react';
+import { ArrowLeft, Edit } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Breadcrumbs } from '@/components/navigation/Breadcrumbs';
+import AdminDashboardLayout from '@/layouts/AdminDashboardLayout';
 import { useToast } from '@/hooks/use-toast';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { supabase } from '@/integrations/supabase/client';
-import { getDashboardRoute } from '@/lib/auth-utils';
 import { resolveDealRoute } from '@/lib/data/dealRouting';
 import { 
   DealWorkspaceTabs, 
@@ -24,7 +23,7 @@ import { DataRoomMetricsBar } from '@/components/data-room/DataRoomMetricsBar';
 import { DataRoomStatsBar } from '@/components/data-room/DataRoomStatsBar';
 import { DataRoomEmptyState } from '@/components/data-room/DataRoomEmptyState';
 import { useDataRoom } from '@/hooks/useDataRoom';
-import { useDiligenceRequests, useDealsWithDiligence } from '@/hooks/useDiligenceTracker';
+import { useDiligenceRequests } from '@/hooks/useDiligenceTracker';
 import { useDealTeam } from '@/hooks/useDealTeam';
 import { useDealActivities } from '@/hooks/useDealActivities';
 import DealDiligenceTracker from '@/components/diligence/DealDiligenceTracker';
@@ -176,48 +175,51 @@ const DealWorkspace: React.FC = () => {
     return 'All Documents';
   }, [selectedFolderId, selectedCategoryId, folders, categories]);
 
+  const breadcrumbs = [
+    { label: 'Deals', path: '/deals' },
+    { label: deal?.company_name || 'Deal' },
+    ...(activeTab !== 'overview' ? [{ label: activeTab.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()) }] : [])
+  ];
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-secondary/30 p-6">
-        <Skeleton className="h-8 w-64 mb-4" />
-        <Skeleton className="h-12 w-full mb-6" />
-        <div className="grid gap-6">
-          <Skeleton className="h-64 w-full" />
-          <Skeleton className="h-96 w-full" />
+      <AdminDashboardLayout activeTab="deals" breadcrumbs={[{ label: 'Deals', path: '/deals' }, { label: 'Loading...' }]}>
+        <div className="p-6">
+          <Skeleton className="h-8 w-64 mb-4" />
+          <Skeleton className="h-12 w-full mb-6" />
+          <div className="grid gap-6">
+            <Skeleton className="h-64 w-full" />
+            <Skeleton className="h-96 w-full" />
+          </div>
         </div>
-      </div>
+      </AdminDashboardLayout>
     );
   }
 
   if (!deal) {
     return (
-      <div className="min-h-screen bg-secondary/30 flex items-center justify-center">
-        <div className="text-center bg-card p-8 rounded-xl border border-border shadow-sm">
-          <h2 className="text-2xl font-bold mb-4 text-foreground">Deal not found</h2>
-          <Button onClick={handleBack}>
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Deals
-          </Button>
+      <AdminDashboardLayout activeTab="deals" breadcrumbs={[{ label: 'Deals', path: '/deals' }, { label: 'Not Found' }]}>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center bg-card p-8 rounded-xl border border-border shadow-sm">
+            <h2 className="text-2xl font-bold mb-4 text-foreground">Deal not found</h2>
+            <Button onClick={handleBack}>
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Deals
+            </Button>
+          </div>
         </div>
-      </div>
+      </AdminDashboardLayout>
     );
   }
 
   const openRequestCount = requests.filter(r => r.status !== 'completed').length;
 
   return (
-    <div className="min-h-screen bg-secondary/30">
-      {/* Header */}
-      <div className="border-b border-border bg-card shadow-sm">
-        <div className="container mx-auto px-6 py-4">
-          {/* Breadcrumb */}
-          <Breadcrumbs 
-            dealName={deal.company_name} 
-            currentTab={activeTab !== 'overview' ? activeTab : undefined} 
-          />
-          
-          {/* Deal Header */}
-          <div className="flex items-center justify-between mt-4">
+    <AdminDashboardLayout activeTab="deals" breadcrumbs={breadcrumbs}>
+      {/* Deal Header */}
+      <div className="border-b border-border bg-card">
+        <div className="px-6 py-4">
+          <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Button variant="ghost" size="icon" onClick={handleBack} className="hover:bg-muted">
                 <ArrowLeft className="h-5 w-5" />
@@ -254,7 +256,7 @@ const DealWorkspace: React.FC = () => {
         </div>
 
         {/* Tabs */}
-        <div className="container mx-auto px-6">
+        <div className="px-6">
           <DealWorkspaceTabs
             activeTab={activeTab}
             onTabChange={handleTabChange}
@@ -267,7 +269,7 @@ const DealWorkspace: React.FC = () => {
       </div>
 
       {/* Tab Content */}
-      <div className="container mx-auto px-6 py-6 bg-secondary/30 min-h-[calc(100vh-200px)]">
+      <div className="p-6 bg-secondary/30 min-h-[calc(100vh-280px)]">
         {activeTab === 'overview' && (
           <DealOverviewTab deal={deal} onTabChange={handleTabChange} />
         )}
@@ -363,7 +365,7 @@ const DealWorkspace: React.FC = () => {
           <DealSettingsTab />
         )}
       </div>
-    </div>
+    </AdminDashboardLayout>
   );
 };
 
