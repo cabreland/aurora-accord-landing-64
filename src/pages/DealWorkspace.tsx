@@ -18,9 +18,10 @@ import {
   DealTab 
 } from '@/components/deal-workspace';
 import { DealSettingsTab } from '@/components/deals/tabs';
-import { DataRoomSidebar } from '@/components/data-room/DataRoomSidebar';
-import { DataRoomContent } from '@/components/data-room/DataRoomContent';
+import { EnhancedDataRoomSidebar } from '@/components/data-room/EnhancedDataRoomSidebar';
+import { EnhancedDataRoomContent } from '@/components/data-room/EnhancedDataRoomContent';
 import { DataRoomMetricsBar } from '@/components/data-room/DataRoomMetricsBar';
+import { DataRoomStatsBar } from '@/components/data-room/DataRoomStatsBar';
 import { DataRoomEmptyState } from '@/components/data-room/DataRoomEmptyState';
 import { useDataRoom } from '@/hooks/useDataRoom';
 import { useDiligenceRequests, useDealsWithDiligence } from '@/hooks/useDiligenceTracker';
@@ -272,7 +273,16 @@ const DealWorkspace: React.FC = () => {
         )}
 
         {activeTab === 'data-room' && (
-          <div className="space-y-6">
+          <div className="space-y-4">
+            {/* Stats Bar */}
+            {!dataRoomLoading && folders.length > 0 && (
+              <DataRoomStatsBar
+                folders={folders}
+                documents={documents}
+              />
+            )}
+
+            {/* Metrics Bar */}
             {!dataRoomLoading && folders.length > 0 && (
               <DataRoomMetricsBar
                 folders={folders}
@@ -285,7 +295,7 @@ const DealWorkspace: React.FC = () => {
             
             {dataRoomLoading ? (
               <div className="flex gap-6">
-                <Skeleton className="w-80 h-96" />
+                <Skeleton className="w-72 h-96" />
                 <Skeleton className="flex-1 h-96" />
               </div>
             ) : folders.length === 0 ? (
@@ -295,7 +305,7 @@ const DealWorkspace: React.FC = () => {
               />
             ) : (
               <div className="flex gap-6">
-                <DataRoomSidebar
+                <EnhancedDataRoomSidebar
                   categories={categories}
                   folders={folders}
                   documents={documents}
@@ -304,13 +314,15 @@ const DealWorkspace: React.FC = () => {
                   onSelectFolder={(folderId, categoryId) => {
                     setSelectedFolderId(folderId);
                     if (categoryId) setSelectedCategoryId(categoryId);
+                    setActiveMetricFilter(null);
                   }}
                   onSelectCategory={(categoryId) => {
                     setSelectedCategoryId(categoryId);
                     setSelectedFolderId(null);
+                    setActiveMetricFilter(null);
                   }}
                 />
-                <DataRoomContent
+                <EnhancedDataRoomContent
                   documents={filteredDocuments}
                   folders={folders}
                   categories={categories}
@@ -323,6 +335,7 @@ const DealWorkspace: React.FC = () => {
                   onNavigateHome={() => {
                     setSelectedFolderId(null);
                     setSelectedCategoryId(null);
+                    setActiveMetricFilter(null);
                   }}
                   onNavigateCategory={(categoryId) => {
                     setSelectedCategoryId(categoryId);
