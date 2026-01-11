@@ -3,8 +3,6 @@ import { useSearchParams } from 'react-router-dom';
 import { Plus, Search, Filter, MoreVertical } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useMyDeals } from '@/hooks/useMyDeals';
 import { useUserProfile } from '@/hooks/useUserProfile';
