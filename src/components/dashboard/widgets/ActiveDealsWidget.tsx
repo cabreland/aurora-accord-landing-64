@@ -1,21 +1,16 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { 
   Building2, 
-  BarChart3, 
   Clock, 
-  Users, 
   FileText,
   MessageSquare,
-  Upload,
-  Activity,
   ChevronRight,
-  ArrowUpDown
+  Plus
 } from 'lucide-react';
 import { DealHealth } from '@/hooks/useMissionControl';
 import { formatDistanceToNow } from 'date-fns';
@@ -28,27 +23,20 @@ interface ActiveDealsWidgetProps {
 type SortOption = 'health' | 'activity' | 'stage' | 'value';
 
 const getHealthDot = (score: number) => {
-  if (score >= 70) return 'bg-success';
-  if (score >= 50) return 'bg-warning';
-  return 'bg-destructive';
-};
-
-const getStageBadgeColor = (stage: string) => {
-  switch (stage) {
-    case 'closing': return 'bg-success/10 text-success border-success/20';
-    case 'final_review': return 'bg-blue-500/10 text-blue-600 border-blue-500/20';
-    case 'analysis': return 'bg-purple-500/10 text-purple-600 border-purple-500/20';
-    case 'information_request': return 'bg-warning/10 text-warning border-warning/20';
-    case 'deal_initiated': return 'bg-muted text-muted-foreground border-border';
-    default: return 'bg-secondary text-muted-foreground border-border';
-  }
+  if (score >= 70) return 'bg-emerald-500';
+  if (score >= 50) return 'bg-amber-500';
+  return 'bg-red-500';
 };
 
 const formatStageName = (stage: string) => {
-  return stage
-    .split('_')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
+  const stageLabels: Record<string, string> = {
+    'closing': 'Closing',
+    'final_review': 'Final Review',
+    'analysis': 'Analysis',
+    'information_request': 'Info Request',
+    'deal_initiated': 'Initiated'
+  };
+  return stageLabels[stage] || stage.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
 };
 
 export const ActiveDealsWidget: React.FC<ActiveDealsWidgetProps> = ({
@@ -63,9 +51,9 @@ export const ActiveDealsWidget: React.FC<ActiveDealsWidgetProps> = ({
   const sortedDeals = [...activeDeals].sort((a, b) => {
     switch (sortBy) {
       case 'health':
-        return a.health_score - b.health_score; // Worst first
+        return a.health_score - b.health_score;
       case 'activity':
-        return new Date(a.last_activity || 0).getTime() - new Date(b.last_activity || 0).getTime(); // Stale first
+        return new Date(a.last_activity || 0).getTime() - new Date(b.last_activity || 0).getTime();
       case 'stage':
         const stageOrder = ['closing', 'final_review', 'analysis', 'information_request', 'deal_initiated'];
         return stageOrder.indexOf(a.current_stage) - stageOrder.indexOf(b.current_stage);
@@ -87,14 +75,14 @@ export const ActiveDealsWidget: React.FC<ActiveDealsWidgetProps> = ({
 
   if (loading) {
     return (
-      <Card className="p-6 bg-card border border-border shadow-sm">
-        <div className="flex items-center justify-between mb-4">
+      <Card className="p-6 bg-white border border-gray-200 shadow-sm rounded-xl">
+        <div className="flex items-center justify-between mb-6">
           <Skeleton className="h-6 w-32" />
           <Skeleton className="h-9 w-36" />
         </div>
-        <div className="space-y-3">
-          {[...Array(4)].map((_, i) => (
-            <Skeleton key={i} className="h-24 w-full" />
+        <div className="space-y-2">
+          {[...Array(5)].map((_, i) => (
+            <Skeleton key={i} className="h-16 w-full" />
           ))}
         </div>
       </Card>
@@ -102,32 +90,27 @@ export const ActiveDealsWidget: React.FC<ActiveDealsWidgetProps> = ({
   }
 
   return (
-    <Card className="p-6 bg-card border border-border shadow-sm">
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-            <BarChart3 className="w-5 h-5 text-primary" />
-          </div>
-          <div>
-            <h3 className="font-semibold text-foreground">Active Deals</h3>
-            <p className="text-xs text-muted-foreground">{activeDeals.length} deal{activeDeals.length !== 1 ? 's' : ''} in progress</p>
-          </div>
+    <Card className="p-6 bg-white border border-gray-200 shadow-sm rounded-xl">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h2 className="text-lg font-semibold text-gray-900">Active Deals</h2>
+          <p className="text-sm text-gray-500">{activeDeals.length} deals in progress</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortOption)}>
-            <SelectTrigger className="w-[140px] h-9">
-              <ArrowUpDown className="w-4 h-4 mr-2" />
-              <SelectValue />
+            <SelectTrigger className="w-[150px] h-9 bg-gray-50 border-gray-200">
+              <SelectValue placeholder="Sort by" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="health">Health (worst)</SelectItem>
-              <SelectItem value="activity">Activity (stale)</SelectItem>
+              <SelectItem value="health">Health (worst first)</SelectItem>
+              <SelectItem value="activity">Last active</SelectItem>
               <SelectItem value="stage">Stage</SelectItem>
               <SelectItem value="value">Value</SelectItem>
             </SelectContent>
           </Select>
           <Link to="/deals">
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" className="border-gray-200">
               View All
             </Button>
           </Link>
@@ -135,111 +118,106 @@ export const ActiveDealsWidget: React.FC<ActiveDealsWidgetProps> = ({
       </div>
 
       {sortedDeals.length === 0 ? (
-        <div className="py-12 text-center">
-          <Building2 className="w-12 h-12 text-muted-foreground/50 mx-auto mb-3" />
-          <p className="text-muted-foreground">No active deals</p>
+        <div className="py-16 text-center">
+          <Building2 className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+          <p className="text-gray-500 mb-4">No active deals yet</p>
           <Link to="/deals?action=create">
-            <Button variant="outline" className="mt-4">
+            <Button className="bg-blue-600 hover:bg-blue-700">
+              <Plus className="w-4 h-4 mr-2" />
               Create First Deal
             </Button>
           </Link>
         </div>
       ) : (
-        <div className="space-y-3">
-          {sortedDeals.slice(0, 6).map((deal) => (
-            <div
-              key={deal.id}
-              onClick={() => navigate(`/deal/${deal.id}`)}
-              className="p-4 rounded-lg border border-border bg-secondary/30 hover:bg-secondary/50 hover:border-primary/30 transition-all cursor-pointer group"
-            >
-              {/* Header Row */}
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-3 flex-1 min-w-0">
-                  {/* Health indicator */}
-                  <div className={`w-3 h-3 rounded-full ${getHealthDot(deal.health_score)} flex-shrink-0`} 
-                       title={`Health: ${deal.health_score}%`} />
-                  <h4 className="font-semibold text-foreground truncate">{deal.title}</h4>
-                  <Badge className={`text-xs flex-shrink-0 ${getStageBadgeColor(deal.current_stage)}`}>
+        <>
+          {/* Table Header */}
+          <div className="grid grid-cols-12 gap-4 px-4 py-2 text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-100">
+            <div className="col-span-4">Deal</div>
+            <div className="col-span-2">Stage</div>
+            <div className="col-span-2 text-center">Progress</div>
+            <div className="col-span-2 text-center">Days in Stage</div>
+            <div className="col-span-2 text-right">Last Activity</div>
+          </div>
+
+          {/* Table Body */}
+          <div className="divide-y divide-gray-50">
+            {sortedDeals.slice(0, 8).map((deal, index) => (
+              <div
+                key={deal.id}
+                onClick={() => navigate(`/deal/${deal.id}`)}
+                className={`grid grid-cols-12 gap-4 px-4 py-4 items-center cursor-pointer transition-colors group ${
+                  index % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'
+                } hover:bg-blue-50/50`}
+              >
+                {/* Deal Name */}
+                <div className="col-span-4 flex items-center gap-3 min-w-0">
+                  <div 
+                    className={`w-2.5 h-2.5 rounded-full ${getHealthDot(deal.health_score)} flex-shrink-0`}
+                    title={`Health: ${deal.health_score}%`}
+                  />
+                  <div className="min-w-0">
+                    <h4 className="font-medium text-gray-900 truncate group-hover:text-blue-600 transition-colors">
+                      {deal.title}
+                    </h4>
+                    {deal.asking_price && (
+                      <p className="text-xs text-gray-500">{deal.asking_price}</p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Stage */}
+                <div className="col-span-2">
+                  <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
                     {formatStageName(deal.current_stage)}
-                  </Badge>
+                  </span>
                 </div>
-                <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
-              </div>
 
-              {/* Metrics Row */}
-              <div className="flex items-center gap-4 text-sm">
-                <div className="flex items-center gap-1.5 text-muted-foreground">
-                  <Clock className="w-4 h-4" />
-                  <span>{deal.days_in_stage}d in stage</span>
-                </div>
-                <div className="flex items-center gap-1.5 text-muted-foreground">
-                  <FileText className="w-4 h-4" />
-                  <span>{deal.document_completion}%</span>
-                </div>
-                {deal.pending_requests > 0 && (
-                  <div className="flex items-center gap-1.5 text-warning">
-                    <MessageSquare className="w-4 h-4" />
-                    <span>{deal.pending_requests} open</span>
+                {/* Progress */}
+                <div className="col-span-2 flex items-center justify-center gap-2">
+                  <div className="flex items-center gap-1.5 text-gray-500">
+                    <FileText className="w-3.5 h-3.5" />
+                    <span className="text-sm">{deal.document_completion}%</span>
                   </div>
-                )}
-                {deal.last_activity && (
-                  <div className="flex items-center gap-1.5 text-muted-foreground ml-auto text-xs">
-                    <Activity className="w-3 h-3" />
-                    <span>{formatDistanceToNow(new Date(deal.last_activity), { addSuffix: true })}</span>
-                  </div>
-                )}
-              </div>
+                  {deal.pending_requests > 0 && (
+                    <div className="flex items-center gap-1 text-amber-600">
+                      <MessageSquare className="w-3.5 h-3.5" />
+                      <span className="text-sm">{deal.pending_requests}</span>
+                    </div>
+                  )}
+                </div>
 
-              {/* Quick Actions - show on hover */}
-              <div className="mt-3 pt-3 border-t border-border/50 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="h-7 text-xs"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate(`/deal/${deal.id}/data-room`);
-                  }}
-                >
-                  <Upload className="w-3 h-3 mr-1" />
-                  Documents
-                </Button>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="h-7 text-xs"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate(`/deal/${deal.id}/requests`);
-                  }}
-                >
-                  <MessageSquare className="w-3 h-3 mr-1" />
-                  Requests
-                </Button>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="h-7 text-xs"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate(`/deal/${deal.id}/activity`);
-                  }}
-                >
-                  <Activity className="w-3 h-3 mr-1" />
-                  Activity
-                </Button>
+                {/* Days in Stage */}
+                <div className="col-span-2 text-center">
+                  <div className="inline-flex items-center gap-1.5 text-gray-500">
+                    <Clock className="w-3.5 h-3.5" />
+                    <span className="text-sm font-medium">{deal.days_in_stage}d</span>
+                  </div>
+                </div>
+
+                {/* Last Activity */}
+                <div className="col-span-2 flex items-center justify-end gap-2">
+                  <span className="text-sm text-gray-400">
+                    {deal.last_activity 
+                      ? formatDistanceToNow(new Date(deal.last_activity), { addSuffix: true })
+                      : 'No activity'
+                    }
+                  </span>
+                  <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-blue-500 transition-colors" />
+                </div>
               </div>
+            ))}
+          </div>
+
+          {sortedDeals.length > 8 && (
+            <div className="mt-4 pt-4 border-t border-gray-100 text-center">
+              <Link to="/deals">
+                <Button variant="ghost" className="text-blue-600 hover:text-blue-700 hover:bg-blue-50">
+                  View all {sortedDeals.length} deals →
+                </Button>
+              </Link>
             </div>
-          ))}
-
-          {sortedDeals.length > 6 && (
-            <Link to="/deals" className="block">
-              <Button variant="outline" className="w-full">
-                View All {sortedDeals.length} Deals
-              </Button>
-            </Link>
           )}
-        </div>
+        </>
       )}
     </Card>
   );

@@ -1,9 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { AlertTriangle, Clock, FileX, Ghost, ChevronRight } from 'lucide-react';
+import { Clock, FileX, AlertCircle, ChevronRight, CheckCircle2 } from 'lucide-react';
 import { DealHealth } from '@/hooks/useMissionControl';
 
 interface DealsRequiringActionWidgetProps {
@@ -15,49 +14,45 @@ export const DealsRequiringActionWidget: React.FC<DealsRequiringActionWidgetProp
   deals,
   loading
 }) => {
-  const getUrgentBadge = (type: 'overdue' | 'pending' | 'missing' | 'stalled') => {
+  const getUrgentIcon = (type: 'overdue' | 'pending' | 'missing' | 'stalled') => {
     switch (type) {
       case 'overdue':
-        return (
-          <Badge className="bg-destructive/10 text-destructive border-destructive/20 text-xs">
-            <Clock className="w-3 h-3 mr-1" />
-            Overdue
-          </Badge>
-        );
+        return <Clock className="w-3.5 h-3.5 text-red-500" />;
       case 'pending':
-        return (
-          <Badge className="bg-warning/10 text-warning border-warning/20 text-xs">
-            <AlertTriangle className="w-3 h-3 mr-1" />
-            Pending
-          </Badge>
-        );
+        return <AlertCircle className="w-3.5 h-3.5 text-amber-500" />;
       case 'missing':
-        return (
-          <Badge className="bg-amber-500/10 text-amber-600 border-amber-500/20 text-xs">
-            <FileX className="w-3 h-3 mr-1" />
-            Missing
-          </Badge>
-        );
+        return <FileX className="w-3.5 h-3.5 text-orange-500" />;
       case 'stalled':
-        return (
-          <Badge className="bg-muted text-muted-foreground border-border text-xs">
-            <Ghost className="w-3 h-3 mr-1" />
-            Stalled
-          </Badge>
-        );
+        return <Clock className="w-3.5 h-3.5 text-gray-400" />;
+    }
+  };
+
+  const getUrgentLabel = (type: 'overdue' | 'pending' | 'missing' | 'stalled') => {
+    switch (type) {
+      case 'overdue': return 'Overdue';
+      case 'pending': return 'Pending 48h+';
+      case 'missing': return 'Missing docs';
+      case 'stalled': return 'Stalled';
+    }
+  };
+
+  const getUrgentBgColor = (type: 'overdue' | 'pending' | 'missing' | 'stalled') => {
+    switch (type) {
+      case 'overdue': return 'bg-red-50 text-red-700';
+      case 'pending': return 'bg-amber-50 text-amber-700';
+      case 'missing': return 'bg-orange-50 text-orange-700';
+      case 'stalled': return 'bg-gray-100 text-gray-600';
     }
   };
 
   if (loading) {
     return (
-      <Card className="p-6 bg-card border border-border shadow-sm">
-        <div className="flex items-center gap-3 mb-4">
-          <Skeleton className="w-10 h-10 rounded-full" />
-          <Skeleton className="h-6 w-40" />
-        </div>
+      <Card className="p-6 bg-white border border-gray-200 shadow-sm rounded-xl h-full">
+        <Skeleton className="h-4 w-28 mb-6" />
+        <Skeleton className="h-8 w-16 mb-4" />
         <div className="space-y-3">
           {[...Array(3)].map((_, i) => (
-            <Skeleton key={i} className="h-16 w-full" />
+            <Skeleton key={i} className="h-14 w-full" />
           ))}
         </div>
       </Card>
@@ -65,66 +60,82 @@ export const DealsRequiringActionWidget: React.FC<DealsRequiringActionWidgetProp
   }
 
   const totalUrgentItems = deals.reduce((sum, d) => sum + d.urgent_items.length, 0);
+  const displayDeals = deals.slice(0, 4);
 
   return (
-    <Card className="p-6 bg-card border border-border shadow-sm">
+    <Card className="p-6 bg-white border border-gray-200 shadow-sm rounded-xl h-full flex flex-col">
+      {/* Header */}
       <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-destructive/10 flex items-center justify-center">
-            <AlertTriangle className="w-5 h-5 text-destructive" />
-          </div>
-          <div>
-            <h3 className="font-semibold text-foreground">Requires Action</h3>
-            <p className="text-xs text-muted-foreground">Urgent deal items</p>
-          </div>
-        </div>
+        <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+          Requires Action
+        </span>
         {totalUrgentItems > 0 && (
-          <Badge variant="destructive" className="text-sm">
+          <span className="text-xs font-medium text-red-600 bg-red-50 px-2 py-1 rounded-full">
             {totalUrgentItems} item{totalUrgentItems !== 1 ? 's' : ''}
-          </Badge>
+          </span>
         )}
       </div>
 
+      {/* Count Display */}
+      <div className="mb-4">
+        <span className="text-4xl font-bold text-gray-900">{deals.length}</span>
+        <span className="text-lg text-gray-400 ml-2">deals</span>
+      </div>
+
       {deals.length === 0 ? (
-        <div className="py-8 text-center">
-          <div className="w-12 h-12 rounded-full bg-success/10 flex items-center justify-center mx-auto mb-3">
-            <svg className="w-6 h-6 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
+        <div className="flex-1 flex flex-col items-center justify-center py-6">
+          <div className="w-12 h-12 rounded-full bg-emerald-50 flex items-center justify-center mb-3">
+            <CheckCircle2 className="w-6 h-6 text-emerald-500" />
           </div>
-          <p className="text-muted-foreground text-sm">All deals are on track!</p>
+          <p className="text-sm font-medium text-gray-900">All clear!</p>
+          <p className="text-xs text-gray-500">No urgent items</p>
         </div>
       ) : (
-        <div className="space-y-3 max-h-[300px] overflow-y-auto">
-          {deals.map((deal) => (
+        <div className="flex-1 space-y-2 overflow-y-auto">
+          {displayDeals.map((deal) => (
             <Link
               key={deal.id}
               to={`/deal/${deal.id}`}
-              className="block"
+              className="block group"
             >
-              <div className="p-3 rounded-lg border border-border bg-secondary/30 hover:bg-secondary/50 hover:border-primary/30 transition-all group">
-                <div className="flex items-center justify-between mb-2">
-                  <h4 className="font-medium text-foreground text-sm truncate pr-2">
+              <div className="p-3 rounded-lg border border-gray-100 bg-gray-50/50 hover:bg-gray-50 hover:border-gray-200 transition-all">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-medium text-gray-900 text-sm truncate pr-2 group-hover:text-blue-600 transition-colors">
                     {deal.title}
                   </h4>
-                  <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                  <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-blue-500 transition-colors flex-shrink-0" />
                 </div>
-                <div className="flex flex-wrap gap-1.5">
-                  {deal.urgent_items.slice(0, 3).map((item, idx) => (
-                    <React.Fragment key={idx}>
-                      {getUrgentBadge(item.type)}
-                    </React.Fragment>
+                <div className="flex flex-wrap gap-1.5 mt-2">
+                  {deal.urgent_items.slice(0, 2).map((item, idx) => (
+                    <span 
+                      key={idx}
+                      className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full ${getUrgentBgColor(item.type)}`}
+                    >
+                      {getUrgentIcon(item.type)}
+                      {getUrgentLabel(item.type)}
+                    </span>
                   ))}
-                  {deal.urgent_items.length > 3 && (
-                    <Badge variant="outline" className="text-xs">
-                      +{deal.urgent_items.length - 3} more
-                    </Badge>
+                  {deal.urgent_items.length > 2 && (
+                    <span className="text-xs text-gray-500 px-2 py-0.5">
+                      +{deal.urgent_items.length - 2} more
+                    </span>
                   )}
                 </div>
               </div>
             </Link>
           ))}
         </div>
+      )}
+
+      {deals.length > 4 && (
+        <Link 
+          to="/deals?filter=urgent" 
+          className="mt-4 pt-4 border-t border-gray-100 text-center"
+        >
+          <span className="text-sm font-medium text-blue-600 hover:text-blue-700">
+            View all {deals.length} deals →
+          </span>
+        </Link>
       )}
     </Card>
   );

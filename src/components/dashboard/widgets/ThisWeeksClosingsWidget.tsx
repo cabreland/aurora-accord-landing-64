@@ -1,9 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Target, DollarSign, ChevronRight } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import { DealHealth } from '@/hooks/useMissionControl';
 
 interface ThisWeeksClosingsWidgetProps {
@@ -24,22 +23,21 @@ export const ThisWeeksClosingsWidget: React.FC<ThisWeeksClosingsWidgetProps> = (
   totalPipelineValue,
   loading
 }) => {
-  const getProbabilityColor = (probability: number) => {
-    if (probability >= 80) return 'bg-success/10 text-success border-success/20';
-    if (probability >= 50) return 'bg-warning/10 text-warning border-warning/20';
-    return 'bg-orange-500/10 text-orange-600 border-orange-500/20';
+  const getProbabilityStyle = (probability: number) => {
+    if (probability >= 80) return { bg: 'bg-emerald-500', text: 'text-emerald-600' };
+    if (probability >= 50) return { bg: 'bg-amber-500', text: 'text-amber-600' };
+    return { bg: 'bg-orange-500', text: 'text-orange-600' };
   };
 
   if (loading) {
     return (
-      <Card className="p-6 bg-card border border-border shadow-sm">
-        <div className="flex items-center gap-3 mb-4">
-          <Skeleton className="w-10 h-10 rounded-full" />
-          <Skeleton className="h-6 w-40" />
-        </div>
+      <Card className="p-6 bg-white border border-gray-200 shadow-sm rounded-xl h-full">
+        <Skeleton className="h-4 w-28 mb-6" />
+        <Skeleton className="h-10 w-32 mb-2" />
+        <Skeleton className="h-4 w-24 mb-6" />
         <div className="space-y-3">
           {[...Array(3)].map((_, i) => (
-            <Skeleton key={i} className="h-14 w-full" />
+            <Skeleton key={i} className="h-12 w-full" />
           ))}
         </div>
       </Card>
@@ -47,62 +45,71 @@ export const ThisWeeksClosingsWidget: React.FC<ThisWeeksClosingsWidgetProps> = (
   }
 
   return (
-    <Card className="p-6 bg-card border border-border shadow-sm">
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-[#D4AF37]/10 flex items-center justify-center">
-            <Target className="w-5 h-5 text-[#D4AF37]" />
-          </div>
-          <div>
-            <h3 className="font-semibold text-foreground">Closing Soon</h3>
-            <p className="text-xs text-muted-foreground">Final stages</p>
-          </div>
-        </div>
-      </div>
+    <Card className="p-6 bg-white border border-gray-200 shadow-sm rounded-xl h-full flex flex-col">
+      {/* Header */}
+      <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">
+        Closing Soon
+      </span>
 
-      {/* Total Projected Value */}
-      <div className="mb-4 p-3 rounded-lg bg-[#D4AF37]/5 border border-[#D4AF37]/20">
-        <div className="flex items-center gap-2 mb-1">
-          <DollarSign className="w-4 h-4 text-[#D4AF37]" />
-          <span className="text-xs text-muted-foreground">Probability-Weighted Value</span>
-        </div>
-        <p className="text-2xl font-bold text-[#D4AF37]">
+      {/* Value Display with Gold Accent */}
+      <div className="mb-6">
+        <p className="text-4xl font-bold text-[#B8860B] tracking-tight">
           {formatCurrency(totalPipelineValue)}
+        </p>
+        <p className="text-sm text-gray-500 mt-1">
+          Probability-weighted value
         </p>
       </div>
 
       {deals.length === 0 ? (
-        <div className="py-6 text-center">
-          <p className="text-muted-foreground text-sm">No deals in final stages</p>
+        <div className="flex-1 flex items-center justify-center py-6">
+          <p className="text-sm text-gray-500">No deals in final stages</p>
         </div>
       ) : (
-        <div className="space-y-2">
-          {deals.map((deal) => (
-            <Link
-              key={deal.id}
-              to={`/deal/${deal.id}`}
-              className="block"
-            >
-              <div className="p-3 rounded-lg border border-border bg-secondary/30 hover:bg-secondary/50 hover:border-primary/30 transition-all group">
-                <div className="flex items-center justify-between">
-                  <div className="flex-1 min-w-0 pr-3">
-                    <h4 className="font-medium text-foreground text-sm truncate">
+        <div className="flex-1 space-y-2 overflow-y-auto">
+          {deals.slice(0, 4).map((deal) => {
+            const style = getProbabilityStyle(deal.close_probability);
+            return (
+              <Link
+                key={deal.id}
+                to={`/deal/${deal.id}`}
+                className="block group"
+              >
+                <div className="p-3 rounded-lg border border-gray-100 bg-gray-50/50 hover:bg-gray-50 hover:border-gray-200 transition-all">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="font-medium text-gray-900 text-sm truncate pr-2 group-hover:text-blue-600 transition-colors">
                       {deal.title}
                     </h4>
-                    <div className="flex items-center gap-2 mt-1">
-                      <span className="text-xs text-muted-foreground">
-                        {deal.asking_price || 'Price TBD'}
+                    <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-blue-500 transition-colors flex-shrink-0" />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-500">
+                      {deal.asking_price || 'Price TBD'}
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <div className="w-16 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                        <div 
+                          className={`h-full ${style.bg} rounded-full`}
+                          style={{ width: `${deal.close_probability}%` }}
+                        />
+                      </div>
+                      <span className={`text-xs font-medium ${style.text}`}>
+                        {deal.close_probability}%
                       </span>
-                      <Badge className={`text-xs ${getProbabilityColor(deal.close_probability)}`}>
-                        {deal.close_probability}% likely
-                      </Badge>
                     </div>
                   </div>
-                  <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
                 </div>
-              </div>
-            </Link>
-          ))}
+              </Link>
+            );
+          })}
+        </div>
+      )}
+
+      {deals.length > 0 && (
+        <div className="mt-4 pt-4 border-t border-gray-100">
+          <p className="text-xs text-gray-500 text-center">
+            {deals.length} deal{deals.length !== 1 ? 's' : ''} in final stages
+          </p>
         </div>
       )}
     </Card>
