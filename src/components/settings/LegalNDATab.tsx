@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -7,6 +6,7 @@ import { Switch } from '@/components/ui/switch';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Save, Eye } from 'lucide-react';
 import { useSettings } from '@/hooks/useSettings';
+import DOMPurify from 'isomorphic-dompurify';
 
 const LegalNDATab: React.FC = () => {
   const { settings, loading, updateSetting } = useSettings();
@@ -92,11 +92,14 @@ By accepting, you agree to be bound by these terms.`;
             <div className="bg-background border border-border rounded-md p-4 min-h-[300px] prose prose-sm max-w-none">
               <div 
                 dangerouslySetInnerHTML={{ 
-                  __html: getSettingValue('nda_template', defaultNDATemplate)
-                    .replace(/\n/g, '<br>')
-                    .replace(/^# (.+)$/gm, '<h1>$1</h1>')
-                    .replace(/^## (.+)$/gm, '<h2>$1</h2>')
-                    .replace(/^- (.+)$/gm, '<li>$1</li>')
+                  __html: DOMPurify.sanitize(
+                    getSettingValue('nda_template', defaultNDATemplate)
+                      .replace(/\n/g, '<br>')
+                      .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+                      .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+                      .replace(/^- (.+)$/gm, '<li>$1</li>'),
+                    { ALLOWED_TAGS: ['h1', 'h2', 'h3', 'p', 'br', 'li', 'ul', 'ol', 'strong', 'em', 'a'], ALLOWED_ATTR: ['href'] }
+                  )
                 }}
               />
             </div>

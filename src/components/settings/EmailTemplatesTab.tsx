@@ -8,6 +8,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { Save, Mail, Eye, Info } from 'lucide-react';
 import { useRegistrationSettingsUnified } from '@/hooks/useRegistrationSettingsUnified';
+import DOMPurify from 'isomorphic-dompurify';
 
 export const EmailTemplatesTab: React.FC = () => {
   const { loading, saving, updateSetting, getSetting } = useRegistrationSettingsUnified();
@@ -102,14 +103,17 @@ export const EmailTemplatesTab: React.FC = () => {
                   <div 
                     className="prose prose-sm max-w-none"
                     dangerouslySetInnerHTML={{ 
-                      __html: welcomeContent.replace(
-                        /\{firstName\}/g, 'John'
-                      ).replace(
-                        /\{lastName\}/g, 'Doe'
-                      ).replace(
-                        /\{email\}/g, 'john.doe@example.com'
-                      ).replace(
-                        /\{companyName\}/g, 'Example Investment Fund'
+                      __html: DOMPurify.sanitize(
+                        welcomeContent.replace(
+                          /\{firstName\}/g, 'John'
+                        ).replace(
+                          /\{lastName\}/g, 'Doe'
+                        ).replace(
+                          /\{email\}/g, 'john.doe@example.com'
+                        ).replace(
+                          /\{companyName\}/g, 'Example Investment Fund'
+                        ),
+                        { ALLOWED_TAGS: ['h1', 'h2', 'h3', 'h4', 'p', 'br', 'li', 'ul', 'ol', 'strong', 'em', 'a', 'div', 'span', 'table', 'tr', 'td', 'th', 'thead', 'tbody'], ALLOWED_ATTR: ['href', 'style', 'class'] }
                       )
                     }} 
                   />
