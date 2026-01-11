@@ -104,9 +104,8 @@ const statusConfig: Record<string, { label: string; icon: React.ComponentType<an
 type SortField = 'title' | 'status' | 'priority' | 'due_date' | 'last_activity_at';
 type SortDirection = 'asc' | 'desc';
 
-// Column order: ID, Title, PR, Status, Assignee, Reviewer, Findings, Reply, Files, Labels, Start date, Due date, Updated
+// Column order: Title, PR, Status, Assignee, Reviewer, Findings, Reply, Files, Labels, Start date, Due date, Updated
 const defaultColumns: ColumnConfig[] = [
-  { id: 'id', label: 'ID', visible: true },
   { id: 'title', label: 'Title', visible: true, required: true },
   { id: 'priority', label: 'PR', visible: true },
   { id: 'status', label: 'Status', visible: true },
@@ -422,7 +421,6 @@ const DiligenceRequestTable: React.FC<DiligenceRequestTableProps> = ({
   // Calculate column count for colspan
   const visibleColumnCount = React.useMemo(() => {
     let count = 2; // Checkbox + Actions are always visible
-    if (isVisible('id')) count++;
     count++; // Title is always visible
     if (isVisible('priority')) count++;
     if (isVisible('status')) count++;
@@ -485,17 +483,6 @@ const DiligenceRequestTable: React.FC<DiligenceRequestTableProps> = ({
                     onCheckedChange={toggleAllSelection}
                   />
                 </TableHead>
-                
-                {/* ID - Blue box style */}
-                {isVisible('id') && (
-                  <TableHead className={`w-16 py-2.5 bg-slate-50 ${cellDivider}`}>
-                    <div className="flex items-center justify-center">
-                      <span className="bg-blue-100 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded">
-                        ID
-                      </span>
-                    </div>
-                  </TableHead>
-                )}
                 
                 {/* Title */}
                 <TableHead 
@@ -663,15 +650,6 @@ const DiligenceRequestTable: React.FC<DiligenceRequestTableProps> = ({
                               onCheckedChange={() => toggleSelection(request.id)}
                             />
                           </TableCell>
-
-                          {/* ID - Blue box with index */}
-                          {isVisible('id') && (
-                            <TableCell className={`py-2.5 text-center ${cellDivider}`}>
-                              <span className="bg-blue-100 text-blue-700 text-[10px] font-bold px-1.5 py-0.5 rounded tabular-nums">
-                                {request.order_index || '—'}
-                              </span>
-                            </TableCell>
-                          )}
 
                           {/* Title with optional NEW badge */}
                           <TableCell className={`py-2.5 ${cellDivider}`}>
