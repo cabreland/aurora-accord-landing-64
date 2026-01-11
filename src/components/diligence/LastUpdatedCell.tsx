@@ -1,5 +1,5 @@
 import React from 'react';
-import { formatDistanceToNow, format, differenceInDays } from 'date-fns';
+import { format, isThisYear } from 'date-fns';
 import {
   Tooltip,
   TooltipContent,
@@ -13,42 +13,28 @@ interface LastUpdatedCellProps {
 
 const LastUpdatedCell: React.FC<LastUpdatedCellProps> = ({ lastActivityAt, updatedBy }) => {
   if (!lastActivityAt) {
-    return <span className="text-xs text-gray-400">—</span>;
+    return <span className="text-xs text-muted-foreground">—</span>;
   }
 
   const date = new Date(lastActivityAt);
-  const daysDiff = differenceInDays(new Date(), date);
   
-  // Use relative time for recent updates (<7 days), otherwise use date format
-  const displayText = daysDiff < 7 
-    ? formatDistanceToNow(date, { addSuffix: true })
-    : format(date, 'MMM d');
-
-  // Shorten "less than a minute ago" to "just now"
-  const shortText = displayText
-    .replace('less than a minute ago', 'just now')
-    .replace(' minutes ago', 'm ago')
-    .replace(' minute ago', 'm ago')
-    .replace(' hours ago', 'h ago')
-    .replace(' hour ago', 'h ago')
-    .replace(' days ago', 'd ago')
-    .replace(' day ago', 'd ago')
-    .replace('about ', '');
+  // Show date format: "MMM d" for this year, "MMM d, yyyy" for previous years
+  const displayText = isThisYear(date) 
+    ? format(date, 'MMM d')
+    : format(date, 'MMM d, yyyy');
 
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <span className={`text-xs whitespace-nowrap ${
-          daysDiff < 1 ? 'text-blue-600 font-medium' : 'text-gray-500'
-        }`}>
-          {shortText}
+        <span className="text-sm text-foreground whitespace-nowrap">
+          {displayText}
         </span>
       </TooltipTrigger>
-      <TooltipContent side="top" className="bg-gray-900 text-white">
+      <TooltipContent side="top" className="bg-popover text-popover-foreground">
         <div className="text-xs">
           <div>{format(date, 'MMM d, yyyy h:mm a')}</div>
           {updatedBy && (
-            <div className="text-gray-400 mt-0.5">by {updatedBy}</div>
+            <div className="text-muted-foreground mt-0.5">by {updatedBy}</div>
           )}
         </div>
       </TooltipContent>

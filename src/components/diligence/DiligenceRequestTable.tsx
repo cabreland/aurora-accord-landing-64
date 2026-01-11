@@ -1,5 +1,5 @@
 import React from 'react';
-import { format, isPast, isToday, addDays, differenceInHours } from 'date-fns';
+import { format, isPast, isToday, addDays, differenceInHours, isThisYear } from 'date-fns';
 import { 
   AlertTriangle,
   FileText,
@@ -107,6 +107,7 @@ const defaultColumns: ColumnConfig[] = [
   { id: 'status', label: 'Status', visible: true },
   { id: 'assignee', label: 'Assigned To', visible: true },
   { id: 'reviewers', label: 'Reviewers', visible: true },
+  { id: 'start_date', label: 'Start Date', visible: true },
   { id: 'due_date', label: 'Due Date', visible: true },
   { id: 'docs', label: 'Documents', visible: true },
   { id: 'comments', label: 'Comments', visible: true },
@@ -466,6 +467,13 @@ const DiligenceRequestTable: React.FC<DiligenceRequestTableProps> = ({
                   </TableHead>
                 )}
                 
+                {/* Start Date */}
+                {isVisible('start_date') && (
+                  <TableHead className="w-[90px] py-3 bg-muted/80 text-muted-foreground font-medium">
+                    Start Date
+                  </TableHead>
+                )}
+                
                 {/* Due Date */}
                 {isVisible('due_date') && (
                   <TableHead 
@@ -683,6 +691,17 @@ const DiligenceRequestTable: React.FC<DiligenceRequestTableProps> = ({
                           reviewerIds={request.reviewer_ids || []}
                           onAddReviewers={() => onSelectRequest(request)}
                         />
+                      </TableCell>
+                    )}
+
+                    {/* Start Date */}
+                    {isVisible('start_date') && (
+                      <TableCell className="py-3">
+                        <span className="text-sm text-foreground">
+                          {isThisYear(new Date(request.created_at)) 
+                            ? format(new Date(request.created_at), 'MMM d')
+                            : format(new Date(request.created_at), 'MMM d, yyyy')}
+                        </span>
                       </TableCell>
                     )}
 
