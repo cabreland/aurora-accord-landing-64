@@ -131,9 +131,9 @@ const columnWidths = {
   status: "w-32 px-4",
   assignee: "w-40 px-4",
   reviewers: "w-36 px-4",
-  findings: "w-16 px-3",
-  comments: "w-16 px-3",
-  docs: "w-16 px-3",
+  findings: "w-24 px-3",
+  comments: "w-24 px-3",
+  docs: "w-24 px-3",
   labels: "w-20 px-3",
   startDate: "w-28 px-4",
   dueDate: "w-28 px-4",
@@ -550,31 +550,53 @@ const DiligenceRequestTable: React.FC<DiligenceRequestTableProps> = ({
                   </TableHead>
                 )}
                 
-                {/* Findings - Icon header */}
+                {/* Findings - Icon + Label header */}
                 {isVisible('findings') && (
                   <TableHead className={`${columnWidths.findings} py-3.5 text-center bg-gray-50 ${cellDivider}`}>
-                    <Search className="w-4 h-4 mx-auto text-gray-400" />
+                    <div className="flex flex-col items-center gap-1">
+                      <div className="w-4 h-4 rounded-full bg-orange-100 flex items-center justify-center">
+                        <span className="text-[10px] font-bold text-orange-600">!</span>
+                      </div>
+                      <span className="text-[10px] font-semibold text-gray-600 uppercase tracking-wider">
+                        Findings
+                      </span>
+                    </div>
                   </TableHead>
                 )}
                 
-                {/* Reply - Icon header */}
+                {/* Reply - Icon + Label header */}
                 {isVisible('comments') && (
                   <TableHead className={`${columnWidths.comments} py-3.5 text-center bg-gray-50 ${cellDivider}`}>
-                    <MessageSquare className="w-4 h-4 mx-auto text-gray-400" />
+                    <div className="flex flex-col items-center gap-1">
+                      <MessageSquare className="w-4 h-4 text-gray-400" />
+                      <span className="text-[10px] font-semibold text-gray-600 uppercase tracking-wider">
+                        Reply
+                      </span>
+                    </div>
                   </TableHead>
                 )}
                 
-                {/* Files - Icon header */}
+                {/* Files - Icon + Label header */}
                 {isVisible('docs') && (
                   <TableHead className={`${columnWidths.docs} py-3.5 text-center bg-gray-50 ${cellDivider}`}>
-                    <Paperclip className="w-4 h-4 mx-auto text-gray-400" />
+                    <div className="flex flex-col items-center gap-1">
+                      <Paperclip className="w-4 h-4 text-gray-400" />
+                      <span className="text-[10px] font-semibold text-gray-600 uppercase tracking-wider">
+                        Files
+                      </span>
+                    </div>
                   </TableHead>
                 )}
                 
                 {/* Labels */}
                 {isVisible('labels') && (
                   <TableHead className={`${columnWidths.labels} py-3.5 text-center bg-gray-50 ${cellDivider}`}>
-                    <Tag className="w-4 h-4 mx-auto text-gray-400" />
+                    <div className="flex flex-col items-center gap-1">
+                      <Tag className="w-4 h-4 text-gray-400" />
+                      <span className="text-[10px] font-semibold text-gray-600 uppercase tracking-wider">
+                        Labels
+                      </span>
+                    </div>
                   </TableHead>
                 )}
                 
