@@ -177,7 +177,7 @@ const DealWorkspace: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background p-6">
+      <div className="min-h-screen bg-secondary/30 p-6">
         <Skeleton className="h-8 w-64 mb-4" />
         <Skeleton className="h-12 w-full mb-6" />
         <div className="grid gap-6">
@@ -190,9 +190,9 @@ const DealWorkspace: React.FC = () => {
 
   if (!deal) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold mb-4">Deal not found</h2>
+      <div className="min-h-screen bg-secondary/30 flex items-center justify-center">
+        <div className="text-center bg-card p-8 rounded-xl border border-border shadow-sm">
+          <h2 className="text-2xl font-bold mb-4 text-foreground">Deal not found</h2>
           <Button onClick={handleBack}>
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Deals
@@ -205,9 +205,9 @@ const DealWorkspace: React.FC = () => {
   const openRequestCount = requests.filter(r => r.status !== 'completed').length;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-secondary/30">
       {/* Header */}
-      <div className="border-b bg-card">
+      <div className="border-b border-border bg-card shadow-sm">
         <div className="container mx-auto px-6 py-4">
           {/* Breadcrumb */}
           <Breadcrumbs 
@@ -218,31 +218,33 @@ const DealWorkspace: React.FC = () => {
           {/* Deal Header */}
           <div className="flex items-center justify-between mt-4">
             <div className="flex items-center gap-4">
-              <Button variant="ghost" size="icon" onClick={handleBack}>
+              <Button variant="ghost" size="icon" onClick={handleBack} className="hover:bg-muted">
                 <ArrowLeft className="h-5 w-5" />
               </Button>
               <div>
                 <div className="flex items-center gap-3">
-                  <h1 className="text-2xl font-bold">{deal.company_name}</h1>
-                  <Badge variant="outline" className="capitalize">{deal.status}</Badge>
+                  <h1 className="text-2xl font-bold text-foreground">{deal.company_name}</h1>
+                  <Badge variant="outline" className="capitalize bg-muted/50">{deal.status}</Badge>
                   <Badge 
                     className={cn(
-                      deal.priority === 'high' && 'bg-red-100 text-red-800',
-                      deal.priority === 'medium' && 'bg-amber-100 text-amber-800',
-                      deal.priority === 'low' && 'bg-green-100 text-green-800',
+                      "capitalize",
+                      deal.priority === 'high' && 'bg-destructive/10 text-destructive border-destructive/30',
+                      deal.priority === 'medium' && 'bg-warning/10 text-warning border-warning/30',
+                      deal.priority === 'low' && 'bg-success/10 text-success border-success/30',
                     )}
+                    variant="outline"
                   >
                     {deal.priority}
                   </Badge>
                 </div>
-                <p className="text-muted-foreground">
+                <p className="text-muted-foreground mt-1">
                   {deal.industry || 'Industry'} • {deal.location || 'Location'}
                 </p>
               </div>
             </div>
             
             {canEdit && (
-              <Button variant="outline">
+              <Button variant="outline" className="shadow-sm">
                 <Edit className="h-4 w-4 mr-2" />
                 Edit Deal
               </Button>
@@ -264,7 +266,7 @@ const DealWorkspace: React.FC = () => {
       </div>
 
       {/* Tab Content */}
-      <div className="container mx-auto px-6 py-6">
+      <div className="container mx-auto px-6 py-6 bg-secondary/30 min-h-[calc(100vh-200px)]">
         {activeTab === 'overview' && (
           <DealOverviewTab deal={deal} onTabChange={handleTabChange} />
         )}

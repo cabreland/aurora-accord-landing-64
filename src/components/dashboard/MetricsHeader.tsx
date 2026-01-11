@@ -6,7 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserProfile } from '@/hooks/useUserProfile';
-
+import { cn } from '@/lib/utils';
 interface MetricCardProps {
   title: string;
   value: string;
@@ -24,19 +24,33 @@ const MetricCard = ({ title, value, change, icon: Icon, trend, onClick, showBadg
     neutral: 'text-muted-foreground'
   };
 
+  // Special styling for "Closing This Month" - gold accent
+  const isClosingThisMonth = title === 'Closing This Month';
+
   return (
     <Card 
-      className="bg-card border border-border hover:border-primary/30 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 min-h-[120px] cursor-pointer"
+      className={cn(
+        "border shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 min-h-[120px] cursor-pointer",
+        isClosingThisMonth 
+          ? "bg-gradient-to-br from-amber-50 to-yellow-50 border-[#D4AF37]/30 hover:border-[#D4AF37]/50" 
+          : "bg-card border-border hover:border-primary/30"
+      )}
       onClick={onClick}
     >
       <CardContent className="p-6">
         <div className="flex items-center justify-between mb-4">
           <div className="relative">
-            <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
-              <Icon className="w-6 h-6 text-primary" />
+            <div className={cn(
+              "w-12 h-12 rounded-xl flex items-center justify-center",
+              isClosingThisMonth ? "bg-[#D4AF37]/15" : "bg-primary/10"
+            )}>
+              <Icon className={cn(
+                "w-6 h-6",
+                isClosingThisMonth ? "text-[#D4AF37]" : "text-primary"
+              )} />
             </div>
             {showBadge && parseInt(value) > 0 && (
-              <div className="absolute -top-1 -right-1 w-3 h-3 bg-warning rounded-full" />
+              <div className="absolute -top-1 -right-1 w-3 h-3 bg-warning rounded-full animate-pulse" />
             )}
           </div>
           {change && (
@@ -46,7 +60,12 @@ const MetricCard = ({ title, value, change, icon: Icon, trend, onClick, showBadg
           )}
         </div>
         <div>
-          <div className="text-3xl font-bold text-foreground mb-2">{value}</div>
+          <div className={cn(
+            "text-3xl font-bold mb-1",
+            isClosingThisMonth ? "text-[#B8860B]" : "text-foreground"
+          )}>
+            {value}
+          </div>
           <p className="text-sm text-muted-foreground font-medium">{title}</p>
         </div>
       </CardContent>
