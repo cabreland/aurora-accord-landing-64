@@ -11,7 +11,12 @@ import {
   Circle,
   AlertCircle,
   Plus,
-  Send
+  Send,
+  Paperclip,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
+  UserPlus
 } from 'lucide-react';
 import {
   Table,
@@ -30,6 +35,10 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuSubContent,
 } from '@/components/ui/dropdown-menu';
 import {
   Tooltip,
@@ -41,7 +50,12 @@ import { DiligenceRequest, DiligenceCategory, DiligenceSubcategory, useUpdateDil
 import { useTeamMembers } from '@/hooks/useTeamMembers';
 import { useDiligenceRequestCounts } from '@/hooks/useDiligenceRequestCounts';
 import { useRequestViews, hasUnreadUpdates } from '@/hooks/useRequestViews';
+import { useAuth } from '@/hooks/useAuth';
 import BulkActionsToolbar from './BulkActionsToolbar';
+import PriorityFlagCell from './PriorityFlagCell';
+import ReviewersCell from './ReviewersCell';
+import LastUpdatedCell from './LastUpdatedCell';
+import ColumnVisibilityDropdown, { useColumnVisibility, ColumnConfig } from './ColumnVisibilityDropdown';
 import { toast } from 'sonner';
 
 interface DiligenceRequestTableProps {
@@ -55,35 +69,49 @@ interface DiligenceRequestTableProps {
 }
 
 // Status badge configuration with icons and proper colors
-// Note: 'sent' status would require DB enum update - using in_progress for now with visual differentiation
-const statusConfig: Record<string, { label: string; icon: React.ComponentType<any>; className: string }> = {
+const statusConfig: Record<string, { label: string; icon: React.ComponentType<any>; className: string; description: string }> = {
   open: { 
     label: 'Open', 
     icon: Circle,
-    className: 'bg-blue-100 text-blue-700 border-blue-200 hover:bg-blue-100'
+    className: 'bg-blue-100 text-blue-700 border-blue-200 hover:bg-blue-100',
+    description: 'Awaiting action'
   },
   in_progress: { 
     label: 'In Progress', 
     icon: Clock,
-    className: 'bg-amber-100 text-amber-700 border-amber-200 hover:bg-amber-100'
+    className: 'bg-amber-100 text-amber-700 border-amber-200 hover:bg-amber-100',
+    description: 'Work in progress'
   },
   completed: { 
     label: 'Resolved', 
     icon: Check,
-    className: 'bg-green-100 text-green-700 border-green-200 hover:bg-green-100'
+    className: 'bg-green-100 text-green-700 border-green-200 hover:bg-green-100',
+    description: 'Item resolved'
   },
   blocked: { 
     label: 'Blocked', 
     icon: AlertCircle,
-    className: 'bg-red-100 text-red-700 border-red-200 hover:bg-red-100'
+    className: 'bg-red-100 text-red-700 border-red-200 hover:bg-red-100',
+    description: 'Blocked by dependency'
   },
 };
 
-const priorityConfig = {
-  high: { label: 'High', color: 'text-red-700', bg: 'bg-red-100' },
-  medium: { label: 'Medium', color: 'text-amber-700', bg: 'bg-amber-100' },
-  low: { label: 'Low', color: 'text-gray-700', bg: 'bg-gray-100' },
-};
+// Sort config
+type SortField = 'title' | 'status' | 'priority' | 'due_date' | 'last_activity_at';
+type SortDirection = 'asc' | 'desc';
+
+// Default column configuration
+const defaultColumns: ColumnConfig[] = [
+  { id: 'priority', label: 'Priority', visible: true },
+  { id: 'title', label: 'Request Name', visible: true, required: true },
+  { id: 'status', label: 'Status', visible: true },
+  { id: 'assignee', label: 'Assigned To', visible: true },
+  { id: 'reviewers', label: 'Reviewers', visible: true },
+  { id: 'due_date', label: 'Due Date', visible: true },
+  { id: 'docs', label: 'Documents', visible: true },
+  { id: 'comments', label: 'Comments', visible: true },
+  { id: 'updated', label: 'Updated', visible: true },
+];
 
 const DiligenceRequestTable: React.FC<DiligenceRequestTableProps> = ({
   requests,
@@ -96,9 +124,14 @@ const DiligenceRequestTable: React.FC<DiligenceRequestTableProps> = ({
 }) => {
   const [selectedRequests, setSelectedRequests] = React.useState<string[]>([]);
   const [isProcessing, setIsProcessing] = React.useState(false);
+  const [sortField, setSortField] = React.useState<SortField>('last_activity_at');
+  const [sortDirection, setSortDirection] = React.useState<SortDirection>('desc');
+  
+  const { user } = useAuth();
   const { data: teamMembers = [] } = useTeamMembers();
   const { data: requestCounts = {} } = useDiligenceRequestCounts(dealId);
   const { data: viewMap = {} } = useRequestViews(dealId);
+  const { columns, toggleColumn, isVisible } = useColumnVisibility('diligence-table-columns', defaultColumns);
   
   const updateRequest = useUpdateDiligenceRequest();
   const deleteRequest = useDeleteDiligenceRequest();
@@ -126,6 +159,24 @@ const DiligenceRequestTable: React.FC<DiligenceRequestTableProps> = ({
   
   // Select all
   const selectAll = () => setSelectedRequests(requests.map(r => r.id));
+  
+  // Handle column sort
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('desc');
+    }
+  };
+
+  // Get sort icon for column header
+  const getSortIcon = (field: SortField) => {
+    if (sortField !== field) return <ArrowUpDown className="w-3 h-3 ml-1 opacity-40" />;
+    return sortDirection === 'asc' 
+      ? <ArrowUp className="w-3 h-3 ml-1 text-primary" />
+      : <ArrowDown className="w-3 h-3 ml-1 text-primary" />;
+  };
   
   // Bulk action handlers
   const handleBulkMarkResolved = async () => {
@@ -181,8 +232,6 @@ const DiligenceRequestTable: React.FC<DiligenceRequestTableProps> = ({
   };
   
   const handleBulkSendToCustomer = async () => {
-    // For now, mark as in_progress as "sent" status requires DB schema update
-    // In production, we'd add a 'sent' status to the diligence_priority enum
     setIsProcessing(true);
     try {
       await Promise.all(
@@ -204,7 +253,6 @@ const DiligenceRequestTable: React.FC<DiligenceRequestTableProps> = ({
     
     setIsProcessing(true);
     try {
-      // Get deal_id from requests for proper invalidation
       const requestsToDelete = requests.filter(r => selectedRequests.includes(r.id));
       await Promise.all(
         requestsToDelete.map(r => deleteRequest.mutateAsync({ id: r.id, dealId: r.deal_id }))
@@ -216,6 +264,17 @@ const DiligenceRequestTable: React.FC<DiligenceRequestTableProps> = ({
     } finally {
       setIsProcessing(false);
     }
+  };
+
+  // Assign to me handler
+  const handleAssignToMe = async (requestId: string, currentAssignees: string[]) => {
+    if (!user?.id) return;
+    const newAssignees = currentAssignees.includes(user.id) 
+      ? currentAssignees 
+      : [...currentAssignees, user.id];
+    
+    updateRequest.mutate({ id: requestId, assignee_ids: newAssignees });
+    toast.success('Assigned to you');
   };
 
   // Check if "NEW" badge should show
@@ -270,18 +329,48 @@ const DiligenceRequestTable: React.FC<DiligenceRequestTableProps> = ({
     return 'normal';
   };
 
-  // Sort requests: non-resolved first, then resolved at bottom
+  // Priority sort order
+  const priorityOrder = { high: 0, medium: 1, low: 2 };
+
+  // Sort requests
   const sortedRequests = React.useMemo(() => {
     return [...requests].sort((a, b) => {
+      // Always put completed at bottom
       if (a.status === 'completed' && b.status !== 'completed') return 1;
       if (a.status !== 'completed' && b.status === 'completed') return -1;
-      return 0;
+      
+      // Then apply user's sort
+      let comparison = 0;
+      
+      switch (sortField) {
+        case 'title':
+          comparison = a.title.localeCompare(b.title);
+          break;
+        case 'status':
+          comparison = a.status.localeCompare(b.status);
+          break;
+        case 'priority':
+          comparison = priorityOrder[a.priority] - priorityOrder[b.priority];
+          break;
+        case 'due_date':
+          const aDate = a.due_date ? new Date(a.due_date).getTime() : Infinity;
+          const bDate = b.due_date ? new Date(b.due_date).getTime() : Infinity;
+          comparison = aDate - bDate;
+          break;
+        case 'last_activity_at':
+          const aActivity = a.last_activity_at ? new Date(a.last_activity_at).getTime() : 0;
+          const bActivity = b.last_activity_at ? new Date(b.last_activity_at).getTime() : 0;
+          comparison = aActivity - bActivity;
+          break;
+      }
+      
+      return sortDirection === 'asc' ? comparison : -comparison;
     });
-  }, [requests]);
+  }, [requests, sortField, sortDirection]);
   
   if (isLoading) {
     return (
-      <div className="text-center py-12 text-gray-500">
+      <div className="text-center py-12 text-muted-foreground">
         Loading requests...
       </div>
     );
@@ -289,14 +378,14 @@ const DiligenceRequestTable: React.FC<DiligenceRequestTableProps> = ({
   
   if (requests.length === 0) {
     return (
-      <div className="text-center py-16 bg-gray-50 rounded-lg border border-gray-200 border-dashed">
-        <FileText className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-        <h3 className="text-lg font-medium text-gray-900 mb-2">No requests found</h3>
-        <p className="text-gray-500 mb-4">Add a request or apply a template to get started</p>
+      <div className="text-center py-16 bg-muted/30 rounded-lg border border-dashed">
+        <FileText className="w-12 h-12 text-muted-foreground/50 mx-auto mb-4" />
+        <h3 className="text-lg font-medium text-foreground mb-2">No requests found</h3>
+        <p className="text-muted-foreground mb-4">Add a request or apply a template to get started</p>
         {onAddRequest && (
           <Button 
             onClick={onAddRequest}
-            className="bg-blue-600 hover:bg-blue-700 text-white"
+            className="bg-primary hover:bg-primary/90"
           >
             <Plus className="w-4 h-4 mr-2" />
             Add First Request
@@ -308,25 +397,127 @@ const DiligenceRequestTable: React.FC<DiligenceRequestTableProps> = ({
 
   return (
     <TooltipProvider>
-      <div className="rounded-lg border border-gray-200 overflow-hidden bg-white">
-        <div className="max-h-[calc(100vh-320px)] overflow-auto">
+      <div className="rounded-lg border overflow-hidden bg-card">
+        {/* Toolbar */}
+        <div className="flex items-center justify-end px-3 py-2 border-b bg-muted/30">
+          <ColumnVisibilityDropdown columns={columns} onToggleColumn={toggleColumn} />
+        </div>
+        
+        <div className="max-h-[calc(100vh-380px)] overflow-auto">
           <Table>
-            <TableHeader className="sticky top-0 z-10 bg-gray-50 shadow-[0_1px_3px_rgba(0,0,0,0.08)]">
-              <TableRow className="border-b border-gray-200 hover:bg-gray-50">
-                <TableHead className="w-[40px] py-3 bg-gray-50">
+            <TableHeader className="sticky top-0 z-10 bg-muted/80 backdrop-blur-sm shadow-[0_1px_3px_rgba(0,0,0,0.08)]">
+              <TableRow className="border-b hover:bg-transparent">
+                {/* Checkbox */}
+                <TableHead className="w-[40px] py-3 bg-muted/80">
                   <Checkbox 
                     checked={selectedRequests.length === requests.length && requests.length > 0}
                     onCheckedChange={toggleAllSelection}
-                    className="border-gray-300" 
                   />
                 </TableHead>
-                <TableHead className="text-gray-600 font-medium py-3 bg-gray-50">Request Name</TableHead>
-                <TableHead className="text-gray-600 font-medium py-3 w-[120px] bg-gray-50">Status</TableHead>
-                <TableHead className="text-gray-600 font-medium py-3 w-[180px] bg-gray-50">Assigned To</TableHead>
-                <TableHead className="text-gray-600 font-medium py-3 w-[100px] bg-gray-50">Due Date</TableHead>
-                <TableHead className="text-gray-600 font-medium py-3 w-[60px] text-center bg-gray-50">Docs</TableHead>
-                <TableHead className="text-gray-600 font-medium py-3 w-[60px] text-center bg-gray-50">Chat</TableHead>
-                <TableHead className="text-gray-600 font-medium py-3 w-[50px] bg-gray-50"></TableHead>
+                
+                {/* Priority Flag */}
+                {isVisible('priority') && (
+                  <TableHead 
+                    className="w-[40px] py-3 bg-muted/80 cursor-pointer hover:bg-muted"
+                    onClick={() => handleSort('priority')}
+                  >
+                    <div className="flex items-center text-muted-foreground font-medium">
+                      PR
+                      {getSortIcon('priority')}
+                    </div>
+                  </TableHead>
+                )}
+                
+                {/* Request Name */}
+                <TableHead 
+                  className="py-3 bg-muted/80 cursor-pointer hover:bg-muted"
+                  onClick={() => handleSort('title')}
+                >
+                  <div className="flex items-center text-muted-foreground font-medium">
+                    Request Name
+                    {getSortIcon('title')}
+                  </div>
+                </TableHead>
+                
+                {/* Status */}
+                {isVisible('status') && (
+                  <TableHead 
+                    className="w-[120px] py-3 bg-muted/80 cursor-pointer hover:bg-muted"
+                    onClick={() => handleSort('status')}
+                  >
+                    <div className="flex items-center text-muted-foreground font-medium">
+                      Status
+                      {getSortIcon('status')}
+                    </div>
+                  </TableHead>
+                )}
+                
+                {/* Assigned To */}
+                {isVisible('assignee') && (
+                  <TableHead className="w-[160px] py-3 bg-muted/80 text-muted-foreground font-medium">
+                    Assigned To
+                  </TableHead>
+                )}
+                
+                {/* Reviewers */}
+                {isVisible('reviewers') && (
+                  <TableHead className="w-[100px] py-3 bg-muted/80 text-muted-foreground font-medium">
+                    Reviewers
+                  </TableHead>
+                )}
+                
+                {/* Due Date */}
+                {isVisible('due_date') && (
+                  <TableHead 
+                    className="w-[100px] py-3 bg-muted/80 cursor-pointer hover:bg-muted"
+                    onClick={() => handleSort('due_date')}
+                  >
+                    <div className="flex items-center text-muted-foreground font-medium">
+                      Due Date
+                      {getSortIcon('due_date')}
+                    </div>
+                  </TableHead>
+                )}
+                
+                {/* Docs */}
+                {isVisible('docs') && (
+                  <TableHead className="w-[50px] py-3 text-center bg-muted/80">
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Paperclip className="w-4 h-4 text-muted-foreground mx-auto" />
+                      </TooltipTrigger>
+                      <TooltipContent>Documents</TooltipContent>
+                    </Tooltip>
+                  </TableHead>
+                )}
+                
+                {/* Comments */}
+                {isVisible('comments') && (
+                  <TableHead className="w-[50px] py-3 text-center bg-muted/80">
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <MessageSquare className="w-4 h-4 text-muted-foreground mx-auto" />
+                      </TooltipTrigger>
+                      <TooltipContent>Comments</TooltipContent>
+                    </Tooltip>
+                  </TableHead>
+                )}
+                
+                {/* Updated */}
+                {isVisible('updated') && (
+                  <TableHead 
+                    className="w-[90px] py-3 bg-muted/80 cursor-pointer hover:bg-muted"
+                    onClick={() => handleSort('last_activity_at')}
+                  >
+                    <div className="flex items-center text-muted-foreground font-medium">
+                      Updated
+                      {getSortIcon('last_activity_at')}
+                    </div>
+                  </TableHead>
+                )}
+                
+                {/* Actions */}
+                <TableHead className="w-[50px] py-3 bg-muted/80"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -338,6 +529,7 @@ const DiligenceRequestTable: React.FC<DiligenceRequestTableProps> = ({
                 const subcategoryName = getSubcategoryName(request.subcategory_id);
                 const counts = requestCounts[request.id] || { documentCount: 0, commentCount: 0 };
                 const assignees = getAssignees(request);
+                const assigneeIds = request.assignee_ids || [];
                 const isUnread = hasUnreadUpdates(request.id, request.last_activity_at, viewMap);
                 const showNewBadge = shouldShowNewBadge(request, counts.commentCount);
                 const isResolved = request.status === 'completed';
@@ -346,8 +538,8 @@ const DiligenceRequestTable: React.FC<DiligenceRequestTableProps> = ({
                 return (
                   <TableRow 
                     key={request.id}
-                    className={`border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors ${
-                      isSelected ? 'bg-blue-50' : isResolved ? 'bg-green-50/30' : isUnread ? 'bg-blue-50/30' : ''
+                    className={`border-b border-border/50 hover:bg-muted/50 cursor-pointer transition-colors group ${
+                      isSelected ? 'bg-primary/5' : isResolved ? 'bg-green-50/30 dark:bg-green-900/10' : isUnread ? 'bg-blue-50/30 dark:bg-blue-900/10' : ''
                     }`}
                     onClick={() => onSelectRequest(request)}
                   >
@@ -356,26 +548,32 @@ const DiligenceRequestTable: React.FC<DiligenceRequestTableProps> = ({
                       <Checkbox 
                         checked={isSelected}
                         onCheckedChange={() => toggleSelection(request.id)}
-                        className="border-gray-300" 
                       />
                     </TableCell>
+
+                    {/* Priority Flag */}
+                    {isVisible('priority') && (
+                      <TableCell className="py-3" onClick={(e) => e.stopPropagation()}>
+                        <PriorityFlagCell requestId={request.id} priority={request.priority} />
+                      </TableCell>
+                    )}
 
                     {/* Request Name with optional NEW badge */}
                     <TableCell className="py-3">
                       <div className="flex items-center gap-2">
-                        <div className="flex-1">
+                        <div className="flex-1 min-w-0">
                           <div className={`font-medium flex items-center gap-2 ${
-                            isResolved ? 'text-gray-500 line-through' : 'text-gray-900'
+                            isResolved ? 'text-muted-foreground line-through' : 'text-foreground'
                           }`}>
-                            {request.title}
+                            <span className="truncate">{request.title}</span>
                             {showNewBadge && (
-                              <Badge variant="secondary" className="bg-purple-100 text-purple-700 border-purple-200 text-[10px] px-1.5 py-0 font-medium">
+                              <Badge variant="secondary" className="bg-purple-100 text-purple-700 border-purple-200 text-[10px] px-1.5 py-0 font-medium shrink-0">
                                 <Sparkles className="w-3 h-3 mr-0.5" />
                                 NEW
                               </Badge>
                             )}
                           </div>
-                          <div className="text-xs text-gray-500 mt-0.5">
+                          <div className="text-xs text-muted-foreground mt-0.5 truncate">
                             {categoryName}
                             {subcategoryName && ` › ${subcategoryName}`}
                           </div>
@@ -384,110 +582,221 @@ const DiligenceRequestTable: React.FC<DiligenceRequestTableProps> = ({
                     </TableCell>
 
                     {/* Status Badge */}
-                    <TableCell className="py-3">
-                      <Badge 
-                        variant="outline" 
-                        className={`text-xs font-medium ${status.className}`}
-                      >
-                        <StatusIcon className="w-3 h-3 mr-1" />
-                        {status.label}
-                      </Badge>
-                    </TableCell>
-
-                    {/* Assigned To - Enhanced with name */}
-                    <TableCell className="py-3">
-                      {assignees.length === 0 ? (
-                        <span className="text-sm text-gray-400">Unassigned</span>
-                      ) : assignees.length === 1 ? (
-                        <div className="flex items-center gap-2">
-                          <Avatar className="h-6 w-6">
-                            <AvatarImage src={assignees[0].profile_picture_url || undefined} />
-                            <AvatarFallback className="text-[10px] bg-gray-200 text-gray-700">
-                              {assignees[0].first_name?.[0]}{assignees[0].last_name?.[0]}
-                            </AvatarFallback>
-                          </Avatar>
-                          <span className="text-sm text-gray-700 truncate max-w-[100px]">
-                            {assignees[0].first_name} {assignees[0].last_name?.[0]}.
-                          </span>
-                        </div>
-                      ) : (
+                    {isVisible('status') && (
+                      <TableCell className="py-3" onClick={(e) => e.stopPropagation()}>
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <div className="flex items-center gap-1">
-                              <div className="flex -space-x-2">
-                                {assignees.slice(0, 3).map((assignee, i) => (
-                                  <Avatar key={assignee.user_id} className="h-6 w-6 border-2 border-white">
-                                    <AvatarImage src={assignee.profile_picture_url || undefined} />
-                                    <AvatarFallback className="text-[10px] bg-gray-200 text-gray-700">
-                                      {assignee.first_name?.[0]}{assignee.last_name?.[0]}
-                                    </AvatarFallback>
-                                  </Avatar>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Badge 
+                                  variant="outline" 
+                                  className={`text-xs font-medium cursor-pointer ${status.className}`}
+                                >
+                                  <StatusIcon className="w-3 h-3 mr-1" />
+                                  {status.label}
+                                </Badge>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="start" className="bg-popover">
+                                {Object.entries(statusConfig).map(([key, config]) => (
+                                  <DropdownMenuItem
+                                    key={key}
+                                    onClick={() => updateRequest.mutate({ id: request.id, status: key as any })}
+                                    className="text-sm"
+                                  >
+                                    <config.icon className="w-3 h-3 mr-2" />
+                                    {config.label}
+                                  </DropdownMenuItem>
                                 ))}
-                              </div>
-                              {assignees.length > 3 && (
-                                <span className="text-xs text-gray-500 ml-1">+{assignees.length - 3}</span>
-                              )}
-                            </div>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
                           </TooltipTrigger>
-                          <TooltipContent className="bg-gray-900 text-white">
-                            <div className="text-xs space-y-1">
-                              {assignees.map(a => (
-                                <div key={a.user_id}>{a.first_name} {a.last_name}</div>
-                              ))}
-                            </div>
+                          <TooltipContent side="top" className="bg-popover text-popover-foreground">
+                            {status.description}
                           </TooltipContent>
                         </Tooltip>
-                      )}
-                    </TableCell>
+                      </TableCell>
+                    )}
+
+                    {/* Assigned To - Enhanced with name */}
+                    {isVisible('assignee') && (
+                      <TableCell className="py-3">
+                        {assignees.length === 0 ? (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 px-2 text-xs text-muted-foreground hover:text-foreground"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleAssignToMe(request.id, assigneeIds);
+                            }}
+                          >
+                            <UserPlus className="w-3 h-3 mr-1" />
+                            Assign
+                          </Button>
+                        ) : assignees.length === 1 ? (
+                          <div className="flex items-center gap-2">
+                            <Avatar className="h-6 w-6">
+                              <AvatarImage src={assignees[0].profile_picture_url || undefined} />
+                              <AvatarFallback className="text-[10px] bg-muted text-muted-foreground">
+                                {assignees[0].first_name?.[0]}{assignees[0].last_name?.[0]}
+                              </AvatarFallback>
+                            </Avatar>
+                            <span className="text-sm text-foreground truncate max-w-[100px]">
+                              {assignees[0].first_name} {assignees[0].last_name?.[0]}.
+                            </span>
+                          </div>
+                        ) : (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <div className="flex items-center gap-1">
+                                <div className="flex -space-x-2">
+                                  {assignees.slice(0, 3).map((assignee) => (
+                                    <Avatar key={assignee.user_id} className="h-6 w-6 border-2 border-background">
+                                      <AvatarImage src={assignee.profile_picture_url || undefined} />
+                                      <AvatarFallback className="text-[10px] bg-muted text-muted-foreground">
+                                        {assignee.first_name?.[0]}{assignee.last_name?.[0]}
+                                      </AvatarFallback>
+                                    </Avatar>
+                                  ))}
+                                </div>
+                                {assignees.length > 3 && (
+                                  <span className="text-xs text-muted-foreground ml-1">+{assignees.length - 3}</span>
+                                )}
+                              </div>
+                            </TooltipTrigger>
+                            <TooltipContent className="bg-popover">
+                              <div className="text-xs space-y-1">
+                                {assignees.map(a => (
+                                  <div key={a.user_id}>{a.first_name} {a.last_name}</div>
+                                ))}
+                              </div>
+                            </TooltipContent>
+                          </Tooltip>
+                        )}
+                      </TableCell>
+                    )}
+
+                    {/* Reviewers */}
+                    {isVisible('reviewers') && (
+                      <TableCell className="py-3" onClick={(e) => e.stopPropagation()}>
+                        <ReviewersCell 
+                          reviewerIds={request.reviewer_ids || []}
+                          onAddReviewers={() => onSelectRequest(request)}
+                        />
+                      </TableCell>
+                    )}
 
                     {/* Due Date */}
-                    <TableCell className="py-3">
-                      {request.due_date ? (
-                        <span className={`text-sm font-medium ${
-                          dueDateStatus === 'overdue' 
-                            ? 'text-red-600' 
-                            : dueDateStatus === 'due-soon' 
-                              ? 'text-amber-600' 
-                              : 'text-gray-700'
-                        }`}>
-                          {format(new Date(request.due_date), 'MMM d')}
-                          {dueDateStatus === 'overdue' && (
-                            <AlertTriangle className="w-3 h-3 inline ml-1" />
-                          )}
-                        </span>
-                      ) : (
-                        <span className="text-sm text-gray-400">—</span>
-                      )}
-                    </TableCell>
+                    {isVisible('due_date') && (
+                      <TableCell className="py-3">
+                        {request.due_date ? (
+                          <span className={`text-sm font-medium ${
+                            dueDateStatus === 'overdue' 
+                              ? 'text-destructive' 
+                              : dueDateStatus === 'due-soon' 
+                                ? 'text-amber-600' 
+                                : 'text-foreground'
+                          }`}>
+                            {format(new Date(request.due_date), 'MMM d')}
+                            {dueDateStatus === 'overdue' && (
+                              <AlertTriangle className="w-3 h-3 inline ml-1" />
+                            )}
+                          </span>
+                        ) : (
+                          <span className="text-sm text-muted-foreground">—</span>
+                        )}
+                      </TableCell>
+                    )}
 
                     {/* Docs Count */}
-                    <TableCell className="py-3 text-center">
-                      <div className={`flex items-center justify-center gap-1 ${counts.documentCount > 0 ? 'text-primary' : 'text-gray-400'}`}>
-                        <FileText className="w-4 h-4" />
-                        <span className="text-xs font-medium tabular-nums">{counts.documentCount}</span>
-                      </div>
-                    </TableCell>
+                    {isVisible('docs') && (
+                      <TableCell className="py-3 text-center">
+                        <div className={`flex items-center justify-center gap-0.5 ${counts.documentCount > 0 ? 'text-primary' : 'text-muted-foreground/50'}`}>
+                          <Paperclip className="w-3.5 h-3.5" />
+                          <span className="text-xs font-medium tabular-nums">{counts.documentCount || ''}</span>
+                        </div>
+                      </TableCell>
+                    )}
 
-                    {/* Chat Count */}
-                    <TableCell className="py-3 text-center">
-                      <div className={`flex items-center justify-center gap-1 ${counts.commentCount > 0 ? 'text-primary' : 'text-gray-400'}`}>
-                        <MessageSquare className="w-4 h-4" />
-                        <span className="text-xs font-medium tabular-nums">{counts.commentCount}</span>
-                      </div>
-                    </TableCell>
+                    {/* Comments Count with unread indicator */}
+                    {isVisible('comments') && (
+                      <TableCell className="py-3 text-center">
+                        <div className={`flex items-center justify-center gap-0.5 relative ${
+                          isUnread && counts.commentCount > 0 
+                            ? 'text-amber-500' 
+                            : counts.commentCount > 0 
+                              ? 'text-primary' 
+                              : 'text-muted-foreground/50'
+                        }`}>
+                          <MessageSquare className={`w-3.5 h-3.5 ${isUnread && counts.commentCount > 0 ? 'animate-pulse' : ''}`} />
+                          <span className="text-xs font-medium tabular-nums">{counts.commentCount || ''}</span>
+                          {isUnread && counts.commentCount > 0 && (
+                            <span className="absolute -top-1 -right-1 w-1.5 h-1.5 bg-amber-500 rounded-full" />
+                          )}
+                        </div>
+                      </TableCell>
+                    )}
+
+                    {/* Last Updated */}
+                    {isVisible('updated') && (
+                      <TableCell className="py-3">
+                        <LastUpdatedCell 
+                          lastActivityAt={request.last_activity_at} 
+                          updatedBy={request.updated_by || undefined}
+                        />
+                      </TableCell>
+                    )}
 
                     {/* Actions Menu */}
                     <TableCell className="py-3" onClick={(e) => e.stopPropagation()}>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 hover:text-gray-600">
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="h-8 w-8 text-muted-foreground hover:text-foreground opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
                             <MoreHorizontal className="w-4 h-4" />
                           </Button>
                         </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="bg-white border-gray-200">
+                        <DropdownMenuContent align="end" className="bg-popover w-48">
                           <DropdownMenuItem onClick={() => onSelectRequest(request)}>
                             View Details
                           </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleAssignToMe(request.id, assigneeIds)}>
+                            <UserPlus className="w-4 h-4 mr-2" />
+                            Assign to Me
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuSub>
+                            <DropdownMenuSubTrigger>Change Priority</DropdownMenuSubTrigger>
+                            <DropdownMenuSubContent className="bg-popover">
+                              <DropdownMenuItem onClick={() => updateRequest.mutate({ id: request.id, priority: 'high' })}>
+                                🔴 High
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => updateRequest.mutate({ id: request.id, priority: 'medium' })}>
+                                🟠 Medium
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => updateRequest.mutate({ id: request.id, priority: 'low' })}>
+                                ⚪ Normal
+                              </DropdownMenuItem>
+                            </DropdownMenuSubContent>
+                          </DropdownMenuSub>
+                          <DropdownMenuSub>
+                            <DropdownMenuSubTrigger>Change Status</DropdownMenuSubTrigger>
+                            <DropdownMenuSubContent className="bg-popover">
+                              {Object.entries(statusConfig).map(([key, config]) => (
+                                <DropdownMenuItem
+                                  key={key}
+                                  onClick={() => updateRequest.mutate({ id: request.id, status: key as any })}
+                                >
+                                  <config.icon className="w-3 h-3 mr-2" />
+                                  {config.label}
+                                </DropdownMenuItem>
+                              ))}
+                            </DropdownMenuSubContent>
+                          </DropdownMenuSub>
+                          <DropdownMenuSeparator />
                           <DropdownMenuItem 
                             onClick={() => updateRequest.mutate({ id: request.id, status: 'in_progress' })}
                           >
@@ -500,8 +809,9 @@ const DiligenceRequestTable: React.FC<DiligenceRequestTableProps> = ({
                             <Check className="w-4 h-4 mr-2" />
                             Mark as Resolved
                           </DropdownMenuItem>
+                          <DropdownMenuSeparator />
                           <DropdownMenuItem 
-                            className="text-red-600"
+                            className="text-destructive focus:text-destructive"
                             onClick={() => {
                               if (confirm('Delete this request?')) {
                                 deleteRequest.mutate({ id: request.id, dealId: request.deal_id });
