@@ -454,12 +454,9 @@ const DiligenceRequestTable: React.FC<DiligenceRequestTableProps> = ({
     return count;
   }, [isVisible]);
   
+  // Loading state is now handled by parent component with skeleton
   if (isLoading) {
-    return (
-      <div className="text-center py-12 text-muted-foreground">
-        Loading requests...
-      </div>
-    );
+    return null;
   }
   
   if (requests.length === 0) {
