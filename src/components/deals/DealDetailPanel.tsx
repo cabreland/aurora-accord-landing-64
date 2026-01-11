@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { X, FileText, Upload, MoreVertical, ExternalLink } from 'lucide-react';
+import { X, FileText, MoreVertical, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { supabase } from '@/integrations/supabase/client';
 import { MyDeal } from '@/hooks/useMyDeals';
 import { useToast } from '@/hooks/use-toast';
@@ -64,203 +65,193 @@ export const DealDetailPanel: React.FC<DealDetailPanelProps> = ({
     }
   };
 
-  if (loading) {
-    return (
-      <div className="fixed right-0 top-0 h-full w-96 bg-background border-l border-border shadow-lg z-50">
-        <div className="p-4 border-b border-border">
-          <div className="flex items-center justify-between">
-            <Skeleton className="h-6 w-48" />
-            <Skeleton className="h-8 w-8" />
-          </div>
-        </div>
-        <div className="p-4 space-y-4">
-          <Skeleton className="h-20 w-full" />
-          <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-32 w-full" />
-        </div>
-      </div>
-    );
-  }
-
-  if (!deal) {
-    return (
-      <div className="fixed right-0 top-0 h-full w-96 bg-background border-l border-border shadow-lg z-50">
-        <div className="p-4 border-b border-border">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold">Deal not found</h2>
-            <Button variant="ghost" size="sm" onClick={onClose}>
-              <X className="w-4 h-4" />
-            </Button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="fixed right-0 top-0 h-full w-96 bg-background border-l border-border shadow-lg z-50 flex flex-col">
-      {/* Header */}
-      <div className="p-4 border-b border-border">
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-lg font-semibold text-foreground">Deal Details</h2>
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm">
-              <ExternalLink className="w-4 h-4" />
-            </Button>
-            <Button variant="ghost" size="sm">
-              <MoreVertical className="w-4 h-4" />
-            </Button>
-            <Button variant="ghost" size="sm" onClick={onClose}>
-              <X className="w-4 h-4" />
-            </Button>
+    <Dialog open={true} onOpenChange={() => onClose()}>
+      <DialogContent className="max-w-2xl max-h-[85vh] overflow-hidden flex flex-col p-0">
+        {loading ? (
+          <div className="p-6 space-y-4">
+            <Skeleton className="h-6 w-48" />
+            <Skeleton className="h-20 w-full" />
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-32 w-full" />
           </div>
-        </div>
-        
-        <div className="space-y-2">
-          <h3 className="font-medium text-foreground truncate" title={deal.title}>
-            {deal.title}
-          </h3>
-          <p className="text-sm text-muted-foreground">
-            {deal.company_name}
-          </p>
-          <div className="flex items-center gap-2">
-            <Badge variant={getStatusVariant(deal.status)}>
-              {deal.status}
-            </Badge>
-            {deal.priority && (
-              <Badge variant="outline">
-                {deal.priority} priority
-              </Badge>
-            )}
+        ) : !deal ? (
+          <div className="p-6">
+            <p className="text-muted-foreground">Deal not found</p>
           </div>
-        </div>
-      </div>
-
-      {/* Content */}
-      <div className="flex-1 overflow-auto">
-        <Tabs defaultValue="overview" className="w-full">
-          <div className="px-4 pt-4">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="documents">
-                <FileText className="w-4 h-4 mr-1" />
-                Docs
-              </TabsTrigger>
-            </TabsList>
-          </div>
-
-          <div className="p-4">
-            <TabsContent value="overview" className="space-y-4">
-              {/* Key Metrics */}
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm">Key Metrics</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {deal.revenue && (
-                    <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">Revenue</span>
-                      <span className="text-sm font-medium">{deal.revenue}</span>
-                    </div>
-                  )}
-                  {deal.ebitda && (
-                    <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">EBITDA</span>
-                      <span className="text-sm font-medium">{deal.ebitda}</span>
-                    </div>
-                  )}
-                  {deal.industry && (
-                    <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">Industry</span>
-                      <span className="text-sm font-medium">{deal.industry}</span>
-                    </div>
-                  )}
-                  {deal.location && (
-                    <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">Location</span>
-                      <span className="text-sm font-medium">{deal.location}</span>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-
-              {/* Deal Information */}
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm">Deal Information</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="flex justify-between">
-                    <span className="text-sm text-muted-foreground">Created</span>
-                    <span className="text-sm font-medium">
-                      {new Date(deal.created_at).toLocaleDateString()}
-                    </span>
+        ) : (
+          <>
+            {/* Header */}
+            <DialogHeader className="p-6 pb-4 border-b border-border">
+              <div className="flex items-center justify-between">
+                <div className="space-y-2">
+                  <DialogTitle className="text-xl font-semibold">
+                    {deal.title}
+                  </DialogTitle>
+                  <p className="text-sm text-muted-foreground">
+                    {deal.company_name}
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <Badge variant={getStatusVariant(deal.status)}>
+                      {deal.status}
+                    </Badge>
+                    {deal.priority && (
+                      <Badge variant="outline">
+                        {deal.priority} priority
+                      </Badge>
+                    )}
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm text-muted-foreground">Last Updated</span>
-                    <span className="text-sm font-medium">
-                      {new Date(deal.updated_at).toLocaleDateString()}
-                    </span>
-                  </div>
-                  {deal.stage && (
-                    <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">Stage</span>
-                      <span className="text-sm font-medium">{deal.stage}</span>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-
-              {/* Actions */}
-              <div className="space-y-2">
-                <Button 
-                  className="w-full" 
-                  onClick={() => setShowEditModal(true)}
-                >
-                  Edit Deal
-                </Button>
-                <Button 
-                  variant="outline" 
-                  className="w-full"
-                  onClick={() => navigate(`/deal/${deal.id}`)}
-                >
-                  View Deal Details
-                </Button>
-              </div>
-
-              {/* Edit Modal */}
-              {showEditModal && deal && (
-                <DealEditModal
-                  deal={deal}
-                  open={showEditModal}
-                  onClose={() => setShowEditModal(false)}
-                  onSaved={() => {
-                    setShowEditModal(false);
-                    fetchDeal();
-                    onDealUpdated();
-                  }}
-                />
-              )}
-            </TabsContent>
-
-            <TabsContent value="documents" className="space-y-4">
-              <div className="space-y-3">
-                <Button 
-                  className="w-full" 
-                  onClick={() => navigate(`/documents?deal=${deal.id}`)}
-                >
-                  <FileText className="w-4 h-4 mr-2" />
-                  Open Document Manager
-                </Button>
-                
-                <div className="text-center text-sm text-muted-foreground">
-                  Click above to access the full document management interface for this deal
+                </div>
+                <div className="flex items-center gap-1">
+                  <Button 
+                    variant="ghost" 
+                    size="icon"
+                    onClick={() => navigate(`/deals/${deal.id}`)}
+                    title="Open Deal Workspace"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                  </Button>
+                  <Button variant="ghost" size="icon">
+                    <MoreVertical className="w-4 h-4" />
+                  </Button>
                 </div>
               </div>
-            </TabsContent>
-          </div>
-        </Tabs>
-      </div>
-    </div>
+            </DialogHeader>
+
+            {/* Content */}
+            <div className="flex-1 overflow-auto">
+              <Tabs defaultValue="overview" className="w-full">
+                <div className="px-6 pt-4">
+                  <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="overview">Overview</TabsTrigger>
+                    <TabsTrigger value="documents">
+                      <FileText className="w-4 h-4 mr-1" />
+                      Docs
+                    </TabsTrigger>
+                  </TabsList>
+                </div>
+
+                <div className="p-6 pt-4">
+                  <TabsContent value="overview" className="space-y-4 mt-0">
+                    {/* Key Metrics */}
+                    <Card>
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-sm">Key Metrics</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-3">
+                        {deal.revenue && (
+                          <div className="flex justify-between">
+                            <span className="text-sm text-muted-foreground">Revenue</span>
+                            <span className="text-sm font-medium">{deal.revenue}</span>
+                          </div>
+                        )}
+                        {deal.ebitda && (
+                          <div className="flex justify-between">
+                            <span className="text-sm text-muted-foreground">EBITDA</span>
+                            <span className="text-sm font-medium">{deal.ebitda}</span>
+                          </div>
+                        )}
+                        {deal.industry && (
+                          <div className="flex justify-between">
+                            <span className="text-sm text-muted-foreground">Industry</span>
+                            <span className="text-sm font-medium">{deal.industry}</span>
+                          </div>
+                        )}
+                        {deal.location && (
+                          <div className="flex justify-between">
+                            <span className="text-sm text-muted-foreground">Location</span>
+                            <span className="text-sm font-medium">{deal.location}</span>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+
+                    {/* Deal Information */}
+                    <Card>
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-sm">Deal Information</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-3">
+                        <div className="flex justify-between">
+                          <span className="text-sm text-muted-foreground">Created</span>
+                          <span className="text-sm font-medium">
+                            {new Date(deal.created_at).toLocaleDateString()}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm text-muted-foreground">Last Updated</span>
+                          <span className="text-sm font-medium">
+                            {new Date(deal.updated_at).toLocaleDateString()}
+                          </span>
+                        </div>
+                        {(deal as any).current_stage && (
+                          <div className="flex justify-between">
+                            <span className="text-sm text-muted-foreground">Stage</span>
+                            <span className="text-sm font-medium">{(deal as any).current_stage}</span>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+
+                    {/* Actions */}
+                    <div className="space-y-2 pt-2">
+                      <Button 
+                        className="w-full" 
+                        onClick={() => setShowEditModal(true)}
+                      >
+                        Edit Deal
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        className="w-full"
+                        onClick={() => {
+                          onClose();
+                          navigate(`/deals/${deal.id}`);
+                        }}
+                      >
+                        Open Deal Workspace
+                      </Button>
+                    </div>
+                  </TabsContent>
+
+                  <TabsContent value="documents" className="space-y-4 mt-0">
+                    <div className="space-y-3">
+                      <Button 
+                        className="w-full" 
+                        onClick={() => {
+                          onClose();
+                          navigate(`/deals/${deal.id}?tab=data-room`);
+                        }}
+                      >
+                        <FileText className="w-4 h-4 mr-2" />
+                        Open Data Room
+                      </Button>
+                      
+                      <div className="text-center text-sm text-muted-foreground">
+                        Click above to access the full document management interface for this deal
+                      </div>
+                    </div>
+                  </TabsContent>
+                </div>
+              </Tabs>
+            </div>
+          </>
+        )}
+
+        {/* Edit Modal */}
+        {showEditModal && deal && (
+          <DealEditModal
+            deal={deal}
+            open={showEditModal}
+            onClose={() => setShowEditModal(false)}
+            onSaved={() => {
+              setShowEditModal(false);
+              fetchDeal();
+              onDealUpdated();
+            }}
+          />
+        )}
+      </DialogContent>
+    </Dialog>
   );
 };
