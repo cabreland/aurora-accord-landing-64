@@ -13,11 +13,12 @@ import { ThemeProvider } from "@/contexts/ThemeContext";
 import { DevTools } from "@/components/dev/DevTools";
 import { useOnboardingCheck } from "@/hooks/useOnboardingCheck";
 
-import Index from "./pages/Index";
 import Demo from "./pages/Demo";
 import InvestorPortal from "./pages/InvestorPortal";
+import Homepage from "./pages/Homepage";
 
 // Lazy-load remaining pages to reduce initial bundle size
+const Index = lazy(() => import("./pages/Index"));
 const IndexV2 = lazy(() => import("./pages/IndexV2"));
 const HomePageA = lazy(() => import("./pages/HomePageA"));
 const HomePageB = lazy(() => import("./pages/HomePageB"));
@@ -104,7 +105,8 @@ const AppContent = () => {
             }
           >
             <Routes>
-              <Route path="/" element={<Index />} />
+              <Route path="/" element={<Homepage />} />
+              <Route path="/index" element={<Index />} />
               <Route path="/v2" element={<IndexV2 />} />
               <Route path="/home-page-a" element={<HomePageA />} />
               <Route path="/home-page-b" element={<HomePageB />} />
