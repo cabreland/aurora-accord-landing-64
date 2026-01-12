@@ -42,7 +42,7 @@ const TestimonialsSection = () => {
   }, []);
 
   return (
-    <section ref={ref} className="py-24 bg-[#f8fafc]">
+    <section ref={ref} className="py-24 bg-[#0a1628]">
       <div className="max-w-7xl mx-auto px-6">
         {/* Header */}
         <motion.div
@@ -51,20 +51,20 @@ const TestimonialsSection = () => {
           transition={{ duration: 0.6 }}
           className="flex items-center justify-between mb-12"
         >
-          <h2 className="text-2xl md:text-3xl font-bold text-[#0a1628]">
+          <h2 className="text-2xl md:text-3xl font-bold text-white">
             See why leading teams choose DealFlow's<br />
             M&A software
           </h2>
           <div className="hidden md:flex items-center gap-2">
             <button
               onClick={prevSlide}
-              className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-colors"
+              className="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center hover:bg-white/10 transition-colors"
             >
-              <ChevronLeft className="w-5 h-5 text-gray-600" />
+              <ChevronLeft className="w-5 h-5 text-white/70" />
             </button>
             <button
               onClick={nextSlide}
-              className="w-10 h-10 rounded-full bg-[#0a1628] flex items-center justify-center hover:bg-[#0a1628]/90 transition-colors"
+              className="w-10 h-10 rounded-full bg-[#2563eb] flex items-center justify-center hover:bg-[#1d4ed8] transition-colors"
             >
               <ChevronRight className="w-5 h-5 text-white" />
             </button>
@@ -79,19 +79,19 @@ const TestimonialsSection = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.5, delay: 0.2 + index * 0.1 }}
-              className={`p-6 rounded-2xl bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow ${
-                index === activeIndex ? 'ring-2 ring-blue-500/20' : ''
+              className={`p-6 rounded-2xl bg-[#1a2744] border border-white/10 hover:border-white/20 transition-colors ${
+                index === activeIndex ? 'ring-2 ring-blue-500/30' : ''
               }`}
             >
-              <Quote className="w-8 h-8 text-gray-200 mb-4" />
-              <p className="text-gray-700 mb-6 leading-relaxed">"{testimonial.quote}"</p>
+              <Quote className="w-8 h-8 text-white/20 mb-4" />
+              <p className="text-white/80 mb-6 leading-relaxed">"{testimonial.quote}"</p>
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center text-gray-600 font-semibold text-sm">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-semibold text-sm">
                   {testimonial.author.split(' ').map(n => n[0]).join('')}
                 </div>
                 <div>
-                  <div className="font-medium text-gray-900 text-sm">{testimonial.author}</div>
-                  <div className="text-xs text-gray-500">{testimonial.role}, {testimonial.company}</div>
+                  <div className="font-medium text-white text-sm">{testimonial.author}</div>
+                  <div className="text-xs text-white/50">{testimonial.role}, {testimonial.company}</div>
                 </div>
               </div>
             </motion.div>
@@ -105,7 +105,7 @@ const TestimonialsSection = () => {
               key={index}
               onClick={() => setActiveIndex(index)}
               className={`w-2 h-2 rounded-full transition-all ${
-                index === activeIndex ? 'bg-[#0a1628] w-4' : 'bg-gray-300'
+                index === activeIndex ? 'bg-[#2563eb] w-4' : 'bg-white/30'
               }`}
             />
           ))}
