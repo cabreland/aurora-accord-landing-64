@@ -1181,6 +1181,10 @@ export type Database = {
       }
       deals: {
         Row: {
+          approval_notes: string | null
+          approval_status: string | null
+          approved_at: string | null
+          approved_by: string | null
           asking_price: string | null
           cac_ltv_ratio: string | null
           closed_at: string | null
@@ -1216,14 +1220,21 @@ export type Database = {
           reason_for_sale: string | null
           recurring_revenue: string | null
           revenue: string | null
+          revision_notes: string | null
+          revision_requested_at: string | null
           rollup_potential: string | null
           stage_entered_at: string | null
           status: Database["public"]["Enums"]["deal_status"]
+          submitted_for_review_at: string | null
           team_size: string | null
           title: string
           updated_at: string
         }
         Insert: {
+          approval_notes?: string | null
+          approval_status?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
           asking_price?: string | null
           cac_ltv_ratio?: string | null
           closed_at?: string | null
@@ -1259,14 +1270,21 @@ export type Database = {
           reason_for_sale?: string | null
           recurring_revenue?: string | null
           revenue?: string | null
+          revision_notes?: string | null
+          revision_requested_at?: string | null
           rollup_potential?: string | null
           stage_entered_at?: string | null
           status?: Database["public"]["Enums"]["deal_status"]
+          submitted_for_review_at?: string | null
           team_size?: string | null
           title: string
           updated_at?: string
         }
         Update: {
+          approval_notes?: string | null
+          approval_status?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
           asking_price?: string | null
           cac_ltv_ratio?: string | null
           closed_at?: string | null
@@ -1302,9 +1320,12 @@ export type Database = {
           reason_for_sale?: string | null
           recurring_revenue?: string | null
           revenue?: string | null
+          revision_notes?: string | null
+          revision_requested_at?: string | null
           rollup_potential?: string | null
           stage_entered_at?: string | null
           status?: Database["public"]["Enums"]["deal_status"]
+          submitted_for_review_at?: string | null
           team_size?: string | null
           title?: string
           updated_at?: string
