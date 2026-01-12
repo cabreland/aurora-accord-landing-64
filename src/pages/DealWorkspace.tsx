@@ -22,6 +22,7 @@ import { EnhancedDataRoomContent } from '@/components/data-room/EnhancedDataRoom
 import { DataRoomMetricsBar } from '@/components/data-room/DataRoomMetricsBar';
 import { DataRoomStatsBar } from '@/components/data-room/DataRoomStatsBar';
 import { DataRoomEmptyState } from '@/components/data-room/DataRoomEmptyState';
+import { DataRoomApprovalBar } from '@/components/data-room/DataRoomApprovalBar';
 import { useDataRoom } from '@/hooks/useDataRoom';
 import { useDiligenceRequests } from '@/hooks/useDiligenceTracker';
 import { useDealTeam } from '@/hooks/useDealTeam';
@@ -46,6 +47,15 @@ interface Deal {
   description?: string | null;
   created_at: string;
   updated_at: string;
+  created_by?: string;
+  // Approval workflow fields
+  approval_status?: string | null;
+  submitted_for_review_at?: string | null;
+  approved_at?: string | null;
+  approved_by?: string | null;
+  approval_notes?: string | null;
+  revision_requested_at?: string | null;
+  revision_notes?: string | null;
 }
 
 const DealWorkspace: React.FC = () => {
@@ -276,6 +286,17 @@ const DealWorkspace: React.FC = () => {
 
         {activeTab === 'data-room' && (
           <div className="space-y-4">
+            {/* Admin Approval Bar - Show for admins when under review */}
+            {!dataRoomLoading && folders.length > 0 && isAdmin() && deal?.approval_status === 'under_review' && (
+              <DataRoomApprovalBar
+                dealId={deal.id}
+                deal={deal}
+                folders={folders}
+                documents={documents}
+                onRefresh={refreshDataRoom}
+              />
+            )}
+
             {/* Stats Bar */}
             {!dataRoomLoading && folders.length > 0 && (
               <DataRoomStatsBar
