@@ -14,7 +14,8 @@ import {
   ChevronRight,
   Menu,
   ClipboardCheck,
-  FolderOpen
+  FolderOpen,
+  GraduationCap
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -77,6 +78,9 @@ const AdminDashboardLayout = ({ children, activeTab = 'dashboard', breadcrumbs }
     if (path === '/investor-invitations') {
       return location.pathname === '/investor-invitations';
     }
+    if (path === '/training') {
+      return location.pathname.startsWith('/training');
+    }
     return location.pathname === path;
   };
 
@@ -90,6 +94,7 @@ const AdminDashboardLayout = ({ children, activeTab = 'dashboard', breadcrumbs }
     { id: 'access-requests', label: 'Access Requests', icon: Lock, path: '/dashboard/access-requests', badge: pendingAccessCount, badgeColor: 'bg-orange-500' },
     { id: 'ndas', label: 'Signed NDAs', icon: FileCheck, path: '/dashboard/ndas' },
     { id: 'investor-relations', label: 'Investor Relations', icon: Mail, path: '/investor-invitations' },
+    { id: 'training', label: 'Training Center', icon: GraduationCap, path: '/training' },
     { 
       id: 'settings', 
       label: 'Settings', 

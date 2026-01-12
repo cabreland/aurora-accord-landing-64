@@ -50,6 +50,7 @@ const InvestorProfile = lazy(() => import("./pages/InvestorProfilePage"));
 const DiligenceTracker = lazy(() => import("./pages/DiligenceTracker"));
 const DataRoom = lazy(() => import("./pages/DataRoom"));
 const DealWorkspace = lazy(() => import("./pages/DealWorkspace"));
+const TrainingCenter = lazy(() => import("./pages/TrainingCenter"));
 
 // Wrap protected components with authentication
 const ProtectedDashboard = withAuth('investor')(Dashboard);
@@ -75,6 +76,7 @@ const ProtectedInvestorProfile = withAuth('investor')(InvestorProfile);
 const ProtectedDiligenceTracker = withAuth('admin')(DiligenceTracker);
 const ProtectedDataRoom = withAuth('staff')(DataRoom);
 const ProtectedDealWorkspace = withAuth('staff')(DealWorkspace);
+const ProtectedTrainingCenter = withAuth('staff')(TrainingCenter);
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -138,6 +140,7 @@ const AppContent = () => {
               <Route path="/data-room" element={<ProtectedDataRoom />} />
               {/* Deal Workspace - unified deal management hub */}
               <Route path="/deals/:dealId" element={<ProtectedDealWorkspace />} />
+              <Route path="/training" element={<ProtectedTrainingCenter />} />
               <Route path="/investor-portal/profile" element={<ProtectedInvestorProfile />} />
               <Route path="/investor/profile" element={<Navigate to="/investor-portal/profile" replace />} />
               <Route path="/403" element={<Forbidden />} />
