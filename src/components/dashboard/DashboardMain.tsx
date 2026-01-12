@@ -1,71 +1,66 @@
-import React from 'react';
+import React, { useState } from 'react';
 import AdminDashboardLayout from '@/layouts/AdminDashboardLayout';
-import { useMissionControl } from '@/hooks/useMissionControl';
-import { HeroStats } from './widgets/HeroStats';
-import { PriorityActionsSection } from './widgets/PriorityActionsSection';
-import { EnhancedDealsTable } from './widgets/EnhancedDealsTable';
-import { RefreshCw } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { WelcomeBand } from './widgets/WelcomeBand';
+import { MyTasksWidget } from './widgets/MyTasksWidget';
+import { ActiveDealsWidget } from './widgets/ActiveDealsWidget';
+import { RecentActivityWidget } from './widgets/RecentActivityWidget';
+import { ActionRequiredWidget } from './widgets/ActionRequiredWidget';
+
+// Widget configuration for future personalization
+type WidgetId = 'myTasks' | 'activeDeals' | 'recentActivity' | 'actionRequired';
+
+interface WidgetConfig {
+  id: WidgetId;
+  component: React.ComponentType;
+  gridClass: string;
+}
+
+const widgetRegistry: WidgetConfig[] = [
+  { id: 'myTasks', component: MyTasksWidget, gridClass: 'col-span-1 lg:col-span-2' },
+  { id: 'actionRequired', component: ActionRequiredWidget, gridClass: 'col-span-1' },
+  { id: 'activeDeals', component: ActiveDealsWidget, gridClass: 'col-span-1 lg:col-span-2' },
+  { id: 'recentActivity', component: RecentActivityWidget, gridClass: 'col-span-1' },
+];
 
 const DashboardMain = () => {
-  const {
-    loading,
-    pipelineHealth,
-    dealHealthData,
-    dealsRequiringAction,
-    thisWeeksClosings,
-    recentActivities,
-    totalPipelineValue,
-    refresh
-  } = useMissionControl();
+  // Future: this could come from user preferences / API
+  const [enabledWidgets] = useState<WidgetId[]>([
+    'myTasks',
+    'activeDeals', 
+    'recentActivity',
+    'actionRequired'
+  ]);
+
+  const visibleWidgets = widgetRegistry.filter(w => enabledWidgets.includes(w.id));
 
   return (
     <AdminDashboardLayout activeTab="dashboard">
-      <div className="min-h-screen bg-[#F8FAFC]">
-        <div className="p-6 lg:p-8 space-y-8 max-w-[1600px] mx-auto">
+      <div className="min-h-screen">
+        <div className="max-w-[1600px] mx-auto space-y-6">
           {/* Page Header */}
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 tracking-tight">
-                Mission Control
-              </h1>
-              <p className="text-sm text-gray-500 mt-1">
-                Monitor deal health, track urgent items, and manage your M&A pipeline
-              </p>
-            </div>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={refresh}
-              disabled={loading}
-              className="text-gray-600 hover:text-gray-900"
-            >
-              <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-              Refresh
-            </Button>
+          <div className="mb-2">
+            <h1 className="text-2xl lg:text-3xl font-bold text-foreground tracking-tight">
+              Mission Control
+            </h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              Monitor deals, track tasks, and manage your M&A pipeline
+            </p>
           </div>
 
-          {/* Hero Stats - 4 Cards */}
-          <HeroStats 
-            pipelineHealth={pipelineHealth}
-            dealsRequiringAction={dealsRequiringAction}
-            thisWeeksClosings={thisWeeksClosings}
-            totalPipelineValue={totalPipelineValue}
-            recentActivities={recentActivities}
-            loading={loading}
-          />
+          {/* Welcome Band */}
+          <WelcomeBand />
 
-          {/* Priority Actions + Quick Stats */}
-          <PriorityActionsSection 
-            dealsRequiringAction={dealsRequiringAction}
-            loading={loading}
-          />
-
-          {/* Enhanced Active Deals Table */}
-          <EnhancedDealsTable 
-            deals={dealHealthData} 
-            loading={loading} 
-          />
+          {/* Modular Widget Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {visibleWidgets.map((widget) => {
+              const WidgetComponent = widget.component;
+              return (
+                <div key={widget.id} className={widget.gridClass}>
+                  <WidgetComponent />
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
     </AdminDashboardLayout>

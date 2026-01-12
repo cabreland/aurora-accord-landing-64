@@ -1,224 +1,166 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Card } from '@/components/ui/card';
+import { BarChart3, ChevronUp, ChevronDown, ArrowRight } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { 
-  Building2, 
-  Clock, 
-  FileText,
-  MessageSquare,
-  ChevronRight,
-  Plus
-} from 'lucide-react';
-import { DealHealth } from '@/hooks/useMissionControl';
-import { formatDistanceToNow } from 'date-fns';
+import { useNavigate } from 'react-router-dom';
+import { cn } from '@/lib/utils';
 
-interface ActiveDealsWidgetProps {
-  deals: DealHealth[];
-  loading: boolean;
+interface Deal {
+  id: string;
+  name: string;
+  stage: string;
+  side: 'Buy' | 'Sell';
+  partner: string;
+  nextAction: string;
 }
 
-type SortOption = 'health' | 'activity' | 'stage' | 'value';
+const mockDeals: Deal[] = [
+  { id: 'deal-1', name: 'TechStartup Inc', stage: 'Due Diligence', side: 'Sell', partner: 'Acme Capital', nextAction: 'Review fins' },
+  { id: 'deal-2', name: 'Green Energy Co', stage: 'Under LOI', side: 'Sell', partner: 'GreenVentures', nextAction: 'Send CIM' },
+  { id: 'deal-3', name: 'HealthTech Solutions', stage: 'Listing', side: 'Sell', partner: 'MedInvest LLC', nextAction: 'Approve docs' },
+  { id: 'deal-4', name: 'DataFlow Systems', stage: 'Due Diligence', side: 'Buy', partner: 'Data Partners', nextAction: 'Schedule call' },
+  { id: 'deal-5', name: 'CloudServe Pro', stage: 'Closed', side: 'Sell', partner: 'CloudCap', nextAction: 'Final sign-off' },
+];
 
-const getHealthDot = (score: number) => {
-  if (score >= 70) return 'bg-emerald-500';
-  if (score >= 50) return 'bg-amber-500';
-  return 'bg-red-500';
+const stageColors: Record<string, string> = {
+  'Listing': 'bg-blue-100 text-blue-700 border-blue-200',
+  'Due Diligence': 'bg-amber-100 text-amber-700 border-amber-200',
+  'Under LOI': 'bg-purple-100 text-purple-700 border-purple-200',
+  'Closed': 'bg-green-100 text-green-700 border-green-200',
 };
 
-const formatStageName = (stage: string) => {
-  const stageLabels: Record<string, string> = {
-    'closing': 'Closing',
-    'final_review': 'Final Review',
-    'analysis': 'Analysis',
-    'information_request': 'Info Request',
-    'deal_initiated': 'Initiated'
-  };
-  return stageLabels[stage] || stage.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-};
+type SortKey = 'name' | 'stage' | 'side' | 'partner';
 
-export const ActiveDealsWidget: React.FC<ActiveDealsWidgetProps> = ({
-  deals,
-  loading
-}) => {
+export const ActiveDealsWidget = () => {
   const navigate = useNavigate();
-  const [sortBy, setSortBy] = useState<SortOption>('health');
+  const [sortKey, setSortKey] = useState<SortKey>('name');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
 
-  const activeDeals = deals.filter(d => d.status === 'active');
-
-  const sortedDeals = [...activeDeals].sort((a, b) => {
-    switch (sortBy) {
-      case 'health':
-        return a.health_score - b.health_score;
-      case 'activity':
-        return new Date(a.last_activity || 0).getTime() - new Date(b.last_activity || 0).getTime();
-      case 'stage':
-        const stageOrder = ['closing', 'final_review', 'analysis', 'information_request', 'deal_initiated'];
-        return stageOrder.indexOf(a.current_stage) - stageOrder.indexOf(b.current_stage);
-      case 'value':
-        const parseValue = (str: string | null) => {
-          if (!str) return 0;
-          const num = parseFloat(str.replace(/[^0-9.]/g, '') || '0');
-          let mult = 1;
-          if (str.toLowerCase().includes('m')) mult = 1000000;
-          if (str.toLowerCase().includes('k')) mult = 1000;
-          if (str.toLowerCase().includes('b')) mult = 1000000000;
-          return num * mult;
-        };
-        return parseValue(b.asking_price) - parseValue(a.asking_price);
-      default:
-        return 0;
+  const handleSort = (key: SortKey) => {
+    if (sortKey === key) {
+      setSortDir(sortDir === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortKey(key);
+      setSortDir('asc');
     }
+  };
+
+  const sortedDeals = [...mockDeals].sort((a, b) => {
+    const aVal = a[sortKey];
+    const bVal = b[sortKey];
+    const comparison = aVal.localeCompare(bVal);
+    return sortDir === 'asc' ? comparison : -comparison;
   });
 
-  if (loading) {
-    return (
-      <Card className="p-6 bg-white border border-gray-200 shadow-sm rounded-xl">
-        <div className="flex items-center justify-between mb-6">
-          <Skeleton className="h-6 w-32" />
-          <Skeleton className="h-9 w-36" />
-        </div>
-        <div className="space-y-2">
-          {[...Array(5)].map((_, i) => (
-            <Skeleton key={i} className="h-16 w-full" />
-          ))}
-        </div>
-      </Card>
-    );
-  }
+  const SortIcon = ({ column }: { column: SortKey }) => {
+    if (sortKey !== column) return null;
+    return sortDir === 'asc' ? 
+      <ChevronUp className="w-3 h-3" /> : 
+      <ChevronDown className="w-3 h-3" />;
+  };
 
   return (
-    <Card className="p-6 bg-white border border-gray-200 shadow-sm rounded-xl">
+    <div className="bg-card border border-border rounded-xl shadow-sm hover:shadow-md transition-shadow">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h2 className="text-lg font-semibold text-gray-900">Active Deals</h2>
-          <p className="text-sm text-gray-500">{activeDeals.length} deals in progress</p>
-        </div>
+      <div className="flex items-center justify-between px-5 py-4 border-b border-border">
         <div className="flex items-center gap-3">
-          <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortOption)}>
-            <SelectTrigger className="w-[150px] h-9 bg-gray-50 border-gray-200">
-              <SelectValue placeholder="Sort by" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="health">Health (worst first)</SelectItem>
-              <SelectItem value="activity">Last active</SelectItem>
-              <SelectItem value="stage">Stage</SelectItem>
-              <SelectItem value="value">Value</SelectItem>
-            </SelectContent>
-          </Select>
-          <Link to="/deals">
-            <Button variant="outline" size="sm" className="border-gray-200">
-              View All
-            </Button>
-          </Link>
+          <div className="w-9 h-9 rounded-lg bg-blue-500/10 flex items-center justify-center">
+            <BarChart3 className="w-5 h-5 text-blue-600" />
+          </div>
+          <div>
+            <h3 className="text-base font-semibold text-foreground">Active Deals</h3>
+            <p className="text-xs text-muted-foreground">{mockDeals.length} deals in progress</p>
+          </div>
         </div>
+        <Button 
+          variant="ghost" 
+          size="sm"
+          onClick={() => navigate('/deals')}
+          className="text-muted-foreground hover:text-foreground"
+        >
+          View All
+          <ArrowRight className="w-4 h-4 ml-1" />
+        </Button>
       </div>
 
-      {sortedDeals.length === 0 ? (
-        <div className="py-16 text-center">
-          <Building2 className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-          <p className="text-gray-500 mb-4">No active deals yet</p>
-          <Link to="/deals?action=create">
-            <Button className="bg-blue-600 hover:bg-blue-700">
-              <Plus className="w-4 h-4 mr-2" />
-              Create First Deal
-            </Button>
-          </Link>
-        </div>
-      ) : (
-        <>
-          {/* Table Header */}
-          <div className="grid grid-cols-12 gap-4 px-4 py-2 text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-100">
-            <div className="col-span-4">Deal</div>
-            <div className="col-span-2">Stage</div>
-            <div className="col-span-2 text-center">Progress</div>
-            <div className="col-span-2 text-center">Days in Stage</div>
-            <div className="col-span-2 text-right">Last Activity</div>
-          </div>
-
-          {/* Table Body */}
-          <div className="divide-y divide-gray-50">
-            {sortedDeals.slice(0, 8).map((deal, index) => (
-              <div
-                key={deal.id}
-                onClick={() => navigate(`/deal/${deal.id}`)}
-                className={`grid grid-cols-12 gap-4 px-4 py-4 items-center cursor-pointer transition-colors group ${
-                  index % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'
-                } hover:bg-blue-50/50`}
+      {/* Table */}
+      <div className="overflow-x-auto">
+        <table className="w-full">
+          <thead className="bg-muted/50 border-b border-border">
+            <tr>
+              <th 
+                onClick={() => handleSort('name')}
+                className="px-5 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider cursor-pointer hover:text-foreground"
               >
-                {/* Deal Name */}
-                <div className="col-span-4 flex items-center gap-3 min-w-0">
-                  <div 
-                    className={`w-2.5 h-2.5 rounded-full ${getHealthDot(deal.health_score)} flex-shrink-0`}
-                    title={`Health: ${deal.health_score}%`}
-                  />
-                  <div className="min-w-0">
-                    <h4 className="font-medium text-gray-900 truncate group-hover:text-blue-600 transition-colors">
-                      {deal.title}
-                    </h4>
-                    {deal.asking_price && (
-                      <p className="text-xs text-gray-500">{deal.asking_price}</p>
-                    )}
-                  </div>
+                <div className="flex items-center gap-1">
+                  Deal Name <SortIcon column="name" />
                 </div>
-
-                {/* Stage */}
-                <div className="col-span-2">
-                  <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
-                    {formatStageName(deal.current_stage)}
+              </th>
+              <th 
+                onClick={() => handleSort('stage')}
+                className="px-5 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider cursor-pointer hover:text-foreground"
+              >
+                <div className="flex items-center gap-1">
+                  Stage <SortIcon column="stage" />
+                </div>
+              </th>
+              <th 
+                onClick={() => handleSort('side')}
+                className="px-5 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider cursor-pointer hover:text-foreground"
+              >
+                <div className="flex items-center gap-1">
+                  Side <SortIcon column="side" />
+                </div>
+              </th>
+              <th 
+                onClick={() => handleSort('partner')}
+                className="px-5 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider cursor-pointer hover:text-foreground"
+              >
+                <div className="flex items-center gap-1">
+                  Partner <SortIcon column="partner" />
+                </div>
+              </th>
+              <th className="px-5 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                Next Action
+              </th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-border">
+            {sortedDeals.map((deal) => (
+              <tr
+                key={deal.id}
+                onClick={() => navigate(`/deals/${deal.id}`)}
+                className="hover:bg-muted/50 transition-colors cursor-pointer group"
+              >
+                <td className="px-5 py-3.5">
+                  <span className="font-medium text-sm text-foreground group-hover:text-[#D4AF37] transition-colors">
+                    {deal.name}
                   </span>
-                </div>
-
-                {/* Progress */}
-                <div className="col-span-2 flex items-center justify-center gap-2">
-                  <div className="flex items-center gap-1.5 text-gray-500">
-                    <FileText className="w-3.5 h-3.5" />
-                    <span className="text-sm">{deal.document_completion}%</span>
-                  </div>
-                  {deal.pending_requests > 0 && (
-                    <div className="flex items-center gap-1 text-amber-600">
-                      <MessageSquare className="w-3.5 h-3.5" />
-                      <span className="text-sm">{deal.pending_requests}</span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Days in Stage */}
-                <div className="col-span-2 text-center">
-                  <div className="inline-flex items-center gap-1.5 text-gray-500">
-                    <Clock className="w-3.5 h-3.5" />
-                    <span className="text-sm font-medium">{deal.days_in_stage}d</span>
-                  </div>
-                </div>
-
-                {/* Last Activity */}
-                <div className="col-span-2 flex items-center justify-end gap-2">
-                  <span className="text-sm text-gray-400">
-                    {deal.last_activity 
-                      ? formatDistanceToNow(new Date(deal.last_activity), { addSuffix: true })
-                      : 'No activity'
-                    }
+                </td>
+                <td className="px-5 py-3.5">
+                  <Badge variant="outline" className={cn("text-xs", stageColors[deal.stage] || 'bg-gray-100 text-gray-700')}>
+                    {deal.stage}
+                  </Badge>
+                </td>
+                <td className="px-5 py-3.5">
+                  <span className={cn(
+                    "text-xs font-medium px-2 py-1 rounded",
+                    deal.side === 'Buy' ? 'bg-emerald-100 text-emerald-700' : 'bg-sky-100 text-sky-700'
+                  )}>
+                    {deal.side}
                   </span>
-                  <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-blue-500 transition-colors" />
-                </div>
-              </div>
+                </td>
+                <td className="px-5 py-3.5">
+                  <span className="text-sm text-muted-foreground">{deal.partner}</span>
+                </td>
+                <td className="px-5 py-3.5">
+                  <span className="text-sm text-muted-foreground">{deal.nextAction}</span>
+                </td>
+              </tr>
             ))}
-          </div>
-
-          {sortedDeals.length > 8 && (
-            <div className="mt-4 pt-4 border-t border-gray-100 text-center">
-              <Link to="/deals">
-                <Button variant="ghost" className="text-blue-600 hover:text-blue-700 hover:bg-blue-50">
-                  View all {sortedDeals.length} deals →
-                </Button>
-              </Link>
-            </div>
-          )}
-        </>
-      )}
-    </Card>
+          </tbody>
+        </table>
+      </div>
+    </div>
   );
 };
