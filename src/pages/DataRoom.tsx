@@ -43,7 +43,9 @@ interface DealWithMetrics {
   asking_price: string | null;
   document_count: number;
   folder_count: number;
+  folders_with_docs: number;
   created_by: string;
+  completion_percent: number;
 }
 
 interface DataRoomMetrics {
@@ -112,12 +114,34 @@ const DataRoom = () => {
         return acc;
       }, {} as Record<string, number>) || {};
 
+      // Get folders with documents (for completion tracking)
+      const foldersWithDocsMap = folderCounts?.reduce((acc, folder) => {
+        if (folder.deal_id) {
+          // Count this folder if it has at least 1 document
+          const hasDoc = docCounts?.some(doc => doc.deal_id === folder.deal_id);
+          if (hasDoc) {
+            acc[folder.deal_id] = (acc[folder.deal_id] || 0) + 1;
+          }
+        }
+        return acc;
+      }, {} as Record<string, number>) || {};
+
       // Merge counts with deals
-      const dealsWithMetrics: DealWithMetrics[] = (dealsData || []).map(deal => ({
-        ...deal,
-        document_count: docCountMap[deal.id] || 0,
-        folder_count: folderCountMap[deal.id] || 0,
-      }));
+      const dealsWithMetrics: DealWithMetrics[] = (dealsData || []).map(deal => {
+        const folderCount = folderCountMap[deal.id] || 0;
+        const foldersWithDocs = Math.min(foldersWithDocsMap[deal.id] || 0, folderCount);
+        const completionPercent = folderCount > 0 
+          ? Math.round((foldersWithDocs / folderCount) * 100) 
+          : 0;
+        
+        return {
+          ...deal,
+          document_count: docCountMap[deal.id] || 0,
+          folder_count: folderCount,
+          folders_with_docs: foldersWithDocs,
+          completion_percent: completionPercent,
+        };
+      });
 
       setDeals(dealsWithMetrics);
 
@@ -202,17 +226,47 @@ const DataRoom = () => {
     { label: 'Data Room', href: '/data-room' },
   ];
 
-  const getStatusStyles = (status: string) => {
+  const getApprovalStatusStyles = (status: string) => {
     switch (status) {
       case 'active':
-        return 'bg-green-50 text-green-700 border-green-200';
+      case 'approved':
+        return 'bg-green-100 text-green-700 border-green-300 dark:bg-green-900/30 dark:text-green-400 dark:border-green-700';
+      case 'under_review':
+        return 'bg-blue-100 text-blue-700 border-blue-300 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-700';
+      case 'needs_revision':
+        return 'bg-orange-100 text-orange-700 border-orange-300 dark:bg-orange-900/30 dark:text-orange-400 dark:border-orange-700';
       case 'draft':
-        return 'bg-gray-50 text-gray-700 border-gray-200';
+        return 'bg-gray-100 text-gray-700 border-gray-300 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600';
       case 'closed':
-        return 'bg-blue-50 text-blue-700 border-blue-200';
+        return 'bg-gray-100 text-gray-500 border-gray-300 dark:bg-gray-800 dark:text-gray-500 dark:border-gray-600';
       default:
-        return 'bg-gray-50 text-gray-700 border-gray-200';
+        return 'bg-gray-100 text-gray-700 border-gray-300 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600';
     }
+  };
+
+  const getApprovalStatusLabel = (status: string) => {
+    switch (status) {
+      case 'draft':
+        return '🟡 Draft';
+      case 'needs_revision':
+        return '🟠 Needs Revision';
+      case 'under_review':
+        return '🔵 Under Review';
+      case 'approved':
+        return '🟢 Approved';
+      case 'active':
+        return '✅ Active';
+      case 'closed':
+        return '⚪ Closed';
+      default:
+        return status;
+    }
+  };
+
+  const getCompletionColor = (percent: number) => {
+    if (percent >= 80) return 'bg-green-500';
+    if (percent >= 50) return 'bg-yellow-500';
+    return 'bg-red-500';
   };
 
   if (loading) {
@@ -471,18 +525,39 @@ const DataRoom = () => {
                     {viewMode === 'grid' && (
                       <Badge 
                         variant="outline" 
-                        className={cn("text-xs font-medium flex-shrink-0", getStatusStyles(deal.status))}
+                        className={cn("text-xs font-medium flex-shrink-0", getApprovalStatusStyles(deal.status))}
                       >
-                        {deal.status}
+                        {getApprovalStatusLabel(deal.status)}
                       </Badge>
                     )}
+                  </div>
+
+                  {/* Completion Indicator */}
+                  <div className="mt-3">
+                    <div className="flex items-center gap-2 mb-1">
+                      <div className="flex-1 h-2 bg-secondary rounded-full overflow-hidden">
+                        <div 
+                          className={cn(
+                            "h-full rounded-full transition-all duration-300",
+                            getCompletionColor(deal.completion_percent)
+                          )}
+                          style={{ width: `${deal.completion_percent}%` }}
+                        />
+                      </div>
+                      <span className="text-xs font-semibold text-muted-foreground tabular-nums">
+                        {deal.completion_percent}%
+                      </span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      {deal.folders_with_docs} of {deal.folder_count} folders complete
+                    </p>
                   </div>
                 </div>
 
                 {/* Card Body */}
                 <div className={cn(
-                  "p-4",
-                  viewMode === 'list' && 'flex-1 flex items-center justify-between gap-4'
+                  "p-4 pt-0",
+                  viewMode === 'list' && 'flex-1 flex items-center justify-between gap-4 pt-4'
                 )}>
                   {viewMode === 'grid' ? (
                     <>
@@ -530,10 +605,21 @@ const DataRoom = () => {
                       <div className="flex items-center gap-6">
                         <Badge 
                           variant="outline" 
-                          className={cn("text-xs font-medium", getStatusStyles(deal.status))}
+                          className={cn("text-xs font-medium", getApprovalStatusStyles(deal.status))}
                         >
-                          {deal.status}
+                          {getApprovalStatusLabel(deal.status)}
                         </Badge>
+
+                        {/* Completion in list view */}
+                        <div className="flex items-center gap-2">
+                          <div className="w-16 h-1.5 bg-secondary rounded-full overflow-hidden">
+                            <div 
+                              className={cn("h-full rounded-full", getCompletionColor(deal.completion_percent))}
+                              style={{ width: `${deal.completion_percent}%` }}
+                            />
+                          </div>
+                          <span className="text-xs text-muted-foreground tabular-nums">{deal.completion_percent}%</span>
+                        </div>
                         
                         <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
                           <FileText className="w-4 h-4" />
