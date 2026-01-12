@@ -26,6 +26,7 @@ import { DataRoomDocumentTable } from './DataRoomDocumentTable';
 import { DataRoomDocumentGrid } from './DataRoomDocumentGrid';
 import { DataRoomEmptyContent } from './DataRoomEmptyContent';
 import { DataRoomBulkActions } from './DataRoomBulkActions';
+import { DataRoomSubmitForReview } from './DataRoomSubmitForReview';
 
 interface EnhancedDataRoomContentProps {
   documents: DataRoomDocument[];
@@ -43,6 +44,11 @@ interface EnhancedDataRoomContentProps {
   ) => Promise<boolean>;
   onNavigateHome: () => void;
   onNavigateCategory: (categoryId: string) => void;
+  // Submit for review props
+  dealId?: string;
+  approvalStatus?: string | null;
+  isOwner?: boolean;
+  onRefresh?: () => void;
 }
 
 export const EnhancedDataRoomContent: React.FC<EnhancedDataRoomContentProps> = ({
@@ -57,6 +63,10 @@ export const EnhancedDataRoomContent: React.FC<EnhancedDataRoomContentProps> = (
   onUpdateStatus,
   onNavigateHome,
   onNavigateCategory,
+  dealId,
+  approvalStatus,
+  isOwner = false,
+  onRefresh,
 }) => {
   const [selectedDocuments, setSelectedDocuments] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState('');
@@ -251,6 +261,18 @@ export const EnhancedDataRoomContent: React.FC<EnhancedDataRoomContentProps> = (
               <Upload className="h-4 w-4 mr-2" />
               Upload Files
             </Button>
+
+            {/* Submit for Review - for deal owners */}
+            {dealId && onRefresh && (
+              <DataRoomSubmitForReview
+                dealId={dealId}
+                approvalStatus={approvalStatus}
+                isOwner={isOwner}
+                folders={folders}
+                documents={documents}
+                onRefresh={onRefresh}
+              />
+            )}
           </div>
         </div>
 

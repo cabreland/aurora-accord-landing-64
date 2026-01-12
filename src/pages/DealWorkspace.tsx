@@ -364,6 +364,20 @@ const DealWorkspace: React.FC = () => {
                     setSelectedCategoryId(categoryId);
                     setSelectedFolderId(null);
                   }}
+                  // Submit for review props
+                  dealId={deal.id}
+                  approvalStatus={deal.approval_status}
+                  isOwner={deal.created_by === profile?.user_id}
+                  onRefresh={async () => {
+                    // Refetch deal data
+                    const { data } = await supabase
+                      .from('deals')
+                      .select('*')
+                      .eq('id', deal.id)
+                      .maybeSingle();
+                    if (data) setDeal(data as Deal);
+                    refreshDataRoom();
+                  }}
                 />
               </div>
             )}
