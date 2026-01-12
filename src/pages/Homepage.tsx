@@ -12,7 +12,7 @@ import {
 
 const Homepage = () => {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-[#0a1628]">
       {/* Navigation */}
       <CleanNavigation />
       

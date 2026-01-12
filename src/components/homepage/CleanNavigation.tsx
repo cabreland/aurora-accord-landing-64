@@ -37,20 +37,20 @@ const CleanNavigation = () => {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 8 }}
       transition={{ duration: 0.15 }}
-      className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-64 p-2 rounded-xl bg-white shadow-xl border border-gray-100"
+      className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-64 p-2 rounded-xl bg-[#1a2744] shadow-xl border border-white/10"
     >
       {items.map((item) => (
         <a
           key={item.label}
           href="#"
-          className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors group"
+          className="flex items-center gap-3 p-3 rounded-lg hover:bg-white/5 transition-colors group"
         >
-          <div className="w-9 h-9 rounded-lg bg-[#0a1628]/5 flex items-center justify-center group-hover:bg-[#0a1628]/10 transition-colors">
-            <item.icon className="w-4 h-4 text-[#0a1628]" />
+          <div className="w-9 h-9 rounded-lg bg-white/10 flex items-center justify-center group-hover:bg-white/15 transition-colors">
+            <item.icon className="w-4 h-4 text-white" />
           </div>
           <div>
-            <div className="text-sm font-medium text-gray-900">{item.label}</div>
-            <div className="text-xs text-gray-500">{item.description}</div>
+            <div className="text-sm font-medium text-white">{item.label}</div>
+            <div className="text-xs text-white/50">{item.description}</div>
           </div>
         </a>
       ))}
@@ -58,15 +58,15 @@ const CleanNavigation = () => {
   );
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-100">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-[#0a1628]/95 backdrop-blur-md border-b border-white/10">
       <div className="max-w-7xl mx-auto px-6">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-[#0a1628] flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-[#2563eb] flex items-center justify-center">
               <Shield className="w-4 h-4 text-white" />
             </div>
-            <span className="text-lg font-semibold text-[#0a1628] tracking-tight">DealFlow</span>
+            <span className="text-lg font-semibold text-white tracking-tight">DealFlow</span>
           </Link>
 
           {/* Center Navigation */}
@@ -77,7 +77,7 @@ const CleanNavigation = () => {
               onMouseEnter={() => setActiveDropdown('products')}
               onMouseLeave={() => setActiveDropdown(null)}
             >
-              <button className="flex items-center gap-1 px-4 py-2 text-sm text-gray-600 hover:text-gray-900 transition-colors">
+              <button className="flex items-center gap-1 px-4 py-2 text-sm text-white/70 hover:text-white transition-colors">
                 Products
                 <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${activeDropdown === 'products' ? 'rotate-180' : ''}`} />
               </button>
@@ -92,7 +92,7 @@ const CleanNavigation = () => {
               onMouseEnter={() => setActiveDropdown('solutions')}
               onMouseLeave={() => setActiveDropdown(null)}
             >
-              <button className="flex items-center gap-1 px-4 py-2 text-sm text-gray-600 hover:text-gray-900 transition-colors">
+              <button className="flex items-center gap-1 px-4 py-2 text-sm text-white/70 hover:text-white transition-colors">
                 Solutions
                 <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${activeDropdown === 'solutions' ? 'rotate-180' : ''}`} />
               </button>
@@ -102,24 +102,21 @@ const CleanNavigation = () => {
             </div>
 
             {/* Static Links */}
-            <a href="#customers" className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900 transition-colors">
+            <a href="#customers" className="px-4 py-2 text-sm text-white/70 hover:text-white transition-colors">
               Customers
             </a>
-            <a href="#resources" className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900 transition-colors">
+            <a href="#resources" className="px-4 py-2 text-sm text-white/70 hover:text-white transition-colors">
               Resources
             </a>
-            <a href="#pricing" className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900 transition-colors">
+            <a href="#pricing" className="px-4 py-2 text-sm text-white/70 hover:text-white transition-colors">
               Pricing
-            </a>
-            <a href="#company" className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900 transition-colors">
-              Company
             </a>
           </div>
 
           {/* Right Side */}
           <div className="flex items-center gap-3">
             <Link to="/auth">
-              <Button variant="ghost" size="sm" className="text-gray-600 hover:text-gray-900 hover:bg-gray-50">
+              <Button variant="ghost" size="sm" className="text-white/70 hover:text-white hover:bg-white/10">
                 Log in
               </Button>
             </Link>
