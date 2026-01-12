@@ -6,6 +6,7 @@ import { ChevronLeft, ChevronRight, Check } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { setupDealSystems } from '@/lib/deal-system-setup';
 
 import { BasicInfoStep } from './BasicInfoStep';
 import { CompanyDetailsStep } from './CompanyDetailsStep';
@@ -15,6 +16,8 @@ import { FounderTeamStep } from './FounderTeamStep';
 import { StrategicAnalysisStep } from './StrategicAnalysisStep';
 import { EnhancedDocumentsStep } from './EnhancedDocumentsStep';
 import { PublishingStep } from './PublishingStep';
+import { SystemSetupStep } from './SystemSetupStep';
+import { DealSuccessModal } from './DealSuccessModal';
 
 interface DealWizardProps {
   open: boolean;
@@ -73,6 +76,10 @@ export interface DealFormData {
   priority: 'low' | 'medium' | 'high';
   publish_immediately: boolean;
   scheduled_publish: Date | null;
+  
+  // System Setup
+  createDueDiligence: boolean;
+  createDataRoom: boolean;
 }
 
 const steps = [
@@ -83,6 +90,7 @@ const steps = [
   { id: 'founder', title: 'Founder & Team', component: FounderTeamStep },
   { id: 'strategic', title: 'Strategic Analysis', component: StrategicAnalysisStep },
   { id: 'documents', title: 'Documents', component: EnhancedDocumentsStep },
+  { id: 'system', title: 'System Setup', component: SystemSetupStep },
   { id: 'publishing', title: 'Status & Publishing', component: PublishingStep },
 ];
 
@@ -94,6 +102,9 @@ export const DealWizard: React.FC<DealWizardProps> = ({
   const [currentStep, setCurrentStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const { user } = useAuth();
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [createdDealId, setCreatedDealId] = useState<string>('');
+  const [createdDealName, setCreatedDealName] = useState<string>('');
   const [formData, setFormData] = useState<DealFormData>({
     title: '',
     company_name: '',
@@ -130,6 +141,8 @@ export const DealWizard: React.FC<DealWizardProps> = ({
     priority: 'medium',
     publish_immediately: false,
     scheduled_publish: null,
+    createDueDiligence: true,
+    createDataRoom: true,
   });
   const { toast } = useToast();
 
@@ -312,12 +325,33 @@ export const DealWizard: React.FC<DealWizardProps> = ({
         // Don't fail the entire process if company creation fails
       }
 
-      toast({
-        title: "Success",
-        description: `Deal created successfully with ${formData.documents.length} documents uploaded`,
-      });
+      // Setup Due Diligence Tracker and Data Room if selected
+      if (formData.createDueDiligence || formData.createDataRoom) {
+        const setupResults = await setupDealSystems(deal.id, {
+          dueDiligence: formData.createDueDiligence,
+          dataRoom: formData.createDataRoom
+        });
 
-      // Reset form and close
+        if (formData.createDueDiligence && setupResults.dueDiligence?.success) {
+          toast({
+            title: "Due Diligence Tracker Created",
+            description: `${setupResults.dueDiligence.requestsCreated} requests ready for tracking`,
+          });
+        }
+
+        if (formData.createDataRoom && setupResults.dataRoom?.success) {
+          toast({
+            title: "Data Room Created",
+            description: `${setupResults.dataRoom.foldersCreated} folders ready for uploads`,
+          });
+        }
+      }
+
+      // Store deal info for success modal
+      setCreatedDealId(deal.id);
+      setCreatedDealName(formData.company_name);
+
+      // Reset form
       setFormData({
         title: '',
         company_name: '',
@@ -354,10 +388,15 @@ export const DealWizard: React.FC<DealWizardProps> = ({
         priority: 'medium',
         publish_immediately: false,
         scheduled_publish: null,
+        createDueDiligence: true,
+        createDataRoom: true,
       });
       setCurrentStep(0);
       onDealCreated();
       onOpenChange(false);
+      
+      // Show success modal
+      setShowSuccessModal(true);
 
     } catch (error: any) {
       console.error('Error creating deal:', error);
@@ -375,6 +414,7 @@ export const DealWizard: React.FC<DealWizardProps> = ({
   const progress = ((currentStep + 1) / steps.length) * 100;
 
   return (
+    <>
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="w-[95vw] max-w-6xl h-[95vh] overflow-hidden p-0">
         <div className="flex flex-col h-full">
@@ -506,5 +546,18 @@ export const DealWizard: React.FC<DealWizardProps> = ({
         </div>
       </DialogContent>
     </Dialog>
+    
+    {/* Success Modal */}
+    <DealSuccessModal
+      open={showSuccessModal}
+      onOpenChange={setShowSuccessModal}
+      dealId={createdDealId}
+      dealName={createdDealName}
+      industry={formData.industry}
+      askingPrice={formData.asking_price}
+      createdDueDiligence={formData.createDueDiligence}
+      createdDataRoom={formData.createDataRoom}
+    />
+  </>
   );
 };
