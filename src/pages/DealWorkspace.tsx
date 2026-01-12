@@ -17,12 +17,14 @@ import {
   DealTab 
 } from '@/components/deal-workspace';
 import { DealSettingsTab } from '@/components/deals/tabs';
-import { EnhancedDataRoomSidebar } from '@/components/data-room/EnhancedDataRoomSidebar';
-import { EnhancedDataRoomContent } from '@/components/data-room/EnhancedDataRoomContent';
-import { DataRoomMetricsBar } from '@/components/data-room/DataRoomMetricsBar';
-import { DataRoomStatsBar } from '@/components/data-room/DataRoomStatsBar';
-import { DataRoomEmptyState } from '@/components/data-room/DataRoomEmptyState';
-import { DataRoomApprovalBar } from '@/components/data-room/DataRoomApprovalBar';
+import { 
+  EnhancedDataRoomSidebar, 
+  EnhancedDataRoomContent, 
+  DataRoomMetricsBar, 
+  DataRoomStatsBar, 
+  DataRoomEmptyState, 
+  DataRoomApprovalBar 
+} from '@/components/data-room';
 import { useDataRoom } from '@/hooks/useDataRoom';
 import { useDiligenceRequests } from '@/hooks/useDiligenceTracker';
 import { useDealTeam } from '@/hooks/useDealTeam';
