@@ -7,6 +7,7 @@ import { Shield, Users } from 'lucide-react';
 import UserInviteDialog from './UserInviteDialog';
 import UserTable from './UserTable';
 import UserForceRemoveDialog from './UserForceRemoveDialog';
+import AddPartnerTeamModal from './AddPartnerTeamModal';
 import { Database } from '@/integrations/supabase/types';
 
 type UserRole = Database['public']['Enums']['user_role'];
@@ -128,6 +129,7 @@ const UserManagement = () => {
               </p>
             </div>
             <div className="flex gap-2">
+              <AddPartnerTeamModal onSuccess={fetchUsers} />
               <UserForceRemoveDialog onRemoveSuccess={fetchUsers} />
               <UserInviteDialog onInviteSuccess={fetchUsers} />
             </div>
