@@ -2299,6 +2299,121 @@ export type Database = {
           },
         ]
       }
+      partner_deal_access: {
+        Row: {
+          access_from: string | null
+          access_until: string | null
+          can_answer_dd_questions: boolean | null
+          can_approve_data_room: boolean | null
+          can_edit_deal_info: boolean | null
+          can_manage_users: boolean | null
+          can_message_buyers: boolean | null
+          can_upload_documents: boolean | null
+          can_view_buyer_activity: boolean | null
+          can_view_data_room: boolean | null
+          deal_id: string
+          granted_at: string | null
+          granted_by: string | null
+          id: string
+          last_accessed_at: string | null
+          partner_id: string
+          partner_role: string
+          revenue_share_percent: number | null
+        }
+        Insert: {
+          access_from?: string | null
+          access_until?: string | null
+          can_answer_dd_questions?: boolean | null
+          can_approve_data_room?: boolean | null
+          can_edit_deal_info?: boolean | null
+          can_manage_users?: boolean | null
+          can_message_buyers?: boolean | null
+          can_upload_documents?: boolean | null
+          can_view_buyer_activity?: boolean | null
+          can_view_data_room?: boolean | null
+          deal_id: string
+          granted_at?: string | null
+          granted_by?: string | null
+          id?: string
+          last_accessed_at?: string | null
+          partner_id: string
+          partner_role: string
+          revenue_share_percent?: number | null
+        }
+        Update: {
+          access_from?: string | null
+          access_until?: string | null
+          can_answer_dd_questions?: boolean | null
+          can_approve_data_room?: boolean | null
+          can_edit_deal_info?: boolean | null
+          can_manage_users?: boolean | null
+          can_message_buyers?: boolean | null
+          can_upload_documents?: boolean | null
+          can_view_buyer_activity?: boolean | null
+          can_view_data_room?: boolean | null
+          deal_id?: string
+          granted_at?: string | null
+          granted_by?: string | null
+          id?: string
+          last_accessed_at?: string | null
+          partner_id?: string
+          partner_role?: string
+          revenue_share_percent?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_deal_access_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_deal_access_granted_by_fkey"
+            columns: ["granted_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "partner_deal_access_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      partner_teams: {
+        Row: {
+          company_name: string
+          created_at: string | null
+          id: string
+          primary_contact_email: string
+          team_name: string
+          team_type: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          company_name: string
+          created_at?: string | null
+          id?: string
+          primary_contact_email: string
+          team_name: string
+          team_type?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          company_name?: string
+          created_at?: string | null
+          id?: string
+          primary_contact_email?: string
+          team_name?: string
+          team_type?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       platform_settings: {
         Row: {
           key: string
@@ -2329,6 +2444,7 @@ export type Database = {
           last_name: string | null
           onboarding_completed: boolean | null
           onboarding_skipped: boolean | null
+          partner_team_id: string | null
           profile_picture_url: string | null
           role: Database["public"]["Enums"]["user_role"]
           updated_at: string
@@ -2342,6 +2458,7 @@ export type Database = {
           last_name?: string | null
           onboarding_completed?: boolean | null
           onboarding_skipped?: boolean | null
+          partner_team_id?: string | null
           profile_picture_url?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string
@@ -2355,12 +2472,21 @@ export type Database = {
           last_name?: string | null
           onboarding_completed?: boolean | null
           onboarding_skipped?: boolean | null
+          partner_team_id?: string | null
           profile_picture_url?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_partner_team_id_fkey"
+            columns: ["partner_team_id"]
+            isOneToOne: false
+            referencedRelation: "partner_teams"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       registration_settings: {
         Row: {
