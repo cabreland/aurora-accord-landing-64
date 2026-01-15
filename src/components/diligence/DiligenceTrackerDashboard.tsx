@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Plus, Settings, Building2, Search, RefreshCw, Loader2, Briefcase, FileText, CheckCircle, AlertTriangle, X } from 'lucide-react';
+import { Plus, Settings, Building2, Search, RefreshCw, Loader2, Briefcase, FileText, CheckCircle, AlertTriangle, X, Calendar, BarChart3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useDealsWithDiligence, useDiligenceRequests, useDiligenceCategories } from '@/hooks/useDiligenceTracker';
@@ -7,7 +7,7 @@ import { useDebounce } from '@/hooks/useDebounce';
 import CreateTrackerDialog from './CreateTrackerDialog';
 import ClickableMetricCard from './dashboard/ClickableMetricCard';
 
-import UrgentItemsPanel from './dashboard/UrgentItemsPanel';
+import PriorityActionsPanel from './dashboard/PriorityActionsPanel';
 import EnhancedTrackerCard from './dashboard/EnhancedTrackerCard';
 import TrackerTableView from './dashboard/TrackerTableView';
 import TrackerKanbanView from './dashboard/TrackerKanbanView';
@@ -16,6 +16,8 @@ import AnalyticsWidgets from './dashboard/AnalyticsWidgets';
 import AdvancedFilters, { ViewMode } from './dashboard/AdvancedFilters';
 import ExportDropdown from './dashboard/ExportDropdown';
 import DiligenceActivityFeed from './dashboard/DiligenceActivityFeed';
+import DeadlinesModal from './dashboard/DeadlinesModal';
+import ReportsModal from './dashboard/ReportsModal';
 import { isPast, isToday, differenceInDays } from 'date-fns';
 
 const DiligenceTrackerDashboard: React.FC = () => {
@@ -37,6 +39,10 @@ const DiligenceTrackerDashboard: React.FC = () => {
   // Active metric filter (for clickable cards)
   const [activeMetricFilter, setActiveMetricFilter] = useState<string | null>(null);
   
+  // Modal states
+  const [showDeadlinesModal, setShowDeadlinesModal] = useState(false);
+  const [showReportsModal, setShowReportsModal] = useState(false);
+  
   const { data: deals = [], isLoading: dealsLoading } = useDealsWithDiligence();
   const { data: allRequests = [] } = useDiligenceRequests();
   const { data: categories = [] } = useDiligenceCategories();
@@ -54,11 +60,20 @@ const DiligenceTrackerDashboard: React.FC = () => {
       return isPast(dueDate) && !isToday(dueDate);
     }).length;
     
+    // Calculate upcoming deadlines (next 7 days, excluding overdue)
+    const upcomingDeadlines = allRequests.filter(r => {
+      if (r.status === 'completed' || !r.due_date) return false;
+      const dueDate = new Date(r.due_date);
+      const daysUntil = differenceInDays(dueDate, new Date());
+      return daysUntil >= 0 && daysUntil <= 7;
+    }).length;
+    
     return {
       activeDeals: deals.length,
       openRequests,
       completedRequests, // Now "Satisfied"
       overdueRequests,
+      upcomingDeadlines,
       totalRequests: allRequests.length,
       completionRate: allRequests.length > 0 
         ? Math.round((completedRequests / allRequests.length) * 100) 
@@ -361,8 +376,8 @@ const DiligenceTrackerDashboard: React.FC = () => {
         </div>
       </div>
       
-      {/* Clickable Metrics - Replaced ExecutiveSummary */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      {/* Clickable Metrics - 6 cards in 2 rows */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         <ClickableMetricCard
           icon={Briefcase}
           value={stats.activeDeals}
@@ -399,6 +414,24 @@ const DiligenceTrackerDashboard: React.FC = () => {
           onClick={() => handleMetricClick('overdue')}
           isActive={activeMetricFilter === 'overdue'}
         />
+        <ClickableMetricCard
+          icon={Calendar}
+          value={stats.upcomingDeadlines}
+          label="Deadlines"
+          description="Due this week"
+          color="amber"
+          onClick={() => setShowDeadlinesModal(true)}
+          isActive={false}
+        />
+        <ClickableMetricCard
+          icon={BarChart3}
+          value={stats.completionRate}
+          label="Stats"
+          description="View reports"
+          color="blue"
+          onClick={() => setShowReportsModal(true)}
+          isActive={false}
+        />
       </div>
 
       {/* Clear Filter Button - Show when metric filter is active */}
@@ -423,9 +456,9 @@ const DiligenceTrackerDashboard: React.FC = () => {
       )}
       
       
-      {/* Urgent Items - Only show if there are urgent items */}
+      {/* Priority Actions - Actionable urgent items panel */}
       {urgentItems.length > 0 && (
-        <UrgentItemsPanel 
+        <PriorityActionsPanel 
           items={urgentItems} 
           totalCount={urgentItems.length} 
         />
@@ -597,6 +630,25 @@ const DiligenceTrackerDashboard: React.FC = () => {
       <CreateTrackerDialog 
         open={createDialogOpen} 
         onOpenChange={setCreateDialogOpen} 
+      />
+      
+      {/* Deadlines Modal */}
+      <DeadlinesModal
+        open={showDeadlinesModal}
+        onOpenChange={setShowDeadlinesModal}
+        items={urgentItems}
+      />
+      
+      {/* Reports Modal */}
+      <ReportsModal
+        open={showReportsModal}
+        onOpenChange={setShowReportsModal}
+        completionTrend={analyticsData.completionTrend}
+        teamStats={analyticsData.teamStats}
+        avgCompletionDays={analyticsData.avgCompletionDays}
+        completionRate={stats.completionRate}
+        totalCompleted={stats.completedRequests}
+        totalOpen={stats.openRequests}
       />
     </div>
   );
