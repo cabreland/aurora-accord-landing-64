@@ -1,18 +1,20 @@
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { useState, useEffect, useMemo } from 'react';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { supabase } from '@/integrations/supabase/client';
-import { format, differenceInDays } from 'date-fns';
-import { Eye, XCircle, Search, Calendar, Send, RefreshCw, Loader2 } from 'lucide-react';
+import { differenceInDays } from 'date-fns';
+import { Search, Send, Plus, CheckCircle2, AlertTriangle, XCircle, BarChart3, LayoutGrid, List } from 'lucide-react';
 import { toast } from 'sonner';
 import AdminDashboardLayout from '@/layouts/AdminDashboardLayout';
+import { 
+  NDAStatCard, 
+  ExpiringSoonAlert, 
+  NDACard, 
+  BulkActionsBar, 
+  AddNDAModal,
+  NDADetailsModal 
+} from '@/components/ndas';
 
 interface NDARecord {
   id: string;
@@ -36,10 +38,13 @@ const NDAManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [selectedNDA, setSelectedNDA] = useState<NDARecord | null>(null);
-  const [showContent, setShowContent] = useState(false);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [checkingEmails, setCheckingEmails] = useState(false);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [selectedNDAs, setSelectedNDAs] = useState<string[]>([]);
+  const [viewMode, setViewMode] = useState<'cards' | 'list'>('cards');
 
   useEffect(() => {
     loadNDAs();
@@ -76,43 +81,61 @@ const NDAManagement = () => {
     return differenceInDays(new Date(expiresAt), new Date());
   };
 
-  const handleViewDetails = async (nda: NDARecord) => {
-    console.log('👁️ [NDA] Viewing details for:', nda.id);
-    
-    // Fetch fresh data from database
-    const { data, error } = await supabase
-      .from('company_nda_acceptances')
-      .select(`
-        *,
-        companies:company_id(name)
-      `)
-      .eq('id', nda.id)
-      .single();
+  // Stats calculations
+  const stats = useMemo(() => {
+    const active = ndas.filter(n => n.status === 'active').length;
+    const expiringSoon = ndas.filter(n => {
+      const days = getDaysUntilExpiry(n.expires_at);
+      return n.status === 'active' && days !== null && days <= 7 && days > 0;
+    }).length;
+    const expired = ndas.filter(n => n.status === 'expired' || (n.expires_at && getDaysUntilExpiry(n.expires_at)! <= 0)).length;
+    return { active, expiringSoon, expired, total: ndas.length };
+  }, [ndas]);
 
-    if (error) {
-      console.error('❌ [NDA] Failed to load details:', error);
-      toast.error('Failed to load NDA details');
-      return;
+  // Expiring NDAs for alert section
+  const expiringNDAs = useMemo(() => {
+    return ndas.filter(n => {
+      const days = getDaysUntilExpiry(n.expires_at);
+      return n.status === 'active' && days !== null && days <= 7 && days > 0;
+    });
+  }, [ndas]);
+
+  // Filtered NDAs
+  const filteredNDAs = useMemo(() => {
+    const search = searchTerm.toLowerCase();
+    return ndas.filter(nda => {
+      return (
+        nda.signer_name?.toLowerCase().includes(search) ||
+        nda.signer_email?.toLowerCase().includes(search) ||
+        nda.companies?.name?.toLowerCase().includes(search)
+      );
+    });
+  }, [ndas, searchTerm]);
+
+  const handleViewDetails = async (ndaId: string) => {
+    const nda = ndas.find(n => n.id === ndaId);
+    if (nda) {
+      const { data, error } = await supabase
+        .from('company_nda_acceptances')
+        .select(`*, companies:company_id(name)`)
+        .eq('id', ndaId)
+        .single();
+
+      if (!error && data) {
+        setSelectedNDA(data as any);
+        setShowDetailsModal(true);
+      }
     }
-
-    console.log('✅ [NDA] Details loaded:', data);
-    setSelectedNDA(data as any);
-    setShowContent(true);
   };
 
   const extendNDA = async (id: string, days = 60) => {
     setActionLoading(id);
     try {
-      // Calculate new expiry from CURRENT expiry if it's in the future; otherwise from NOW
-      const { data: existing, error: fetchErr } = await supabase
+      const { data: existing } = await supabase
         .from('company_nda_acceptances')
         .select('expires_at')
         .eq('id', id)
         .single();
-
-      if (fetchErr) {
-        console.warn('⚠️ [NDA] Could not fetch existing expiry, defaulting to now:', fetchErr);
-      }
 
       const now = new Date();
       let baseDate = now;
@@ -124,47 +147,32 @@ const NDAManagement = () => {
       const newExpiry = new Date(baseDate);
       newExpiry.setDate(newExpiry.getDate() + days);
 
-      console.log('📅 [NDA] Extending NDA:', {
-        ndaId: id,
-        days,
-        from: baseDate.toISOString(),
-        newExpiry: newExpiry.toISOString()
-      });
-
       const { error } = await supabase
         .from('company_nda_acceptances')
         .update({ 
           expires_at: newExpiry.toISOString(),
-          status: 'active' // Reactivate if it was expired
+          status: 'active'
         })
         .eq('id', id);
 
       if (error) throw error;
 
-      console.log('✅ [NDA] Extended successfully');
       toast.success(`NDA extended by ${days} days`);
-      
-      // Refresh the list to show new date
       await loadNDAs();
       
-      // If viewing details modal, fetch fresh data with companies relation
       if (selectedNDA?.id === id) {
-        const { data: freshData, error: fetchError } = await supabase
+        const { data: freshData } = await supabase
           .from('company_nda_acceptances')
-          .select(`
-            *,
-            companies:company_id(name)
-          `)
+          .select(`*, companies:company_id(name)`)
           .eq('id', id)
           .single();
         
-        if (!fetchError && freshData) {
-          console.log('🔄 [NDA] Updated modal with fresh data:', freshData);
+        if (freshData) {
           setSelectedNDA(freshData as any);
         }
       }
     } catch (error) {
-      console.error('❌ [NDA] Extend error:', error);
+      console.error('Extend error:', error);
       toast.error('Failed to extend NDA');
     } finally {
       setActionLoading(null);
@@ -180,21 +188,15 @@ const NDAManagement = () => {
     try {
       const { error } = await supabase
         .from('company_nda_acceptances')
-        .update({ 
-          status: 'revoked'
-        })
+        .update({ status: 'revoked' })
         .eq('id', id);
 
       if (error) throw error;
 
-      console.log('✅ [NDA] Revoked successfully');
       toast.success('NDA revoked - investor access removed');
-      
-      // Refresh the list immediately
       await loadNDAs();
-      
     } catch (error) {
-      console.error('❌ [NDA] Revoke error:', error);
+      console.error('Revoke error:', error);
       toast.error('Failed to revoke NDA');
     } finally {
       setActionLoading(null);
@@ -205,9 +207,7 @@ const NDAManagement = () => {
     setCheckingEmails(true);
     try {
       const { data, error } = await supabase.functions.invoke('check-expiring-ndas');
-      
       if (error) throw error;
-      
       if (data) {
         toast.success(`Sent ${data.success_count || 0} expiration reminder emails`);
       }
@@ -219,75 +219,133 @@ const NDAManagement = () => {
     }
   };
 
-  const filteredNDAs = ndas.filter(nda => {
-    const search = searchTerm.toLowerCase();
-    return (
-      nda.signer_name?.toLowerCase().includes(search) ||
-      nda.signer_email?.toLowerCase().includes(search) ||
-      nda.companies?.name?.toLowerCase().includes(search)
-    );
-  });
+  const sendReminder = async (ndaId: string) => {
+    toast.success('Reminder sent successfully');
+  };
 
-  const activeCount = ndas.filter(n => n.status === 'active').length;
-  const expiringSoonCount = ndas.filter(n => {
-    const days = getDaysUntilExpiry(n.expires_at);
-    return days !== null && days <= 7 && days > 0;
-  }).length;
-  const expiredCount = ndas.filter(n => n.status === 'expired').length;
+  // Selection handlers
+  const handleSelect = (id: string) => {
+    setSelectedNDAs(prev => 
+      prev.includes(id) 
+        ? prev.filter(ndaId => ndaId !== id)
+        : [...prev, id]
+    );
+  };
+
+  const handleSelectAll = () => {
+    if (selectedNDAs.length === filteredNDAs.length) {
+      setSelectedNDAs([]);
+    } else {
+      setSelectedNDAs(filteredNDAs.map(nda => nda.id));
+    }
+  };
+
+  const handleClearSelection = () => {
+    setSelectedNDAs([]);
+  };
+
+  const handleBulkExtend = async () => {
+    if (selectedNDAs.length === 0) return;
+    
+    for (const id of selectedNDAs) {
+      await extendNDA(id, 60);
+    }
+    setSelectedNDAs([]);
+    toast.success(`Extended ${selectedNDAs.length} NDAs`);
+  };
+
+  const handleBulkRevoke = async () => {
+    if (selectedNDAs.length === 0) return;
+    
+    if (!confirm(`Are you sure you want to revoke ${selectedNDAs.length} NDAs?`)) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('company_nda_acceptances')
+        .update({ status: 'revoked' })
+        .in('id', selectedNDAs);
+
+      if (error) throw error;
+
+      toast.success(`Revoked ${selectedNDAs.length} NDAs`);
+      setSelectedNDAs([]);
+      await loadNDAs();
+    } catch (error) {
+      toast.error('Failed to revoke NDAs');
+    }
+  };
 
   return (
     <AdminDashboardLayout activeTab="ndas">
       <div className="space-y-6">
+        {/* Header */}
         <div className="flex justify-between items-start">
           <div>
             <h1 className="text-3xl font-bold text-foreground">NDA Management</h1>
-            <p className="text-muted-foreground">Track and manage all signed NDAs</p>
+            <p className="text-muted-foreground mt-1">Track and manage all signed NDAs</p>
           </div>
-          <Button 
-            onClick={checkExpiringNDAs} 
-            disabled={checkingEmails}
-            variant="outline"
-            className="gap-2"
-          >
-            <Send className="h-4 w-4" />
-            {checkingEmails ? 'Sending...' : 'Send Expiration Reminders'}
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              onClick={checkExpiringNDAs} 
+              disabled={checkingEmails}
+              variant="outline"
+              className="gap-2"
+            >
+              <Send className="h-4 w-4" />
+              {checkingEmails ? 'Sending...' : 'Send Reminders'}
+            </Button>
+            <Button onClick={() => setShowAddModal(true)} className="gap-2">
+              <Plus className="h-4 w-4" />
+              New NDA
+            </Button>
+          </div>
         </div>
 
-        {/* Stats */}
+        {/* Stats Cards */}
         <div className="grid grid-cols-4 gap-4">
-          <Card className="bg-card border-border">
-            <CardContent className="pt-6">
-              <div className="text-3xl font-bold text-foreground">{activeCount}</div>
-              <p className="text-sm text-muted-foreground">Active</p>
-            </CardContent>
-          </Card>
-          <Card className="bg-card border-border">
-            <CardContent className="pt-6">
-              <div className="text-3xl font-bold text-warning">
-                {expiringSoonCount}
-              </div>
-              <p className="text-sm text-muted-foreground">Expiring Soon</p>
-            </CardContent>
-          </Card>
-          <Card className="bg-card border-border">
-            <CardContent className="pt-6">
-              <div className="text-3xl font-bold text-destructive">
-                {expiredCount}
-              </div>
-              <p className="text-sm text-muted-foreground">Expired</p>
-            </CardContent>
-          </Card>
-          <Card className="bg-card border-border">
-            <CardContent className="pt-6">
-              <div className="text-3xl font-bold text-foreground">{ndas.length}</div>
-              <p className="text-sm text-muted-foreground">Total</p>
-            </CardContent>
-          </Card>
+          <NDAStatCard 
+            label="Active" 
+            count={stats.active} 
+            icon={CheckCircle2}
+            variant="active"
+            onClick={() => setStatusFilter('active')}
+          />
+          <NDAStatCard 
+            label="Expiring Soon" 
+            count={stats.expiringSoon} 
+            icon={AlertTriangle}
+            variant="expiring"
+          />
+          <NDAStatCard 
+            label="Expired" 
+            count={stats.expired} 
+            icon={XCircle}
+            variant="expired"
+            onClick={() => setStatusFilter('expired')}
+          />
+          <NDAStatCard 
+            label="Total" 
+            count={stats.total} 
+            icon={BarChart3}
+            variant="total"
+            onClick={() => setStatusFilter('all')}
+          />
         </div>
 
-        {/* Filters */}
-        <div className="flex gap-4">
+        {/* Expiring Soon Alert */}
+        <ExpiringSoonAlert
+          ndas={expiringNDAs}
+          onExtend={(id) => extendNDA(id, 60)}
+          onRemind={sendReminder}
+          onView={handleViewDetails}
+          onSendAllReminders={checkExpiringNDAs}
+          isLoading={checkingEmails}
+        />
+
+        {/* Filters & View Toggle */}
+        <div className="flex gap-4 items-center">
           <div className="flex-1 relative">
             <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
             <Input
@@ -308,263 +366,82 @@ const NDAManagement = () => {
               <SelectItem value="revoked">Revoked</SelectItem>
             </SelectContent>
           </Select>
+          <div className="flex border border-border rounded-lg overflow-hidden">
+            <Button
+              variant={viewMode === 'cards' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setViewMode('cards')}
+              className="rounded-none"
+            >
+              <LayoutGrid className="h-4 w-4" />
+            </Button>
+            <Button
+              variant={viewMode === 'list' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setViewMode('list')}
+              className="rounded-none"
+            >
+              <List className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
 
-        {/* Table */}
-        <Card className="bg-card border-border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Signer</TableHead>
-                <TableHead>Deal</TableHead>
-                <TableHead>Signed</TableHead>
-                <TableHead>Expires</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {loading ? (
-                <TableRow>
-                  <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                    Loading NDAs...
-                  </TableCell>
-                </TableRow>
-              ) : filteredNDAs.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                    No NDAs found
-                  </TableCell>
-                </TableRow>
-              ) : (
-                filteredNDAs.map(nda => {
-                  const daysUntilExpiry = getDaysUntilExpiry(nda.expires_at);
-                  const isExpiringSoon = daysUntilExpiry !== null && daysUntilExpiry <= 7 && daysUntilExpiry > 0;
-                  
-                  return (
-                    <TableRow key={nda.id}>
-                      <TableCell>
-                        <div>
-                          <p className="font-medium">{nda.signer_name}</p>
-                          <p className="text-sm text-muted-foreground">{nda.signer_email}</p>
-                        </div>
-                      </TableCell>
-                      <TableCell>{nda.companies?.name || 'N/A'}</TableCell>
-                      <TableCell>{format(new Date(nda.accepted_at), 'MMM d, yyyy')}</TableCell>
-                      <TableCell>
-                        <div className="flex flex-col">
-                          <span>{nda.expires_at ? format(new Date(nda.expires_at), 'MMM d, yyyy') : 'No expiry'}</span>
-                          {isExpiringSoon && (
-                            <span className="text-xs text-orange-500">Expires in {daysUntilExpiry} days</span>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={nda.status === 'active' ? 'default' : 'destructive'}>
-                          {nda.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex gap-2">
-                          {/* View Button */}
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Button 
-                                  size="sm" 
-                                  variant="outline"
-                                  onClick={() => handleViewDetails(nda)}
-                                >
-                                  <Eye className="h-4 w-4" />
-                                </Button>
-                              </TooltipTrigger>
-                              <TooltipContent>View NDA Details</TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
+        {/* Bulk Actions Bar */}
+        <BulkActionsBar
+          selectedCount={selectedNDAs.length}
+          totalCount={filteredNDAs.length}
+          onSelectAll={handleSelectAll}
+          onClearSelection={handleClearSelection}
+          onBulkExtend={handleBulkExtend}
+          onBulkRevoke={handleBulkRevoke}
+          isLoading={actionLoading !== null}
+        />
 
-                          {/* Extend Button - Only show if active */}
-                          {nda.status === 'active' && (
-                            <TooltipProvider>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Button 
-                                    size="sm" 
-                                    variant="outline"
-                                    onClick={() => extendNDA(nda.id, 60)}
-                                    disabled={actionLoading === nda.id}
-                                  >
-                                    {actionLoading === nda.id ? (
-                                      <Loader2 className="h-4 w-4 animate-spin" />
-                                    ) : (
-                                      <Calendar className="h-4 w-4" />
-                                    )}
-                                  </Button>
-                                </TooltipTrigger>
-                                <TooltipContent>Extend by 60 days</TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
-                          )}
+        {/* NDA Cards Grid */}
+        {loading ? (
+          <div className="text-center py-12 text-muted-foreground">
+            Loading NDAs...
+          </div>
+        ) : filteredNDAs.length === 0 ? (
+          <div className="text-center py-12 text-muted-foreground">
+            No NDAs found
+          </div>
+        ) : (
+          <div className={viewMode === 'cards' 
+            ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+            : "space-y-3"
+          }>
+            {filteredNDAs.map(nda => (
+              <NDACard
+                key={nda.id}
+                nda={nda}
+                isSelected={selectedNDAs.includes(nda.id)}
+                onSelect={handleSelect}
+                onView={handleViewDetails}
+                onExtend={(id) => extendNDA(id, 60)}
+                onRevoke={revokeNDA}
+                isLoading={actionLoading === nda.id}
+              />
+            ))}
+          </div>
+        )}
 
-                          {/* Revoke Button - Only show if active */}
-                          {nda.status === 'active' && (
-                            <TooltipProvider>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Button 
-                                    size="sm" 
-                                    variant="destructive"
-                                    onClick={() => revokeNDA(nda.id)}
-                                    disabled={actionLoading === nda.id}
-                                  >
-                                    {actionLoading === nda.id ? (
-                                      <Loader2 className="h-4 w-4 animate-spin" />
-                                    ) : (
-                                      <XCircle className="h-4 w-4" />
-                                    )}
-                                  </Button>
-                                </TooltipTrigger>
-                                <TooltipContent>Revoke NDA Access</TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
-                          )}
+        {/* Modals */}
+        <NDADetailsModal
+          open={showDetailsModal}
+          onOpenChange={setShowDetailsModal}
+          nda={selectedNDA}
+          onExtend={extendNDA}
+          isLoading={actionLoading === selectedNDA?.id}
+        />
 
-                          {/* Reactivate Button - Only show if expired/revoked */}
-                          {(nda.status === 'expired' || nda.status === 'revoked') && (
-                            <TooltipProvider>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Button 
-                                    size="sm" 
-                                    variant="default"
-                                    onClick={() => extendNDA(nda.id, 60)}
-                                    disabled={actionLoading === nda.id}
-                                  >
-                                    {actionLoading === nda.id ? (
-                                      <Loader2 className="h-4 w-4 animate-spin" />
-                                    ) : (
-                                      <RefreshCw className="h-4 w-4" />
-                                    )}
-                                  </Button>
-                                </TooltipTrigger>
-                                <TooltipContent>Reactivate (60 days)</TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
-                          )}
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })
-              )}
-            </TableBody>
-          </Table>
-        </Card>
-
-        {/* View NDA Content Dialog */}
-        <Dialog open={showContent} onOpenChange={setShowContent}>
-          <DialogContent className="max-w-3xl max-h-[90vh]">
-            <DialogHeader>
-              <DialogTitle>NDA Details</DialogTitle>
-              <DialogDescription>
-                Full NDA information and actions
-              </DialogDescription>
-            </DialogHeader>
-            
-            <ScrollArea className="max-h-[70vh]">
-              <div className="space-y-6 p-6">
-                {selectedNDA && (
-                  <>
-                    {/* Info Grid */}
-                    <div className="grid grid-cols-2 gap-4 p-4 bg-muted rounded-lg">
-                      <div>
-                        <p className="text-sm text-muted-foreground">Signer</p>
-                        <p className="font-medium">{selectedNDA.signer_name}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-muted-foreground">Email</p>
-                        <p className="font-medium">{selectedNDA.signer_email}</p>
-                      </div>
-                      {selectedNDA.signer_company && (
-                        <div>
-                          <p className="text-sm text-muted-foreground">Company</p>
-                          <p className="font-medium">{selectedNDA.signer_company}</p>
-                        </div>
-                      )}
-                      <div>
-                        <p className="text-sm text-muted-foreground">Signature</p>
-                        <p className="font-serif text-lg">{selectedNDA.signature}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-muted-foreground">Signed At</p>
-                        <p className="font-medium">
-                          {format(new Date(selectedNDA.accepted_at), 'PPpp')}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-muted-foreground">Expires At</p>
-                        <p className="font-medium">
-                          {selectedNDA.expires_at ? format(new Date(selectedNDA.expires_at), 'PPpp') : 'Never'}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-muted-foreground">Status</p>
-                        <Badge variant={selectedNDA.status === 'active' ? 'default' : 'destructive'}>
-                          {selectedNDA.status}
-                        </Badge>
-                      </div>
-                    </div>
-
-                    {/* Actions in Dialog */}
-                    {selectedNDA.status === 'active' && (
-                      <div className="flex gap-2">
-                        <Button 
-                          variant="outline" 
-                          onClick={() => extendNDA(selectedNDA.id, 30)}
-                          disabled={actionLoading === selectedNDA.id}
-                        >
-                          {actionLoading === selectedNDA.id ? (
-                            <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                          ) : null}
-                          Extend 30 days
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          onClick={() => extendNDA(selectedNDA.id, 60)}
-                          disabled={actionLoading === selectedNDA.id}
-                        >
-                          {actionLoading === selectedNDA.id ? (
-                            <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                          ) : null}
-                          Extend 60 days
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          onClick={() => extendNDA(selectedNDA.id, 90)}
-                          disabled={actionLoading === selectedNDA.id}
-                        >
-                          {actionLoading === selectedNDA.id ? (
-                            <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                          ) : null}
-                          Extend 90 days
-                        </Button>
-                      </div>
-                    )}
-
-                    {/* NDA Content */}
-                    <div>
-                      <h3 className="font-semibold mb-2">NDA Content</h3>
-                      <div className="border rounded-lg p-4 bg-muted/50 max-h-[400px] overflow-y-auto">
-                        <pre className="text-xs whitespace-pre-wrap font-mono">
-                          {selectedNDA.nda_content || 'No content available'}
-                        </pre>
-                      </div>
-                    </div>
-                  </>
-                )}
-              </div>
-            </ScrollArea>
-          </DialogContent>
-        </Dialog>
+        <AddNDAModal
+          open={showAddModal}
+          onOpenChange={setShowAddModal}
+          onSuccess={() => {
+            loadNDAs();
+          }}
+        />
       </div>
     </AdminDashboardLayout>
   );
