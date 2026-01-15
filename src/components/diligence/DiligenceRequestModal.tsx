@@ -95,6 +95,8 @@ interface DiligenceRequestModalProps {
   categories: DiligenceCategory[];
   subcategories: DiligenceSubcategory[];
   onClose: () => void;
+  // Partner permission props
+  canAnswerDDQuestions?: boolean;
 }
 
 const statusConfig = {
@@ -182,7 +184,8 @@ const DiligenceRequestModal: React.FC<DiligenceRequestModalProps> = ({
   request,
   categories,
   subcategories,
-  onClose
+  onClose,
+  canAnswerDDQuestions = true
 }) => {
   const [activeTab, setActiveTab] = useState('details');
   const [assigneePopoverOpen, setAssigneePopoverOpen] = useState(false);
@@ -460,54 +463,69 @@ const DiligenceRequestModal: React.FC<DiligenceRequestModalProps> = ({
             </div>
           </div>
           
-          {/* Status & Priority Controls */}
-          <div className="flex items-center gap-3 mt-4">
-            <div className="flex-1">
-              <Select value={currentStatus} onValueChange={handleStatusChange}>
-                <SelectTrigger className="bg-white border-gray-200 h-10">
-                  <Badge 
-                    variant="outline" 
-                    className={`${status.bg} ${status.color} border font-medium`}
-                  >
-                    {status.label}
-                  </Badge>
-                </SelectTrigger>
-                <SelectContent className="bg-white border-gray-200 z-[100]">
-                  {Object.entries(statusConfig).map(([key, config]) => (
-                    <SelectItem key={key} value={key}>
-                      <Badge 
-                        variant="outline" 
-                        className={`${config.bg} ${config.color} border`}
-                      >
-                        {config.label}
-                      </Badge>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+          {/* Status & Priority Controls - only editable with permission */}
+          {canAnswerDDQuestions ? (
+            <div className="flex items-center gap-3 mt-4">
+              <div className="flex-1">
+                <Select value={currentStatus} onValueChange={handleStatusChange}>
+                  <SelectTrigger className="bg-white border-gray-200 h-10">
+                    <Badge 
+                      variant="outline" 
+                      className={`${status.bg} ${status.color} border font-medium`}
+                    >
+                      {status.label}
+                    </Badge>
+                  </SelectTrigger>
+                  <SelectContent className="bg-white border-gray-200 z-[100]">
+                    {Object.entries(statusConfig).map(([key, config]) => (
+                      <SelectItem key={key} value={key}>
+                        <Badge 
+                          variant="outline" 
+                          className={`${config.bg} ${config.color} border`}
+                        >
+                          {config.label}
+                        </Badge>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="flex-1">
+                <Select value={currentPriority} onValueChange={handlePriorityChange}>
+                  <SelectTrigger className="bg-white border-gray-200 h-10">
+                    <div className="flex items-center gap-2">
+                      <div className={`w-2 h-2 rounded-full ${priority.dot}`} />
+                      <span className={`text-sm ${priority.color}`}>{priority.label}</span>
+                    </div>
+                  </SelectTrigger>
+                  <SelectContent className="bg-white border-gray-200 z-[100]">
+                    {Object.entries(priorityConfig).map(([key, config]) => (
+                      <SelectItem key={key} value={key}>
+                        <div className="flex items-center gap-2">
+                          <div className={`w-2 h-2 rounded-full ${config.dot}`} />
+                          <span>{config.label}</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-            
-            <div className="flex-1">
-              <Select value={currentPriority} onValueChange={handlePriorityChange}>
-                <SelectTrigger className="bg-white border-gray-200 h-10">
-                  <div className="flex items-center gap-2">
-                    <div className={`w-2 h-2 rounded-full ${priority.dot}`} />
-                    <span className={`text-sm ${priority.color}`}>{priority.label}</span>
-                  </div>
-                </SelectTrigger>
-                <SelectContent className="bg-white border-gray-200 z-[100]">
-                  {Object.entries(priorityConfig).map(([key, config]) => (
-                    <SelectItem key={key} value={key}>
-                      <div className="flex items-center gap-2">
-                        <div className={`w-2 h-2 rounded-full ${config.dot}`} />
-                        <span>{config.label}</span>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+          ) : (
+            <div className="flex items-center gap-3 mt-4">
+              <Badge 
+                variant="outline" 
+                className={`${status.bg} ${status.color} border font-medium`}
+              >
+                {status.label}
+              </Badge>
+              <div className="flex items-center gap-2">
+                <div className={`w-2 h-2 rounded-full ${priority.dot}`} />
+                <span className={`text-sm ${priority.color}`}>{priority.label}</span>
+              </div>
             </div>
-          </div>
+          )}
         </div>
         
         {/* Tabs */}
@@ -661,40 +679,46 @@ const DiligenceRequestModal: React.FC<DiligenceRequestModalProps> = ({
             </TabsContent>
             
             <TabsContent value="documents" className="py-4 mt-0">
-              {/* Upload Zone */}
-              <div 
-                {...getRootProps()} 
-                className={cn(
-                  "border-2 border-dashed rounded-lg p-6 md:p-8 text-center transition-colors cursor-pointer mb-4",
-                  isDragActive 
-                    ? 'border-blue-500 bg-blue-50' 
-                    : 'border-gray-300 hover:border-blue-400 hover:bg-blue-50/50',
-                  uploadDocument.isPending && 'opacity-50 pointer-events-none'
-                )}
-              >
-                <input {...getInputProps()} />
-                {uploadDocument.isPending ? (
-                  <>
-                    <Loader2 className="w-10 h-10 text-blue-500 mx-auto mb-3 animate-spin" />
-                    <p className="text-sm font-medium text-blue-600 mb-1">Uploading...</p>
-                  </>
-                ) : isDragActive ? (
-                  <>
-                    <Upload className="w-10 h-10 text-blue-500 mx-auto mb-3" />
-                    <p className="text-sm font-medium text-blue-600 mb-1">Drop files here</p>
-                  </>
-                ) : (
-                  <>
-                    <Upload className="w-10 h-10 text-gray-400 mx-auto mb-3" />
-                    <p className="text-sm font-medium text-gray-700 mb-1">Drag and drop files here</p>
-                    <p className="text-xs text-gray-500 mb-3">PDF, Word, Excel, images up to 20MB</p>
-                    <Button size="sm" variant="outline" className="border-gray-300" type="button">
-                      <Paperclip className="w-4 h-4 mr-2" />
-                      Browse Files
-                    </Button>
-                  </>
-                )}
-              </div>
+              {/* Upload Zone - only show if user has permission */}
+              {canAnswerDDQuestions ? (
+                <div 
+                  {...getRootProps()} 
+                  className={cn(
+                    "border-2 border-dashed rounded-lg p-6 md:p-8 text-center transition-colors cursor-pointer mb-4",
+                    isDragActive 
+                      ? 'border-blue-500 bg-blue-50' 
+                      : 'border-gray-300 hover:border-blue-400 hover:bg-blue-50/50',
+                    uploadDocument.isPending && 'opacity-50 pointer-events-none'
+                  )}
+                >
+                  <input {...getInputProps()} />
+                  {uploadDocument.isPending ? (
+                    <>
+                      <Loader2 className="w-10 h-10 text-blue-500 mx-auto mb-3 animate-spin" />
+                      <p className="text-sm font-medium text-blue-600 mb-1">Uploading...</p>
+                    </>
+                  ) : isDragActive ? (
+                    <>
+                      <Upload className="w-10 h-10 text-blue-500 mx-auto mb-3" />
+                      <p className="text-sm font-medium text-blue-600 mb-1">Drop files here</p>
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="w-10 h-10 text-gray-400 mx-auto mb-3" />
+                      <p className="text-sm font-medium text-gray-700 mb-1">Drag and drop files here</p>
+                      <p className="text-xs text-gray-500 mb-3">PDF, Word, Excel, images up to 20MB</p>
+                      <Button size="sm" variant="outline" className="border-gray-300" type="button">
+                        <Paperclip className="w-4 h-4 mr-2" />
+                        Browse Files
+                      </Button>
+                    </>
+                  )}
+                </div>
+              ) : (
+                <div className="rounded-lg p-4 bg-muted/50 border border-dashed border-muted-foreground/30 text-center mb-4">
+                  <p className="text-sm text-muted-foreground">You don't have permission to upload documents</p>
+                </div>
+              )}
               
               {/* Document List */}
               {documents.length > 0 ? (
@@ -772,7 +796,7 @@ const DiligenceRequestModal: React.FC<DiligenceRequestModalProps> = ({
           currentStatus === 'completed' ? 'bg-green-50/50' : 'bg-gray-50'
         )}>
           <div className="flex gap-3 justify-between">
-            {currentStatus === 'completed' ? (
+            {canAnswerDDQuestions && currentStatus === 'completed' ? (
               <Button 
                 onClick={handleReopen}
                 variant="outline"
@@ -781,7 +805,7 @@ const DiligenceRequestModal: React.FC<DiligenceRequestModalProps> = ({
                 <RotateCcw className="w-4 h-4 mr-2" />
                 Reopen Request
               </Button>
-            ) : (currentStatus === 'open' || currentStatus === 'in_progress') ? (
+            ) : canAnswerDDQuestions && (currentStatus === 'open' || currentStatus === 'in_progress') ? (
               <Button 
                 onClick={handleMarkComplete}
                 className="bg-green-600 hover:bg-green-700 text-white"
@@ -794,7 +818,7 @@ const DiligenceRequestModal: React.FC<DiligenceRequestModalProps> = ({
                 )}
                 Mark as Resolved
               </Button>
-            ) : null}
+            ) : <div />}
             <div className="flex-1" />
             <Button 
               variant="outline"

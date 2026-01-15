@@ -49,6 +49,9 @@ interface EnhancedDataRoomContentProps {
   approvalStatus?: string | null;
   isOwner?: boolean;
   onRefresh?: () => void;
+  // Partner permission props
+  canUploadDocuments?: boolean;
+  canApproveDataRoom?: boolean;
 }
 
 export const EnhancedDataRoomContent: React.FC<EnhancedDataRoomContentProps> = ({
@@ -67,6 +70,8 @@ export const EnhancedDataRoomContent: React.FC<EnhancedDataRoomContentProps> = (
   approvalStatus,
   isOwner = false,
   onRefresh,
+  canUploadDocuments = true,
+  canApproveDataRoom = true,
 }) => {
   const [selectedDocuments, setSelectedDocuments] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState('');
@@ -253,17 +258,20 @@ export const EnhancedDataRoomContent: React.FC<EnhancedDataRoomContentProps> = (
 
             <div className="h-6 w-px bg-border" />
 
-            <Button 
-              size="sm" 
-              onClick={() => setShowUpload(!showUpload)}
-              className="bg-primary"
-            >
-              <Upload className="h-4 w-4 mr-2" />
-              Upload Files
-            </Button>
+            {/* Upload Files - only if user has permission */}
+            {canUploadDocuments && (
+              <Button 
+                size="sm" 
+                onClick={() => setShowUpload(!showUpload)}
+                className="bg-primary"
+              >
+                <Upload className="h-4 w-4 mr-2" />
+                Upload Files
+              </Button>
+            )}
 
-            {/* Submit for Review - for deal owners */}
-            {dealId && onRefresh && (
+            {/* Submit for Review - for deal owners with approval permission */}
+            {dealId && onRefresh && canApproveDataRoom && (
               <DataRoomSubmitForReview
                 dealId={dealId}
                 approvalStatus={approvalStatus}
