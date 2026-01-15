@@ -16,3 +16,8 @@ export { EnhancedDataRoomSidebar } from './EnhancedDataRoomSidebar';
 export { EnhancedDataRoomContent } from './EnhancedDataRoomContent';
 export { DataRoomApprovalBar } from './DataRoomApprovalBar';
 export { DataRoomSubmitForReview } from './DataRoomSubmitForReview';
+export { StatPill } from './StatPill';
+export { SellSideDataRoomCard } from './SellSideDataRoomCard';
+export { BuySideDataRoomCard } from './BuySideDataRoomCard';
+export { DataRoomEmptySection } from './DataRoomEmptySection';
+export { CreateDataRoomModal } from './CreateDataRoomModal';
