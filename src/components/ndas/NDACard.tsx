@@ -108,12 +108,12 @@ export function NDACard({
           />
           
           <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center text-primary font-semibold">
-            {nda.signer_name.charAt(0).toUpperCase()}
+            {(nda.signer_name || nda.signer_email || 'U').charAt(0).toUpperCase()}
           </div>
           
           <div>
-            <h3 className="font-semibold text-lg text-foreground">{nda.signer_name}</h3>
-            <p className="text-sm text-muted-foreground">{nda.signer_email}</p>
+            <h3 className="font-semibold text-lg text-foreground">{nda.signer_name || 'Unknown Signer'}</h3>
+            <p className="text-sm text-muted-foreground">{nda.signer_email || 'No email'}</p>
             {nda.signer_company && (
               <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
                 <Building2 className="w-3 h-3" />
