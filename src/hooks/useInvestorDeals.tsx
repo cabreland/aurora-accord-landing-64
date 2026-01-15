@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { getPublishedTeasers, TeaserData } from '@/lib/data/teasers';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
-import { getAccessibleDeals, AccessibleDeal, logInvestorActivity } from '@/lib/rpc/investorDealAccess';
+import { getAccessibleDeals, AccessibleDeal, logInvestorActivity, PartnerPermissions } from '@/lib/rpc/investorDealAccess';
 import { supabase } from '@/integrations/supabase/client';
 import { getDealIdFromCompanyId } from '@/lib/data/dealRouting';
 
@@ -18,7 +18,7 @@ export interface InvestorDeal {
   location: string;
   fitScore: number;
   lastUpdated: string;
-  createdAt: string; // Add actual date for filtering
+  createdAt: string;
   description: string;
   foundedYear: string;
   teamSize: string;
@@ -41,6 +41,8 @@ export interface InvestorDeal {
     size: string;
     lastUpdated: string;
   }>;
+  // Partner-specific permissions
+  partnerAccess?: PartnerPermissions;
 }
 
 interface FilterCriteria {
@@ -79,8 +81,8 @@ export const useInvestorDeals = () => {
         return;
       }
 
-      // Get permission-based accessible deals
-      const accessibleDeals = await getAccessibleDeals(user.email);
+      // Get permission-based accessible deals (prioritizes partner_deal_access, falls back to investor_invitations)
+      const accessibleDeals = await getAccessibleDeals(user.email, user.id);
       
       if (accessibleDeals.length === 0) {
         console.warn('No accessible deals found, using fallback teaser data');
@@ -97,10 +99,11 @@ export const useInvestorDeals = () => {
       setAllDeals(deals);
       setFilteredDeals(deals);
 
-      // Log activity
+      // Log activity with access type info
+      const hasPartnerAccess = accessibleDeals.some(d => d.partnerAccess);
       await logInvestorActivity(user.email, 'deals_viewed', undefined, {
         deal_count: deals.length,
-        access_type: 'permission_based'
+        access_type: hasPartnerAccess ? 'partner_deal_access' : 'investor_invitations'
       });
     } catch (error) {
       console.error('Error fetching deals:', error);
@@ -283,7 +286,9 @@ const convertAccessibleDealToInvestorDeal = (deal: AccessibleDeal): InvestorDeal
     cacLtvRatio: 'Not disclosed',
     highlights: [],
     risks: [],
-    documents: []
+    documents: [],
+    // Include partner access permissions if available
+    partnerAccess: deal.partnerAccess
   };
 };
 
