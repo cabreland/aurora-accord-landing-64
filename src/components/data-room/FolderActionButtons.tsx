@@ -3,22 +3,26 @@ import { Ban, CheckCircle2, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { useQueryClient } from '@tanstack/react-query';
 import { DataRoomFolder } from '@/hooks/useDataRoom';
 
 interface FolderActionButtonsProps {
   folder: DataRoomFolder;
   dealId: string;
+  onFolderUpdate?: (folderId: string, updates: Partial<DataRoomFolder>) => void;
 }
 
 export const FolderActionButtons: React.FC<FolderActionButtonsProps> = ({
   folder,
   dealId,
+  onFolderUpdate,
 }) => {
   const [isUpdating, setIsUpdating] = useState(false);
-  const queryClient = useQueryClient();
 
   const handleMarkNA = async () => {
+    // Optimistic update - instant UI feedback
+    const previousState = { is_not_applicable: folder.is_not_applicable, is_required: folder.is_required };
+    onFolderUpdate?.(folder.id, { is_not_applicable: true, is_required: false });
+    
     setIsUpdating(true);
     try {
       const { error } = await supabase
@@ -29,9 +33,10 @@ export const FolderActionButtons: React.FC<FolderActionButtonsProps> = ({
       if (error) throw error;
 
       toast.success('Folder marked as N/A');
-      queryClient.invalidateQueries({ queryKey: ['data-room-folders', dealId] });
     } catch (err) {
       console.error('Error marking folder as N/A:', err);
+      // Revert optimistic update on failure
+      onFolderUpdate?.(folder.id, previousState);
       toast.error('Failed to update folder');
     } finally {
       setIsUpdating(false);
@@ -39,6 +44,10 @@ export const FolderActionButtons: React.FC<FolderActionButtonsProps> = ({
   };
 
   const handleMarkRequired = async () => {
+    // Optimistic update - instant UI feedback
+    const previousState = { is_not_applicable: folder.is_not_applicable, is_required: folder.is_required };
+    onFolderUpdate?.(folder.id, { is_required: true, is_not_applicable: false });
+    
     setIsUpdating(true);
     try {
       const { error } = await supabase
@@ -49,9 +58,10 @@ export const FolderActionButtons: React.FC<FolderActionButtonsProps> = ({
       if (error) throw error;
 
       toast.success('Folder marked as required');
-      queryClient.invalidateQueries({ queryKey: ['data-room-folders', dealId] });
     } catch (err) {
       console.error('Error marking folder as required:', err);
+      // Revert optimistic update on failure
+      onFolderUpdate?.(folder.id, previousState);
       toast.error('Failed to update folder');
     } finally {
       setIsUpdating(false);

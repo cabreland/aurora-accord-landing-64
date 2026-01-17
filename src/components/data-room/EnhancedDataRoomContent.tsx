@@ -54,6 +54,7 @@ interface EnhancedDataRoomContentProps {
   canApproveDataRoom?: boolean;
   // Folder management
   enableFolderManagement?: boolean;
+  onFolderUpdate?: (folderId: string, updates: Partial<DataRoomFolder>) => void;
 }
 
 export const EnhancedDataRoomContent: React.FC<EnhancedDataRoomContentProps> = ({
@@ -75,6 +76,7 @@ export const EnhancedDataRoomContent: React.FC<EnhancedDataRoomContentProps> = (
   canUploadDocuments = true,
   canApproveDataRoom = true,
   enableFolderManagement = false,
+  onFolderUpdate,
 }) => {
   const [selectedDocuments, setSelectedDocuments] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState('');
@@ -254,7 +256,7 @@ export const EnhancedDataRoomContent: React.FC<EnhancedDataRoomContentProps> = (
 
             {/* Folder Action Buttons - shown when a folder is selected */}
             {enableFolderManagement && selectedFolder && dealId && (
-              <FolderActionButtons folder={selectedFolder} dealId={dealId} />
+              <FolderActionButtons folder={selectedFolder} dealId={dealId} onFolderUpdate={onFolderUpdate} />
             )}
 
             {/* Submit for Review - for deal owners with approval permission */}

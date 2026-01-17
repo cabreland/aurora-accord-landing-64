@@ -189,6 +189,7 @@ interface EnhancedDataRoomSidebarProps {
     deposit_received?: boolean;
   };
   enableFolderManagement?: boolean;
+  onFolderUpdate?: (folderId: string, updates: Partial<DataRoomFolder>) => void;
 }
 
 export const EnhancedDataRoomSidebar: React.FC<EnhancedDataRoomSidebarProps> = ({
@@ -202,6 +203,7 @@ export const EnhancedDataRoomSidebar: React.FC<EnhancedDataRoomSidebarProps> = (
   hasLOIAccess = false,
   deal,
   enableFolderManagement = false,
+  onFolderUpdate,
 }) => {
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
     new Set(categories.map((c) => c.id))
@@ -488,6 +490,7 @@ export const EnhancedDataRoomSidebar: React.FC<EnhancedDataRoomSidebarProps> = (
                                   <FolderActionsMenu
                                     folder={folder}
                                     dealId={deal.id}
+                                    onFolderUpdate={onFolderUpdate}
                                   />
                                 )}
                               </div>
