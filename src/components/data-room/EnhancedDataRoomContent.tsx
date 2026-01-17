@@ -27,6 +27,7 @@ import { DataRoomDocumentGrid } from './DataRoomDocumentGrid';
 import { DataRoomEmptyContent } from './DataRoomEmptyContent';
 import { DataRoomBulkActions } from './DataRoomBulkActions';
 import { DataRoomSubmitForReview } from './DataRoomSubmitForReview';
+import { FolderActionButtons } from './FolderActionButtons';
 
 interface EnhancedDataRoomContentProps {
   documents: DataRoomDocument[];
@@ -52,6 +53,8 @@ interface EnhancedDataRoomContentProps {
   // Partner permission props
   canUploadDocuments?: boolean;
   canApproveDataRoom?: boolean;
+  // Folder management
+  enableFolderManagement?: boolean;
 }
 
 export const EnhancedDataRoomContent: React.FC<EnhancedDataRoomContentProps> = ({
@@ -72,6 +75,7 @@ export const EnhancedDataRoomContent: React.FC<EnhancedDataRoomContentProps> = (
   onRefresh,
   canUploadDocuments = true,
   canApproveDataRoom = true,
+  enableFolderManagement = false,
 }) => {
   const [selectedDocuments, setSelectedDocuments] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState('');
@@ -260,14 +264,26 @@ export const EnhancedDataRoomContent: React.FC<EnhancedDataRoomContentProps> = (
 
             {/* Upload Files - only if user has permission */}
             {canUploadDocuments && (
-              <Button 
-                size="sm" 
-                onClick={() => setShowUpload(!showUpload)}
-                className="bg-primary"
-              >
-                <Upload className="h-4 w-4 mr-2" />
-                Upload Files
-              </Button>
+              <div className="flex flex-col items-end gap-1">
+                <div className="flex items-center gap-2">
+                  <Button 
+                    size="sm" 
+                    onClick={() => setShowUpload(!showUpload)}
+                    className="bg-primary"
+                  >
+                    <Upload className="h-4 w-4 mr-2" />
+                    Upload Files
+                  </Button>
+
+                  {/* Folder Action Buttons - shown when a folder is selected */}
+                  {enableFolderManagement && selectedFolder && dealId && (
+                    <FolderActionButtons folder={selectedFolder} dealId={dealId} />
+                  )}
+                </div>
+                <p className="text-[10px] text-muted-foreground">
+                  PDF, Word, Excel, Images, Text (Max 100MB)
+                </p>
+              </div>
             )}
 
             {/* Submit for Review - for deal owners with approval permission */}

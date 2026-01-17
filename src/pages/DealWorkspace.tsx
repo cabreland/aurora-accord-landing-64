@@ -382,6 +382,8 @@ const DealWorkspace: React.FC = () => {
                     if (data) setDeal(data as Deal);
                     refreshDataRoom();
                   }}
+                  // Folder management props
+                  enableFolderManagement={isAdmin() || isEditor()}
                 />
               </div>
             )}
