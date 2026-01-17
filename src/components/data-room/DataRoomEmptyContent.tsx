@@ -1,16 +1,13 @@
 import React from 'react';
-import { Upload, FolderOpen } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { FolderOpen } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 interface DataRoomEmptyContentProps {
   folderName: string;
-  onUploadClick: () => void;
 }
 
 export const DataRoomEmptyContent: React.FC<DataRoomEmptyContentProps> = ({
   folderName,
-  onUploadClick,
 }) => {
   return (
     <motion.div
@@ -41,23 +38,12 @@ export const DataRoomEmptyContent: React.FC<DataRoomEmptyContentProps> = ({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.3 }}
-        className="text-muted-foreground text-center max-w-md mb-6"
+        className="text-muted-foreground text-center max-w-md"
       >
-        Upload documents to{' '}
-        <span className="font-medium text-foreground">{folderName}</span> to get started.
-        Drag files here or click the upload button above.
+        No documents in{' '}
+        <span className="font-medium text-foreground">{folderName}</span> yet.
+        Use the upload zone above to add files.
       </motion.p>
-
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4 }}
-      >
-        <Button onClick={onUploadClick} size="lg">
-          <Upload className="h-4 w-4 mr-2" />
-          Upload Documents
-        </Button>
-      </motion.div>
     </motion.div>
   );
 };

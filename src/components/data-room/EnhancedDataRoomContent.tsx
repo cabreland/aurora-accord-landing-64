@@ -1,10 +1,9 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { 
   LayoutGrid, 
   List, 
   ArrowUpDown, 
   Filter, 
-  Upload,
   Search,
   X
 } from 'lucide-react';
@@ -82,8 +81,6 @@ export const EnhancedDataRoomContent: React.FC<EnhancedDataRoomContentProps> = (
   const [statusFilter, setStatusFilter] = useState('all');
   const [sortBy, setSortBy] = useState('date');
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
-  const [showUpload, setShowUpload] = useState(false);
-  const uploadRef = useRef<HTMLDivElement>(null);
 
   // Get selected folder and category objects
   const selectedFolder = selectedFolderId
@@ -152,13 +149,6 @@ export const EnhancedDataRoomContent: React.FC<EnhancedDataRoomContentProps> = (
   const handleClearFilters = () => {
     setSearchQuery('');
     setStatusFilter('all');
-  };
-
-  const scrollToUpload = () => {
-    setShowUpload(true);
-    setTimeout(() => {
-      uploadRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, 100);
   };
 
   const hasActiveFilters = searchQuery || statusFilter !== 'all';
@@ -262,28 +252,9 @@ export const EnhancedDataRoomContent: React.FC<EnhancedDataRoomContentProps> = (
 
             <div className="h-6 w-px bg-border" />
 
-            {/* Upload Files - only if user has permission */}
-            {canUploadDocuments && (
-              <div className="flex flex-col items-end gap-1">
-                <div className="flex items-center gap-2">
-                  <Button 
-                    size="sm" 
-                    onClick={() => setShowUpload(!showUpload)}
-                    className="bg-primary"
-                  >
-                    <Upload className="h-4 w-4 mr-2" />
-                    Upload Files
-                  </Button>
-
-                  {/* Folder Action Buttons - shown when a folder is selected */}
-                  {enableFolderManagement && selectedFolder && dealId && (
-                    <FolderActionButtons folder={selectedFolder} dealId={dealId} />
-                  )}
-                </div>
-                <p className="text-[10px] text-muted-foreground">
-                  PDF, Word, Excel, Images, Text (Max 100MB)
-                </p>
-              </div>
+            {/* Folder Action Buttons - shown when a folder is selected */}
+            {enableFolderManagement && selectedFolder && dealId && (
+              <FolderActionButtons folder={selectedFolder} dealId={dealId} />
             )}
 
             {/* Submit for Review - for deal owners with approval permission */}
@@ -327,23 +298,18 @@ export const EnhancedDataRoomContent: React.FC<EnhancedDataRoomContentProps> = (
         )}
       </div>
 
-      {/* Upload Zone (Collapsible) */}
-      {showUpload && (
-        <div ref={uploadRef}>
-          <DataRoomUploadZone
-            folderName={currentLocation}
-            onUpload={onUpload}
-          />
-        </div>
+      {/* Upload Zone - Always visible when folder is selected and user can upload */}
+      {canUploadDocuments && selectedFolderId && (
+        <DataRoomUploadZone
+          folderName={currentLocation}
+          onUpload={onUpload}
+        />
       )}
 
       {/* Document Content */}
       {filteredDocuments.length === 0 ? (
         <div className="bg-card rounded-xl border border-border">
-          <DataRoomEmptyContent
-            folderName={currentLocation}
-            onUploadClick={scrollToUpload}
-          />
+          <DataRoomEmptyContent folderName={currentLocation} />
         </div>
       ) : viewMode === 'list' ? (
         <DataRoomDocumentTable

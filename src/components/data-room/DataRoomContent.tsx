@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { DataRoomDocument, DataRoomFolder, DataRoomCategory } from '@/hooks/useDataRoom';
 import { DataRoomBreadcrumb } from './DataRoomBreadcrumb';
 import { DataRoomUploadZone } from './DataRoomUploadZone';
@@ -41,7 +41,6 @@ export const DataRoomContent: React.FC<DataRoomContentProps> = ({
   const [selectedDocuments, setSelectedDocuments] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  const uploadRef = useRef<HTMLDivElement>(null);
 
   // Get selected folder and category objects
   const selectedFolder = selectedFolderId
@@ -98,10 +97,6 @@ export const DataRoomContent: React.FC<DataRoomContentProps> = ({
     setStatusFilter('all');
   };
 
-  const scrollToUpload = () => {
-    uploadRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
   return (
     <div className="flex-1 space-y-4">
       {/* Breadcrumb */}
@@ -114,12 +109,10 @@ export const DataRoomContent: React.FC<DataRoomContentProps> = ({
       />
 
       {/* Upload Zone */}
-      <div ref={uploadRef}>
-        <DataRoomUploadZone
-          folderName={currentLocation}
-          onUpload={onUpload}
-        />
-      </div>
+      <DataRoomUploadZone
+        folderName={currentLocation}
+        onUpload={onUpload}
+      />
 
       {/* Filters */}
       {documents.length > 0 && (
@@ -136,10 +129,7 @@ export const DataRoomContent: React.FC<DataRoomContentProps> = ({
       {/* Document Table or Empty State */}
       {filteredDocuments.length === 0 ? (
         <div className="bg-card rounded-xl border border-border">
-          <DataRoomEmptyContent
-            folderName={currentLocation}
-            onUploadClick={scrollToUpload}
-          />
+          <DataRoomEmptyContent folderName={currentLocation} />
         </div>
       ) : (
         <DataRoomDocumentTable
