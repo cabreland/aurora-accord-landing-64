@@ -262,40 +262,116 @@ const CreateDeal: React.FC = () => {
     return () => clearTimeout(timer);
   }, [currentStep, showDraftPrompt]);
 
-  // Keyboard navigation
+  // Keyboard navigation - use document instead of window for better compatibility
   useEffect(() => {
     if (showDraftPrompt) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement;
-      const isInputField = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable;
+      const tagName = target.tagName.toLowerCase();
+      const isInputField = tagName === 'input' || tagName === 'textarea' || tagName === 'select' || target.isContentEditable;
       
+      // Handle Escape - always close
       if (e.key === 'Escape') {
         e.preventDefault();
-        handleClose();
-      } else if (e.key === 'Enter' && !isInputField && !e.shiftKey) {
+        e.stopPropagation();
+        navigate('/deals');
+        return;
+      }
+      
+      // Handle Cmd/Ctrl+S - always save (even in input fields)
+      if ((e.metaKey || e.ctrlKey) && e.key === 's') {
         e.preventDefault();
-        if (currentStep < steps.length - 1 && validateStep(currentStep)) {
-          handleNext();
-        }
-      } else if (e.key === 'Enter' && e.shiftKey && !isInputField) {
-        e.preventDefault();
-        handlePrevious();
-      } else if ((e.metaKey || e.ctrlKey) && e.key === 's') {
-        e.preventDefault();
+        e.stopPropagation();
         saveDraft();
         toast({
           title: "Draft Saved",
           description: "Your progress has been saved.",
         });
+        return;
+      }
+      
+      // Don't trigger navigation from input fields
+      if (isInputField) return;
+      
+      // Handle Enter (not in input) - go next
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (currentStep < steps.length - 1 && validateStep(currentStep)) {
+          setCurrentStep(prev => prev + 1);
+        }
+        return;
+      }
+      
+      // Handle Shift+Enter (not in input) - go back
+      if (e.key === 'Enter' && e.shiftKey) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (currentStep > 0) {
+          setCurrentStep(prev => prev - 1);
+        }
+        return;
       }
     };
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [showDraftPrompt, currentStep, saveDraft, validateStep, toast]);
+    // Use capture phase for better event handling
+    document.addEventListener('keydown', handleKeyDown, true);
+    return () => document.removeEventListener('keydown', handleKeyDown, true);
+  }, [showDraftPrompt, currentStep, saveDraft, validateStep, toast, navigate]);
 
-  // CRITICAL: handleSubmit - Keep EXACTLY as original
+  // Helper: Map file to appropriate data room folder based on name/type
+  const mapFileToFolder = (fileName: string, folders: { id: string; name: string }[]): { id: string; name: string } | undefined => {
+    const lowerName = fileName.toLowerCase();
+    
+    // Check for financial documents
+    if (lowerName.includes('financial') || lowerName.includes('p&l') || lowerName.includes('balance') || 
+        lowerName.includes('income') || lowerName.includes('revenue') || lowerName.includes('tax') ||
+        lowerName.includes('audit') || lowerName.includes('budget')) {
+      return folders.find(f => f.name === 'Financials');
+    }
+    
+    // Check for legal/corporate documents
+    if (lowerName.includes('legal') || lowerName.includes('contract') || lowerName.includes('agreement') ||
+        lowerName.includes('article') || lowerName.includes('bylaws') || lowerName.includes('certificate') ||
+        lowerName.includes('license') || lowerName.includes('permit') || lowerName.includes('incorporation')) {
+      return folders.find(f => f.name === 'Corporate & Legal');
+    }
+    
+    // Check for operations documents
+    if (lowerName.includes('operation') || lowerName.includes('process') || lowerName.includes('procedure') ||
+        lowerName.includes('workflow') || lowerName.includes('sop') || lowerName.includes('manual')) {
+      return folders.find(f => f.name === 'Operations');
+    }
+    
+    // Check for marketing/sales documents
+    if (lowerName.includes('marketing') || lowerName.includes('sales') || lowerName.includes('campaign') ||
+        lowerName.includes('branding') || lowerName.includes('pitch') || lowerName.includes('deck')) {
+      return folders.find(f => f.name === 'Marketing & Sales');
+    }
+    
+    // Check for client/customer documents
+    if (lowerName.includes('client') || lowerName.includes('customer') || lowerName.includes('account')) {
+      return folders.find(f => f.name === 'Client Base & Contracts');
+    }
+    
+    // Check for technology documents
+    if (lowerName.includes('tech') || lowerName.includes('software') || lowerName.includes('api') ||
+        lowerName.includes('integration') || lowerName.includes('system') || lowerName.includes('architecture')) {
+      return folders.find(f => f.name === 'Technology & Integrations');
+    }
+    
+    // Check for debt documents
+    if (lowerName.includes('debt') || lowerName.includes('loan') || lowerName.includes('credit') ||
+        lowerName.includes('mortgage') || lowerName.includes('liability')) {
+      return folders.find(f => f.name === 'Debt Documents');
+    }
+    
+    // Default to Miscellaneous
+    return folders.find(f => f.name === 'Miscellaneous');
+  };
+
+  // CRITICAL: handleSubmit with document mapping and activity logging
   const handleSubmit = async () => {
     if (!validateStep(currentStep)) {
       toast({
@@ -341,12 +417,62 @@ const CreateDeal: React.FC = () => {
           market_trends_alignment: formData.market_trends_alignment,
           status: formData.status,
           priority: formData.priority,
-          created_by: user.id
+          created_by: user.id,
+          listing_received_at: new Date().toISOString()
         })
         .select()
         .single();
 
       if (dealError) throw dealError;
+
+      // Log deal creation activity
+      await supabase.from('deal_activities').insert({
+        deal_id: deal.id,
+        user_id: user.id,
+        activity_type: 'deal_created',
+        entity_type: 'deal',
+        entity_id: deal.id,
+        metadata: {
+          company_name: formData.company_name,
+          industry: formData.industry,
+          status: formData.status
+        }
+      });
+
+      // Setup Due Diligence Tracker and Data Room FIRST (before document upload)
+      // This ensures folders exist before we try to map documents to them
+      let dataRoomFolders: { id: string; name: string }[] = [];
+      
+      if (formData.createDueDiligence || formData.createDataRoom) {
+        const setupResults = await setupDealSystems(deal.id, {
+          dueDiligence: formData.createDueDiligence,
+          dataRoom: formData.createDataRoom
+        });
+
+        if (formData.createDueDiligence && setupResults.dueDiligence?.success) {
+          toast({
+            title: "Due Diligence Tracker Created",
+            description: `${setupResults.dueDiligence.requestsCreated} requests ready for tracking`,
+          });
+        }
+
+        if (formData.createDataRoom && setupResults.dataRoom?.success) {
+          toast({
+            title: "Data Room Created",
+            description: `${setupResults.dataRoom.foldersCreated} folders ready for uploads`,
+          });
+          
+          // Fetch the created folders for document mapping
+          const { data: folders } = await supabase
+            .from('data_room_folders')
+            .select('id, name')
+            .eq('deal_id', deal.id);
+          
+          if (folders) {
+            dataRoomFolders = folders;
+          }
+        }
+      }
 
       // Upload documents if any exist
       if (formData.documents.length > 0) {
@@ -368,7 +494,7 @@ const CreateDeal: React.FC = () => {
               continue; // Skip this file but continue with others
             }
 
-            // Save document metadata to database
+            // Save document metadata to documents table (library)
             const { error: docError } = await supabase
               .from('documents')
               .insert({
@@ -377,15 +503,56 @@ const CreateDeal: React.FC = () => {
                 file_path: fileName,
                 file_size: file.size,
                 file_type: file.type,
-                tag: 'other', // Default tag, can be enhanced later
+                tag: 'other',
                 uploaded_by: user.id
               });
 
             if (docError) {
               console.error('Document metadata save error for', file.name, ':', docError);
-            } else {
-              console.log('Successfully uploaded document:', file.name);
             }
+
+            // CRITICAL FIX: Also add to data_room_documents if data room was created
+            if (formData.createDataRoom && dataRoomFolders.length > 0) {
+              const targetFolder = mapFileToFolder(file.name, dataRoomFolders);
+              
+              if (targetFolder) {
+                const { error: drDocError } = await supabase
+                  .from('data_room_documents')
+                  .insert({
+                    deal_id: deal.id,
+                    folder_id: targetFolder.id,
+                    file_name: file.name,
+                    file_path: fileName,
+                    file_size: file.size,
+                    file_type: fileExt || null,
+                    mime_type: file.type,
+                    status: 'pending_review',
+                    uploaded_by: user.id,
+                    version: 1
+                  });
+
+                if (drDocError) {
+                  console.error('Data room document error for', file.name, ':', drDocError);
+                } else {
+                  console.log(`Mapped ${file.name} to data room folder: ${targetFolder.name}`);
+                  
+                  // Log document upload activity
+                  await supabase.from('deal_activities').insert({
+                    deal_id: deal.id,
+                    user_id: user.id,
+                    activity_type: 'document_uploaded',
+                    entity_type: 'document',
+                    metadata: {
+                      file_name: file.name,
+                      folder_name: targetFolder.name,
+                      file_size: file.size
+                    }
+                  });
+                }
+              }
+            }
+
+            console.log('Successfully uploaded document:', file.name);
 
           } catch (error) {
             console.error('Error processing document:', file.name, error);
@@ -423,28 +590,6 @@ const CreateDeal: React.FC = () => {
       if (companyError) {
         console.warn('Company creation failed:', companyError);
         // Don't fail the entire process if company creation fails
-      }
-
-      // Setup Due Diligence Tracker and Data Room if selected
-      if (formData.createDueDiligence || formData.createDataRoom) {
-        const setupResults = await setupDealSystems(deal.id, {
-          dueDiligence: formData.createDueDiligence,
-          dataRoom: formData.createDataRoom
-        });
-
-        if (formData.createDueDiligence && setupResults.dueDiligence?.success) {
-          toast({
-            title: "Due Diligence Tracker Created",
-            description: `${setupResults.dueDiligence.requestsCreated} requests ready for tracking`,
-          });
-        }
-
-        if (formData.createDataRoom && setupResults.dataRoom?.success) {
-          toast({
-            title: "Data Room Created",
-            description: `${setupResults.dataRoom.foldersCreated} folders ready for uploads`,
-          });
-        }
       }
 
       // Store deal info for success modal
