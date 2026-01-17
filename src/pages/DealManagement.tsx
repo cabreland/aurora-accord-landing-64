@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Plus, Search, Filter, MoreVertical } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,19 +13,19 @@ import { DealCardsView } from '@/components/deals/DealCardsView';
 import { DealListView } from '@/components/deals/DealListView';
 import { DealKanbanView } from '@/components/deals/DealKanbanView';
 import { DealDetailPanel } from '@/components/deals/DealDetailPanel';
-import { DealWizard } from '@/components/deals/wizard/DealWizard';
 
 
 type ViewType = 'cards' | 'list' | 'kanban';
 
 const DealManagement: React.FC = () => {
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { profile } = useUserProfile();
   
   const currentView = (searchParams.get('view') as ViewType) || 'cards';
   const selectedDealId = searchParams.get('deal') || null;
   
-  const [showCreateDialog, setShowCreateDialog] = useState(false);
+
   const [showFilters, setShowFilters] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   
@@ -40,15 +40,12 @@ const DealManagement: React.FC = () => {
     filteredCount 
   } = useMyDeals();
 
-  // Auto-open wizard when navigating with ?create=true (from Data Room modal)
+  // Redirect to /deals/new when navigating with ?create=true (backward compat)
   useEffect(() => {
     if (searchParams.get('create') === 'true') {
-      setShowCreateDialog(true);
-      const newParams = new URLSearchParams(searchParams);
-      newParams.delete('create');
-      setSearchParams(newParams, { replace: true });
+      navigate('/deals/new', { replace: true });
     }
-  }, [searchParams, setSearchParams]);
+  }, [searchParams, navigate]);
 
   useEffect(() => {
     updateFilters({ search: searchQuery });
@@ -94,8 +91,8 @@ const DealManagement: React.FC = () => {
             onDealSelect={handleDealSelect}
             selectedDealId={selectedDealId}
             onCreateDeal={(status) => {
-              // Open creation wizard with default status
-              setShowCreateDialog(true);
+              // Navigate to creation page
+              navigate('/deals/new');
             }}
           />
         );
@@ -128,7 +125,7 @@ const DealManagement: React.FC = () => {
               
               <div className="flex items-center gap-3">
                 {canCreateDeals && (
-                  <Button onClick={() => setShowCreateDialog(true)}>
+                  <Button onClick={() => navigate('/deals/new')}>
                     <Plus className="w-4 h-4 mr-2" />
                     New Deal
                   </Button>
@@ -204,13 +201,6 @@ const DealManagement: React.FC = () => {
             onDealUpdated={refresh}
           />
         )}
-
-        {/* Deal Creation Wizard */}
-        <DealWizard 
-          open={showCreateDialog}
-          onOpenChange={setShowCreateDialog}
-          onDealCreated={refresh}
-        />
       </div>
     </AdminDashboardLayout>
   );
