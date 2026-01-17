@@ -16,13 +16,19 @@ import {
   Search,
   Lock,
   Building2,
+  Ban,
+  SquareCheck,
+  Square,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Checkbox } from '@/components/ui/checkbox';
 import { DataRoomCategory, DataRoomFolder, DataRoomDocument } from '@/hooks/useDataRoom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { FolderActionsMenu } from './FolderActionsMenu';
+import { FolderBulkActions } from './FolderBulkActions';
 
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   FileText,
@@ -182,9 +188,11 @@ interface EnhancedDataRoomSidebarProps {
   onSelectCategory: (categoryId: string | null) => void;
   hasLOIAccess?: boolean;
   deal?: {
+    id?: string;
     loi_submitted_at?: string | null;
     deposit_received?: boolean;
   };
+  enableFolderManagement?: boolean;
 }
 
 export const EnhancedDataRoomSidebar: React.FC<EnhancedDataRoomSidebarProps> = ({
@@ -197,11 +205,14 @@ export const EnhancedDataRoomSidebar: React.FC<EnhancedDataRoomSidebarProps> = (
   onSelectCategory,
   hasLOIAccess = false,
   deal,
+  enableFolderManagement = false,
 }) => {
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
     new Set(categories.map((c) => c.id))
   );
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedFolderIds, setSelectedFolderIds] = useState<Set<string>>(new Set());
+  const [selectionMode, setSelectionMode] = useState(false);
 
   // Check LOI access based on deal data
   const computedLOIAccess = hasLOIAccess || Boolean(deal?.loi_submitted_at && deal?.deposit_received);
@@ -218,6 +229,24 @@ export const EnhancedDataRoomSidebar: React.FC<EnhancedDataRoomSidebarProps> = (
     });
   };
 
+  const toggleFolderSelection = (folderId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSelectedFolderIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(folderId)) {
+        next.delete(folderId);
+      } else {
+        next.add(folderId);
+      }
+      return next;
+    });
+  };
+
+  const clearFolderSelection = () => {
+    setSelectedFolderIds(new Set());
+    setSelectionMode(false);
+  };
+
   const getCategoryFolders = (categoryId: string) => {
     return folders.filter((f) => f.category_id === categoryId);
   };
@@ -232,6 +261,7 @@ export const EnhancedDataRoomSidebar: React.FC<EnhancedDataRoomSidebarProps> = (
   };
 
   const getFolderStatus = (folder: DataRoomFolder) => {
+    if (folder.is_not_applicable) return 'not_applicable';
     const folderDocs = documents.filter((d) => d.folder_id === folder.id);
     if (folderDocs.length === 0) {
       return folder.is_required ? 'missing' : 'empty';
@@ -411,31 +441,70 @@ export const EnhancedDataRoomSidebar: React.FC<EnhancedDataRoomSidebarProps> = (
                           const folderDocCount = getFolderDocumentCount(folder.id);
                           const status = getFolderStatus(folder);
                           const isSelected = selectedFolderId === folder.id;
+                          const isChecked = selectedFolderIds.has(folder.id);
 
                           return (
-                            <motion.button
+                            <motion.div
                               key={folder.id}
                               whileHover={{ x: 2, scale: 1.01 }}
-                              onClick={() => onSelectFolder(folder.id, category.id)}
                               className={cn(
-                                'w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-left transition-all duration-200',
+                                'w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-left transition-all duration-200 group',
                                 isSelected
                                   ? 'bg-primary/10 text-primary'
-                                  : 'hover:bg-muted text-foreground'
+                                  : 'hover:bg-muted text-foreground',
+                                status === 'not_applicable' && 'opacity-60'
                               )}
                             >
-                              <Folder className="h-3.5 w-3.5 flex-shrink-0" />
-                              <span className="flex-1 text-xs truncate">
-                                {folder.name}
-                              </span>
+                              {/* Selection checkbox (only in management mode) */}
+                              {enableFolderManagement && (
+                                <Checkbox
+                                  checked={isChecked}
+                                  onCheckedChange={() => {
+                                    setSelectedFolderIds((prev) => {
+                                      const next = new Set(prev);
+                                      if (next.has(folder.id)) {
+                                        next.delete(folder.id);
+                                      } else {
+                                        next.add(folder.id);
+                                      }
+                                      return next;
+                                    });
+                                  }}
+                                  onClick={(e) => e.stopPropagation()}
+                                  className="h-3.5 w-3.5"
+                                />
+                              )}
+                              
+                              <button
+                                onClick={() => onSelectFolder(folder.id, category.id)}
+                                className="flex-1 flex items-center gap-2 min-w-0"
+                              >
+                                <Folder className="h-3.5 w-3.5 flex-shrink-0" />
+                                <span className={cn(
+                                  "flex-1 text-xs truncate",
+                                  status === 'not_applicable' && 'line-through'
+                                )}>
+                                  {folder.name}
+                                </span>
+                              </button>
+                              
                               <div className="flex items-center gap-1">
+                                {/* N/A Badge */}
+                                {status === 'not_applicable' && (
+                                  <Badge variant="secondary" className="text-[10px] h-4 px-1 bg-muted text-muted-foreground">
+                                    N/A
+                                  </Badge>
+                                )}
+                                {/* Required missing indicator */}
                                 {folder.is_required && status === 'missing' && (
                                   <AlertCircle className="h-3 w-3 text-destructive" />
                                 )}
+                                {/* Complete indicator */}
                                 {status === 'complete' && (
                                   <CheckCircle className="h-3 w-3 text-success" />
                                 )}
-                                {folderDocCount > 0 && (
+                                {/* Document count */}
+                                {folderDocCount > 0 && status !== 'not_applicable' && (
                                   <Badge
                                     variant={isSelected ? 'default' : 'outline'}
                                     className="text-[10px] h-4 min-w-[18px] justify-center px-1"
@@ -443,8 +512,15 @@ export const EnhancedDataRoomSidebar: React.FC<EnhancedDataRoomSidebarProps> = (
                                     {folderDocCount}
                                   </Badge>
                                 )}
+                                {/* Actions menu */}
+                                {enableFolderManagement && deal?.id && (
+                                  <FolderActionsMenu
+                                    folder={folder}
+                                    dealId={deal.id}
+                                  />
+                                )}
                               </div>
-                            </motion.button>
+                            </motion.div>
                           );
                         })}
                       </motion.div>
@@ -504,6 +580,15 @@ export const EnhancedDataRoomSidebar: React.FC<EnhancedDataRoomSidebarProps> = (
           <span>{documents.filter(d => d.status === 'pending_review').length} pending</span>
         </div>
       </div>
+
+      {/* Bulk actions for folder management */}
+      {enableFolderManagement && deal?.id && (
+        <FolderBulkActions
+          selectedFolderIds={selectedFolderIds}
+          dealId={deal.id}
+          onClearSelection={clearFolderSelection}
+        />
+      )}
     </div>
   );
 };

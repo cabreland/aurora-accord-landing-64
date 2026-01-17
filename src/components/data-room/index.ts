@@ -21,3 +21,5 @@ export { SellSideDataRoomCard } from './SellSideDataRoomCard';
 export { BuySideDataRoomCard } from './BuySideDataRoomCard';
 export { DataRoomEmptySection } from './DataRoomEmptySection';
 export { CreateDataRoomModal } from './CreateDataRoomModal';
+export { FolderActionsMenu } from './FolderActionsMenu';
+export { FolderBulkActions } from './FolderBulkActions';
