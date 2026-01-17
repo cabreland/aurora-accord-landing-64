@@ -88,7 +88,7 @@ const DealWorkspace: React.FC = () => {
   const { data: activities = [] } = useDealActivities(deal?.id, 100);
   const {
     categories,
-    folders,
+    folders: rawFolders,
     documents,
     templates,
     loading: dataRoomLoading,
@@ -98,6 +98,26 @@ const DealWorkspace: React.FC = () => {
     deleteDocument,
     updateDocumentStatus,
   } = useDataRoom({ dealId: deal?.id });
+
+  // Local folder state for optimistic updates
+  const [localFolders, setLocalFolders] = useState<typeof rawFolders | null>(null);
+  const folders = localFolders ?? rawFolders;
+
+  // Sync local folders when raw folders change (initial load or refresh)
+  useEffect(() => {
+    if (rawFolders.length > 0) {
+      setLocalFolders(rawFolders);
+    }
+  }, [rawFolders]);
+
+  // Optimistic folder update handler
+  const handleFolderUpdate = (folderId: string, updates: Partial<typeof folders[0]>) => {
+    setLocalFolders(prev => 
+      (prev ?? rawFolders).map(f => 
+        f.id === folderId ? { ...f, ...updates } : f
+      )
+    );
+  };
 
   // Fetch deal data
   useEffect(() => {
@@ -348,6 +368,7 @@ const DealWorkspace: React.FC = () => {
                   }}
                   deal={deal ? { id: deal.id } : undefined}
                   enableFolderManagement={isAdmin() || isEditor()}
+                  onFolderUpdate={handleFolderUpdate}
                 />
                 <EnhancedDataRoomContent
                   documents={filteredDocuments}
@@ -384,6 +405,7 @@ const DealWorkspace: React.FC = () => {
                   }}
                   // Folder management props
                   enableFolderManagement={isAdmin() || isEditor()}
+                  onFolderUpdate={handleFolderUpdate}
                 />
               </div>
             )}

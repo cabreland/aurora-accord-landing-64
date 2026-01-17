@@ -20,25 +20,29 @@ import {
 } from '@/components/ui/alert-dialog';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { useQueryClient } from '@tanstack/react-query';
 import { DataRoomFolder } from '@/hooks/useDataRoom';
 
 interface FolderActionsMenuProps {
   folder: DataRoomFolder;
   dealId: string;
   onUpdate?: () => void;
+  onFolderUpdate?: (folderId: string, updates: Partial<DataRoomFolder>) => void;
 }
 
 export const FolderActionsMenu: React.FC<FolderActionsMenuProps> = ({
   folder,
   dealId,
   onUpdate,
+  onFolderUpdate,
 }) => {
   const [isUpdating, setIsUpdating] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const queryClient = useQueryClient();
 
   const handleMarkNotApplicable = async () => {
+    // Optimistic update - instant UI feedback
+    const previousState = { is_not_applicable: folder.is_not_applicable, is_required: folder.is_required };
+    onFolderUpdate?.(folder.id, { is_not_applicable: true, is_required: false });
+    
     setIsUpdating(true);
     try {
       const { error } = await supabase
@@ -49,10 +53,11 @@ export const FolderActionsMenu: React.FC<FolderActionsMenuProps> = ({
       if (error) throw error;
       
       toast.success(`"${folder.name}" marked as Not Applicable`);
-      queryClient.invalidateQueries({ queryKey: ['data-room-folders', dealId] });
       onUpdate?.();
     } catch (err) {
       console.error('Error marking folder as N/A:', err);
+      // Revert optimistic update on failure
+      onFolderUpdate?.(folder.id, previousState);
       toast.error('Failed to update folder');
     } finally {
       setIsUpdating(false);
@@ -60,6 +65,10 @@ export const FolderActionsMenu: React.FC<FolderActionsMenuProps> = ({
   };
 
   const handleMarkRequired = async () => {
+    // Optimistic update - instant UI feedback
+    const previousState = { is_not_applicable: folder.is_not_applicable, is_required: folder.is_required };
+    onFolderUpdate?.(folder.id, { is_required: true, is_not_applicable: false });
+    
     setIsUpdating(true);
     try {
       const { error } = await supabase
@@ -70,10 +79,11 @@ export const FolderActionsMenu: React.FC<FolderActionsMenuProps> = ({
       if (error) throw error;
       
       toast.success(`"${folder.name}" marked as Required`);
-      queryClient.invalidateQueries({ queryKey: ['data-room-folders', dealId] });
       onUpdate?.();
     } catch (err) {
       console.error('Error marking folder as required:', err);
+      // Revert optimistic update on failure
+      onFolderUpdate?.(folder.id, previousState);
       toast.error('Failed to update folder');
     } finally {
       setIsUpdating(false);
@@ -104,7 +114,6 @@ export const FolderActionsMenu: React.FC<FolderActionsMenuProps> = ({
       if (error) throw error;
       
       toast.success(`"${folder.name}" deleted`);
-      queryClient.invalidateQueries({ queryKey: ['data-room-folders', dealId] });
       onUpdate?.();
     } catch (err) {
       console.error('Error deleting folder:', err);
