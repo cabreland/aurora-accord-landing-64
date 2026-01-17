@@ -23,3 +23,4 @@ export { DataRoomEmptySection } from './DataRoomEmptySection';
 export { CreateDataRoomModal } from './CreateDataRoomModal';
 export { FolderActionsMenu } from './FolderActionsMenu';
 export { FolderBulkActions } from './FolderBulkActions';
+export { FolderActionButtons } from './FolderActionButtons';

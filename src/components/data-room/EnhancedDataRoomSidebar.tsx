@@ -16,15 +16,11 @@ import {
   Search,
   Lock,
   Building2,
-  Ban,
-  SquareCheck,
-  Square,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Checkbox } from '@/components/ui/checkbox';
 import { DataRoomCategory, DataRoomFolder, DataRoomDocument } from '@/hooks/useDataRoom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FolderActionsMenu } from './FolderActionsMenu';
@@ -441,52 +437,27 @@ export const EnhancedDataRoomSidebar: React.FC<EnhancedDataRoomSidebarProps> = (
                           const folderDocCount = getFolderDocumentCount(folder.id);
                           const status = getFolderStatus(folder);
                           const isSelected = selectedFolderId === folder.id;
-                          const isChecked = selectedFolderIds.has(folder.id);
 
                           return (
-                            <motion.div
+                            <motion.button
                               key={folder.id}
                               whileHover={{ x: 2, scale: 1.01 }}
+                              onClick={() => onSelectFolder(folder.id, category.id)}
                               className={cn(
                                 'w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-left transition-all duration-200 group',
                                 isSelected
-                                  ? 'bg-primary/10 text-primary'
+                                  ? 'bg-primary/15 text-primary ring-1 ring-primary/30'
                                   : 'hover:bg-muted text-foreground',
                                 status === 'not_applicable' && 'opacity-60'
                               )}
                             >
-                              {/* Selection checkbox (only in management mode) */}
-                              {enableFolderManagement && (
-                                <Checkbox
-                                  checked={isChecked}
-                                  onCheckedChange={() => {
-                                    setSelectedFolderIds((prev) => {
-                                      const next = new Set(prev);
-                                      if (next.has(folder.id)) {
-                                        next.delete(folder.id);
-                                      } else {
-                                        next.add(folder.id);
-                                      }
-                                      return next;
-                                    });
-                                  }}
-                                  onClick={(e) => e.stopPropagation()}
-                                  className="h-3.5 w-3.5"
-                                />
-                              )}
-                              
-                              <button
-                                onClick={() => onSelectFolder(folder.id, category.id)}
-                                className="flex-1 flex items-center gap-2 min-w-0"
-                              >
-                                <Folder className="h-3.5 w-3.5 flex-shrink-0" />
-                                <span className={cn(
-                                  "flex-1 text-xs truncate",
-                                  status === 'not_applicable' && 'line-through'
-                                )}>
-                                  {folder.name}
-                                </span>
-                              </button>
+                              <Folder className="h-3.5 w-3.5 flex-shrink-0" />
+                              <span className={cn(
+                                "flex-1 text-xs truncate",
+                                status === 'not_applicable' && 'line-through'
+                              )}>
+                                {folder.name}
+                              </span>
                               
                               <div className="flex items-center gap-1">
                                 {/* N/A Badge */}
@@ -520,7 +491,7 @@ export const EnhancedDataRoomSidebar: React.FC<EnhancedDataRoomSidebarProps> = (
                                   />
                                 )}
                               </div>
-                            </motion.div>
+                            </motion.button>
                           );
                         })}
                       </motion.div>

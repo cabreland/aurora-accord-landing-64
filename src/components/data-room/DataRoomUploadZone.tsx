@@ -32,6 +32,10 @@ const ACCEPTED_TYPES = [
   'image/png',
   'image/jpeg',
   'image/gif',
+  'text/plain', // .txt
+  'text/rtf', // .rtf
+  'application/rtf', // .rtf (alternate)
+  'application/vnd.oasis.opendocument.text', // .odt
 ];
 
 const formatFileSize = (bytes: number): string => {
@@ -116,7 +120,7 @@ export const DataRoomUploadZone: React.FC<DataRoomUploadZoneProps> = ({
   const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
     onDrop,
     multiple: true,
-    noClick: uploadQueue.length > 0,
+    noClick: true, // Disable automatic click handling - we control it manually
   });
 
   return (
@@ -156,15 +160,13 @@ export const DataRoomUploadZone: React.FC<DataRoomUploadZoneProps> = ({
           Uploading to: <span className="font-medium">{folderName}</span>
         </p>
         <p className="text-xs text-muted-foreground mt-1">
-          Max file size: {formatFileSize(maxSize)} • PDF, Word, Excel, CSV, Images
+          Max file size: {formatFileSize(maxSize)} • PDF, Word, Excel, Images, Text
         </p>
 
-        {uploadQueue.length === 0 && (
-          <Button variant="outline" size="sm" className="mt-4" onClick={open}>
-            <Upload className="h-4 w-4 mr-2" />
-            Select Files
-          </Button>
-        )}
+        <Button variant="outline" size="sm" className="mt-4" onClick={open}>
+          <Upload className="h-4 w-4 mr-2" />
+          Select Files
+        </Button>
       </div>
 
       {/* Upload Queue */}
