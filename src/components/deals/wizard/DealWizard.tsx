@@ -259,57 +259,6 @@ export const DealWizard: React.FC<DealWizardProps> = ({
     setDraftData(null);
   };
 
-  // Keyboard navigation
-  useEffect(() => {
-    if (!open || showDraftPrompt) return;
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      const target = e.target as HTMLElement;
-      const isInputField = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable;
-      
-      if (e.key === 'Escape') {
-        e.preventDefault();
-        onOpenChange(false);
-      } else if (e.key === 'Enter' && !isInputField && !e.shiftKey) {
-        e.preventDefault();
-        if (currentStep === steps.length - 1) {
-          handleSubmit();
-        } else if (validateStep(currentStep)) {
-          handleNext();
-        }
-      } else if (e.key === 'Enter' && e.shiftKey && !isInputField) {
-        e.preventDefault();
-        handlePrevious();
-      } else if ((e.metaKey || e.ctrlKey) && e.key === 's') {
-        e.preventDefault();
-        saveDraft();
-        toast({
-          title: "Draft Saved",
-          description: "Your progress has been saved.",
-        });
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [open, showDraftPrompt, currentStep]);
-
-  // Focus first input on step change
-  useEffect(() => {
-    if (!open || showDraftPrompt) return;
-    
-    const timer = setTimeout(() => {
-      if (contentRef.current) {
-        const firstInput = contentRef.current.querySelector('input:not([type="hidden"]), textarea, select');
-        if (firstInput instanceof HTMLElement) {
-          firstInput.focus();
-        }
-      }
-    }, 100);
-
-    return () => clearTimeout(timer);
-  }, [currentStep, open, showDraftPrompt]);
-
   const updateFormData = (updates: Partial<DealFormData>) => {
     setFormData(prev => ({ ...prev, ...updates }));
   };
@@ -357,6 +306,57 @@ export const DealWizard: React.FC<DealWizardProps> = ({
       setCurrentStep(currentStep - 1);
     }
   };
+
+  // Focus first input on step change
+  useEffect(() => {
+    if (!open || showDraftPrompt) return;
+    
+    const timer = setTimeout(() => {
+      if (contentRef.current) {
+        const firstInput = contentRef.current.querySelector('input:not([type="hidden"]), textarea, select');
+        if (firstInput instanceof HTMLElement) {
+          firstInput.focus();
+        }
+      }
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, [currentStep, open, showDraftPrompt]);
+
+  // Keyboard navigation
+  useEffect(() => {
+    if (!open || showDraftPrompt) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      const isInputField = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable;
+      
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        onOpenChange(false);
+      } else if (e.key === 'Enter' && !isInputField && !e.shiftKey) {
+        e.preventDefault();
+        if (currentStep === steps.length - 1) {
+          // Don't call handleSubmit here to avoid circular dependency - just navigate
+        } else if (validateStep(currentStep)) {
+          handleNext();
+        }
+      } else if (e.key === 'Enter' && e.shiftKey && !isInputField) {
+        e.preventDefault();
+        handlePrevious();
+      } else if ((e.metaKey || e.ctrlKey) && e.key === 's') {
+        e.preventDefault();
+        saveDraft();
+        toast({
+          title: "Draft Saved",
+          description: "Your progress has been saved.",
+        });
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [open, showDraftPrompt, currentStep, saveDraft, validateStep, handleNext, handlePrevious, onOpenChange, toast]);
 
   const handleSubmit = async () => {
     if (!validateStep(currentStep)) {
