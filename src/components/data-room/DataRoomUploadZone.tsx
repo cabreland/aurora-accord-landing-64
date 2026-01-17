@@ -125,48 +125,48 @@ export const DataRoomUploadZone: React.FC<DataRoomUploadZoneProps> = ({
 
   return (
     <div className="space-y-4">
-      {/* Drop Zone */}
+      {/* Drop Zone - Compact */}
       <div
         {...getRootProps()}
         className={cn(
-          'relative border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all duration-200',
+          'relative border-2 border-dashed rounded-lg p-6 transition-all duration-200',
           isDragActive
-            ? 'border-primary bg-primary/5 scale-[1.02]'
-            : 'border-border hover:border-primary/50 hover:bg-muted/50',
+            ? 'border-primary bg-primary/5 scale-[1.01]'
+            : 'border-border hover:border-primary/50 hover:bg-muted/30',
           isUploading && 'pointer-events-none opacity-50'
         )}
       >
         <input {...getInputProps()} />
-        <motion.div
-          initial={{ scale: 1 }}
-          animate={{ scale: isDragActive ? 1.1 : 1 }}
-          className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-4"
-        >
-          <Upload
-            className={cn(
-              'h-8 w-8 transition-colors',
-              isDragActive ? 'text-primary' : 'text-muted-foreground'
-            )}
-          />
-        </motion.div>
+        <div className="flex items-center gap-6">
+          <motion.div
+            initial={{ scale: 1 }}
+            animate={{ scale: isDragActive ? 1.1 : 1 }}
+            className="w-14 h-14 rounded-full bg-muted flex items-center justify-center flex-shrink-0"
+          >
+            <Upload
+              className={cn(
+                'h-6 w-6 transition-colors',
+                isDragActive ? 'text-primary' : 'text-muted-foreground'
+              )}
+            />
+          </motion.div>
 
-        <p className="text-sm font-medium text-foreground mb-1">
-          {isDragActive ? 'Drop files here' : 'Drag & drop files here'}
-        </p>
-        <p className="text-xs text-muted-foreground mb-3">
-          or click to browse your computer
-        </p>
-        <p className="text-xs text-muted-foreground">
-          Uploading to: <span className="font-medium">{folderName}</span>
-        </p>
-        <p className="text-xs text-muted-foreground mt-1">
-          Max file size: {formatFileSize(maxSize)} • PDF, Word, Excel, Images, Text
-        </p>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-foreground mb-0.5">
+              {isDragActive ? 'Drop files here' : 'Drag & drop files here'}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Upload to: <span className="font-medium text-foreground">{folderName}</span>
+              <span className="mx-2">•</span>
+              PDF, Word, Excel, Images, Text (Max {formatFileSize(maxSize)})
+            </p>
+          </div>
 
-        <Button variant="outline" size="sm" className="mt-4" onClick={open}>
-          <Upload className="h-4 w-4 mr-2" />
-          Select Files
-        </Button>
+          <Button variant="outline" size="sm" onClick={open} className="flex-shrink-0">
+            <Upload className="h-4 w-4 mr-2" />
+            Select Files
+          </Button>
+        </div>
       </div>
 
       {/* Upload Queue */}
