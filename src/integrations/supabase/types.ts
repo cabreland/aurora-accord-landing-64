@@ -742,6 +742,7 @@ export type Database = {
           description: string | null
           id: string
           index_number: string
+          is_not_applicable: boolean | null
           is_required: boolean | null
           name: string
           parent_folder_id: string | null
@@ -756,6 +757,7 @@ export type Database = {
           description?: string | null
           id?: string
           index_number: string
+          is_not_applicable?: boolean | null
           is_required?: boolean | null
           name: string
           parent_folder_id?: string | null
@@ -770,6 +772,7 @@ export type Database = {
           description?: string | null
           id?: string
           index_number?: string
+          is_not_applicable?: boolean | null
           is_required?: boolean | null
           name?: string
           parent_folder_id?: string | null

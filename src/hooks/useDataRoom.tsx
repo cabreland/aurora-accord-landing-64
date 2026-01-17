@@ -21,6 +21,7 @@ export interface DataRoomFolder {
   index_number: string;
   description: string | null;
   is_required: boolean;
+  is_not_applicable: boolean;
   sort_order: number | null;
   category?: DataRoomCategory;
 }

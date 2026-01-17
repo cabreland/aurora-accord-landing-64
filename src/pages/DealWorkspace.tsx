@@ -346,6 +346,8 @@ const DealWorkspace: React.FC = () => {
                     setSelectedFolderId(null);
                     setActiveMetricFilter(null);
                   }}
+                  deal={deal ? { id: deal.id } : undefined}
+                  enableFolderManagement={isAdmin() || isEditor()}
                 />
                 <EnhancedDataRoomContent
                   documents={filteredDocuments}
