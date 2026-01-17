@@ -45,6 +45,11 @@ export interface DealStageInfo {
   current_stage: DealStage;
   deal_status: DealStatus;
   stage_entered_at: string | null;
+  // Sell-side milestones
+  listing_received_at: string | null;
+  listing_approved_at: string | null;
+  data_room_complete_at: string | null;
+  // Buy-side milestones
   deal_published_at: string | null;
   first_nda_signed_at: string | null;
   loi_submitted_at: string | null;
