@@ -163,7 +163,7 @@ export function CreateDataRoomModal({ open, onClose }: CreateDataRoomModalProps)
               className="mt-2 p-0 h-auto"
               onClick={() => {
                 onClose();
-                navigate('/deals/new');
+                navigate('/deals?create=true');
               }}
             >
               <Plus className="w-3 h-3 mr-1" />

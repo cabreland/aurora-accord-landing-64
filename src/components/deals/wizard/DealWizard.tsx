@@ -1,12 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { ChevronLeft, ChevronRight, Check } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { ChevronLeft, ChevronRight, Check, Loader2, Save, Clock, AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { setupDealSystems } from '@/lib/deal-system-setup';
+import { formatDistanceToNow } from 'date-fns';
 
 import { BasicInfoStep } from './BasicInfoStep';
 import { CompanyDetailsStep } from './CompanyDetailsStep';
@@ -94,6 +96,51 @@ const steps = [
   { id: 'publishing', title: 'Status & Publishing', component: PublishingStep },
 ];
 
+// Draft storage key generator
+const getDraftKey = (userId: string | undefined) => `deal-draft-${userId || 'anonymous'}`;
+const DRAFT_EXPIRY_DAYS = 7;
+
+// Initial form state
+const getInitialFormData = (): DealFormData => ({
+  title: '',
+  company_name: '',
+  industry: '',
+  location: '',
+  description: '',
+  company_overview: '',
+  founded_year: null,
+  team_size: '',
+  reason_for_sale: '',
+  revenue: '',
+  ebitda: '',
+  asking_price: '',
+  profit_margin: '',
+  customer_count: '',
+  recurring_revenue: '',
+  cac_ltv_ratio: '',
+  growth_rate: '',
+  growth_opportunities: [],
+  market_position: '',
+  competitive_advantages: '',
+  strategic_fit: '',
+  founders_message: '',
+  founder_name: '',
+  founder_title: '',
+  key_personnel: '',
+  management_experience: '',
+  ideal_buyer_profile: '',
+  rollup_potential: '',
+  market_trends_alignment: '',
+  documents: [],
+  document_categories: [],
+  status: 'draft',
+  priority: 'medium',
+  publish_immediately: false,
+  scheduled_publish: null,
+  createDueDiligence: true,
+  createDataRoom: true,
+});
+
 export const DealWizard: React.FC<DealWizardProps> = ({
   open,
   onOpenChange,
@@ -105,46 +152,163 @@ export const DealWizard: React.FC<DealWizardProps> = ({
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [createdDealId, setCreatedDealId] = useState<string>('');
   const [createdDealName, setCreatedDealName] = useState<string>('');
-  const [formData, setFormData] = useState<DealFormData>({
-    title: '',
-    company_name: '',
-    industry: '',
-    location: '',
-    description: '',
-    company_overview: '',
-    founded_year: null,
-    team_size: '',
-    reason_for_sale: '',
-    revenue: '',
-    ebitda: '',
-    asking_price: '',
-    profit_margin: '',
-    customer_count: '',
-    recurring_revenue: '',
-    cac_ltv_ratio: '',
-    growth_rate: '',
-    growth_opportunities: [],
-    market_position: '',
-    competitive_advantages: '',
-    strategic_fit: '',
-    founders_message: '',
-    founder_name: '',
-    founder_title: '',
-    key_personnel: '',
-    management_experience: '',
-    ideal_buyer_profile: '',
-    rollup_potential: '',
-    market_trends_alignment: '',
-    documents: [],
-    document_categories: [],
-    status: 'draft',
-    priority: 'medium',
-    publish_immediately: false,
-    scheduled_publish: null,
-    createDueDiligence: true,
-    createDataRoom: true,
-  });
+  const [formData, setFormData] = useState<DealFormData>(getInitialFormData());
+  
+  // Draft state
+  const [showDraftPrompt, setShowDraftPrompt] = useState(false);
+  const [draftData, setDraftData] = useState<{ formData: DealFormData; currentStep: number; timestamp: number } | null>(null);
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  
   const { toast } = useToast();
+
+  // Load draft on open
+  useEffect(() => {
+    if (open && user) {
+      const draftKey = getDraftKey(user.id);
+      const storedDraft = localStorage.getItem(draftKey);
+      
+      if (storedDraft) {
+        try {
+          const parsed = JSON.parse(storedDraft);
+          const draftAge = Date.now() - parsed.timestamp;
+          const maxAge = DRAFT_EXPIRY_DAYS * 24 * 60 * 60 * 1000;
+          
+          if (draftAge < maxAge && parsed.formData?.company_name) {
+            setDraftData(parsed);
+            setShowDraftPrompt(true);
+          } else {
+            // Draft expired, remove it
+            localStorage.removeItem(draftKey);
+          }
+        } catch (e) {
+          localStorage.removeItem(draftKey);
+        }
+      }
+    }
+  }, [open, user]);
+
+  // Debounced auto-save
+  const saveDraft = useCallback(() => {
+    if (!user) return;
+    
+    setSaveStatus('saving');
+    
+    const draftKey = getDraftKey(user.id);
+    const draftPayload = {
+      formData: { ...formData, documents: [] }, // Don't store files in localStorage
+      currentStep,
+      timestamp: Date.now()
+    };
+    
+    localStorage.setItem(draftKey, JSON.stringify(draftPayload));
+    
+    setTimeout(() => {
+      setSaveStatus('saved');
+      setLastSaved(new Date());
+    }, 300);
+  }, [formData, currentStep, user]);
+
+  // Trigger save on form changes (debounced)
+  useEffect(() => {
+    if (!open || showDraftPrompt) return;
+    
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+    }
+    
+    saveTimeoutRef.current = setTimeout(() => {
+      saveDraft();
+    }, 2000);
+
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+    };
+  }, [formData, currentStep, open, showDraftPrompt, saveDraft]);
+
+  // Clear draft on successful submission
+  const clearDraft = useCallback(() => {
+    if (user) {
+      localStorage.removeItem(getDraftKey(user.id));
+    }
+  }, [user]);
+
+  // Resume draft handler
+  const handleResumeDraft = () => {
+    if (draftData) {
+      setFormData({ ...getInitialFormData(), ...draftData.formData });
+      setCurrentStep(draftData.currentStep);
+      setShowDraftPrompt(false);
+      toast({
+        title: "Draft Restored",
+        description: "Your previous progress has been restored.",
+      });
+    }
+  };
+
+  // Start fresh handler
+  const handleStartFresh = () => {
+    clearDraft();
+    setFormData(getInitialFormData());
+    setCurrentStep(0);
+    setShowDraftPrompt(false);
+    setDraftData(null);
+  };
+
+  // Keyboard navigation
+  useEffect(() => {
+    if (!open || showDraftPrompt) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      const isInputField = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable;
+      
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        onOpenChange(false);
+      } else if (e.key === 'Enter' && !isInputField && !e.shiftKey) {
+        e.preventDefault();
+        if (currentStep === steps.length - 1) {
+          handleSubmit();
+        } else if (validateStep(currentStep)) {
+          handleNext();
+        }
+      } else if (e.key === 'Enter' && e.shiftKey && !isInputField) {
+        e.preventDefault();
+        handlePrevious();
+      } else if ((e.metaKey || e.ctrlKey) && e.key === 's') {
+        e.preventDefault();
+        saveDraft();
+        toast({
+          title: "Draft Saved",
+          description: "Your progress has been saved.",
+        });
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [open, showDraftPrompt, currentStep]);
+
+  // Focus first input on step change
+  useEffect(() => {
+    if (!open || showDraftPrompt) return;
+    
+    const timer = setTimeout(() => {
+      if (contentRef.current) {
+        const firstInput = contentRef.current.querySelector('input:not([type="hidden"]), textarea, select');
+        if (firstInput instanceof HTMLElement) {
+          firstInput.focus();
+        }
+      }
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, [currentStep, open, showDraftPrompt]);
 
   const updateFormData = (updates: Partial<DealFormData>) => {
     setFormData(prev => ({ ...prev, ...updates }));
@@ -351,47 +515,14 @@ export const DealWizard: React.FC<DealWizardProps> = ({
       setCreatedDealId(deal.id);
       setCreatedDealName(formData.company_name);
 
+      // Clear draft from localStorage
+      clearDraft();
+      
       // Reset form
-      setFormData({
-        title: '',
-        company_name: '',
-        industry: '',
-        location: '',
-        description: '',
-        company_overview: '',
-        founded_year: null,
-        team_size: '',
-        reason_for_sale: '',
-        revenue: '',
-        ebitda: '',
-        asking_price: '',
-        profit_margin: '',
-        customer_count: '',
-        recurring_revenue: '',
-        cac_ltv_ratio: '',
-        growth_rate: '',
-        growth_opportunities: [],
-        market_position: '',
-        competitive_advantages: '',
-        strategic_fit: '',
-        founders_message: '',
-        founder_name: '',
-        founder_title: '',
-        key_personnel: '',
-        management_experience: '',
-        ideal_buyer_profile: '',
-        rollup_potential: '',
-        market_trends_alignment: '',
-        documents: [],
-        document_categories: [],
-        status: 'draft',
-        priority: 'medium',
-        publish_immediately: false,
-        scheduled_publish: null,
-        createDueDiligence: true,
-        createDataRoom: true,
-      });
+      setFormData(getInitialFormData());
       setCurrentStep(0);
+      setSaveStatus('idle');
+      setLastSaved(null);
       onDealCreated();
       onOpenChange(false);
       
@@ -416,8 +547,35 @@ export const DealWizard: React.FC<DealWizardProps> = ({
   return (
     <>
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[95vw] max-w-6xl h-[95vh] overflow-hidden p-0">
-        <div className="flex flex-col h-full">
+      <DialogContent className="w-[95vw] max-w-6xl h-[95vh] overflow-auto p-0 flex flex-col">
+        {/* Draft Resume Prompt */}
+        {showDraftPrompt && draftData && (
+          <div className="absolute inset-0 bg-background/95 z-50 flex items-center justify-center p-6">
+            <Alert className="max-w-md">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Resume Previous Draft?</AlertTitle>
+              <AlertDescription className="mt-2">
+                <p className="mb-2">
+                  You have an unsaved draft for <strong>{draftData.formData.company_name || 'a new deal'}</strong> 
+                  from {formatDistanceToNow(new Date(draftData.timestamp), { addSuffix: true })}.
+                </p>
+                <p className="text-xs text-muted-foreground mb-4">
+                  Step {draftData.currentStep + 1} of {steps.length}: {steps[draftData.currentStep]?.title}
+                </p>
+                <div className="flex gap-2">
+                  <Button onClick={handleResumeDraft} size="sm">
+                    Resume Draft
+                  </Button>
+                  <Button onClick={handleStartFresh} variant="outline" size="sm">
+                    Start Fresh
+                  </Button>
+                </div>
+              </AlertDescription>
+            </Alert>
+          </div>
+        )}
+
+        <div className="flex flex-col h-full min-h-0">
           {/* Header */}
           <div className="border-b border-border p-3 sm:p-4 shrink-0 bg-background">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-3 gap-2">
@@ -427,8 +585,25 @@ export const DealWizard: React.FC<DealWizardProps> = ({
                   Step {currentStep + 1} of {steps.length}: {steps[currentStep].title}
                 </p>
               </div>
-              <div className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">
-                {Math.round(progress)}% Complete
+              <div className="flex items-center gap-3">
+                {/* Save Status Indicator */}
+                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  {saveStatus === 'saving' && (
+                    <>
+                      <Loader2 className="w-3 h-3 animate-spin" />
+                      <span>Saving...</span>
+                    </>
+                  )}
+                  {saveStatus === 'saved' && lastSaved && (
+                    <>
+                      <Check className="w-3 h-3 text-green-500" />
+                      <span>Saved {formatDistanceToNow(lastSaved, { addSuffix: true })}</span>
+                    </>
+                  )}
+                </div>
+                <div className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">
+                  {Math.round(progress)}% Complete
+                </div>
               </div>
             </div>
             
@@ -482,8 +657,8 @@ export const DealWizard: React.FC<DealWizardProps> = ({
           </div>
 
           {/* Step Content - Scrollable Area */}
-          <div className="flex-1 overflow-y-auto min-h-0 overscroll-contain">
-            <div className="p-3 sm:p-6 pb-4">
+          <div className="flex-1 overflow-y-auto min-h-0 overscroll-contain" ref={contentRef}>
+            <div className="p-3 sm:p-6 pb-8">
               <div className="max-w-3xl mx-auto">
                 <CurrentStepComponent 
                   data={formData}
@@ -495,19 +670,39 @@ export const DealWizard: React.FC<DealWizardProps> = ({
           </div>
 
           {/* Footer - Sticky at Bottom */}
-          <div className="border-t border-border p-3 sm:p-4 shrink-0 bg-background sticky bottom-0 z-10">
+          <div className="border-t border-border p-3 sm:p-4 shrink-0 bg-background mt-auto">
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handlePrevious}
-                disabled={currentStep === 0}
-                className="flex items-center justify-center h-9 order-2 sm:order-1 min-w-[100px]"
-                size="sm"
-              >
-                <ChevronLeft className="w-4 h-4 mr-1" />
-                Previous
-              </Button>
+              <div className="flex items-center gap-2 order-2 sm:order-1">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handlePrevious}
+                  disabled={currentStep === 0}
+                  className="flex items-center justify-center h-9 min-w-[100px]"
+                  size="sm"
+                >
+                  <ChevronLeft className="w-4 h-4 mr-1" />
+                  Previous
+                </Button>
+                
+                {/* Manual Save Button */}
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => {
+                    saveDraft();
+                    toast({
+                      title: "Draft Saved",
+                      description: "Your progress has been saved.",
+                    });
+                  }}
+                  className="h-9"
+                  size="sm"
+                >
+                  <Save className="w-4 h-4 mr-1" />
+                  Save
+                </Button>
+              </div>
 
               <div className="flex items-center gap-2 order-1 sm:order-2 flex-1 sm:flex-none">
                 <Button
@@ -541,6 +736,14 @@ export const DealWizard: React.FC<DealWizardProps> = ({
                   </Button>
                 )}
               </div>
+            </div>
+            
+            {/* Keyboard Hints - Desktop Only */}
+            <div className="hidden sm:flex items-center justify-center gap-4 mt-2 text-[10px] text-muted-foreground">
+              <span><kbd className="px-1 py-0.5 rounded bg-muted border border-border text-[10px]">Enter</kbd> Continue</span>
+              <span><kbd className="px-1 py-0.5 rounded bg-muted border border-border text-[10px]">Shift+Enter</kbd> Back</span>
+              <span><kbd className="px-1 py-0.5 rounded bg-muted border border-border text-[10px]">⌘S</kbd> Save</span>
+              <span><kbd className="px-1 py-0.5 rounded bg-muted border border-border text-[10px]">Esc</kbd> Close</span>
             </div>
           </div>
         </div>

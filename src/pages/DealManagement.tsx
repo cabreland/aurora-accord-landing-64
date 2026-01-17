@@ -40,6 +40,16 @@ const DealManagement: React.FC = () => {
     filteredCount 
   } = useMyDeals();
 
+  // Auto-open wizard when navigating with ?create=true (from Data Room modal)
+  useEffect(() => {
+    if (searchParams.get('create') === 'true') {
+      setShowCreateDialog(true);
+      const newParams = new URLSearchParams(searchParams);
+      newParams.delete('create');
+      setSearchParams(newParams, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
+
   useEffect(() => {
     updateFilters({ search: searchQuery });
   }, [searchQuery]); // Remove updateFilters from deps to prevent infinite re-render
