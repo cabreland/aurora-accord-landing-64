@@ -104,11 +104,8 @@ const DraggableCard: React.FC<{
     transition,
   };
 
-  // Mock team members
-  const teamMembers = [
-    { initials: 'SA', name: 'Sarah Adams', online: true },
-    { initials: 'MK', name: 'Mike Kim', online: false },
-  ];
+  // Team members would be fetched from deal_team_members - empty for now
+  const teamMembers: { initials: string; name: string; online: boolean }[] = [];
 
   return (
     <div

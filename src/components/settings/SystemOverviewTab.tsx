@@ -10,33 +10,109 @@ import {
   Database,
   TrendingUp,
   AlertTriangle,
-  CheckCircle
+  CheckCircle,
+  Inbox
 } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const SystemOverviewTab: React.FC = () => {
-  // Mock data - in real implementation, fetch from API
-  const stats = {
-    totalUsers: 147,
-    activeUsers: 23,
-    totalDeals: 89,
-    totalDocuments: 342,
-    storageUsed: 2.3, // GB
-    storageLimit: 10, // GB
-    securityAlerts: 2,
-    systemHealth: 98.5
-  };
+  // Fetch real stats from database
+  const { data: stats, isLoading } = useQuery({
+    queryKey: ['system-overview-stats'],
+    queryFn: async () => {
+      // Get total users from profiles
+      const { count: totalUsers } = await supabase
+        .from('profiles')
+        .select('*', { count: 'exact', head: true });
 
-  const recentActivity = [
-    { action: 'New user registered', user: 'john.doe@example.com', time: '2 minutes ago', type: 'user' },
-    { action: 'Document uploaded', user: 'admin', time: '15 minutes ago', type: 'document' },
-    { action: 'Settings updated', user: 'admin', time: '1 hour ago', type: 'system' },
-    { action: 'Access granted', user: 'jane.smith@example.com', time: '2 hours ago', type: 'access' },
-  ];
+      // Get total deals (non-test)
+      const { count: totalDeals } = await supabase
+        .from('deals')
+        .select('*', { count: 'exact', head: true })
+        .eq('is_test_data', false);
 
-  const systemAlerts = [
-    { type: 'warning', message: 'Storage usage is at 73% capacity', time: '1 hour ago' },
-    { type: 'info', message: 'Scheduled maintenance tonight at 2 AM EST', time: '3 hours ago' },
-  ];
+      // Get total documents
+      const { count: totalDocuments } = await supabase
+        .from('data_room_documents')
+        .select('*', { count: 'exact', head: true });
+
+      // Calculate storage used from document sizes
+      const { data: docs } = await supabase
+        .from('data_room_documents')
+        .select('file_size');
+
+      const totalBytes = (docs || []).reduce((sum, doc) => sum + (doc.file_size || 0), 0);
+      const storageUsedGB = totalBytes / (1024 * 1024 * 1024);
+
+      return {
+        totalUsers: totalUsers || 0,
+        activeUsers: 0, // Would need session tracking
+        totalDeals: totalDeals || 0,
+        totalDocuments: totalDocuments || 0,
+        storageUsed: Math.round(storageUsedGB * 100) / 100,
+        storageLimit: 10,
+        securityAlerts: 0,
+        systemHealth: 100
+      };
+    },
+  });
+
+  // Fetch recent activity from deal_activities
+  const { data: recentActivity = [] } = useQuery({
+    queryKey: ['system-recent-activity'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('deal_activities')
+        .select(`
+          id,
+          activity_type,
+          created_at,
+          deal:deals(company_name)
+        `)
+        .order('created_at', { ascending: false })
+        .limit(5);
+
+      if (error) throw error;
+
+      return (data || []).map(a => ({
+        action: a.activity_type?.replace(/_/g, ' ') || 'Activity',
+        user: a.deal?.company_name || 'System',
+        time: new Date(a.created_at).toLocaleString(),
+        type: 'activity'
+      }));
+    },
+  });
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[1, 2, 3, 4].map(i => (
+            <Card key={i}>
+              <CardHeader className="pb-2">
+                <Skeleton className="h-4 w-24" />
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-8 w-16" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  const { 
+    totalUsers = 0, 
+    activeUsers = 0, 
+    totalDeals = 0, 
+    totalDocuments = 0, 
+    storageUsed = 0, 
+    storageLimit = 10, 
+    systemHealth = 100 
+  } = stats || {};
 
   return (
     <div className="space-y-6">
@@ -48,9 +124,9 @@ const SystemOverviewTab: React.FC = () => {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.totalUsers}</div>
+            <div className="text-2xl font-bold">{totalUsers}</div>
             <p className="text-xs text-muted-foreground">
-              <span className="text-green-600">+12%</span> from last month
+              Registered accounts
             </p>
           </CardContent>
         </Card>
@@ -61,7 +137,7 @@ const SystemOverviewTab: React.FC = () => {
             <Activity className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.activeUsers}</div>
+            <div className="text-2xl font-bold">{activeUsers}</div>
             <p className="text-xs text-muted-foreground">
               Currently online
             </p>
@@ -74,29 +150,49 @@ const SystemOverviewTab: React.FC = () => {
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.totalDeals}</div>
+            <div className="text-2xl font-bold">{totalDeals}</div>
             <p className="text-xs text-muted-foreground">
-              <span className="text-green-600">+5</span> this week
+              Active deals
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Documents</CardTitle>
+            <CardTitle className="text-sm font-medium">Total Documents</CardTitle>
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.totalDocuments}</div>
+            <div className="text-2xl font-bold">{totalDocuments}</div>
             <p className="text-xs text-muted-foreground">
-              Total uploaded
+              Uploaded files
             </p>
           </CardContent>
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* System Health */}
+      {/* Storage & Security */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Database className="h-5 w-5" />
+              Storage Usage
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-muted-foreground">
+                {storageUsed.toFixed(2)} GB / {storageLimit} GB used
+              </span>
+              <span className="text-sm font-medium">
+                {Math.round((storageUsed / storageLimit) * 100)}%
+              </span>
+            </div>
+            <Progress value={(storageUsed / storageLimit) * 100} />
+          </CardContent>
+        </Card>
+
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -105,60 +201,15 @@ const SystemOverviewTab: React.FC = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div>
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-sm font-medium">Overall Health</span>
-                <span className="text-sm text-muted-foreground">{stats.systemHealth}%</span>
-              </div>
-              <Progress value={stats.systemHealth} className="h-2" />
-            </div>
-
-            <div>
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-sm font-medium">Storage Usage</span>
-                <span className="text-sm text-muted-foreground">
-                  {stats.storageUsed}GB / {stats.storageLimit}GB
-                </span>
-              </div>
-              <Progress value={(stats.storageUsed / stats.storageLimit) * 100} className="h-2" />
-            </div>
-
-            <div className="flex items-center gap-2 pt-2">
-              <CheckCircle className="h-4 w-4 text-green-600" />
-              <span className="text-sm text-green-600">All systems operational</span>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Security Status */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5" />
-              Security Status
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
             <div className="flex items-center justify-between">
-              <span className="text-sm font-medium">Active Security Alerts</span>
-              <Badge variant={stats.securityAlerts > 0 ? "destructive" : "secondary"}>
-                {stats.securityAlerts}
+              <span className="text-sm text-muted-foreground">
+                Overall system health
+              </span>
+              <Badge variant={systemHealth >= 90 ? 'default' : 'destructive'}>
+                {systemHealth}%
               </Badge>
             </div>
-
-            <div className="space-y-2">
-              {systemAlerts.map((alert, index) => (
-                <div key={index} className="flex items-start gap-2 p-2 rounded-md bg-muted/50">
-                  <AlertTriangle className={`h-4 w-4 mt-0.5 ${
-                    alert.type === 'warning' ? 'text-yellow-500' : 'text-blue-500'
-                  }`} />
-                  <div className="flex-1">
-                    <p className="text-sm">{alert.message}</p>
-                    <p className="text-xs text-muted-foreground">{alert.time}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <Progress value={systemHealth} className="bg-green-100" />
           </CardContent>
         </Card>
       </div>
@@ -172,23 +223,27 @@ const SystemOverviewTab: React.FC = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-3">
-            {recentActivity.map((activity, index) => (
-              <div key={index} className="flex items-center gap-3 p-2 rounded-md hover:bg-muted/50">
-                <div className={`h-2 w-2 rounded-full ${
-                  activity.type === 'user' ? 'bg-blue-500' :
-                  activity.type === 'document' ? 'bg-green-500' :
-                  activity.type === 'system' ? 'bg-purple-500' :
-                  'bg-orange-500'
-                }`} />
-                <div className="flex-1">
-                  <p className="text-sm font-medium">{activity.action}</p>
-                  <p className="text-xs text-muted-foreground">by {activity.user}</p>
+          {recentActivity.length === 0 ? (
+            <div className="text-center py-8">
+              <Inbox className="w-10 h-10 text-muted-foreground/50 mx-auto mb-2" />
+              <p className="text-sm text-muted-foreground">No recent activity</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {recentActivity.map((activity, index) => (
+                <div key={index} className="flex items-center justify-between py-2 border-b last:border-0">
+                  <div className="flex items-center gap-3">
+                    <CheckCircle className="h-4 w-4 text-green-500" />
+                    <div>
+                      <p className="text-sm font-medium">{activity.action}</p>
+                      <p className="text-xs text-muted-foreground">{activity.user}</p>
+                    </div>
+                  </div>
+                  <span className="text-xs text-muted-foreground">{activity.time}</span>
                 </div>
-                <span className="text-xs text-muted-foreground">{activity.time}</span>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

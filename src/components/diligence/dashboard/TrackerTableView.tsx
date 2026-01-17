@@ -153,12 +153,10 @@ const TrackerTableView: React.FC<TrackerTableViewProps> = ({
   const allSelected = paginatedDeals.length > 0 && paginatedDeals.every(d => selectedDeals.includes(d.id));
   const someSelected = selectedDeals.length > 0 && !allSelected;
 
-  // Mock team members with their data
+  // Real owner data would come from deal_team_members joined with profiles
   const getOwnerData = (dealId: string) => {
-    const owners: Record<string, { name: string; initials: string; isOnline: boolean }> = {
-      default: { name: 'Sarah Adams', initials: 'SA', isOnline: true }
-    };
-    return owners[dealId] || owners.default;
+    // Returns placeholder until real team data is implemented
+    return { name: 'Unassigned', initials: '--', isOnline: false };
   };
 
   return (
