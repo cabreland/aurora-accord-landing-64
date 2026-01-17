@@ -11,6 +11,7 @@ import { format, isToday, isTomorrow, isPast, addDays } from 'date-fns';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { AddTaskDialog } from './AddTaskDialog';
+import { TaskDetailDialog } from './TaskDetailDialog';
 import { Database } from '@/integrations/supabase/types';
 
 type TaskPriority = Database['public']['Enums']['task_priority'];
@@ -52,6 +53,7 @@ export const MyTasksWidget = () => {
   const [showCompleted, setShowCompleted] = useState(false);
   const [showTodayOnly, setShowTodayOnly] = useState(false);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
   const { data: tasks = [], isLoading } = useQuery({
     queryKey: ['dashboard-tasks', showCompleted, showTodayOnly],
@@ -243,11 +245,8 @@ export const MyTasksWidget = () => {
               return (
                 <div
                   key={task.id}
-                  onClick={() => task.dealId && navigate(`/deals/${task.dealId}?tab=diligence`)}
-                  className={cn(
-                    "px-5 py-3.5 transition-colors group",
-                    task.dealId && "hover:bg-muted/50 cursor-pointer"
-                  )}
+                  onClick={() => setSelectedTask(task)}
+                  className="px-5 py-3.5 transition-colors group hover:bg-muted/50 cursor-pointer"
                 >
                   <div className="flex items-start gap-3">
                     {/* Checkbox */}
@@ -302,9 +301,6 @@ export const MyTasksWidget = () => {
                         <Clock className="w-3 h-3" />
                         <span>{task.dueDateFormatted}</span>
                       </div>
-                      {task.dealId && (
-                        <ChevronRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
-                      )}
                     </div>
                   </div>
                 </div>
@@ -317,6 +313,12 @@ export const MyTasksWidget = () => {
       <AddTaskDialog 
         open={isAddDialogOpen} 
         onOpenChange={setIsAddDialogOpen}
+      />
+
+      <TaskDetailDialog
+        open={!!selectedTask}
+        onOpenChange={(open) => !open && setSelectedTask(null)}
+        task={selectedTask}
       />
     </>
   );
