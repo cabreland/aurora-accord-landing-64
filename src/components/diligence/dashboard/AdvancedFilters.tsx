@@ -65,12 +65,8 @@ interface AdvancedFiltersProps {
   onResetFilters: () => void;
 }
 
-// Mock team members data
-const teamMembers = [
-  { id: 'sa', initials: 'SA', name: 'Sarah Adams', online: true },
-  { id: 'mk', initials: 'MK', name: 'Mike Kim', online: false },
-  { id: 'hj', initials: 'HJ', name: 'Hannah Jones', online: true },
-];
+// Team members would be fetched from profiles table - empty for now
+const teamMembers: { id: string; initials: string; name: string; online: boolean }[] = [];
 
 // Industries
 const industries = ['SaaS', 'E-commerce', 'Agency', 'Marketplace', 'Healthcare', 'FinTech'];

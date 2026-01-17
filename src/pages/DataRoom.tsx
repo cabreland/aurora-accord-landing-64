@@ -119,10 +119,10 @@ const DataRoom = () => {
           folder_count: folderCount,
           folders_with_docs: foldersWithDocs,
           completion_percent: completionPercent,
-          // Mock buyer metrics for now - would come from actual tables
-          active_buyers_count: Math.floor(Math.random() * 10),
-          ndas_signed_count: Math.floor(Math.random() * 5),
-          lois_submitted_count: Math.floor(Math.random() * 2),
+          // Real metrics would come from investor_invitations/nda_signatures tables
+          active_buyers_count: 0,
+          ndas_signed_count: 0,
+          lois_submitted_count: 0,
         };
       });
 

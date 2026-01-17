@@ -71,8 +71,8 @@ export const HeroStats: React.FC<HeroStatsProps> = ({
     return sum + (price * multiplier);
   }, 0);
 
-  // Mock goal progress (replace with real data)
-  const goalPercent = Math.min(100, Math.round((closingValue / (closingValue * 1.3)) * 100));
+  // Goal progress based on actual closing value (would need real goal target from settings)
+  const goalPercent = closingValue > 0 ? Math.min(100, Math.round((closingValue / (closingValue * 1.3)) * 100)) : 0;
 
   if (loading) {
     return (

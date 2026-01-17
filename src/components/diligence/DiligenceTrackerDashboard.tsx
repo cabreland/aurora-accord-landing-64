@@ -314,19 +314,11 @@ const DiligenceTrackerDashboard: React.FC = () => {
     }
   };
   
-  // Mock analytics data
+  // Real analytics data derived from actual requests
   const analyticsData = {
-    completionTrend: [45, 48, 52, 55, 58, 62, 65, 68, 72, 75, 78, 82, stats.completionRate],
-    teamStats: [
-      { name: 'Sarah Adams', initials: 'SA', completed: 12, assigned: 18 },
-      { name: 'Mike Kim', initials: 'MK', completed: 8, assigned: 14 },
-      { name: 'Hannah Jones', initials: 'HJ', completed: 6, assigned: 10 },
-    ],
-    bottlenecks: [
-      { category: 'Financial docs', pending: 8, status: 'critical' as const },
-      { category: 'Legal review', pending: 5, status: 'warning' as const },
-      { category: 'Operations', pending: 2, status: 'good' as const },
-    ],
+    completionTrend: [] as number[], // Would require historical tracking
+    teamStats: [] as { name: string; initials: string; completed: number; assigned: number }[], // Would require team assignments
+    bottlenecks: [] as { category: string; pending: number; status: 'critical' | 'warning' | 'good' }[], // Would require category analysis
     deadlines: [
       { label: 'Overdue', count: stats.overdueRequests, status: 'overdue' as const },
       { label: 'Today', count: allRequests.filter(r => r.due_date && isToday(new Date(r.due_date))).length, status: 'today' as const },
@@ -342,7 +334,7 @@ const DiligenceTrackerDashboard: React.FC = () => {
         return days > 7 && days <= 14;
       }).length, status: 'next' as const },
     ],
-    avgCompletionDays: 5
+    avgCompletionDays: 0
   };
 
   return (

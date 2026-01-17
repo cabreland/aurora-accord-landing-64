@@ -3,17 +3,18 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Lock } from 'lucide-react';
+import { Lock, Inbox } from 'lucide-react';
 import DashboardLayout from '@/components/investor/DashboardLayout';
 import OverviewTab from '@/components/investor/OverviewTab';
 import DealDetailView from '@/components/investor/DealDetailView';
-import { mockDeals } from '@/data/mockDeals';
 import { useInvestorDeals } from '@/hooks/useInvestorDeals';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const Demo = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const {
-    filteredDeals,
     selectedDeal,
     selectedDealData,
     viewMode,
@@ -21,15 +22,82 @@ const Demo = () => {
     handleDealClick,
     handleBackToDashboard,
     resetFilters,
-    allDeals: mockDealsData
   } = useInvestorDeals();
 
-  // Convert mock deals to InvestorDeal format for the demo
-  const convertedMockDeals = mockDeals.map(deal => ({
-    ...deal,
-    id: deal.id,
-    createdAt: new Date().toISOString()
-  }));
+  // Fetch real deals from database filtered to exclude test data
+  const { data: realDeals = [], isLoading } = useQuery({
+    queryKey: ['demo-real-deals'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('deals')
+        .select(`
+          id,
+          company_name,
+          industry,
+          revenue,
+          ebitda,
+          current_stage,
+          status,
+          priority,
+          location,
+          description,
+          founded_year,
+          team_size,
+          reason_for_sale,
+          growth_opportunities,
+          founders_message,
+          founder_name,
+          ideal_buyer_profile,
+          rollup_potential,
+          market_trends_alignment,
+          profit_margin,
+          customer_count,
+          recurring_revenue,
+          cac_ltv_ratio,
+          updated_at
+        `)
+        .eq('is_test_data', false)
+        .eq('status', 'active')
+        .order('updated_at', { ascending: false });
+
+      if (error) throw error;
+
+      // Map to the expected format for OverviewTab
+      return (data || []).map(deal => ({
+        id: deal.id,
+        companyName: deal.company_name,
+        industry: deal.industry || 'N/A',
+        revenue: deal.revenue || 'N/A',
+        ebitda: deal.ebitda || 'N/A',
+        stage: deal.current_stage || deal.status || 'Active',
+        progress: 50, // Would need real calculation
+        priority: deal.priority || 'Medium',
+        location: deal.location || 'N/A',
+        fitScore: 85, // Would need real calculation
+        lastUpdated: deal.updated_at,
+        description: deal.description || '',
+        foundedYear: deal.founded_year?.toString() || '',
+        teamSize: deal.team_size || '',
+        reasonForSale: deal.reason_for_sale || '',
+        growthOpportunities: Array.isArray(deal.growth_opportunities) 
+          ? deal.growth_opportunities as string[]
+          : [],
+        foundersMessage: deal.founders_message || '',
+        founderName: deal.founder_name || '',
+        idealBuyerProfile: deal.ideal_buyer_profile || '',
+        rollupPotential: deal.rollup_potential || '',
+        marketTrends: deal.market_trends_alignment || '',
+        profitMargin: deal.profit_margin || '',
+        customerCount: deal.customer_count || '',
+        recurringRevenue: deal.recurring_revenue || '',
+        cacLtvRatio: deal.cac_ltv_ratio || '',
+        highlights: [] as string[],
+        risks: [] as string[],
+        documents: [] as { name: string; type: string; size: string; lastUpdated: string }[],
+        createdAt: deal.updated_at
+      }));
+    },
+  });
 
   const renderDemoContent = () => {
     if (viewMode === 'detail' && selectedDealData) {
@@ -75,14 +143,31 @@ const Demo = () => {
               </div>
             </div>
 
-            <OverviewTab
-              allDeals={convertedMockDeals}
-              filteredDeals={convertedMockDeals}
-              selectedDeal={selectedDeal}
-              onFilterChange={handleFilterChange}
-              onDealClick={handleDealClick}
-              onResetFilters={resetFilters}
-            />
+            {isLoading ? (
+              <div className="space-y-4">
+                <Skeleton className="h-48 w-full" />
+                <Skeleton className="h-48 w-full" />
+              </div>
+            ) : realDeals.length === 0 ? (
+              <div className="bg-gradient-to-r from-[#0A0F0F] to-[#1A1F2E] p-12 rounded-2xl border border-[#D4AF37]/30 text-center">
+                <Inbox className="w-16 h-16 text-[#D4AF37]/50 mx-auto mb-4" />
+                <h3 className="text-2xl font-bold text-[#FAFAFA] mb-2">
+                  No Deals Available
+                </h3>
+                <p className="text-[#F4E4BC]/70">
+                  There are currently no active deals to display.
+                </p>
+              </div>
+            ) : (
+              <OverviewTab
+                allDeals={realDeals}
+                filteredDeals={realDeals}
+                selectedDeal={selectedDeal}
+                onFilterChange={handleFilterChange}
+                onDealClick={handleDealClick}
+                onResetFilters={resetFilters}
+              />
+            )}
           </div>
         );
       case 'deals':
