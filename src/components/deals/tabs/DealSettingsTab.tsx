@@ -315,11 +315,49 @@ export const DealSettingsTab = () => {
               </div>
             ) : (
               <div className="grid gap-3">
+                {/* Sell-Side Milestones */}
+                <MilestoneItem
+                  label="Listing Received"
+                  date={stageInfo?.listing_received_at || null}
+                  icon="📥"
+                  description="Initial company information submitted"
+                  canEdit
+                  onDateChange={handleDateChange('listing_received_at')}
+                  onMark={() => updateTimestampMutation.mutate({ 
+                    field: 'listing_received_at', 
+                    value: new Date().toISOString() 
+                  })}
+                />
+                <MilestoneItem
+                  label="Listing Approved"
+                  date={stageInfo?.listing_approved_at || null}
+                  icon="✅"
+                  description="Agreed to represent this seller"
+                  canEdit
+                  onDateChange={handleDateChange('listing_approved_at')}
+                  onMark={() => updateTimestampMutation.mutate({ 
+                    field: 'listing_approved_at', 
+                    value: new Date().toISOString() 
+                  })}
+                />
+                <MilestoneItem
+                  label="Data Room Complete"
+                  date={stageInfo?.data_room_complete_at || null}
+                  icon="📁"
+                  description="All required documents uploaded and verified"
+                  canEdit
+                  onDateChange={handleDateChange('data_room_complete_at')}
+                  onMark={() => updateTimestampMutation.mutate({ 
+                    field: 'data_room_complete_at', 
+                    value: new Date().toISOString() 
+                  })}
+                />
+                {/* Buy-Side Milestones */}
                 <MilestoneItem
                   label="Deal Published"
                   date={stageInfo?.deal_published_at || null}
                   icon="🚀"
-                  description="When the deal went live for buy-side"
+                  description="Listing went live for buyer marketplace"
                   canEdit
                   onDateChange={handleDateChange('deal_published_at')}
                   onMark={() => updateTimestampMutation.mutate({ 
