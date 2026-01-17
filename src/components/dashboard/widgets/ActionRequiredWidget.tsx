@@ -24,24 +24,15 @@ export const ActionRequiredWidget = () => {
         .eq('is_test_data', false)
         .eq('approval_status', 'pending');
 
-      // Get overdue tasks (diligence requests with past due dates from real deals)
+      // Get overdue tasks from the new tasks table
       const today = new Date().toISOString().split('T')[0];
-      const { data: overdueRequests } = await supabase
-        .from('diligence_requests')
-        .select(`
-          id,
-          deal:deals!inner(
-            id,
-            is_test_data
-          )
-        `)
-        .in('status', ['open', 'in_progress'])
+      const { count: overdueTasksCount } = await supabase
+        .from('tasks')
+        .select('*', { count: 'exact', head: true })
+        .neq('status', 'completed')
         .lt('due_date', today);
 
-      // Filter to only real deals
-      const overdueCount = (overdueRequests || [])
-        .filter((r: any) => r.deal && r.deal.is_test_data === false)
-        .length;
+      const overdueCount = overdueTasksCount || 0;
 
       return {
         dealsAwaitingReview: pendingDealsCount || 0,

@@ -2731,6 +2731,53 @@ export type Database = {
         }
         Relationships: []
       }
+      tasks: {
+        Row: {
+          assigned_to: string
+          created_at: string
+          deal_id: string | null
+          description: string | null
+          due_date: string | null
+          id: string
+          priority: Database["public"]["Enums"]["task_priority"]
+          status: Database["public"]["Enums"]["task_status"]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_to: string
+          created_at?: string
+          deal_id?: string | null
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          priority?: Database["public"]["Enums"]["task_priority"]
+          status?: Database["public"]["Enums"]["task_status"]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string
+          created_at?: string
+          deal_id?: string | null
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          priority?: Database["public"]["Enums"]["task_priority"]
+          status?: Database["public"]["Enums"]["task_status"]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tasks_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       team_invitations: {
         Row: {
           accepted_at: string | null
@@ -3325,6 +3372,8 @@ export type Database = {
       invitation_status: "pending" | "accepted" | "expired" | "revoked"
       priority_level: "low" | "medium" | "high"
       referral_source: "referral" | "social_media" | "search" | "other"
+      task_priority: "high" | "medium" | "low"
+      task_status: "open" | "in_progress" | "completed"
       team_invitation_status: "pending" | "accepted" | "expired" | "revoked"
       user_role: "admin" | "editor" | "viewer" | "super_admin"
     }
@@ -3505,6 +3554,8 @@ export const Constants = {
       invitation_status: ["pending", "accepted", "expired", "revoked"],
       priority_level: ["low", "medium", "high"],
       referral_source: ["referral", "social_media", "search", "other"],
+      task_priority: ["high", "medium", "low"],
+      task_status: ["open", "in_progress", "completed"],
       team_invitation_status: ["pending", "accepted", "expired", "revoked"],
       user_role: ["admin", "editor", "viewer", "super_admin"],
     },
