@@ -1195,6 +1195,7 @@ export type Database = {
           created_by: string
           current_stage: string | null
           customer_count: string | null
+          data_room_complete_at: string | null
           deal_published_at: string | null
           deal_status: string | null
           description: string | null
@@ -1210,6 +1211,8 @@ export type Database = {
           ideal_buyer_profile: string | null
           industry: string | null
           is_test_data: boolean | null
+          listing_approved_at: string | null
+          listing_received_at: string | null
           location: string | null
           loi_accepted_at: string | null
           loi_submitted_at: string | null
@@ -1229,6 +1232,7 @@ export type Database = {
           team_size: string | null
           title: string
           updated_at: string
+          workflow_phase: Database["public"]["Enums"]["workflow_phase"] | null
         }
         Insert: {
           approval_notes?: string | null
@@ -1245,6 +1249,7 @@ export type Database = {
           created_by: string
           current_stage?: string | null
           customer_count?: string | null
+          data_room_complete_at?: string | null
           deal_published_at?: string | null
           deal_status?: string | null
           description?: string | null
@@ -1260,6 +1265,8 @@ export type Database = {
           ideal_buyer_profile?: string | null
           industry?: string | null
           is_test_data?: boolean | null
+          listing_approved_at?: string | null
+          listing_received_at?: string | null
           location?: string | null
           loi_accepted_at?: string | null
           loi_submitted_at?: string | null
@@ -1279,6 +1286,7 @@ export type Database = {
           team_size?: string | null
           title: string
           updated_at?: string
+          workflow_phase?: Database["public"]["Enums"]["workflow_phase"] | null
         }
         Update: {
           approval_notes?: string | null
@@ -1295,6 +1303,7 @@ export type Database = {
           created_by?: string
           current_stage?: string | null
           customer_count?: string | null
+          data_room_complete_at?: string | null
           deal_published_at?: string | null
           deal_status?: string | null
           description?: string | null
@@ -1310,6 +1319,8 @@ export type Database = {
           ideal_buyer_profile?: string | null
           industry?: string | null
           is_test_data?: boolean | null
+          listing_approved_at?: string | null
+          listing_received_at?: string | null
           location?: string | null
           loi_accepted_at?: string | null
           loi_submitted_at?: string | null
@@ -1329,6 +1340,7 @@ export type Database = {
           team_size?: string | null
           title?: string
           updated_at?: string
+          workflow_phase?: Database["public"]["Enums"]["workflow_phase"] | null
         }
         Relationships: [
           {
@@ -3376,6 +3388,18 @@ export type Database = {
       task_status: "open" | "in_progress" | "completed"
       team_invitation_status: "pending" | "accepted" | "expired" | "revoked"
       user_role: "admin" | "editor" | "viewer" | "super_admin"
+      workflow_phase:
+        | "listing_received"
+        | "under_review"
+        | "listing_approved"
+        | "data_room_build"
+        | "qa_compliance"
+        | "ready_for_distribution"
+        | "live_active"
+        | "under_loi"
+        | "due_diligence"
+        | "closing"
+        | "closed"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -3558,6 +3582,19 @@ export const Constants = {
       task_status: ["open", "in_progress", "completed"],
       team_invitation_status: ["pending", "accepted", "expired", "revoked"],
       user_role: ["admin", "editor", "viewer", "super_admin"],
+      workflow_phase: [
+        "listing_received",
+        "under_review",
+        "listing_approved",
+        "data_room_build",
+        "qa_compliance",
+        "ready_for_distribution",
+        "live_active",
+        "under_loi",
+        "due_diligence",
+        "closing",
+        "closed",
+      ],
     },
   },
 } as const

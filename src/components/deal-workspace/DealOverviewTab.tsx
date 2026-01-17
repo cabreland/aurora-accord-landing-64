@@ -26,6 +26,9 @@ import { useDealTeam, getRoleDisplayName, getRoleColor } from '@/hooks/useDealTe
 import { useDiligenceRequests } from '@/hooks/useDiligenceTracker';
 import { useDataRoom } from '@/hooks/useDataRoom';
 import { useDealStageManager, STAGE_ORDER, DealStage as StageType } from '@/hooks/useDealStageManager';
+import { useWorkflowPhase, isSellSidePhase, isBuySidePhase } from '@/hooks/useWorkflowPhase';
+import { useDataRoomHealth } from '@/hooks/useDataRoomHealth';
+import { useDDCompleteness } from '@/hooks/useDDCompleteness';
 import { cn } from '@/lib/utils';
 import { DealTab } from './DealWorkspaceTabs';
 import { 
@@ -34,10 +37,13 @@ import {
   BottlenecksWidget, 
   OutstandingItemsWidget,
   StageProgressionAlert,
+  PublishDealButton,
   type DiligenceStage,
   type Bottleneck,
   type OutstandingItem 
 } from './overview';
+import SellSideHealthScorecard from './overview/SellSideHealthScorecard';
+import BuySideMetricsScorecard from './overview/BuySideMetricsScorecard';
 import * as Icons from 'lucide-react';
 
 interface DealOverviewTabProps {
@@ -86,6 +92,22 @@ export const DealOverviewTab: React.FC<DealOverviewTabProps> = ({ deal, onTabCha
   const { data: teamMembers = [], isLoading: teamLoading } = useDealTeam(deal.id);
   const { data: requests = [], isLoading: requestsLoading } = useDiligenceRequests(deal.id);
   const { folders, documents, loading: dataRoomLoading } = useDataRoom({ dealId: deal.id });
+  
+  // Workflow phase hook
+  const { 
+    currentPhase, 
+    isSellSide, 
+    isBuySide, 
+    isLoading: phaseLoading,
+    publishDeal,
+    isUpdating: isPublishing
+  } = useWorkflowPhase(deal.id);
+  
+  // Data room health (sell-side metric)
+  const dataRoomHealth = useDataRoomHealth(deal.id);
+  
+  // DD completeness (buy-side metric)
+  const ddCompleteness = useDDCompleteness(deal.id);
   
   // Use the stage manager hook for real stage data
   const {
@@ -326,7 +348,7 @@ export const DealOverviewTab: React.FC<DealOverviewTabProps> = ({ deal, onTabCha
     onTabChange('activity');
   };
 
-  const isLoading = activitiesLoading || teamLoading || requestsLoading || dataRoomLoading;
+  const isLoading = activitiesLoading || teamLoading || requestsLoading || dataRoomLoading || phaseLoading;
 
   if (isLoading) {
     return (
@@ -344,8 +366,8 @@ export const DealOverviewTab: React.FC<DealOverviewTabProps> = ({ deal, onTabCha
 
   return (
     <div className="space-y-6">
-      {/* Stage Progression Alert - Show when trigger is met */}
-      {showProgressionAlert && progressionCheck?.should_progress && progressionCheck.suggested_stage && dbCurrentStage && (
+      {/* Stage Progression Alert - Show when trigger is met (buy-side only) */}
+      {isBuySide && showProgressionAlert && progressionCheck?.should_progress && progressionCheck.suggested_stage && dbCurrentStage && (
         <StageProgressionAlert
           currentStage={dbCurrentStage}
           suggestedStage={progressionCheck.suggested_stage}
@@ -356,20 +378,58 @@ export const DealOverviewTab: React.FC<DealOverviewTabProps> = ({ deal, onTabCha
         />
       )}
 
-      {/* Deal Health Scorecard */}
-      <DealHealthScorecard
-        overallScore={metrics.overallCompletion}
-        documentCompletion={metrics.documentCompletion}
-        requestResponseRate={metrics.requestResponseRate}
-        teamEngagement={metrics.teamEngagement}
-        timelineStatus={metrics.timelineStatus}
-        trend={0}
-        documentsTotal={metrics.requiredFolders || metrics.totalFolders}
-        documentsCompleted={metrics.completedRequired}
-        requestsTotal={metrics.totalRequests}
-        requestsAnswered={metrics.answeredRequests}
-        teamSize={teamMembers.length}
-      />
+      {/* Sell-Side: Data Room Health Scorecard */}
+      {isSellSide && (
+        <SellSideHealthScorecard
+          healthPercentage={dataRoomHealth.healthPercentage}
+          requiredFolders={dataRoomHealth.requiredFolders}
+          requiredFoldersWithDocuments={dataRoomHealth.requiredFoldersWithDocuments}
+          totalDocuments={dataRoomHealth.totalDocuments}
+          isComplete={dataRoomHealth.isComplete}
+        />
+      )}
+
+      {/* Buy-Side: Buyer Metrics Scorecard */}
+      {isBuySide && (
+        <BuySideMetricsScorecard
+          ndasSigned={0} // TODO: Fetch from NDA table
+          loisReceived={0} // TODO: Fetch from LOI data
+          loisActive={0}
+          ddCompletionPercentage={ddCompleteness.completionPercentage}
+          ddTotalRequests={ddCompleteness.totalRequests}
+          ddCompletedRequests={ddCompleteness.completedRequests}
+          activeBuyers={0} // TODO: Fetch from buyer activity
+        />
+      )}
+
+      {/* Publish Deal Button - Show when ready_for_distribution and data room complete */}
+      {currentPhase === 'ready_for_distribution' && (
+        <div className="flex justify-center">
+          <PublishDealButton
+            companyName={deal.company_name}
+            dataRoomHealthPercentage={dataRoomHealth.healthPercentage}
+            isPublishing={isPublishing}
+            onPublish={publishDeal}
+          />
+        </div>
+      )}
+
+      {/* Buy-Side: Deal Health Scorecard (shows overall progress) */}
+      {isBuySide && (
+        <DealHealthScorecard
+          overallScore={metrics.overallCompletion}
+          documentCompletion={metrics.documentCompletion}
+          requestResponseRate={metrics.requestResponseRate}
+          teamEngagement={metrics.teamEngagement}
+          timelineStatus={metrics.timelineStatus}
+          trend={0}
+          documentsTotal={metrics.requiredFolders || metrics.totalFolders}
+          documentsCompleted={metrics.completedRequired}
+          requestsTotal={metrics.totalRequests}
+          requestsAnswered={metrics.answeredRequests}
+          teamSize={teamMembers.length}
+        />
+      )}
 
       {/* Bottlenecks Alert - Only if issues exist */}
       {bottlenecks.length > 0 && (
@@ -397,21 +457,43 @@ export const DealOverviewTab: React.FC<DealOverviewTabProps> = ({ deal, onTabCha
           </CardContent>
         </Card>
 
-        <Card className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => onTabChange('requests')}>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-amber-100">
-                <ClipboardList className="h-5 w-5 text-amber-600" />
+        {/* Only show DD Requests card for buy-side phases */}
+        {isBuySide && (
+          <Card className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => onTabChange('requests')}>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-amber-100">
+                  <ClipboardList className="h-5 w-5 text-amber-600" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold tabular-nums">{metrics.openRequests}</p>
+                  <p className="text-sm text-muted-foreground">
+                    Open / {metrics.totalRequests} total
+                  </p>
+                </div>
               </div>
-              <div>
-                <p className="text-2xl font-bold tabular-nums">{metrics.openRequests}</p>
-                <p className="text-sm text-muted-foreground">
-                  Open / {metrics.totalRequests} total
-                </p>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Sell-side: Show Data Room Health metric instead */}
+        {isSellSide && (
+          <Card className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => onTabChange('data-room')}>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-amber-100">
+                  <Target className="h-5 w-5 text-amber-600" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-2xl font-bold tabular-nums">{dataRoomHealth.healthPercentage}%</p>
+                  <p className="text-sm text-muted-foreground">
+                    Data Room Health
+                  </p>
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        )}
 
         <Card>
           <CardContent className="p-4">
@@ -420,8 +502,13 @@ export const DealOverviewTab: React.FC<DealOverviewTabProps> = ({ deal, onTabCha
                 <Target className="h-5 w-5 text-green-600" />
               </div>
               <div className="flex-1">
-                <p className="text-2xl font-bold tabular-nums">{metrics.overallCompletion}%</p>
-                <Progress value={metrics.overallCompletion} className="h-1.5 mt-1" />
+                <p className="text-2xl font-bold tabular-nums">
+                  {isSellSide ? dataRoomHealth.healthPercentage : metrics.overallCompletion}%
+                </p>
+                <Progress 
+                  value={isSellSide ? dataRoomHealth.healthPercentage : metrics.overallCompletion} 
+                  className="h-1.5 mt-1" 
+                />
               </div>
             </div>
           </CardContent>
@@ -447,12 +534,14 @@ export const DealOverviewTab: React.FC<DealOverviewTabProps> = ({ deal, onTabCha
         </Card>
       </div>
 
-      {/* Progress Timeline */}
-      <DiligenceStageTimeline
-        currentStage={currentStage}
-        completedStages={completedStages}
-        daysInCurrentStage={daysInCurrentStage}
-      />
+      {/* Progress Timeline - Only show for buy-side */}
+      {isBuySide && (
+        <DiligenceStageTimeline
+          currentStage={currentStage}
+          completedStages={completedStages}
+          daysInCurrentStage={daysInCurrentStage}
+        />
+      )}
 
       {/* Two Column Layout */}
       <div className="grid md:grid-cols-3 gap-6">

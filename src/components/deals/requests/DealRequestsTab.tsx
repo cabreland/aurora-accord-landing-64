@@ -5,9 +5,10 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Search, Download, Filter } from 'lucide-react';
+import { Plus, Search, Download, Filter, FolderOpen } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useDealRequests, REQUEST_CATEGORIES, REQUEST_PRIORITIES, REQUEST_STATUSES } from '@/hooks/useDealRequests';
+import { useWorkflowPhase, isSellSidePhase } from '@/hooks/useWorkflowPhase';
 import { RequestMetricsBar } from './RequestMetricsBar';
 import { RequestCard } from './RequestCard';
 import { NewRequestModal } from './NewRequestModal';
@@ -22,6 +23,9 @@ export const DealRequestsTab = () => {
   const [activeMetricFilter, setActiveMetricFilter] = useState<string | null>(null);
   const [isNewRequestOpen, setIsNewRequestOpen] = useState(false);
   const [selectedRequestId, setSelectedRequestId] = useState<string | null>(null);
+
+  const { currentPhase, isLoading: phaseLoading } = useWorkflowPhase(dealId || '');
+  const isSellSide = isSellSidePhase(currentPhase);
 
   const {
     requests,
@@ -100,6 +104,21 @@ export const DealRequestsTab = () => {
     return (
       <div className="p-6 text-center text-muted-foreground">
         No deal selected
+      </div>
+    );
+  }
+
+  // Show empty state for sell-side phases
+  if (isSellSide && !phaseLoading) {
+    return (
+      <div className="text-center py-16 bg-muted/20 rounded-lg border border-dashed">
+        <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
+          <FolderOpen className="h-8 w-8 text-muted-foreground" />
+        </div>
+        <h3 className="text-lg font-medium mb-2">No Buyer DD Requests Yet</h3>
+        <p className="text-muted-foreground max-w-md mx-auto">
+          Finish building the data room and publish this deal to start receiving buyer due diligence requests.
+        </p>
       </div>
     );
   }
