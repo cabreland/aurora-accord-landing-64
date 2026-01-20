@@ -61,7 +61,7 @@ export const useMyDeals = () => {
     if (user && profile) {
       fetchDeals();
     }
-  }, [user, profile]);
+  }, [user, profile, filters.status]);
 
   const fetchDeals = async () => {
     try {
@@ -75,6 +75,11 @@ export const useMyDeals = () => {
       // If not admin, only show user's deals
       if (profile?.role !== 'admin') {
         query = query.eq('created_by', user?.id);
+      }
+
+      // Exclude archived deals by default - they're only shown when explicitly filtered
+      if (filters.status !== 'archived') {
+        query = query.neq('status', 'archived');
       }
 
       const { data, error } = await query;
