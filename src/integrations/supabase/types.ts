@@ -1852,6 +1852,305 @@ export type Database = {
           },
         ]
       }
+      financing_activity: {
+        Row: {
+          activity_type: string
+          application_id: string
+          condition_id: string | null
+          created_at: string | null
+          description: string | null
+          document_id: string | null
+          id: string
+          metadata: Json | null
+          title: string
+          user_id: string | null
+        }
+        Insert: {
+          activity_type: string
+          application_id: string
+          condition_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          document_id?: string | null
+          id?: string
+          metadata?: Json | null
+          title: string
+          user_id?: string | null
+        }
+        Update: {
+          activity_type?: string
+          application_id?: string
+          condition_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          document_id?: string | null
+          id?: string
+          metadata?: Json | null
+          title?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financing_activity_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "financing_applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financing_activity_condition_id_fkey"
+            columns: ["condition_id"]
+            isOneToOne: false
+            referencedRelation: "financing_conditions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financing_activity_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "financing_documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      financing_applications: {
+        Row: {
+          amortization_months: number | null
+          application_number: string | null
+          approved_at: string | null
+          assigned_to: string | null
+          closing_date: string | null
+          created_at: string | null
+          created_by: string
+          days_in_stage: number | null
+          deal_id: string
+          decline_reason: string | null
+          down_payment_percent: number | null
+          financing_type: Database["public"]["Enums"]["financing_type"]
+          funded_at: string | null
+          health_score: number | null
+          id: string
+          interest_rate: number | null
+          internal_notes: string | null
+          is_primary: boolean | null
+          lender_id: string | null
+          loan_amount: number | null
+          partner_id: string | null
+          priority: string | null
+          stage: Database["public"]["Enums"]["financing_stage"]
+          stage_entered_at: string | null
+          submitted_at: string | null
+          term_months: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          amortization_months?: number | null
+          application_number?: string | null
+          approved_at?: string | null
+          assigned_to?: string | null
+          closing_date?: string | null
+          created_at?: string | null
+          created_by: string
+          days_in_stage?: number | null
+          deal_id: string
+          decline_reason?: string | null
+          down_payment_percent?: number | null
+          financing_type?: Database["public"]["Enums"]["financing_type"]
+          funded_at?: string | null
+          health_score?: number | null
+          id?: string
+          interest_rate?: number | null
+          internal_notes?: string | null
+          is_primary?: boolean | null
+          lender_id?: string | null
+          loan_amount?: number | null
+          partner_id?: string | null
+          priority?: string | null
+          stage?: Database["public"]["Enums"]["financing_stage"]
+          stage_entered_at?: string | null
+          submitted_at?: string | null
+          term_months?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          amortization_months?: number | null
+          application_number?: string | null
+          approved_at?: string | null
+          assigned_to?: string | null
+          closing_date?: string | null
+          created_at?: string | null
+          created_by?: string
+          days_in_stage?: number | null
+          deal_id?: string
+          decline_reason?: string | null
+          down_payment_percent?: number | null
+          financing_type?: Database["public"]["Enums"]["financing_type"]
+          funded_at?: string | null
+          health_score?: number | null
+          id?: string
+          interest_rate?: number | null
+          internal_notes?: string | null
+          is_primary?: boolean | null
+          lender_id?: string | null
+          loan_amount?: number | null
+          partner_id?: string | null
+          priority?: string | null
+          stage?: Database["public"]["Enums"]["financing_stage"]
+          stage_entered_at?: string | null
+          submitted_at?: string | null
+          term_months?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financing_applications_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financing_applications_lender_id_fkey"
+            columns: ["lender_id"]
+            isOneToOne: false
+            referencedRelation: "lenders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      financing_conditions: {
+        Row: {
+          application_id: string
+          assigned_to: string | null
+          category: string | null
+          completed_at: string | null
+          completed_by: string | null
+          created_at: string | null
+          description: string | null
+          due_date: string | null
+          id: string
+          notes: string | null
+          order_index: number | null
+          status: Database["public"]["Enums"]["condition_status"] | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          application_id: string
+          assigned_to?: string | null
+          category?: string | null
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string | null
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          notes?: string | null
+          order_index?: number | null
+          status?: Database["public"]["Enums"]["condition_status"] | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          application_id?: string
+          assigned_to?: string | null
+          category?: string | null
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string | null
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          notes?: string | null
+          order_index?: number | null
+          status?: Database["public"]["Enums"]["condition_status"] | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financing_conditions_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "financing_applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      financing_documents: {
+        Row: {
+          application_id: string
+          category: string | null
+          created_at: string | null
+          description: string | null
+          due_date: string | null
+          file_name: string | null
+          file_path: string | null
+          file_size: number | null
+          file_type: string | null
+          id: string
+          name: string
+          notes: string | null
+          received_at: string | null
+          rejection_reason: string | null
+          requested_at: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: Database["public"]["Enums"]["financing_doc_status"] | null
+          updated_at: string | null
+        }
+        Insert: {
+          application_id: string
+          category?: string | null
+          created_at?: string | null
+          description?: string | null
+          due_date?: string | null
+          file_name?: string | null
+          file_path?: string | null
+          file_size?: number | null
+          file_type?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          received_at?: string | null
+          rejection_reason?: string | null
+          requested_at?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["financing_doc_status"] | null
+          updated_at?: string | null
+        }
+        Update: {
+          application_id?: string
+          category?: string | null
+          created_at?: string | null
+          description?: string | null
+          due_date?: string | null
+          file_name?: string | null
+          file_path?: string | null
+          file_size?: number | null
+          file_type?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          received_at?: string | null
+          rejection_reason?: string | null
+          requested_at?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["financing_doc_status"] | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financing_documents_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "financing_applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       growth_opportunities: {
         Row: {
           created_at: string | null
@@ -2120,6 +2419,57 @@ export type Database = {
           timeline_to_close?: string
           updated_at?: string | null
           user_id?: string
+        }
+        Relationships: []
+      }
+      lenders: {
+        Row: {
+          avg_close_days: number | null
+          contact_email: string | null
+          contact_name: string | null
+          contact_phone: string | null
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          is_preferred: boolean | null
+          name: string
+          notes: string | null
+          success_rate: number | null
+          type: string | null
+          updated_at: string | null
+          website: string | null
+        }
+        Insert: {
+          avg_close_days?: number | null
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_preferred?: boolean | null
+          name: string
+          notes?: string | null
+          success_rate?: number | null
+          type?: string | null
+          updated_at?: string | null
+          website?: string | null
+        }
+        Update: {
+          avg_close_days?: number | null
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_preferred?: boolean | null
+          name?: string
+          notes?: string | null
+          success_rate?: number | null
+          type?: string | null
+          updated_at?: string | null
+          website?: string | null
         }
         Relationships: []
       }
@@ -3347,6 +3697,13 @@ export type Database = {
         | "explore_options"
       business_type: "saas" | "ecom" | "agency" | "other"
       company_stage: "teaser" | "discovery" | "dd" | "closing"
+      condition_status:
+        | "pending"
+        | "in_progress"
+        | "submitted"
+        | "approved"
+        | "waived"
+        | "rejected"
       deal_activity_type:
         | "document_uploaded"
         | "document_deleted"
@@ -3383,6 +3740,35 @@ export type Database = {
         | "buyer_notes"
         | "legal"
         | "due_diligence"
+        | "other"
+      financing_doc_status:
+        | "required"
+        | "requested"
+        | "received"
+        | "under_review"
+        | "approved"
+        | "rejected"
+        | "waived"
+      financing_stage:
+        | "pre_qualification"
+        | "application_submitted"
+        | "under_review"
+        | "additional_docs_requested"
+        | "conditional_approval"
+        | "final_approval"
+        | "closing"
+        | "funded"
+        | "declined"
+        | "withdrawn"
+      financing_type:
+        | "sba_7a"
+        | "sba_504"
+        | "conventional"
+        | "seller_financing"
+        | "mezzanine"
+        | "equity"
+        | "bridge"
+        | "line_of_credit"
         | "other"
       invitation_status: "pending" | "accepted" | "expired" | "revoked"
       priority_level: "low" | "medium" | "high"
@@ -3538,6 +3924,14 @@ export const Constants = {
       ],
       business_type: ["saas", "ecom", "agency", "other"],
       company_stage: ["teaser", "discovery", "dd", "closing"],
+      condition_status: [
+        "pending",
+        "in_progress",
+        "submitted",
+        "approved",
+        "waived",
+        "rejected",
+      ],
       deal_activity_type: [
         "document_uploaded",
         "document_deleted",
@@ -3576,6 +3970,38 @@ export const Constants = {
         "buyer_notes",
         "legal",
         "due_diligence",
+        "other",
+      ],
+      financing_doc_status: [
+        "required",
+        "requested",
+        "received",
+        "under_review",
+        "approved",
+        "rejected",
+        "waived",
+      ],
+      financing_stage: [
+        "pre_qualification",
+        "application_submitted",
+        "under_review",
+        "additional_docs_requested",
+        "conditional_approval",
+        "final_approval",
+        "closing",
+        "funded",
+        "declined",
+        "withdrawn",
+      ],
+      financing_type: [
+        "sba_7a",
+        "sba_504",
+        "conventional",
+        "seller_financing",
+        "mezzanine",
+        "equity",
+        "bridge",
+        "line_of_credit",
         "other",
       ],
       invitation_status: ["pending", "accepted", "expired", "revoked"],
