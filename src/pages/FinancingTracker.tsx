@@ -6,13 +6,13 @@ import { FinancingAttentionRequired } from '@/components/financing/FinancingAtte
 import { FinancingApplicationsByStage } from '@/components/financing/FinancingApplicationsByStage';
 import { LenderPerformanceMetrics } from '@/components/financing/LenderPerformanceMetrics';
 import { FinancingFilters } from '@/components/financing/FinancingFilters';
+import { AddDealToFinancingDialog } from '@/components/financing/AddDealToFinancingDialog';
 import { Button } from '@/components/ui/button';
 import { Plus, DollarSign, RefreshCw } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const FinancingTracker = () => {
-  const navigate = useNavigate();
+  const [showAddDialog, setShowAddDialog] = useState(false);
   const [filters, setFilters] = useState({
     search: '',
     stage: '',
@@ -89,13 +89,18 @@ const FinancingTracker = () => {
               Refresh
             </Button>
             <Button 
-              onClick={() => navigate('/financing/new')}
+              onClick={() => setShowAddDialog(true)}
               className="bg-[#D4AF37] hover:bg-[#B4941F] text-black"
             >
               <Plus className="w-4 h-4 mr-1" />
-              New Application
+              Add Deal
             </Button>
           </div>
+          
+          <AddDealToFinancingDialog
+            open={showAddDialog}
+            onOpenChange={setShowAddDialog}
+          />
         </div>
         
         {isLoading ? (
