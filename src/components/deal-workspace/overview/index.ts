@@ -12,4 +12,3 @@ export { DealPipelineProgress } from './DealPipelineProgress';
 export { DataRoomStatusCard } from './DataRoomStatusCard';
 export { KeyInformationCard } from './KeyInformationCard';
 export { TeamCollaborationCard } from './TeamCollaborationCard';
-export { ProgressCard } from './ProgressCard';
