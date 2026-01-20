@@ -1,22 +1,24 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ArrowLeft, Filter, Upload, Search, LayoutGrid, List, FolderOpen } from 'lucide-react';
+import { Filter, Search, LayoutGrid, List, FolderOpen, Upload } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { DataRoomEmptyState } from '@/components/data-room/DataRoomEmptyState';
 import { DataRoomUploadZone } from '@/components/data-room/DataRoomUploadZone';
 import { DocumentCard } from '@/components/data-room/DocumentCard';
 import { DocumentDetailModal } from '@/components/data-room/DocumentDetailModal';
-import { DataRoomCategorySidebar } from '@/components/data-room/DataRoomCategorySidebar';
+import { EnterpriseDataRoomHeader } from '@/components/data-room/EnterpriseDataRoomHeader';
+import DataRoomFolderSidebar from '@/components/data-room/DataRoomFolderSidebar';
 import { useDataRoom } from '@/hooks/useDataRoom';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
 
 const DOCUMENT_STATUSES = [
-  { value: 'all', label: 'All Statuses' },
+  { value: 'all', label: 'All Status' },
   { value: 'approved', label: 'Approved' },
   { value: 'pending_review', label: 'Pending' },
   { value: 'rejected', label: 'Rejected' },
@@ -35,6 +37,21 @@ export const DealDataRoomTab = () => {
   });
   const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(null);
   const [isUploadOpen, setIsUploadOpen] = useState(false);
+
+  // Fetch deal info
+  const { data: deal } = useQuery({
+    queryKey: ['deal', dealId],
+    queryFn: async () => {
+      if (!dealId) return null;
+      const { data } = await supabase
+        .from('deals')
+        .select('company_name, asking_price, industry')
+        .eq('id', dealId)
+        .single();
+      return data;
+    },
+    enabled: !!dealId,
+  });
 
   const {
     categories,
@@ -56,13 +73,12 @@ export const DealDataRoomTab = () => {
 
   // Calculate folder completion stats
   const folderStats = useMemo(() => {
-    const totalFolders = folders.filter(f => !f.is_not_applicable).length;
+    const totalFolders = folders.filter(f => !f.is_not_applicable && f.is_required).length;
     const foldersWithDocs = folders.filter(f => {
-      if (f.is_not_applicable) return false;
+      if (f.is_not_applicable || !f.is_required) return false;
       return documents.some(d => d.folder_id === f.id);
     }).length;
-    const completionPct = totalFolders > 0 ? Math.round((foldersWithDocs / totalFolders) * 100) : 0;
-    return { total: totalFolders, complete: foldersWithDocs, pct: completionPct };
+    return { total: totalFolders, complete: foldersWithDocs };
   }, [folders, documents]);
 
   // Filter documents
@@ -113,14 +129,9 @@ export const DealDataRoomTab = () => {
   const handleClearFilters = () => {
     setSearchQuery('');
     setStatusFilter('all');
-    setSelectedCategoryId(null);
-    setSelectedFolderId(null);
   };
 
-  const hasActiveFilters = searchQuery !== '' || 
-    statusFilter !== 'all' || 
-    selectedCategoryId !== null ||
-    selectedFolderId !== null;
+  const hasActiveFilters = searchQuery !== '' || statusFilter !== 'all';
 
   const handleToggleCategory = (categoryId: string) => {
     setExpandedCategories(prev => {
@@ -156,7 +167,6 @@ export const DealDataRoomTab = () => {
   };
 
   const handleUpload = async (file: File) => {
-    // Upload to the selected folder or root
     const targetFolderId = selectedFolderId || null;
     await uploadDocument(file, targetFolderId);
   };
@@ -172,22 +182,9 @@ export const DealDataRoomTab = () => {
     return null;
   };
 
-  // Get current location label
-  const currentLocationLabel = useMemo(() => {
-    if (selectedFolderId) {
-      const folder = folders.find(f => f.id === selectedFolderId);
-      return folder ? `${folder.index_number} ${folder.name}` : 'All Documents';
-    }
-    if (selectedCategoryId) {
-      const category = categories.find(c => c.id === selectedCategoryId);
-      return category ? `${category.index_number}. ${category.name}` : 'All Documents';
-    }
-    return 'All Documents';
-  }, [selectedCategoryId, selectedFolderId, categories, folders]);
-
   if (!dealId) {
     return (
-      <div className="p-6 text-center text-muted-foreground">
+      <div className="p-6 text-center text-gray-500">
         No deal selected
       </div>
     );
@@ -196,18 +193,28 @@ export const DealDataRoomTab = () => {
   // Show loading state
   if (loading) {
     return (
-      <div className="space-y-6">
-        <div className="flex items-center gap-4">
-          <Skeleton className="h-10 w-32" />
-          <Skeleton className="h-6 flex-1 max-w-xs" />
-          <Skeleton className="h-6 w-40 ml-auto" />
+      <div className="h-full flex flex-col bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+        <div className="flex items-center justify-between px-6 py-3 border-b border-gray-200">
+          <div className="flex items-center gap-4">
+            <Skeleton className="h-9 w-32" />
+            <Skeleton className="h-9 w-9 rounded-lg" />
+            <Skeleton className="h-8 w-48" />
+          </div>
+          <Skeleton className="h-9 w-32" />
         </div>
-        <div className="flex gap-6">
-          <Skeleton className="w-72 h-[600px]" />
-          <div className="flex-1 space-y-4">
-            <Skeleton className="h-10" />
+        <div className="flex-1 flex">
+          <div className="w-72 border-r border-gray-200 p-4 space-y-3">
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-px w-full" />
+            {[...Array(5)].map((_, i) => (
+              <Skeleton key={i} className="h-16 w-full" />
+            ))}
+          </div>
+          <div className="flex-1 p-4 space-y-4">
+            <Skeleton className="h-10 w-full" />
             {[...Array(4)].map((_, i) => (
-              <Skeleton key={i} className="h-24" />
+              <Skeleton key={i} className="h-20 w-full" />
             ))}
           </div>
         </div>
@@ -218,54 +225,29 @@ export const DealDataRoomTab = () => {
   // Show empty state if no folders
   if (folders.length === 0) {
     return (
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" onClick={() => navigate('/deals')}>
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-            <div>
-              <h2 className="text-2xl font-bold text-foreground">Data Room</h2>
-              <p className="text-muted-foreground text-sm">
-                Set up your data room structure
-              </p>
-            </div>
-          </div>
+      <div className="h-full flex flex-col bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+        <EnterpriseDataRoomHeader
+          deal={deal || undefined}
+          completedCount={0}
+          totalCount={0}
+          onUploadDocument={() => setIsUploadOpen(true)}
+        />
+        <div className="flex-1 p-6">
+          <DataRoomEmptyState templates={templates} onApplyTemplate={applyTemplate} />
         </div>
-        <DataRoomEmptyState templates={templates} onApplyTemplate={applyTemplate} />
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => navigate('/deals')}>
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <div>
-            <h2 className="text-2xl font-bold text-foreground">Data Room</h2>
-            <p className="text-muted-foreground text-sm">
-              Manage deal documents and materials
-            </p>
-          </div>
-        </div>
-        <div className="flex items-center gap-4">
-          {/* Progress Indicator */}
-          <div className="text-sm text-muted-foreground flex items-center gap-2">
-            <span className="font-semibold text-foreground">{folderStats.pct}%</span>
-            <span>|</span>
-            <span>{folderStats.complete} of {folderStats.total} folders complete</span>
-          </div>
-          <Button onClick={() => setIsUploadOpen(!isUploadOpen)} className="gap-2">
-            <Upload className="h-4 w-4" />
-            Upload Document
-          </Button>
-        </div>
-      </div>
+    <div className="h-full flex flex-col bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+      {/* Header - Matches DiligenceHeader exactly */}
+      <EnterpriseDataRoomHeader
+        deal={deal || undefined}
+        completedCount={folderStats.complete}
+        totalCount={folderStats.total}
+        onUploadDocument={() => setIsUploadOpen(!isUploadOpen)}
+      />
 
       {/* Upload Zone (collapsible) */}
       {isUploadOpen && (
@@ -273,18 +255,21 @@ export const DealDataRoomTab = () => {
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: 'auto' }}
           exit={{ opacity: 0, height: 0 }}
+          className="border-b border-gray-200"
         >
-          <DataRoomUploadZone
-            folderName={selectedFolderId ? folders.find(f => f.id === selectedFolderId)?.name || 'Documents' : 'Data Room'}
-            onUpload={handleUpload}
-          />
+          <div className="p-4 bg-gray-50">
+            <DataRoomUploadZone
+              folderName={selectedFolderId ? folders.find(f => f.id === selectedFolderId)?.name || 'Documents' : 'Data Room'}
+              onUpload={handleUpload}
+            />
+          </div>
         </motion.div>
       )}
 
       {/* Main Layout: Sidebar + Content */}
-      <div className="flex gap-6 min-h-[600px]">
-        {/* Sidebar */}
-        <DataRoomCategorySidebar
+      <div className="flex-1 flex overflow-hidden">
+        {/* Sidebar - Matches EnhancedCategorySidebar exactly */}
+        <DataRoomFolderSidebar
           categories={categories}
           folders={folders}
           documents={documents}
@@ -296,119 +281,118 @@ export const DealDataRoomTab = () => {
           onToggleCategory={handleToggleCategory}
         />
 
-        {/* Content Area */}
-        <div className="flex-1 space-y-4">
-          {/* Content Header */}
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-lg font-semibold text-foreground">{currentLocationLabel}</h3>
-              <p className="text-sm text-muted-foreground">
-                {filteredDocuments.length} document{filteredDocuments.length !== 1 ? 's' : ''}
-              </p>
-            </div>
-          </div>
+        {/* Main Content */}
+        <div className="flex-1 flex flex-col overflow-hidden bg-white">
+          {/* Filter Bar - Matches DealDiligenceTracker filter bar exactly */}
+          <div className="p-4 border-b border-gray-200 bg-gray-50/80">
+            <div className="flex items-center gap-3">
+              <div className="relative flex-1 max-w-md">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Input
+                  placeholder="Search documents..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 bg-white border-gray-300 text-gray-900 placeholder:text-gray-400 h-9"
+                />
+              </div>
+              
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-[140px] bg-white border-gray-300 h-9">
+                  <div className="flex items-center gap-2">
+                    <Filter className="w-4 h-4 text-gray-400" />
+                    <SelectValue placeholder="Status" />
+                  </div>
+                </SelectTrigger>
+                <SelectContent className="bg-white border-gray-200">
+                  {DOCUMENT_STATUSES.map((status) => (
+                    <SelectItem key={status.value} value={status.value}>
+                      {status.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
 
-          {/* Filter Bar */}
-          <div className="flex flex-wrap items-center gap-4">
-            {/* Search */}
-            <div className="relative flex-1 min-w-[200px] max-w-sm">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search documents..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9"
-              />
-            </div>
+              {hasActiveFilters && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleClearFilters}
+                  className="text-gray-600 hover:text-gray-900"
+                >
+                  Clear
+                </Button>
+              )}
 
-            {/* Status Filter */}
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-[140px]">
-                <SelectValue placeholder="Status" />
-              </SelectTrigger>
-              <SelectContent>
-                {DOCUMENT_STATUSES.map((status) => (
-                  <SelectItem key={status.value} value={status.value}>
-                    {status.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            {/* Clear Filters */}
-            {hasActiveFilters && (
-              <Button variant="ghost" size="sm" onClick={handleClearFilters}>
-                Clear Filters
-              </Button>
-            )}
-
-            {/* View Mode Toggle */}
-            <div className="flex items-center border rounded-lg p-1 ml-auto">
-              <Button
-                variant="ghost"
-                size="sm"
-                className={cn(
-                  'h-8 w-8 p-0',
-                  viewMode === 'grid' && 'bg-muted'
-                )}
-                onClick={() => setViewMode('grid')}
-              >
-                <LayoutGrid className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className={cn(
-                  'h-8 w-8 p-0',
-                  viewMode === 'list' && 'bg-muted'
-                )}
-                onClick={() => setViewMode('list')}
-              >
-                <List className="h-4 w-4" />
-              </Button>
+              {/* View Mode Toggle */}
+              <div className="flex items-center border border-gray-300 rounded-lg p-0.5 ml-auto bg-white">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className={cn(
+                    'h-7 w-7 p-0',
+                    viewMode === 'grid' && 'bg-gray-100'
+                  )}
+                  onClick={() => setViewMode('grid')}
+                >
+                  <LayoutGrid className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className={cn(
+                    'h-7 w-7 p-0',
+                    viewMode === 'list' && 'bg-gray-100'
+                  )}
+                  onClick={() => setViewMode('list')}
+                >
+                  <List className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
           </div>
 
           {/* Document List/Grid */}
-          {filteredDocuments.length === 0 ? (
-            <div className="text-center py-16 bg-muted/20 rounded-lg border border-dashed">
-              <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
-                {hasActiveFilters ? (
-                  <Filter className="h-8 w-8 text-muted-foreground" />
-                ) : (
-                  <FolderOpen className="h-8 w-8 text-muted-foreground" />
+          <div className="flex-1 overflow-auto p-4">
+            {filteredDocuments.length === 0 ? (
+              <div className="flex flex-col items-center justify-center h-full text-center py-16">
+                <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
+                  {hasActiveFilters ? (
+                    <Filter className="h-8 w-8 text-gray-400" />
+                  ) : (
+                    <FolderOpen className="h-8 w-8 text-gray-400" />
+                  )}
+                </div>
+                <h3 className="text-lg font-medium text-gray-900 mb-1">No documents found</h3>
+                <p className="text-gray-500 mb-4">
+                  {documents.length === 0
+                    ? 'Upload your first document to get started'
+                    : 'Try adjusting your filters'}
+                </p>
+                {documents.length === 0 && (
+                  <Button onClick={() => setIsUploadOpen(true)} className="bg-blue-600 hover:bg-blue-700">
+                    <Upload className="mr-2 h-4 w-4" />
+                    Upload Document
+                  </Button>
                 )}
               </div>
-              <h3 className="text-lg font-medium mb-1">No documents found</h3>
-              <p className="text-muted-foreground mb-4">
-                {documents.length === 0
-                  ? 'Upload your first document to get started'
-                  : 'Try adjusting your filters'}
-              </p>
-              {documents.length === 0 && (
-                <Button onClick={() => setIsUploadOpen(true)}>
-                  <Upload className="mr-2 h-4 w-4" />
-                  Upload Document
-                </Button>
-              )}
-            </div>
-          ) : (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.3 }}
-              className={viewMode === 'grid' ? 'grid gap-4 md:grid-cols-2' : 'grid gap-3'}
-            >
-              {filteredDocuments.map((doc) => (
-                <DocumentCard
-                  key={doc.id}
-                  document={doc}
-                  folder={getFolderForDocument(doc)}
-                  onClick={() => setSelectedDocumentId(doc.id)}
-                />
-              ))}
-            </motion.div>
-          )}
+            ) : (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.3 }}
+                className={viewMode === 'grid' ? 'grid gap-4 md:grid-cols-2 lg:grid-cols-3' : 'space-y-3'}
+              >
+                {filteredDocuments.map((doc) => (
+                  <DocumentCard
+                    key={doc.id}
+                    document={doc}
+                    folder={getFolderForDocument(doc)}
+                    onClick={() => setSelectedDocumentId(doc.id)}
+                  />
+                ))}
+              </motion.div>
+            )}
+          </div>
         </div>
       </div>
 
