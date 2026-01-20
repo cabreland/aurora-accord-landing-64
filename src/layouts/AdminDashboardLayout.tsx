@@ -15,7 +15,8 @@ import {
   Menu,
   ClipboardCheck,
   FolderOpen,
-  GraduationCap
+  GraduationCap,
+  DollarSign
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -81,6 +82,9 @@ const AdminDashboardLayout = ({ children, activeTab = 'dashboard', breadcrumbs }
     if (path === '/training') {
       return location.pathname.startsWith('/training');
     }
+    if (path === '/financing') {
+      return location.pathname.startsWith('/financing');
+    }
     return location.pathname === path;
   };
 
@@ -89,6 +93,7 @@ const AdminDashboardLayout = ({ children, activeTab = 'dashboard', breadcrumbs }
     { id: 'dashboard', label: 'Dashboard', icon: Home, path: '/dashboard' },
     { id: 'deals', label: 'Deals', icon: BarChart3, path: '/deals' },
     { id: 'diligence-tracker', label: 'Due Diligence', icon: ClipboardCheck, path: '/dashboard/diligence-tracker' },
+    { id: 'financing', label: 'Financing', icon: DollarSign, path: '/financing' },
     { id: 'data-room', label: 'Data Room', icon: FolderOpen, path: '/data-room' },
     { id: 'documents', label: 'Documents', icon: FileText, path: '/documents' },
     { id: 'access-requests', label: 'Access Requests', icon: Lock, path: '/dashboard/access-requests', badge: pendingAccessCount, badgeColor: 'bg-orange-500' },
