@@ -178,12 +178,12 @@ export const AddDealToFinancingDialog: React.FC<AddDealToFinancingDialogProps> =
               {/* Lender (Optional) */}
               <div className="space-y-2">
                 <Label>Lender (Optional)</Label>
-                <Select value={selectedLenderId} onValueChange={setSelectedLenderId}>
+                <Select value={selectedLenderId || 'none'} onValueChange={(v) => setSelectedLenderId(v === 'none' ? '' : v)}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select lender or add later" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Add lender later</SelectItem>
+                    <SelectItem value="none">Add lender later</SelectItem>
                     {lenders.map(lender => (
                       <SelectItem key={lender.id} value={lender.id}>
                         {lender.name}
