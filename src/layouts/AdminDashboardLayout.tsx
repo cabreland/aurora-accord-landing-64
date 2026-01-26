@@ -254,7 +254,7 @@ const AdminDashboardLayout = ({ children, activeTab = 'dashboard', breadcrumbs }
             <Breadcrumbs items={breadcrumbs} />
             
             {/* Right side actions */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 ml-auto">
               <NotificationBell />
               <UserMenuDropdown />
             </div>
