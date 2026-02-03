@@ -79,34 +79,34 @@ function Navigation() {
   return <PremiumHeader />;
 }
 
-// Hero Section - Premium Dark Theme with Custom Hero Image as Full-Bleed Background
+// Hero Section - Premium Dark Theme with Image on Right Side
 function Hero() {
   return (
     <section className="relative min-h-screen flex items-center pt-24 pb-16 overflow-hidden">
       {/* Base dark background */}
       <div className="absolute inset-0 bg-[#0A0C10]" />
       
-      {/* YOUR custom hero image - positioned to the right, full height */}
-      <div 
-        className="absolute inset-0"
-        style={{
-          backgroundImage: `url(${heroCircuitImage})`,
-          backgroundPosition: 'right center',
-          backgroundSize: 'cover',
-          backgroundRepeat: 'no-repeat'
-        }}
-      />
+      {/* YOUR custom hero image - positioned on right half only */}
+      <div className="absolute top-0 right-0 bottom-0 w-1/2 lg:w-[55%] overflow-hidden">
+        <div 
+          className="absolute inset-0"
+          style={{
+            backgroundImage: `url(${heroCircuitImage})`,
+            backgroundPosition: 'center',
+            backgroundSize: 'cover',
+            backgroundRepeat: 'no-repeat'
+          }}
+        />
+        {/* Left edge fade for seamless blend */}
+        <div className="absolute inset-y-0 left-0 w-1/3 pointer-events-none" style={{ background: 'linear-gradient(to right, #0A0C10 0%, transparent 100%)' }} />
+        {/* Top fade */}
+        <div className="absolute inset-x-0 top-0 h-24 pointer-events-none" style={{ background: 'linear-gradient(to bottom, #0A0C10 0%, transparent 100%)' }} />
+        {/* Bottom fade */}
+        <div className="absolute inset-x-0 bottom-0 h-24 pointer-events-none" style={{ background: 'linear-gradient(to top, #0A0C10 0%, transparent 100%)' }} />
+      </div>
       
-      {/* Gradient fades to seamlessly blend image into dark background */}
-      {/* Left fade - protects text area */}
-      <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(to right, #0A0C10 0%, #0A0C10 40%, transparent 75%)' }} />
-      {/* Top fade */}
-      <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(to bottom, #0A0C10 0%, transparent 20%)' }} />
-      {/* Bottom fade */}
-      <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(to top, #0A0C10 0%, transparent 15%)' }} />
-      
-      {/* Subtle gold glow to enhance the circuit aesthetic */}
-      <div className="absolute top-1/3 right-1/4 w-[500px] h-[500px] bg-gradient-to-br from-[#F4D77F]/8 to-[#D4AF37]/5 rounded-full blur-[120px] pointer-events-none" />
+      {/* Subtle gold glow */}
+      <div className="absolute top-1/3 right-1/4 w-[400px] h-[400px] bg-gradient-to-br from-[#F4D77F]/10 to-[#D4AF37]/5 rounded-full blur-[100px] pointer-events-none" />
 
       <div className="relative z-10 max-w-7xl mx-auto px-6 w-full">
         <div className="grid lg:grid-cols-2 gap-16 items-center">
