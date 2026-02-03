@@ -86,26 +86,27 @@ function Hero() {
       {/* Base dark background */}
       <div className="absolute inset-0 bg-[#0A0C10]" />
       
-      {/* YOUR custom hero image - positioned as full-bleed on right side */}
-      <div className="absolute inset-0 overflow-hidden">
-        <img
-          src={heroCircuitImage}
-          alt=""
-          className="absolute right-0 top-1/2 -translate-y-1/2 h-[140%] w-auto max-w-none object-contain object-right"
-          style={{ minWidth: '60%' }}
-        />
-        
-        {/* Gradient fades to seamlessly blend image into dark background */}
-        {/* Left fade - protects text area */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#0A0C10] via-[#0A0C10] to-transparent" style={{ background: 'linear-gradient(to right, #0A0C10 0%, #0A0C10 35%, transparent 70%)' }} />
-        {/* Top fade */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0A0C10] via-transparent to-transparent" style={{ background: 'linear-gradient(to bottom, #0A0C10 0%, transparent 25%)' }} />
-        {/* Bottom fade */}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0A0C10] via-transparent to-transparent" style={{ background: 'linear-gradient(to top, #0A0C10 0%, transparent 20%)' }} />
-        
-        {/* Subtle gold glow to enhance the circuit aesthetic */}
-        <div className="absolute top-1/3 right-1/4 w-[500px] h-[500px] bg-gradient-to-br from-[#F4D77F]/8 to-[#D4AF37]/5 rounded-full blur-[120px] pointer-events-none" />
-      </div>
+      {/* YOUR custom hero image - positioned to the right, full height */}
+      <div 
+        className="absolute inset-0"
+        style={{
+          backgroundImage: `url(${heroCircuitImage})`,
+          backgroundPosition: 'right center',
+          backgroundSize: 'cover',
+          backgroundRepeat: 'no-repeat'
+        }}
+      />
+      
+      {/* Gradient fades to seamlessly blend image into dark background */}
+      {/* Left fade - protects text area */}
+      <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(to right, #0A0C10 0%, #0A0C10 40%, transparent 75%)' }} />
+      {/* Top fade */}
+      <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(to bottom, #0A0C10 0%, transparent 20%)' }} />
+      {/* Bottom fade */}
+      <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(to top, #0A0C10 0%, transparent 15%)' }} />
+      
+      {/* Subtle gold glow to enhance the circuit aesthetic */}
+      <div className="absolute top-1/3 right-1/4 w-[500px] h-[500px] bg-gradient-to-br from-[#F4D77F]/8 to-[#D4AF37]/5 rounded-full blur-[120px] pointer-events-none" />
 
       <div className="relative z-10 max-w-7xl mx-auto px-6 w-full">
         <div className="grid lg:grid-cols-2 gap-16 items-center">
