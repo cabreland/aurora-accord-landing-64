@@ -20,7 +20,6 @@ import {
 import { Link } from 'react-router-dom';
 import nextTierLogo from '@/assets/next-tier-logo.png';
 import heroCircuitImage from '@/assets/hero-circuit.png';
-import bgCircuitHero from '@/assets/bg-circuit-hero.png';
 import bgCircuitPattern from '@/assets/bg-circuit-pattern.png';
 import bgCircuitCta from '@/assets/bg-circuit-cta.png';
 
@@ -80,31 +79,32 @@ function Navigation() {
   return <PremiumHeader />;
 }
 
-// Hero Section - Premium Dark Theme
+// Hero Section - Premium Dark Theme with Custom Hero Image as Full-Bleed Background
 function Hero() {
   return (
     <section className="relative min-h-screen flex items-center pt-24 pb-16 overflow-hidden">
-      {/* Full-bleed circuit background */}
-      <div className="absolute inset-0">
-        {/* Base dark layer */}
-        <div className="absolute inset-0 bg-[#0A0C10]" />
-        
-        {/* Hero circuit background - full bleed with fade */}
-        <div 
-          className="absolute inset-0 opacity-60"
-          style={{
-            backgroundImage: `url(${bgCircuitHero})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-          }}
+      {/* Base dark background */}
+      <div className="absolute inset-0 bg-[#0A0C10]" />
+      
+      {/* YOUR custom hero image - positioned as full-bleed on right side */}
+      <div className="absolute inset-0 overflow-hidden">
+        <img
+          src={heroCircuitImage}
+          alt=""
+          className="absolute right-0 top-1/2 -translate-y-1/2 h-[140%] w-auto max-w-none object-contain object-right"
+          style={{ minWidth: '60%' }}
         />
         
-        {/* Gradient overlay - fades circuit bg towards edges for text readability */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#0A0C10] via-[#0A0C10]/70 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0A0C10] via-transparent to-[#0A0C10]/50" />
+        {/* Gradient fades to seamlessly blend image into dark background */}
+        {/* Left fade - protects text area */}
+        <div className="absolute inset-0 bg-gradient-to-r from-[#0A0C10] via-[#0A0C10] to-transparent" style={{ background: 'linear-gradient(to right, #0A0C10 0%, #0A0C10 35%, transparent 70%)' }} />
+        {/* Top fade */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0A0C10] via-transparent to-transparent" style={{ background: 'linear-gradient(to bottom, #0A0C10 0%, transparent 25%)' }} />
+        {/* Bottom fade */}
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0A0C10] via-transparent to-transparent" style={{ background: 'linear-gradient(to top, #0A0C10 0%, transparent 20%)' }} />
         
-        {/* Gold accent glow - enhances the circuit pattern */}
-        <div className="absolute top-1/3 right-1/4 w-[600px] h-[600px] bg-gradient-to-br from-[#F4D77F]/15 to-[#D4AF37]/10 rounded-full blur-[150px]" />
+        {/* Subtle gold glow to enhance the circuit aesthetic */}
+        <div className="absolute top-1/3 right-1/4 w-[500px] h-[500px] bg-gradient-to-br from-[#F4D77F]/8 to-[#D4AF37]/5 rounded-full blur-[120px] pointer-events-none" />
       </div>
 
       <div className="relative z-10 max-w-7xl mx-auto px-6 w-full">
@@ -192,29 +192,8 @@ function Hero() {
             </div>
           </motion.div>
 
-          {/* Right - Hero Circuit Image */}
-          <motion.div
-            initial={{ opacity: 0, x: 40 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, delay: 0.3 }}
-            className="relative hidden lg:block"
-          >
-            {/* Gradient overlay from left - creates seamless fade */}
-            <div className="absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-[#0A0C10] to-transparent z-10 pointer-events-none" />
-            
-            {/* Subtle glow behind image */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-gradient-to-br from-[#F4D77F]/10 to-[#D4AF37]/5 rounded-full blur-[100px]" />
-            
-            {/* Hero Image */}
-            <motion.img
-              src={heroCircuitImage}
-              alt="Next Tier Partners - AI-Powered M&A Technology"
-              className="relative w-full h-auto max-w-[600px] ml-auto object-contain"
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 1, delay: 0.4 }}
-            />
-
+          {/* Right side - Floating badges positioned over the background image */}
+          <div className="relative hidden lg:block">
             {/* Floating Badge - Deal Closed */}
             <motion.div 
               initial={{ opacity: 0, scale: 0.9, x: 20 }}
@@ -250,7 +229,7 @@ function Hero() {
                 </div>
               </div>
             </motion.div>
-          </motion.div>
+          </div>
         </div>
       </div>
     </section>
