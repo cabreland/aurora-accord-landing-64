@@ -128,21 +128,25 @@ function Hero() {
             </motion.div>
 
             <h1 className="text-4xl md:text-5xl lg:text-[58px] font-bold text-white leading-[1.08] tracking-[-0.02em] mb-6" style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}>
-              We Buy & Sell Digital Businesses in{' '}
+              Fast-Exit Acquisitions for{' '}
               <span className="bg-gradient-to-r from-[#F4D77F] via-[#D4AF37] to-[#F4D77F] bg-clip-text text-transparent">
-                45-60 Days
+                Digital Founders
               </span>
             </h1>
             
+            <p className="text-xl text-white/70 mb-4 font-medium tracking-tight">
+              We buy profitable digital businesses. Cash. 45-60 days.
+            </p>
+            
             <p className="text-lg text-white/50 mb-8 leading-relaxed max-w-lg tracking-tight">
-              Strategic acquisitions and premium exits for SaaS, agencies, and DTC brands. Fast, professional transactions with complete transparency.
+              Next Tier Partners acquires digital businesses that are ready for professional ownership and strategic growth. If you've built a profitable SaaS, agency, or DTC brand and want a fast exit with certainty—we're your buyer.
             </p>
 
             <div className="space-y-3 mb-10">
               {[
-                'We acquire digital businesses for optimization and growth',
-                'Or facilitate premium exits to qualified buyers in our network',
-                'Fast, professional transactions in 45-60 days'
+                "Direct acquisitions—we're principals, not brokers",
+                "45-60 day closings with cash payment",
+                "$300K-$2.5M deals—serious capital for serious founders"
               ].map((item, i) => (
                 <motion.p 
                   key={i}
@@ -162,7 +166,7 @@ function Hero() {
                 size="lg" 
                 className="bg-gradient-to-r from-[#F4D77F] to-[#D4AF37] hover:from-[#D4AF37] hover:to-[#F4D77F] text-[#0A0C10] font-semibold px-8 h-13 shadow-xl shadow-[#D4AF37]/25 transition-all duration-300 tracking-tight"
               >
-                Get Your Business Valued
+                Start Your Exit
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
               <Button 
@@ -170,8 +174,7 @@ function Hero() {
                 variant="outline" 
                 className="border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.02)] text-white hover:bg-[rgba(255,255,255,0.06)] hover:border-[rgba(255,255,255,0.15)] px-6 h-13 transition-all duration-300 tracking-tight"
               >
-                <Play className="w-4 h-4 mr-2 fill-current" />
-                Watch video
+                Learn More
               </Button>
             </div>
 
