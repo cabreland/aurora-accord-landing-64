@@ -128,17 +128,13 @@ function Hero() {
             </motion.div>
 
             <h1 className="text-4xl md:text-5xl lg:text-[58px] font-bold text-white leading-[1.08] tracking-[-0.02em] mb-6" style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}>
-              Fast-Exit Acquisitions for{' '}
+              We buy profitable digital businesses.{' '}
               <span className="bg-gradient-to-r from-[#F4D77F] via-[#D4AF37] to-[#F4D77F] bg-clip-text text-transparent">
-                Digital Founders
+                Cash. 45-60 days.
               </span>
             </h1>
             
-            <p className="text-xl text-white/70 mb-4 font-medium tracking-tight">
-              We buy profitable digital businesses. Cash. 45-60 days.
-            </p>
-            
-            <p className="text-lg text-white/50 mb-8 leading-relaxed max-w-lg tracking-tight">
+            <p className="text-lg text-white/80 mb-8 leading-relaxed max-w-lg tracking-tight">
               Next Tier Partners acquires digital businesses that are ready for professional ownership and strategic growth. If you've built a profitable SaaS, agency, or DTC brand and want a fast exit with certainty—we're your buyer.
             </p>
 
@@ -153,7 +149,7 @@ function Hero() {
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.5, delay: 0.4 + i * 0.1 }}
-                  className="flex items-center gap-3 text-white/60 tracking-tight"
+                  className="flex items-center gap-3 text-white/80 tracking-tight"
                 >
                   <span className="text-[#F4D77F]">→</span>
                   {item}
