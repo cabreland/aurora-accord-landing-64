@@ -161,7 +161,7 @@ function Hero() {
               ))}
             </div>
 
-            <div className="flex flex-wrap items-center gap-4 mb-10">
+            <div className="flex flex-wrap items-center gap-4">
               <Button 
                 size="lg" 
                 className="bg-gradient-to-r from-[#F4D77F] to-[#D4AF37] hover:from-[#D4AF37] hover:to-[#F4D77F] text-[#0A0C10] font-semibold px-8 h-13 shadow-xl shadow-[#D4AF37]/25 transition-all duration-300 tracking-tight"
@@ -177,63 +177,10 @@ function Hero() {
                 Learn More
               </Button>
             </div>
-
-            {/* Trust indicators */}
-            <div className="flex items-center gap-6">
-              <div className="flex -space-x-2">
-                {[1, 2, 3, 4].map((i) => (
-                  <div 
-                    key={i} 
-                    className="w-9 h-9 rounded-full bg-gradient-to-br from-[#F4D77F]/30 to-[#D4AF37]/20 border-2 border-[#0A0C10] flex items-center justify-center backdrop-blur-sm"
-                  >
-                    <span className="text-xs font-medium text-white/70">{String.fromCharCode(64 + i)}</span>
-                  </div>
-                ))}
-              </div>
-              <p className="text-sm text-white/40 tracking-tight">
-                Trusted by <span className="text-white/60 font-medium">100+</span> founders worldwide
-              </p>
-            </div>
           </motion.div>
 
-          {/* Right side - Floating badges positioned over the background image */}
-          <div className="relative hidden lg:block">
-            {/* Floating Badge - Deal Closed */}
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.9, x: 20 }}
-              animate={{ opacity: 1, scale: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.8 }}
-              className="absolute right-8 top-16 bg-[rgba(13,17,23,0.95)] backdrop-blur-[30px] rounded-xl shadow-xl px-4 py-3 border border-[rgba(255,255,255,0.08)]"
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                </div>
-                <div>
-                  <span className="text-sm font-medium text-white tracking-tight">Deal Closed</span>
-                  <p className="text-xs text-white/40">$2.4M acquisition</p>
-                </div>
-              </div>
-            </motion.div>
-
-            {/* Floating Badge - Licensed Broker */}
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 1 }}
-              className="absolute left-4 bottom-24 bg-[rgba(13,17,23,0.95)] backdrop-blur-[30px] rounded-xl shadow-xl px-4 py-3 border border-[rgba(255,255,255,0.08)]"
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#F4D77F]/20 to-[#D4AF37]/20 flex items-center justify-center">
-                  <Shield className="w-4 h-4 text-[#F4D77F]" />
-                </div>
-                <div>
-                  <span className="text-sm font-medium text-white tracking-tight">Licensed Broker</span>
-                  <p className="text-xs text-white/40">Full compliance</p>
-                </div>
-              </div>
-            </motion.div>
-          </div>
+          {/* Right side - empty, letting the background image do the work */}
+          <div className="hidden lg:block" />
         </div>
       </div>
     </section>
