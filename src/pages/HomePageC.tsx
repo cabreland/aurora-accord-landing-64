@@ -18,10 +18,11 @@ import {
   BarChart3
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import nextTierLogo from '@/assets/next-tier-logo.png';
 
 const HomePageC = () => {
   return (
-    <div className="min-h-screen bg-[#0A0C10] text-white">
+    <div className="min-h-screen bg-[#0A0C10] text-white" style={{ fontFamily: "'Inter', sans-serif" }}>
       <Navigation />
       <Hero />
       <TrustStrip />
@@ -34,30 +35,63 @@ const HomePageC = () => {
       <FAQ />
       <FinalCTA />
       <Footer />
+      
+      {/* Circuit pattern overlay - subtle tech-forward element */}
+      <div className="fixed inset-0 pointer-events-none z-0 opacity-[0.02]">
+        <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <pattern id="circuit" x="0" y="0" width="100" height="100" patternUnits="userSpaceOnUse">
+              <circle cx="50" cy="50" r="1" fill="#D4AF37"/>
+              <path d="M50 0 L50 48 M50 52 L50 100 M0 50 L48 50 M52 50 L100 50" stroke="#D4AF37" strokeWidth="0.5" fill="none"/>
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#circuit)"/>
+        </svg>
+      </div>
     </div>
   );
 };
 
-// Navigation - Modern SaaS Style
+// Glass card component for consistent styling
+const GlassCard = ({ children, className = "", highlight = false, ...props }: { children: React.ReactNode; className?: string; highlight?: boolean }) => (
+  <div 
+    className={`
+      bg-[rgba(255,255,255,0.04)] 
+      backdrop-blur-[30px] 
+      border border-[rgba(255,255,255,0.08)] 
+      rounded-2xl 
+      ${highlight ? 'border-[#D4AF37]/40 shadow-lg shadow-[#D4AF37]/10' : ''}
+      hover:border-[rgba(212,175,55,0.3)] 
+      transition-all duration-300
+      ${className}
+    `}
+    {...props}
+  >
+    {children}
+  </div>
+);
+
+// Navigation - Modern SaaS Style with Logo
 function Navigation() {
   return (
-    <nav className="fixed top-0 w-full z-50 bg-[#0A0C10]/80 backdrop-blur-xl border-b border-white/[0.06]">
+    <nav className="fixed top-0 w-full z-50 bg-[rgba(10,12,16,0.85)] backdrop-blur-[30px] border-b border-[rgba(255,255,255,0.06)]">
       <div className="max-w-7xl mx-auto px-6">
-        <div className="flex items-center justify-between h-16">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-[#D4AF37] to-[#B8962E] rounded-lg flex items-center justify-center shadow-lg shadow-[#D4AF37]/20">
-              <span className="text-[#0A0C10] font-bold text-sm">NT</span>
-            </div>
-            <span className="text-white font-bold text-lg tracking-tight">Next Tier Partners</span>
+        <div className="flex items-center justify-between h-18 py-3">
+          <div className="flex items-center gap-3">
+            <img 
+              src={nextTierLogo} 
+              alt="Next Tier Partners" 
+              className="h-12 w-auto"
+            />
           </div>
           
           <div className="hidden md:flex items-center gap-8">
-            <a href="#how-it-works" className="text-white/60 hover:text-[#D4AF37] transition-colors text-sm font-medium">How It Works</a>
-            <a href="#exit-paths" className="text-white/60 hover:text-[#D4AF37] transition-colors text-sm font-medium">Exit Paths</a>
-            <a href="#faq" className="text-white/60 hover:text-[#D4AF37] transition-colors text-sm font-medium">FAQ</a>
+            <a href="#how-it-works" className="text-white/60 hover:text-[#D4AF37] transition-colors text-sm font-medium tracking-tight">How It Works</a>
+            <a href="#exit-paths" className="text-white/60 hover:text-[#D4AF37] transition-colors text-sm font-medium tracking-tight">Exit Paths</a>
+            <a href="#faq" className="text-white/60 hover:text-[#D4AF37] transition-colors text-sm font-medium tracking-tight">FAQ</a>
           </div>
           
-          <Button className="bg-gradient-to-r from-[#D4AF37] to-[#B8962E] hover:from-[#B8962E] hover:to-[#D4AF37] text-[#0A0C10] font-semibold px-6 shadow-lg shadow-[#D4AF37]/20 transition-all duration-300">
+          <Button className="bg-gradient-to-r from-[#F4D77F] to-[#D4AF37] hover:from-[#D4AF37] hover:to-[#F4D77F] text-[#0A0C10] font-semibold px-6 shadow-lg shadow-[#D4AF37]/25 transition-all duration-300 tracking-tight">
             Apply Now
           </Button>
         </div>
@@ -66,30 +100,30 @@ function Navigation() {
   );
 }
 
-// Hero Section - DealFlow Style
+// Hero Section - Premium Dark Theme
 function Hero() {
   return (
-    <section className="relative min-h-screen flex items-center pt-20 pb-16 overflow-hidden">
-      {/* Refined Background */}
+    <section className="relative min-h-screen flex items-center pt-24 pb-16 overflow-hidden">
+      {/* Refined Background with gold gradient glow */}
       <div className="absolute inset-0 bg-[#0A0C10]">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#0A0C10] via-[#111318] to-[#0A0C10]" />
+        <div className="absolute inset-0 bg-gradient-to-br from-[#0A0C10] via-[#0D0F14] to-[#0A0C10]" />
         
         {/* Gold accent glow - top left */}
-        <div className="absolute top-0 left-0 w-[600px] h-[600px] bg-[#D4AF37]/8 rounded-full blur-[150px] -translate-x-1/2 -translate-y-1/2" />
+        <div className="absolute top-0 left-0 w-[700px] h-[700px] bg-gradient-to-br from-[#F4D77F]/12 to-[#D4AF37]/8 rounded-full blur-[180px] -translate-x-1/3 -translate-y-1/3" />
         
-        {/* Blue accent glow - bottom right */}
-        <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-blue-500/8 rounded-full blur-[120px] translate-x-1/4 translate-y-1/4" />
+        {/* Subtle secondary glow - bottom right */}
+        <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-[#D4AF37]/6 rounded-full blur-[150px] translate-x-1/4 translate-y-1/4" />
         
         {/* Center subtle glow */}
-        <div className="absolute top-1/2 left-1/2 w-[800px] h-[400px] bg-[#D4AF37]/5 rounded-full blur-[180px] -translate-x-1/2 -translate-y-1/2" />
+        <div className="absolute top-1/2 left-1/2 w-[900px] h-[500px] bg-gradient-to-r from-[#F4D77F]/5 to-[#D4AF37]/5 rounded-full blur-[200px] -translate-x-1/2 -translate-y-1/2" />
         
-        {/* Grid pattern overlay */}
+        {/* Grid pattern overlay - 2-5% opacity */}
         <div 
-          className="absolute inset-0 opacity-[0.02]"
+          className="absolute inset-0 opacity-[0.03]"
           style={{
-            backgroundImage: `linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), 
-                             linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)`,
-            backgroundSize: '60px 60px'
+            backgroundImage: `linear-gradient(rgba(212,175,55,0.3) 1px, transparent 1px), 
+                             linear-gradient(90deg, rgba(212,175,55,0.3) 1px, transparent 1px)`,
+            backgroundSize: '80px 80px'
           }}
         />
       </div>
@@ -107,20 +141,20 @@ function Hero() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/[0.03] border border-white/[0.06] mb-8"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] backdrop-blur-[30px] mb-8"
             >
-              <Sparkles className="w-4 h-4 text-[#D4AF37]" />
-              <span className="text-sm text-white/70">Founder-First Exit Firm</span>
+              <Sparkles className="w-4 h-4 text-[#F4D77F]" />
+              <span className="text-sm text-white/70 tracking-tight">Founder-First Exit Firm</span>
             </motion.div>
 
-            <h1 className="text-4xl md:text-5xl lg:text-[56px] font-bold text-white leading-[1.1] tracking-tight mb-6">
+            <h1 className="text-4xl md:text-5xl lg:text-[58px] font-bold text-white leading-[1.08] tracking-[-0.02em] mb-6" style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}>
               We Buy & Sell Digital Businesses in{' '}
-              <span className="bg-gradient-to-r from-[#D4AF37] via-[#F4E4BC] to-[#D4AF37] bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-[#F4D77F] via-[#D4AF37] to-[#F4D77F] bg-clip-text text-transparent">
                 45-60 Days
               </span>
             </h1>
             
-            <p className="text-lg text-white/50 mb-8 leading-relaxed max-w-lg">
+            <p className="text-lg text-white/50 mb-8 leading-relaxed max-w-lg tracking-tight">
               Strategic acquisitions and premium exits for SaaS, agencies, and DTC brands. Fast, professional transactions with complete transparency.
             </p>
 
@@ -135,9 +169,9 @@ function Hero() {
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.5, delay: 0.4 + i * 0.1 }}
-                  className="flex items-center gap-3 text-white/60"
+                  className="flex items-center gap-3 text-white/60 tracking-tight"
                 >
-                  <span className="text-[#D4AF37]">→</span>
+                  <span className="text-[#F4D77F]">→</span>
                   {item}
                 </motion.p>
               ))}
@@ -146,7 +180,7 @@ function Hero() {
             <div className="flex flex-wrap items-center gap-4 mb-10">
               <Button 
                 size="lg" 
-                className="bg-gradient-to-r from-[#D4AF37] to-[#B8962E] hover:from-[#B8962E] hover:to-[#D4AF37] text-[#0A0C10] font-semibold px-8 h-13 shadow-lg shadow-[#D4AF37]/20 transition-all duration-300"
+                className="bg-gradient-to-r from-[#F4D77F] to-[#D4AF37] hover:from-[#D4AF37] hover:to-[#F4D77F] text-[#0A0C10] font-semibold px-8 h-13 shadow-xl shadow-[#D4AF37]/25 transition-all duration-300 tracking-tight"
               >
                 Get Your Business Valued
                 <ArrowRight className="w-4 h-4 ml-2" />
@@ -154,7 +188,7 @@ function Hero() {
               <Button 
                 size="lg" 
                 variant="outline" 
-                className="border-white/[0.1] bg-white/[0.02] text-white hover:bg-white/[0.05] hover:border-white/[0.15] px-6 h-13 transition-all duration-300"
+                className="border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.02)] text-white hover:bg-[rgba(255,255,255,0.06)] hover:border-[rgba(255,255,255,0.15)] px-6 h-13 transition-all duration-300 tracking-tight"
               >
                 <Play className="w-4 h-4 mr-2 fill-current" />
                 Watch video
@@ -167,13 +201,13 @@ function Hero() {
                 {[1, 2, 3, 4].map((i) => (
                   <div 
                     key={i} 
-                    className="w-8 h-8 rounded-full bg-gradient-to-br from-[#D4AF37]/30 to-[#B8962E]/30 border-2 border-[#0A0C10] flex items-center justify-center"
+                    className="w-9 h-9 rounded-full bg-gradient-to-br from-[#F4D77F]/30 to-[#D4AF37]/20 border-2 border-[#0A0C10] flex items-center justify-center backdrop-blur-sm"
                   >
                     <span className="text-xs font-medium text-white/70">{String.fromCharCode(64 + i)}</span>
                   </div>
                 ))}
               </div>
-              <p className="text-sm text-white/40">
+              <p className="text-sm text-white/40 tracking-tight">
                 Trusted by <span className="text-white/60 font-medium">100+</span> founders worldwide
               </p>
             </div>
@@ -187,41 +221,41 @@ function Hero() {
             className="relative"
           >
             {/* Glow behind card */}
-            <div className="absolute inset-0 bg-gradient-to-br from-[#D4AF37]/10 to-blue-500/10 rounded-3xl blur-2xl transform scale-105" />
+            <div className="absolute inset-0 bg-gradient-to-br from-[#F4D77F]/15 to-[#D4AF37]/10 rounded-3xl blur-3xl transform scale-105" />
             
-            <div className="relative bg-[#0D1117]/80 backdrop-blur-xl rounded-2xl p-1 shadow-2xl border border-white/[0.08]">
+            <div className="relative bg-[rgba(13,17,23,0.9)] backdrop-blur-[30px] rounded-2xl p-1 shadow-2xl border border-[rgba(255,255,255,0.08)]">
               <div className="bg-[#0A0C10] rounded-xl overflow-hidden">
                 {/* Header */}
-                <div className="bg-[#0D1117] border-b border-white/[0.06] px-4 py-3 flex items-center gap-2">
+                <div className="bg-[rgba(255,255,255,0.02)] border-b border-[rgba(255,255,255,0.06)] px-4 py-3 flex items-center gap-2">
                   <div className="w-3 h-3 rounded-full bg-[#FF5F57]" />
                   <div className="w-3 h-3 rounded-full bg-[#FFBD2E]" />
                   <div className="w-3 h-3 rounded-full bg-[#28C840]" />
-                  <span className="ml-3 text-xs text-white/30">Exit Dashboard</span>
+                  <span className="ml-3 text-xs text-white/30 tracking-tight">Exit Dashboard</span>
                 </div>
                 
                 {/* Content */}
                 <div className="p-5">
                   {/* Stats Row */}
                   <div className="grid grid-cols-3 gap-3 mb-5">
-                    <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4 text-center hover:bg-white/[0.04] transition-colors">
-                      <div className="text-2xl font-bold text-[#D4AF37]">45</div>
-                      <div className="text-xs text-white/40 mt-1">Day Timeline</div>
-                    </div>
-                    <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4 text-center hover:bg-white/[0.04] transition-colors">
+                    <GlassCard className="p-4 text-center">
+                      <div className="text-2xl font-bold bg-gradient-to-r from-[#F4D77F] to-[#D4AF37] bg-clip-text text-transparent">45</div>
+                      <div className="text-xs text-white/40 mt-1 tracking-tight">Day Timeline</div>
+                    </GlassCard>
+                    <GlassCard className="p-4 text-center">
                       <div className="text-2xl font-bold text-emerald-400">$15M+</div>
-                      <div className="text-xs text-white/40 mt-1">Closed Deals</div>
-                    </div>
-                    <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4 text-center hover:bg-white/[0.04] transition-colors">
-                      <div className="text-2xl font-bold text-blue-400">100%</div>
-                      <div className="text-xs text-white/40 mt-1">Confidential</div>
-                    </div>
+                      <div className="text-xs text-white/40 mt-1 tracking-tight">Closed Deals</div>
+                    </GlassCard>
+                    <GlassCard className="p-4 text-center">
+                      <div className="text-2xl font-bold bg-gradient-to-r from-[#F4D77F] to-[#D4AF37] bg-clip-text text-transparent">100%</div>
+                      <div className="text-xs text-white/40 mt-1 tracking-tight">Confidential</div>
+                    </GlassCard>
                   </div>
 
                   {/* Progress Visualization */}
-                  <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-5 mb-5">
+                  <GlassCard className="p-5 mb-5">
                     <div className="flex items-center justify-between mb-4">
-                      <span className="text-xs font-medium text-white/60">Deal Progress</span>
-                      <span className="text-xs text-[#D4AF37]">45 Days to Close</span>
+                      <span className="text-xs font-medium text-white/60 tracking-tight">Deal Progress</span>
+                      <span className="text-xs bg-gradient-to-r from-[#F4D77F] to-[#D4AF37] bg-clip-text text-transparent font-medium">45 Days to Close</span>
                     </div>
                     <div className="flex items-end justify-between h-20 gap-2">
                       {[40, 65, 45, 80, 55, 90, 70, 85].map((h, i) => (
@@ -230,24 +264,24 @@ function Hero() {
                           initial={{ height: 0 }}
                           animate={{ height: `${h}%` }}
                           transition={{ duration: 0.8, delay: 0.5 + i * 0.1 }}
-                          className="flex-1 bg-gradient-to-t from-[#D4AF37] to-[#F4E4BC] rounded-sm opacity-80"
+                          className="flex-1 bg-gradient-to-t from-[#D4AF37] to-[#F4D77F] rounded-sm opacity-80"
                         />
                       ))}
                     </div>
-                  </div>
+                  </GlassCard>
 
                   {/* Activity */}
                   <div className="space-y-2">
-                    <div className="flex items-center gap-3 p-3 bg-white/[0.02] rounded-lg border border-white/[0.06] hover:bg-white/[0.04] transition-colors">
+                    <GlassCard className="flex items-center gap-3 p-3">
                       <div className="w-2 h-2 rounded-full bg-emerald-400" />
-                      <span className="text-xs text-white/60 flex-1">LOI signed - SaaS Co</span>
+                      <span className="text-xs text-white/60 flex-1 tracking-tight">LOI signed - SaaS Co</span>
                       <span className="text-xs text-white/30">2h ago</span>
-                    </div>
-                    <div className="flex items-center gap-3 p-3 bg-white/[0.02] rounded-lg border border-white/[0.06] hover:bg-white/[0.04] transition-colors">
-                      <div className="w-2 h-2 rounded-full bg-[#D4AF37]" />
-                      <span className="text-xs text-white/60 flex-1">Due diligence complete</span>
+                    </GlassCard>
+                    <GlassCard className="flex items-center gap-3 p-3">
+                      <div className="w-2 h-2 rounded-full bg-[#F4D77F]" />
+                      <span className="text-xs text-white/60 flex-1 tracking-tight">Due diligence complete</span>
                       <span className="text-xs text-white/30">1d ago</span>
-                    </div>
+                    </GlassCard>
                   </div>
                 </div>
               </div>
@@ -257,14 +291,14 @@ function Hero() {
                 initial={{ opacity: 0, scale: 0.9, x: 20 }}
                 animate={{ opacity: 1, scale: 1, x: 0 }}
                 transition={{ duration: 0.6, delay: 0.8 }}
-                className="absolute -right-4 top-12 bg-[#0D1117] rounded-xl shadow-xl px-4 py-3 border border-white/[0.08]"
+                className="absolute -right-4 top-12 bg-[rgba(13,17,23,0.95)] backdrop-blur-[30px] rounded-xl shadow-xl px-4 py-3 border border-[rgba(255,255,255,0.08)]"
               >
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center">
                     <CheckCircle2 className="w-4 h-4 text-emerald-400" />
                   </div>
                   <div>
-                    <span className="text-sm font-medium text-white">Deal Closed</span>
+                    <span className="text-sm font-medium text-white tracking-tight">Deal Closed</span>
                     <p className="text-xs text-white/40">$2.4M acquisition</p>
                   </div>
                 </div>
@@ -275,14 +309,14 @@ function Hero() {
                 initial={{ opacity: 0, scale: 0.9, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 1 }}
-                className="absolute -left-4 bottom-16 bg-[#0D1117] rounded-xl shadow-xl px-4 py-3 border border-white/[0.08]"
+                className="absolute -left-4 bottom-16 bg-[rgba(13,17,23,0.95)] backdrop-blur-[30px] rounded-xl shadow-xl px-4 py-3 border border-[rgba(255,255,255,0.08)]"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-[#D4AF37]/20 flex items-center justify-center">
-                    <Shield className="w-4 h-4 text-[#D4AF37]" />
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#F4D77F]/20 to-[#D4AF37]/20 flex items-center justify-center">
+                    <Shield className="w-4 h-4 text-[#F4D77F]" />
                   </div>
                   <div>
-                    <span className="text-sm font-medium text-white">Licensed Broker</span>
+                    <span className="text-sm font-medium text-white tracking-tight">Licensed Broker</span>
                     <p className="text-xs text-white/40">Full compliance</p>
                   </div>
                 </div>
@@ -298,10 +332,10 @@ function Hero() {
 // Trust Strip - Refined
 function TrustStrip() {
   return (
-    <div className="border-y border-white/[0.06] bg-[#0A0C10]/60 backdrop-blur-sm">
+    <div className="border-y border-[rgba(255,255,255,0.06)] bg-[rgba(10,12,16,0.6)] backdrop-blur-[30px]">
       <div className="max-w-7xl mx-auto px-6 py-4">
-        <div className="flex items-center justify-center gap-3 text-sm text-white/50">
-          <Shield className="w-4 h-4 text-[#D4AF37]" />
+        <div className="flex items-center justify-center gap-3 text-sm text-white/50 tracking-tight">
+          <Shield className="w-4 h-4 text-[#F4D77F]" />
           <span>Professional acquisition and exit facilitation — Fast, transparent, and confidential</span>
         </div>
       </div>
@@ -312,10 +346,10 @@ function TrustStrip() {
 // What We Do Section
 function WhatWeDo() {
   return (
-    <section className="py-24 relative overflow-hidden">
+    <section className="py-28 relative overflow-hidden">
       {/* Subtle background */}
-      <div className="absolute inset-0 bg-gradient-to-b from-[#0A0C10] via-[#0D1117] to-[#0A0C10]" />
-      <div className="absolute top-1/2 left-1/2 w-[600px] h-[600px] bg-[#D4AF37]/5 rounded-full blur-[150px] -translate-x-1/2 -translate-y-1/2" />
+      <div className="absolute inset-0 bg-gradient-to-b from-[#0A0C10] via-[#0D0F14] to-[#0A0C10]" />
+      <div className="absolute top-1/2 left-1/2 w-[700px] h-[700px] bg-gradient-to-br from-[#F4D77F]/6 to-[#D4AF37]/4 rounded-full blur-[180px] -translate-x-1/2 -translate-y-1/2" />
       
       <div className="max-w-7xl mx-auto px-6 relative z-10">
         <motion.div 
@@ -324,17 +358,17 @@ function WhatWeDo() {
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/[0.03] border border-white/[0.06] mb-6">
-            <Building2 className="w-4 h-4 text-[#D4AF37]" />
-            <span className="text-sm text-white/70">Our Business Model</span>
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] backdrop-blur-[30px] mb-6">
+            <Building2 className="w-4 h-4 text-[#F4D77F]" />
+            <span className="text-sm text-white/70 tracking-tight">Our Business Model</span>
           </div>
-          <h2 className="text-3xl md:text-5xl font-bold text-white mb-4">
+          <h2 className="text-3xl md:text-5xl font-bold text-white mb-4 tracking-[-0.02em]" style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}>
             Two Paths to Your{' '}
-            <span className="bg-gradient-to-r from-[#D4AF37] via-[#F4E4BC] to-[#D4AF37] bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-[#F4D77F] via-[#D4AF37] to-[#F4D77F] bg-clip-text text-transparent">
               Perfect Exit
             </span>
           </h2>
-          <p className="text-lg text-white/50 max-w-2xl mx-auto">
+          <p className="text-lg text-white/50 max-w-2xl mx-auto tracking-tight">
             We operate as both strategic buyers and exit facilitators for digital businesses
           </p>
         </motion.div>
@@ -346,32 +380,33 @@ function WhatWeDo() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.1 }}
-            className="group bg-white/[0.02] border border-white/[0.08] rounded-2xl p-8 hover:border-[#D4AF37]/30 hover:bg-white/[0.04] transition-all duration-300"
           >
-            <div className="w-14 h-14 rounded-xl bg-[#D4AF37]/10 flex items-center justify-center mb-6 group-hover:bg-[#D4AF37]/20 transition-colors">
-              <Target className="w-7 h-7 text-[#D4AF37]" />
-            </div>
-            
-            <h3 className="text-2xl font-bold text-white mb-4">
-              Strategic Acquisitions
-            </h3>
-            
-            <p className="text-white/50 mb-6">
-              We acquire stable, cash-flowing digital businesses for optimization and long-term growth.
-            </p>
-            
-            <ul className="space-y-3">
-              {[
-                'Focus on SaaS, agencies, and e-commerce',
-                'Operational improvements and growth strategies',
-                'Portfolio approach with multiple holdings'
-              ].map((item, i) => (
-                <li key={i} className="flex items-start gap-3 text-white/60">
-                  <CheckCircle2 className="w-4 h-4 text-[#D4AF37] mt-0.5 flex-shrink-0" />
-                  <span className="text-sm">{item}</span>
-                </li>
-              ))}
-            </ul>
+            <GlassCard className="p-8 h-full group">
+              <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-[#F4D77F]/15 to-[#D4AF37]/10 flex items-center justify-center mb-6 group-hover:from-[#F4D77F]/25 group-hover:to-[#D4AF37]/15 transition-colors">
+                <Target className="w-7 h-7 text-[#F4D77F]" />
+              </div>
+              
+              <h3 className="text-2xl font-bold text-white mb-4 tracking-tight" style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}>
+                Strategic Acquisitions
+              </h3>
+              
+              <p className="text-white/50 mb-6 tracking-tight">
+                We acquire stable, cash-flowing digital businesses for optimization and long-term growth.
+              </p>
+              
+              <ul className="space-y-3">
+                {[
+                  'Focus on SaaS, agencies, and e-commerce',
+                  'Operational improvements and growth strategies',
+                  'Portfolio approach with multiple holdings'
+                ].map((item, i) => (
+                  <li key={i} className="flex items-start gap-3 text-white/60">
+                    <CheckCircle2 className="w-4 h-4 text-[#F4D77F] mt-0.5 flex-shrink-0" />
+                    <span className="text-sm tracking-tight">{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </GlassCard>
           </motion.div>
           
           {/* Path 2: Exit Facilitation */}
@@ -380,36 +415,37 @@ function WhatWeDo() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.2 }}
-            className="group bg-white/[0.02] border border-[#D4AF37]/30 rounded-2xl p-8 hover:bg-white/[0.04] transition-all duration-300 relative"
           >
-            <div className="absolute -top-3 right-8 bg-gradient-to-r from-[#D4AF37] to-[#B8962E] text-[#0A0C10] px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wide">
-              Most Popular
-            </div>
-            
-            <div className="w-14 h-14 rounded-xl bg-[#D4AF37]/10 flex items-center justify-center mb-6 group-hover:bg-[#D4AF37]/20 transition-colors">
-              <TrendingUp className="w-7 h-7 text-[#D4AF37]" />
-            </div>
-            
-            <h3 className="text-2xl font-bold text-white mb-4">
-              Premium Exit Services
-            </h3>
-            
-            <p className="text-white/50 mb-6">
-              Not ready to sell to us? We facilitate premium exits to qualified buyers in our network.
-            </p>
-            
-            <ul className="space-y-3">
-              {[
-                'Curated buyer network of strategic acquirers',
-                'Confidential deal structuring and negotiation',
-                'Full transaction support from LOI to close'
-              ].map((item, i) => (
-                <li key={i} className="flex items-start gap-3 text-white/60">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400 mt-0.5 flex-shrink-0" />
-                  <span className="text-sm">{item}</span>
-                </li>
-              ))}
-            </ul>
+            <GlassCard highlight className="p-8 h-full group relative">
+              <div className="absolute -top-3 right-8 bg-gradient-to-r from-[#F4D77F] to-[#D4AF37] text-[#0A0C10] px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wide">
+                Most Popular
+              </div>
+              
+              <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-[#F4D77F]/15 to-[#D4AF37]/10 flex items-center justify-center mb-6 group-hover:from-[#F4D77F]/25 group-hover:to-[#D4AF37]/15 transition-colors">
+                <TrendingUp className="w-7 h-7 text-[#F4D77F]" />
+              </div>
+              
+              <h3 className="text-2xl font-bold text-white mb-4 tracking-tight" style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}>
+                Premium Exit Services
+              </h3>
+              
+              <p className="text-white/50 mb-6 tracking-tight">
+                Not ready to sell to us? We facilitate premium exits to qualified buyers in our network.
+              </p>
+              
+              <ul className="space-y-3">
+                {[
+                  'Curated buyer network of strategic acquirers',
+                  'Confidential deal structuring and negotiation',
+                  'Full transaction support from LOI to close'
+                ].map((item, i) => (
+                  <li key={i} className="flex items-start gap-3 text-white/60">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400 mt-0.5 flex-shrink-0" />
+                    <span className="text-sm tracking-tight">{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </GlassCard>
           </motion.div>
         </div>
       </div>
@@ -420,10 +456,10 @@ function WhatWeDo() {
 // Why Next Tier - Comparison
 function WhyNextTier() {
   return (
-    <section className="py-24 relative overflow-hidden">
+    <section className="py-28 relative overflow-hidden">
       <div className="absolute inset-0 bg-[#0A0C10]" />
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-red-500/5 rounded-full blur-[150px]" />
-      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-[#D4AF37]/5 rounded-full blur-[150px]" />
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-red-500/5 rounded-full blur-[180px]" />
+      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-gradient-to-br from-[#F4D77F]/6 to-[#D4AF37]/4 rounded-full blur-[180px]" />
       
       <div className="max-w-7xl mx-auto px-6 relative z-10">
         <motion.div 
@@ -432,7 +468,7 @@ function WhyNextTier() {
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <h2 className="text-3xl md:text-5xl font-bold text-white mb-4">
+          <h2 className="text-3xl md:text-5xl font-bold text-white mb-4 tracking-[-0.02em]" style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}>
             Why Next Tier Partners vs{' '}
             <span className="text-white/40">Typical Buyers</span>
           </h2>
@@ -444,11 +480,11 @@ function WhyNextTier() {
             initial={{ opacity: 0, x: -20 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
-            className="rounded-2xl border border-red-500/20 bg-white/[0.02] backdrop-blur p-8"
+            className="rounded-2xl border border-red-500/20 bg-[rgba(255,255,255,0.02)] backdrop-blur-[30px] p-8"
           >
             <div className="flex items-center gap-2 mb-6">
               <XCircle className="w-6 h-6 text-red-400" />
-              <h3 className="text-xl font-bold text-white">Typical Buyers & Flippers</h3>
+              <h3 className="text-xl font-bold text-white tracking-tight" style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}>Typical Buyers & Flippers</h3>
             </div>
             <ul className="space-y-3">
               {[
@@ -461,7 +497,7 @@ function WhyNextTier() {
               ].map((item, idx) => (
                 <li key={idx} className="flex items-start gap-3 text-white/50">
                   <XCircle className="w-4 h-4 text-red-400/60 mt-0.5 flex-shrink-0" />
-                  <span className="text-sm">{item}</span>
+                  <span className="text-sm tracking-tight">{item}</span>
                 </li>
               ))}
             </ul>
@@ -472,30 +508,31 @@ function WhyNextTier() {
             initial={{ opacity: 0, x: 20 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
-            className="rounded-2xl border-2 border-[#D4AF37]/40 bg-white/[0.03] backdrop-blur p-8 relative"
           >
-            <div className="absolute -top-3 right-8 bg-gradient-to-r from-[#D4AF37] to-[#B8962E] text-[#0A0C10] px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wide">
-              Our Approach
-            </div>
-            <div className="flex items-center gap-2 mb-6">
-              <CheckCircle2 className="w-6 h-6 text-[#D4AF37]" />
-              <h3 className="text-xl font-bold text-white">Next Tier Partners</h3>
-            </div>
-            <ul className="space-y-3">
-              {[
-                "Strategic acquisitions and premium exits",
-                "Founder-first approach with fair valuations",
-                "45-60 day transaction timelines",
-                "Transparent deal structure with clear pricing",
-                "Multiple exit paths tailored to your goals",
-                "Post-exit partnership and growth options"
-              ].map((item, idx) => (
-                <li key={idx} className="flex items-start gap-3 text-white/70">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400 mt-0.5 flex-shrink-0" />
-                  <span className="text-sm">{item}</span>
-                </li>
-              ))}
-            </ul>
+            <GlassCard highlight className="p-8 relative">
+              <div className="absolute -top-3 right-8 bg-gradient-to-r from-[#F4D77F] to-[#D4AF37] text-[#0A0C10] px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wide">
+                Our Approach
+              </div>
+              <div className="flex items-center gap-2 mb-6">
+                <CheckCircle2 className="w-6 h-6 text-[#F4D77F]" />
+                <h3 className="text-xl font-bold text-white tracking-tight" style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}>Next Tier Partners</h3>
+              </div>
+              <ul className="space-y-3">
+                {[
+                  "Strategic acquisitions and premium exits",
+                  "Founder-first approach with fair valuations",
+                  "45-60 day transaction timelines",
+                  "Transparent deal structure with clear pricing",
+                  "Multiple exit paths tailored to your goals",
+                  "Post-exit partnership and growth options"
+                ].map((item, idx) => (
+                  <li key={idx} className="flex items-start gap-3 text-white/70">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400 mt-0.5 flex-shrink-0" />
+                    <span className="text-sm tracking-tight">{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </GlassCard>
           </motion.div>
         </div>
       </div>
@@ -533,9 +570,9 @@ function Process() {
   ];
 
   return (
-    <section id="how-it-works" className="py-24 relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-b from-[#0A0C10] via-[#0D1117] to-[#0A0C10]" />
-      <div className="absolute top-1/2 left-0 w-[400px] h-[400px] bg-[#D4AF37]/5 rounded-full blur-[150px]" />
+    <section id="how-it-works" className="py-28 relative overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-b from-[#0A0C10] via-[#0D0F14] to-[#0A0C10]" />
+      <div className="absolute top-1/2 left-0 w-[500px] h-[500px] bg-gradient-to-br from-[#F4D77F]/6 to-[#D4AF37]/4 rounded-full blur-[180px]" />
       
       <div className="max-w-7xl mx-auto px-6 relative z-10">
         <motion.div 
@@ -544,14 +581,14 @@ function Process() {
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/[0.03] border border-white/[0.06] mb-6">
-            <Clock className="w-4 h-4 text-[#D4AF37]" />
-            <span className="text-sm text-white/70">45-Day Process</span>
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] backdrop-blur-[30px] mb-6">
+            <Clock className="w-4 h-4 text-[#F4D77F]" />
+            <span className="text-sm text-white/70 tracking-tight">45-Day Process</span>
           </div>
-          <h2 className="text-3xl md:text-5xl font-bold text-white mb-4">
+          <h2 className="text-3xl md:text-5xl font-bold text-white mb-4 tracking-[-0.02em]" style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}>
             How the Process Works
           </h2>
-          <p className="text-lg text-white/50">
+          <p className="text-lg text-white/50 tracking-tight">
             Clear, professional guidance from first call to close.
           </p>
         </motion.div>
@@ -566,14 +603,14 @@ function Process() {
               transition={{ delay: idx * 0.1 }}
               className="relative group"
             >
-              <div className="bg-white/[0.02] border border-white/[0.08] rounded-2xl p-6 hover:border-[#D4AF37]/30 hover:bg-white/[0.04] transition-all duration-300 h-full">
-                <div className="text-5xl font-bold text-[#D4AF37]/20 mb-4">{step.number}</div>
-                <div className="w-12 h-12 rounded-xl bg-[#D4AF37]/10 flex items-center justify-center mb-4 text-[#D4AF37] group-hover:bg-[#D4AF37]/20 transition-colors">
+              <GlassCard className="p-6 h-full">
+                <div className="text-5xl font-bold bg-gradient-to-r from-[#F4D77F]/30 to-[#D4AF37]/20 bg-clip-text text-transparent mb-4">{step.number}</div>
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#F4D77F]/15 to-[#D4AF37]/10 flex items-center justify-center mb-4 text-[#F4D77F] group-hover:from-[#F4D77F]/25 group-hover:to-[#D4AF37]/15 transition-colors">
                   {step.icon}
                 </div>
-                <h3 className="text-lg font-bold text-white mb-2">{step.title}</h3>
-                <p className="text-white/50 text-sm leading-relaxed">{step.description}</p>
-              </div>
+                <h3 className="text-lg font-bold text-white mb-2 tracking-tight" style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}>{step.title}</h3>
+                <p className="text-white/50 text-sm leading-relaxed tracking-tight">{step.description}</p>
+              </GlassCard>
               
               {idx < steps.length - 1 && (
                 <div className="hidden lg:block absolute top-1/2 -right-3 w-6 h-0.5 bg-gradient-to-r from-[#D4AF37]/40 to-transparent"></div>
@@ -610,9 +647,9 @@ function ExitPaths() {
   ];
 
   return (
-    <section id="exit-paths" className="py-24 relative overflow-hidden">
+    <section id="exit-paths" className="py-28 relative overflow-hidden">
       <div className="absolute inset-0 bg-[#0A0C10]" />
-      <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-blue-500/5 rounded-full blur-[150px]" />
+      <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-gradient-to-br from-[#F4D77F]/6 to-[#D4AF37]/4 rounded-full blur-[180px]" />
       
       <div className="max-w-7xl mx-auto px-6 relative z-10">
         <motion.div 
@@ -621,9 +658,9 @@ function ExitPaths() {
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <h2 className="text-3xl md:text-5xl font-bold text-white mb-4">
+          <h2 className="text-3xl md:text-5xl font-bold text-white mb-4 tracking-[-0.02em]" style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}>
             Choose Your{' '}
-            <span className="bg-gradient-to-r from-[#D4AF37] via-[#F4E4BC] to-[#D4AF37] bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-[#F4D77F] via-[#D4AF37] to-[#F4D77F] bg-clip-text text-transparent">
               Exit Path
             </span>
           </h2>
@@ -637,29 +674,26 @@ function ExitPaths() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: idx * 0.1 }}
-              className={`rounded-2xl border p-8 hover:scale-[1.02] transition-all duration-300 ${
-                path.highlight 
-                  ? 'border-[#D4AF37]/40 bg-gradient-to-br from-[#D4AF37]/10 to-transparent shadow-lg shadow-[#D4AF37]/10' 
-                  : 'border-white/[0.08] bg-white/[0.02] hover:border-[#D4AF37]/30'
-              }`}
             >
-              {path.highlight && (
-                <div className="inline-block bg-gradient-to-r from-[#D4AF37] to-[#B8962E] text-[#0A0C10] px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide mb-4">
-                  Most Popular
-                </div>
-              )}
-              <h3 className="text-2xl font-bold text-white mb-2">{path.title}</h3>
-              <div className="text-[#D4AF37] text-sm font-semibold mb-4">{path.subtitle}</div>
-              <p className="text-white/50 leading-relaxed mb-6">{path.description}</p>
-              <Button 
-                className={`w-full ${
-                  path.highlight 
-                    ? 'bg-gradient-to-r from-[#D4AF37] to-[#B8962E] hover:from-[#B8962E] hover:to-[#D4AF37] text-[#0A0C10]' 
-                    : 'bg-white/[0.05] border border-white/[0.1] hover:bg-white/[0.1] text-white'
-                }`}
-              >
-                Learn More
-              </Button>
+              <GlassCard highlight={path.highlight} className="p-8 h-full hover:scale-[1.02] transition-transform duration-300">
+                {path.highlight && (
+                  <div className="inline-block bg-gradient-to-r from-[#F4D77F] to-[#D4AF37] text-[#0A0C10] px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide mb-4">
+                    Most Popular
+                  </div>
+                )}
+                <h3 className="text-2xl font-bold text-white mb-2 tracking-tight" style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}>{path.title}</h3>
+                <div className="bg-gradient-to-r from-[#F4D77F] to-[#D4AF37] bg-clip-text text-transparent text-sm font-semibold mb-4">{path.subtitle}</div>
+                <p className="text-white/50 leading-relaxed mb-6 tracking-tight">{path.description}</p>
+                <Button 
+                  className={`w-full ${
+                    path.highlight 
+                      ? 'bg-gradient-to-r from-[#F4D77F] to-[#D4AF37] hover:from-[#D4AF37] hover:to-[#F4D77F] text-[#0A0C10]' 
+                      : 'bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.1)] hover:bg-[rgba(255,255,255,0.1)] text-white'
+                  } tracking-tight`}
+                >
+                  Learn More
+                </Button>
+              </GlassCard>
             </motion.div>
           ))}
         </div>
@@ -689,9 +723,9 @@ function ResultsTestimonials() {
   ];
 
   return (
-    <section className="py-24 relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-b from-[#0A0C10] via-[#0D1117] to-[#0A0C10]" />
-      <div className="absolute top-1/2 right-0 w-[500px] h-[500px] bg-[#D4AF37]/5 rounded-full blur-[150px]" />
+    <section className="py-28 relative overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-b from-[#0A0C10] via-[#0D0F14] to-[#0A0C10]" />
+      <div className="absolute top-1/2 right-0 w-[500px] h-[500px] bg-gradient-to-br from-[#F4D77F]/6 to-[#D4AF37]/4 rounded-full blur-[180px]" />
       
       <div className="max-w-7xl mx-auto px-6 relative z-10">
         <motion.div 
@@ -700,11 +734,11 @@ function ResultsTestimonials() {
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/[0.03] border border-white/[0.06] mb-6">
-            <Users className="w-4 h-4 text-[#D4AF37]" />
-            <span className="text-sm text-white/70">Founder Stories</span>
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] backdrop-blur-[30px] mb-6">
+            <Users className="w-4 h-4 text-[#F4D77F]" />
+            <span className="text-sm text-white/70 tracking-tight">Founder Stories</span>
           </div>
-          <h2 className="text-3xl md:text-5xl font-bold text-white mb-4">
+          <h2 className="text-3xl md:text-5xl font-bold text-white mb-4 tracking-[-0.02em]" style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}>
             What Founders Say
           </h2>
         </motion.div>
@@ -717,13 +751,14 @@ function ResultsTestimonials() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: idx * 0.1 }}
-              className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-8 hover:border-[#D4AF37]/30 transition-all duration-300"
             >
-              <p className="text-white/70 leading-relaxed mb-6">"{testimonial.quote}"</p>
-              <div>
-                <div className="font-bold text-white">{testimonial.author}</div>
-                <div className="text-[#D4AF37] text-sm">{testimonial.business}</div>
-              </div>
+              <GlassCard className="p-8 h-full">
+                <p className="text-white/70 leading-relaxed mb-6 tracking-tight">"{testimonial.quote}"</p>
+                <div>
+                  <div className="font-bold text-white tracking-tight">{testimonial.author}</div>
+                  <div className="bg-gradient-to-r from-[#F4D77F] to-[#D4AF37] bg-clip-text text-transparent text-sm">{testimonial.business}</div>
+                </div>
+              </GlassCard>
             </motion.div>
           ))}
         </div>
@@ -735,8 +770,8 @@ function ResultsTestimonials() {
             'Digital-only focus'
           ].map((item, i) => (
             <div key={i} className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-[#D4AF37]"></div>
-              <span>{item}</span>
+              <div className="w-2 h-2 rounded-full bg-gradient-to-r from-[#F4D77F] to-[#D4AF37]"></div>
+              <span className="tracking-tight">{item}</span>
             </div>
           ))}
         </div>
@@ -759,7 +794,7 @@ function WhoWeWorkWith() {
   ];
 
   return (
-    <section className="py-24 relative overflow-hidden">
+    <section className="py-28 relative overflow-hidden">
       <div className="absolute inset-0 bg-[#0A0C10]" />
       
       <div className="max-w-7xl mx-auto px-6 relative z-10">
@@ -769,10 +804,10 @@ function WhoWeWorkWith() {
           viewport={{ once: true }}
           className="text-center mb-12"
         >
-          <h2 className="text-3xl md:text-5xl font-bold text-white mb-4">
+          <h2 className="text-3xl md:text-5xl font-bold text-white mb-4 tracking-[-0.02em]" style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}>
             Who We Work With
           </h2>
-          <p className="text-lg text-white/50 max-w-2xl mx-auto">
+          <p className="text-lg text-white/50 max-w-2xl mx-auto tracking-tight">
             Digital founders who are serious about a professional exit or scale path.
           </p>
         </motion.div>
@@ -786,7 +821,7 @@ function WhoWeWorkWith() {
           {businessTypes.map((type, idx) => (
             <div 
               key={idx} 
-              className="px-6 py-3 rounded-full bg-white/[0.02] border border-white/[0.08] text-white/70 text-sm hover:border-[#D4AF37]/30 hover:text-white transition-all duration-300"
+              className="px-6 py-3 rounded-full bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] backdrop-blur-[30px] text-white/70 text-sm hover:border-[#D4AF37]/30 hover:text-white transition-all duration-300 tracking-tight"
             >
               {type}
             </div>
@@ -820,22 +855,23 @@ function FAQ() {
     },
     {
       question: "What fees should I expect?",
-      answer: "Brokerage fees are success-based and disclosed upfront during valuation. Direct acquisitions have no brokerage fees. We never charge upfront fees or retainers."
+      answer: "For direct acquisitions, there are no seller-side fees. For brokered exits, we charge a standard success fee (a percentage of the sale price), only paid when the deal closes. We'll discuss specific terms during our initial consultation."
     }
   ];
 
   return (
-    <section id="faq" className="py-24 relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-b from-[#0A0C10] via-[#0D1117] to-[#0A0C10]" />
+    <section id="faq" className="py-28 relative overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-b from-[#0A0C10] via-[#0D0F14] to-[#0A0C10]" />
+      <div className="absolute top-1/2 left-1/2 w-[600px] h-[600px] bg-gradient-to-br from-[#F4D77F]/5 to-[#D4AF37]/3 rounded-full blur-[180px] -translate-x-1/2 -translate-y-1/2" />
       
       <div className="max-w-3xl mx-auto px-6 relative z-10">
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center mb-16"
+          className="text-center mb-12"
         >
-          <h2 className="text-3xl md:text-5xl font-bold text-white mb-4">
+          <h2 className="text-3xl md:text-5xl font-bold text-white mb-4 tracking-[-0.02em]" style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}>
             Frequently Asked Questions
           </h2>
         </motion.div>
@@ -844,24 +880,34 @@ function FAQ() {
           {faqs.map((faq, idx) => (
             <motion.div 
               key={idx}
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: idx * 0.05 }}
-              className="rounded-xl border border-white/[0.08] bg-white/[0.02] overflow-hidden"
             >
-              <button
-                onClick={() => setOpenIndex(openIndex === idx ? null : idx)}
-                className="w-full flex items-center justify-between p-6 text-left hover:bg-white/[0.02] transition-colors"
-              >
-                <span className="font-semibold text-white pr-4">{faq.question}</span>
-                <ChevronDown className={`w-5 h-5 text-[#D4AF37] flex-shrink-0 transition-transform ${openIndex === idx ? 'rotate-180' : ''}`} />
-              </button>
-              {openIndex === idx && (
-                <div className="px-6 pb-6">
-                  <p className="text-white/50 leading-relaxed">{faq.answer}</p>
-                </div>
-              )}
+              <GlassCard className="overflow-hidden">
+                <button
+                  className="w-full flex items-center justify-between p-6 text-left"
+                  onClick={() => setOpenIndex(openIndex === idx ? null : idx)}
+                >
+                  <span className="font-semibold text-white tracking-tight">{faq.question}</span>
+                  <ChevronDown 
+                    className={`w-5 h-5 text-[#F4D77F] transition-transform duration-200 ${
+                      openIndex === idx ? 'rotate-180' : ''
+                    }`}
+                  />
+                </button>
+                {openIndex === idx && (
+                  <motion.div 
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="px-6 pb-6"
+                  >
+                    <p className="text-white/60 leading-relaxed tracking-tight">{faq.answer}</p>
+                  </motion.div>
+                )}
+              </GlassCard>
             </motion.div>
           ))}
         </div>
@@ -873,45 +919,65 @@ function FAQ() {
 // Final CTA
 function FinalCTA() {
   return (
-    <section className="py-32 relative overflow-hidden">
+    <section className="py-28 relative overflow-hidden">
+      {/* Premium gold glow */}
       <div className="absolute inset-0 bg-[#0A0C10]" />
-      <div className="absolute top-1/2 left-1/2 w-[800px] h-[400px] bg-[#D4AF37]/10 rounded-full blur-[180px] -translate-x-1/2 -translate-y-1/2" />
+      <div className="absolute top-1/2 left-1/2 w-[1000px] h-[600px] bg-gradient-to-r from-[#F4D77F]/12 to-[#D4AF37]/8 rounded-full blur-[200px] -translate-x-1/2 -translate-y-1/2" />
       
-      {/* Grid pattern */}
-      <div 
-        className="absolute inset-0 opacity-[0.02]"
-        style={{
-          backgroundImage: `linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), 
-                           linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)`,
-          backgroundSize: '60px 60px'
-        }}
-      />
-      
-      <div className="max-w-4xl mx-auto px-6 text-center relative z-10">
+      <div className="max-w-4xl mx-auto px-6 relative z-10 text-center">
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
         >
-          <h2 className="text-4xl md:text-6xl font-bold text-white mb-6">
-            Your Next Chapter{' '}
-            <span className="bg-gradient-to-r from-[#D4AF37] via-[#F4E4BC] to-[#D4AF37] bg-clip-text text-transparent">
-              Starts Here
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] backdrop-blur-[30px] mb-8">
+            <Sparkles className="w-4 h-4 text-[#F4D77F]" />
+            <span className="text-sm text-white/70 tracking-tight">Ready to Exit?</span>
+          </div>
+          
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 tracking-[-0.02em]" style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}>
+            Let's Discuss Your{' '}
+            <span className="bg-gradient-to-r from-[#F4D77F] via-[#D4AF37] to-[#F4D77F] bg-clip-text text-transparent">
+              Exit Strategy
             </span>
           </h2>
-          <p className="text-lg text-white/50 mb-10 max-w-2xl mx-auto leading-relaxed">
-            Share your business and we'll map a clear, professional exit or scale path in under 45 days.
+          
+          <p className="text-lg text-white/50 mb-10 max-w-2xl mx-auto tracking-tight">
+            Apply below for a confidential conversation. We'll assess your business, outline potential exit paths, and answer all your questions — no pressure, no commitment.
           </p>
-          <Button 
-            size="lg"
-            className="bg-gradient-to-r from-[#D4AF37] to-[#B8962E] hover:from-[#B8962E] hover:to-[#D4AF37] text-[#0A0C10] font-semibold px-12 h-14 text-lg shadow-2xl shadow-[#D4AF37]/30 transition-all duration-300"
-          >
-            Apply for a 45-Day Exit Plan
-            <ArrowRight className="w-5 h-5 ml-2" />
-          </Button>
-          <p className="text-white/40 text-sm mt-4">
-            No obligation. Strictly confidential.
-          </p>
+          
+          <div className="flex flex-wrap items-center justify-center gap-4 mb-12">
+            <Button 
+              size="lg" 
+              className="bg-gradient-to-r from-[#F4D77F] to-[#D4AF37] hover:from-[#D4AF37] hover:to-[#F4D77F] text-[#0A0C10] font-semibold px-10 h-14 text-base shadow-2xl shadow-[#D4AF37]/30 transition-all duration-300 tracking-tight"
+            >
+              Get Your Free Valuation
+              <ArrowRight className="w-5 h-5 ml-2" />
+            </Button>
+            <Button 
+              size="lg" 
+              variant="outline" 
+              className="border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.02)] text-white hover:bg-[rgba(255,255,255,0.06)] hover:border-[rgba(255,255,255,0.15)] px-8 h-14 text-base transition-all duration-300 tracking-tight"
+            >
+              Talk to Our Team
+            </Button>
+          </div>
+
+          {/* Trust indicators */}
+          <div className="flex flex-wrap items-center justify-center gap-8 text-sm text-white/40">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-emerald-400" />
+              <span className="tracking-tight">100% Confidential</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-emerald-400" />
+              <span className="tracking-tight">No Obligation</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-emerald-400" />
+              <span className="tracking-tight">Licensed Brokerage</span>
+            </div>
+          </div>
         </motion.div>
       </div>
     </section>
@@ -921,50 +987,31 @@ function FinalCTA() {
 // Footer
 function Footer() {
   return (
-    <footer className="bg-[#0A0C10] border-t border-white/[0.06] py-12">
+    <footer className="py-12 border-t border-[rgba(255,255,255,0.06)] bg-[#0A0C10]">
       <div className="max-w-7xl mx-auto px-6">
-        <div className="grid md:grid-cols-4 gap-8 mb-8">
-          <div>
-            <div className="flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 bg-gradient-to-br from-[#D4AF37] to-[#B8962E] rounded-lg flex items-center justify-center shadow-lg shadow-[#D4AF37]/20">
-                <span className="text-[#0A0C10] font-bold text-sm">NT</span>
-              </div>
-              <span className="text-white font-bold">Next Tier Partners</span>
-            </div>
-            <p className="text-white/40 text-sm">Strategic acquisitions and premium exits for digital businesses</p>
+        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="flex items-center gap-3">
+            <img 
+              src={nextTierLogo} 
+              alt="Next Tier Partners" 
+              className="h-10 w-auto"
+            />
           </div>
           
-          <div>
-            <h4 className="text-white font-semibold mb-4">Company</h4>
-            <ul className="space-y-2 text-white/40 text-sm">
-              <li><a href="#" className="hover:text-[#D4AF37] transition-colors">About</a></li>
-              <li><a href="#" className="hover:text-[#D4AF37] transition-colors">Process</a></li>
-              <li><a href="#" className="hover:text-[#D4AF37] transition-colors">Case Studies</a></li>
-            </ul>
+          <div className="flex items-center gap-8">
+            <a href="#" className="text-white/50 hover:text-[#F4D77F] text-sm transition-colors tracking-tight">Privacy Policy</a>
+            <a href="#" className="text-white/50 hover:text-[#F4D77F] text-sm transition-colors tracking-tight">Terms of Service</a>
+            <a href="#" className="text-white/50 hover:text-[#F4D77F] text-sm transition-colors tracking-tight">Contact</a>
           </div>
           
-          <div>
-            <h4 className="text-white font-semibold mb-4">Resources</h4>
-            <ul className="space-y-2 text-white/40 text-sm">
-              <li><a href="#" className="hover:text-[#D4AF37] transition-colors">Blog</a></li>
-              <li><a href="#" className="hover:text-[#D4AF37] transition-colors">Exit Guide</a></li>
-              <li><a href="#" className="hover:text-[#D4AF37] transition-colors">FAQ</a></li>
-            </ul>
-          </div>
-          
-          <div>
-            <h4 className="text-white font-semibold mb-4">Legal</h4>
-            <ul className="space-y-2 text-white/40 text-sm">
-              <li><a href="#" className="hover:text-[#D4AF37] transition-colors">Privacy</a></li>
-              <li><a href="#" className="hover:text-[#D4AF37] transition-colors">Terms</a></li>
-              <li><a href="#" className="hover:text-[#D4AF37] transition-colors">Contact</a></li>
-            </ul>
-          </div>
+          <p className="text-white/30 text-sm tracking-tight">
+            © 2026 Next Tier Partners. All rights reserved.
+          </p>
         </div>
         
-        <div className="border-t border-white/[0.06] pt-8">
-          <p className="text-white/30 text-sm text-center">
-            &copy; 2024 Next Tier Partners. All rights reserved.
+        <div className="mt-8 pt-6 border-t border-[rgba(255,255,255,0.04)]">
+          <p className="text-center text-xs text-white/30 tracking-tight">
+            All transactions facilitated through Exclusive Business Brokers (License info where applicable).
           </p>
         </div>
       </div>
