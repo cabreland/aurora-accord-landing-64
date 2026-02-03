@@ -20,6 +20,9 @@ import {
 import { Link } from 'react-router-dom';
 import nextTierLogo from '@/assets/next-tier-logo.png';
 import heroCircuitImage from '@/assets/hero-circuit.png';
+import bgCircuitHero from '@/assets/bg-circuit-hero.png';
+import bgCircuitPattern from '@/assets/bg-circuit-pattern.png';
+import bgCircuitCta from '@/assets/bg-circuit-cta.png';
 
 const HomePageC = () => {
   return (
@@ -37,18 +40,15 @@ const HomePageC = () => {
       <FinalCTA />
       <Footer />
       
-      {/* Circuit pattern overlay - subtle tech-forward element */}
-      <div className="fixed inset-0 pointer-events-none z-0 opacity-[0.02]">
-        <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <pattern id="circuit" x="0" y="0" width="100" height="100" patternUnits="userSpaceOnUse">
-              <circle cx="50" cy="50" r="1" fill="#D4AF37"/>
-              <path d="M50 0 L50 48 M50 52 L50 100 M0 50 L48 50 M52 50 L100 50" stroke="#D4AF37" strokeWidth="0.5" fill="none"/>
-            </pattern>
-          </defs>
-          <rect width="100%" height="100%" fill="url(#circuit)"/>
-        </svg>
-      </div>
+      {/* Circuit pattern overlay - using generated asset for visual continuity */}
+      <div 
+        className="fixed inset-0 pointer-events-none z-0 opacity-[0.04]"
+        style={{
+          backgroundImage: `url(${bgCircuitPattern})`,
+          backgroundSize: '400px 400px',
+          backgroundRepeat: 'repeat'
+        }}
+      />
     </div>
   );
 };
@@ -84,28 +84,27 @@ function Navigation() {
 function Hero() {
   return (
     <section className="relative min-h-screen flex items-center pt-24 pb-16 overflow-hidden">
-      {/* Refined Background with gold gradient glow */}
-      <div className="absolute inset-0 bg-[#0A0C10]">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#0A0C10] via-[#0D0F14] to-[#0A0C10]" />
+      {/* Full-bleed circuit background */}
+      <div className="absolute inset-0">
+        {/* Base dark layer */}
+        <div className="absolute inset-0 bg-[#0A0C10]" />
         
-        {/* Gold accent glow - top left */}
-        <div className="absolute top-0 left-0 w-[700px] h-[700px] bg-gradient-to-br from-[#F4D77F]/12 to-[#D4AF37]/8 rounded-full blur-[180px] -translate-x-1/3 -translate-y-1/3" />
-        
-        {/* Subtle secondary glow - bottom right */}
-        <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-[#D4AF37]/6 rounded-full blur-[150px] translate-x-1/4 translate-y-1/4" />
-        
-        {/* Center subtle glow */}
-        <div className="absolute top-1/2 left-1/2 w-[900px] h-[500px] bg-gradient-to-r from-[#F4D77F]/5 to-[#D4AF37]/5 rounded-full blur-[200px] -translate-x-1/2 -translate-y-1/2" />
-        
-        {/* Grid pattern overlay - 2-5% opacity */}
+        {/* Hero circuit background - full bleed with fade */}
         <div 
-          className="absolute inset-0 opacity-[0.03]"
+          className="absolute inset-0 opacity-60"
           style={{
-            backgroundImage: `linear-gradient(rgba(212,175,55,0.3) 1px, transparent 1px), 
-                             linear-gradient(90deg, rgba(212,175,55,0.3) 1px, transparent 1px)`,
-            backgroundSize: '80px 80px'
+            backgroundImage: `url(${bgCircuitHero})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
           }}
         />
+        
+        {/* Gradient overlay - fades circuit bg towards edges for text readability */}
+        <div className="absolute inset-0 bg-gradient-to-r from-[#0A0C10] via-[#0A0C10]/70 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0A0C10] via-transparent to-[#0A0C10]/50" />
+        
+        {/* Gold accent glow - enhances the circuit pattern */}
+        <div className="absolute top-1/3 right-1/4 w-[600px] h-[600px] bg-gradient-to-br from-[#F4D77F]/15 to-[#D4AF37]/10 rounded-full blur-[150px]" />
       </div>
 
       <div className="relative z-10 max-w-7xl mx-auto px-6 w-full">
@@ -849,9 +848,18 @@ function FAQ() {
 function FinalCTA() {
   return (
     <section className="py-28 relative overflow-hidden">
-      {/* Premium gold glow */}
+      {/* CTA circuit background - full immersive experience */}
       <div className="absolute inset-0 bg-[#0A0C10]" />
-      <div className="absolute top-1/2 left-1/2 w-[1000px] h-[600px] bg-gradient-to-r from-[#F4D77F]/12 to-[#D4AF37]/8 rounded-full blur-[200px] -translate-x-1/2 -translate-y-1/2" />
+      <div 
+        className="absolute inset-0 opacity-70"
+        style={{
+          backgroundImage: `url(${bgCircuitCta})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        }}
+      />
+      {/* Gradient overlays for text readability */}
+      <div className="absolute inset-0 bg-gradient-to-t from-[#0A0C10]/80 via-transparent to-[#0A0C10]/60" />
       
       <div className="max-w-4xl mx-auto px-6 relative z-10 text-center">
         <motion.div
