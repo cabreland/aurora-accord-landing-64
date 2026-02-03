@@ -71,33 +71,12 @@ const GlassCard = ({ children, className = "", highlight = false, ...props }: { 
   </div>
 );
 
-// Navigation - Modern SaaS Style with Logo
+// Import premium header
+import PremiumHeader from '@/components/homepage/PremiumHeader';
+
+// Navigation - Using Premium Header
 function Navigation() {
-  return (
-    <nav className="fixed top-0 w-full z-50 bg-[rgba(10,12,16,0.85)] backdrop-blur-[30px] border-b border-[rgba(255,255,255,0.06)]">
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="flex items-center justify-between h-18 py-3">
-          <div className="flex items-center gap-3">
-            <img 
-              src={nextTierLogo} 
-              alt="Next Tier Partners" 
-              className="h-12 w-auto"
-            />
-          </div>
-          
-          <div className="hidden md:flex items-center gap-8">
-            <a href="#how-it-works" className="text-white/60 hover:text-[#D4AF37] transition-colors text-sm font-medium tracking-tight">How It Works</a>
-            <a href="#exit-paths" className="text-white/60 hover:text-[#D4AF37] transition-colors text-sm font-medium tracking-tight">Exit Paths</a>
-            <a href="#faq" className="text-white/60 hover:text-[#D4AF37] transition-colors text-sm font-medium tracking-tight">FAQ</a>
-          </div>
-          
-          <Button className="bg-gradient-to-r from-[#F4D77F] to-[#D4AF37] hover:from-[#D4AF37] hover:to-[#F4D77F] text-[#0A0C10] font-semibold px-6 shadow-lg shadow-[#D4AF37]/25 transition-all duration-300 tracking-tight">
-            Apply Now
-          </Button>
-        </div>
-      </div>
-    </nav>
-  );
+  return <PremiumHeader />;
 }
 
 // Hero Section - Premium Dark Theme

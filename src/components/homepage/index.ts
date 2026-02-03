@@ -7,6 +7,7 @@ export { default as PlatformSection } from './PlatformSection';
 export { default as TestimonialsSection } from './TestimonialsSection';
 export { default as CTASection } from './CTASection';
 export { default as CleanFooter } from './CleanFooter';
+export { default as PremiumHeader } from './PremiumHeader';
 
 // Legacy components (kept for backwards compatibility)
 export { default as TourBanner } from './TourBanner';
