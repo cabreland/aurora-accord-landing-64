@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import nextTierLogo from '@/assets/next-tier-logo.png';
+import heroCircuitImage from '@/assets/hero-circuit.png';
 
 const HomePageC = () => {
   return (
@@ -192,115 +193,64 @@ function Hero() {
             </div>
           </motion.div>
 
-          {/* Right - Stats Preview Card */}
+          {/* Right - Hero Circuit Image */}
           <motion.div
             initial={{ opacity: 0, x: 40 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, delay: 0.3 }}
-            className="relative"
+            className="relative hidden lg:block"
           >
-            {/* Glow behind card */}
-            <div className="absolute inset-0 bg-gradient-to-br from-[#F4D77F]/15 to-[#D4AF37]/10 rounded-3xl blur-3xl transform scale-105" />
+            {/* Gradient overlay from left - creates seamless fade */}
+            <div className="absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-[#0A0C10] to-transparent z-10 pointer-events-none" />
             
-            <div className="relative bg-[rgba(13,17,23,0.9)] backdrop-blur-[30px] rounded-2xl p-1 shadow-2xl border border-[rgba(255,255,255,0.08)]">
-              <div className="bg-[#0A0C10] rounded-xl overflow-hidden">
-                {/* Header */}
-                <div className="bg-[rgba(255,255,255,0.02)] border-b border-[rgba(255,255,255,0.06)] px-4 py-3 flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-[#FF5F57]" />
-                  <div className="w-3 h-3 rounded-full bg-[#FFBD2E]" />
-                  <div className="w-3 h-3 rounded-full bg-[#28C840]" />
-                  <span className="ml-3 text-xs text-white/30 tracking-tight">Exit Dashboard</span>
+            {/* Subtle glow behind image */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-gradient-to-br from-[#F4D77F]/10 to-[#D4AF37]/5 rounded-full blur-[100px]" />
+            
+            {/* Hero Image */}
+            <motion.img
+              src={heroCircuitImage}
+              alt="Next Tier Partners - AI-Powered M&A Technology"
+              className="relative w-full h-auto max-w-[600px] ml-auto object-contain"
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 1, delay: 0.4 }}
+            />
+
+            {/* Floating Badge - Deal Closed */}
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9, x: 20 }}
+              animate={{ opacity: 1, scale: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.8 }}
+              className="absolute right-8 top-16 bg-[rgba(13,17,23,0.95)] backdrop-blur-[30px] rounded-xl shadow-xl px-4 py-3 border border-[rgba(255,255,255,0.08)]"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400" />
                 </div>
-                
-                {/* Content */}
-                <div className="p-5">
-                  {/* Stats Row */}
-                  <div className="grid grid-cols-3 gap-3 mb-5">
-                    <GlassCard className="p-4 text-center">
-                      <div className="text-2xl font-bold bg-gradient-to-r from-[#F4D77F] to-[#D4AF37] bg-clip-text text-transparent">45</div>
-                      <div className="text-xs text-white/40 mt-1 tracking-tight">Day Timeline</div>
-                    </GlassCard>
-                    <GlassCard className="p-4 text-center">
-                      <div className="text-2xl font-bold text-emerald-400">$15M+</div>
-                      <div className="text-xs text-white/40 mt-1 tracking-tight">Closed Deals</div>
-                    </GlassCard>
-                    <GlassCard className="p-4 text-center">
-                      <div className="text-2xl font-bold bg-gradient-to-r from-[#F4D77F] to-[#D4AF37] bg-clip-text text-transparent">100%</div>
-                      <div className="text-xs text-white/40 mt-1 tracking-tight">Confidential</div>
-                    </GlassCard>
-                  </div>
-
-                  {/* Progress Visualization */}
-                  <GlassCard className="p-5 mb-5">
-                    <div className="flex items-center justify-between mb-4">
-                      <span className="text-xs font-medium text-white/60 tracking-tight">Deal Progress</span>
-                      <span className="text-xs bg-gradient-to-r from-[#F4D77F] to-[#D4AF37] bg-clip-text text-transparent font-medium">45 Days to Close</span>
-                    </div>
-                    <div className="flex items-end justify-between h-20 gap-2">
-                      {[40, 65, 45, 80, 55, 90, 70, 85].map((h, i) => (
-                        <motion.div 
-                          key={i} 
-                          initial={{ height: 0 }}
-                          animate={{ height: `${h}%` }}
-                          transition={{ duration: 0.8, delay: 0.5 + i * 0.1 }}
-                          className="flex-1 bg-gradient-to-t from-[#D4AF37] to-[#F4D77F] rounded-sm opacity-80"
-                        />
-                      ))}
-                    </div>
-                  </GlassCard>
-
-                  {/* Activity */}
-                  <div className="space-y-2">
-                    <GlassCard className="flex items-center gap-3 p-3">
-                      <div className="w-2 h-2 rounded-full bg-emerald-400" />
-                      <span className="text-xs text-white/60 flex-1 tracking-tight">LOI signed - SaaS Co</span>
-                      <span className="text-xs text-white/30">2h ago</span>
-                    </GlassCard>
-                    <GlassCard className="flex items-center gap-3 p-3">
-                      <div className="w-2 h-2 rounded-full bg-[#F4D77F]" />
-                      <span className="text-xs text-white/60 flex-1 tracking-tight">Due diligence complete</span>
-                      <span className="text-xs text-white/30">1d ago</span>
-                    </GlassCard>
-                  </div>
+                <div>
+                  <span className="text-sm font-medium text-white tracking-tight">Deal Closed</span>
+                  <p className="text-xs text-white/40">$2.4M acquisition</p>
                 </div>
               </div>
+            </motion.div>
 
-              {/* Floating Badge */}
-              <motion.div 
-                initial={{ opacity: 0, scale: 0.9, x: 20 }}
-                animate={{ opacity: 1, scale: 1, x: 0 }}
-                transition={{ duration: 0.6, delay: 0.8 }}
-                className="absolute -right-4 top-12 bg-[rgba(13,17,23,0.95)] backdrop-blur-[30px] rounded-xl shadow-xl px-4 py-3 border border-[rgba(255,255,255,0.08)]"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                  </div>
-                  <div>
-                    <span className="text-sm font-medium text-white tracking-tight">Deal Closed</span>
-                    <p className="text-xs text-white/40">$2.4M acquisition</p>
-                  </div>
+            {/* Floating Badge - Licensed Broker */}
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 1 }}
+              className="absolute left-4 bottom-24 bg-[rgba(13,17,23,0.95)] backdrop-blur-[30px] rounded-xl shadow-xl px-4 py-3 border border-[rgba(255,255,255,0.08)]"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#F4D77F]/20 to-[#D4AF37]/20 flex items-center justify-center">
+                  <Shield className="w-4 h-4 text-[#F4D77F]" />
                 </div>
-              </motion.div>
-
-              {/* Second floating element */}
-              <motion.div 
-                initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 1 }}
-                className="absolute -left-4 bottom-16 bg-[rgba(13,17,23,0.95)] backdrop-blur-[30px] rounded-xl shadow-xl px-4 py-3 border border-[rgba(255,255,255,0.08)]"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#F4D77F]/20 to-[#D4AF37]/20 flex items-center justify-center">
-                    <Shield className="w-4 h-4 text-[#F4D77F]" />
-                  </div>
-                  <div>
-                    <span className="text-sm font-medium text-white tracking-tight">Licensed Broker</span>
-                    <p className="text-xs text-white/40">Full compliance</p>
-                  </div>
+                <div>
+                  <span className="text-sm font-medium text-white tracking-tight">Licensed Broker</span>
+                  <p className="text-xs text-white/40">Full compliance</p>
                 </div>
-              </motion.div>
-            </div>
+              </div>
+            </motion.div>
           </motion.div>
         </div>
       </div>
