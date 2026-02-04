@@ -318,40 +318,46 @@ function OurStory() {
 
   return (
     <section className="py-24 md:py-32 relative overflow-hidden">
-      {/* Base dark background - matching header darkness */}
+      {/* Base dark background */}
       <div className="absolute inset-0 bg-[#0A0C10]" />
       
-      {/* Very subtle circuit pattern - barely visible, like header */}
+      {/* Circuit image as section background - prominent on right side */}
       <div className="absolute inset-0 pointer-events-none">
+        {/* Main circuit image - visible on right */}
         <div 
           className="absolute inset-0"
           style={{
             backgroundImage: `url(${circuitTransitionBg})`,
-            backgroundPosition: 'center right',
-            backgroundSize: 'cover',
+            backgroundPosition: 'right center',
+            backgroundSize: '60% auto',
             backgroundRepeat: 'no-repeat',
-            opacity: 0.08
+            opacity: 0.5
           }}
         />
         
-        {/* Strong gradient overlays to keep it dark */}
-        <div className="absolute inset-0 bg-[#0A0C10]/85" />
+        {/* Left fade - keeps text readable */}
+        <div 
+          className="absolute inset-0"
+          style={{ 
+            background: 'linear-gradient(to right, #0A0C10 30%, rgba(10,12,16,0.6) 50%, transparent 75%)' 
+          }} 
+        />
         
         {/* Top fade */}
         <div 
-          className="absolute inset-x-0 top-0 h-32" 
+          className="absolute inset-x-0 top-0 h-40" 
           style={{ background: 'linear-gradient(to bottom, #0A0C10 0%, transparent 100%)' }} 
         />
         
         {/* Bottom fade */}
         <div 
-          className="absolute inset-x-0 bottom-0 h-32" 
+          className="absolute inset-x-0 bottom-0 h-40" 
           style={{ background: 'linear-gradient(to top, #0A0C10 0%, transparent 100%)' }} 
         />
       </div>
       
-      {/* Very subtle gold ambient glow */}
-      <div className="absolute top-1/2 left-1/4 w-[300px] h-[300px] bg-[#D4AF37]/5 rounded-full blur-[150px] pointer-events-none" />
+      {/* Gold ambient glow on right side */}
+      <div className="absolute top-1/2 right-1/4 w-[400px] h-[400px] bg-[#D4AF37]/15 rounded-full blur-[150px] pointer-events-none" />
       
       <div className="max-w-7xl mx-auto px-6 relative z-10">
         {/* Section header */}
@@ -407,30 +413,8 @@ function OurStory() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="relative"
           >
-            {/* Seamless circuit glow behind card - no borders, fades naturally */}
-            <div className="absolute -inset-12 md:-inset-20 -z-10 pointer-events-none">
-              <div 
-                className="absolute inset-0"
-                style={{
-                  backgroundImage: `url(${circuitTransitionBg})`,
-                  backgroundPosition: 'center',
-                  backgroundSize: 'cover',
-                  opacity: 0.35,
-                  maskImage: 'radial-gradient(ellipse 70% 80% at 50% 50%, black 20%, transparent 70%)',
-                  WebkitMaskImage: 'radial-gradient(ellipse 70% 80% at 50% 50%, black 20%, transparent 70%)'
-                }}
-              />
-              {/* Gold ambient glow */}
-              <div 
-                className="absolute inset-0"
-                style={{
-                  background: 'radial-gradient(ellipse 60% 70% at 50% 50%, rgba(212,175,55,0.25) 0%, rgba(244,215,127,0.1) 40%, transparent 70%)'
-                }}
-              />
-            </div>
-            
-            {/* Glassmorphism card - enhanced brightness */}
-            <SpotlightBox className="p-8 md:p-10 rounded-3xl border border-[#D4AF37]/30 bg-[rgba(10,12,16,0.75)] backdrop-blur-[40px] shadow-[0_0_80px_-20px_rgba(212,175,55,0.4)]">
+            {/* Glassmorphism card - brighter, floating on section background */}
+            <SpotlightBox className="p-8 md:p-10 rounded-3xl border border-[#D4AF37]/40 bg-[rgba(20,24,32,0.85)] backdrop-blur-[30px] shadow-[0_0_60px_-10px_rgba(212,175,55,0.3)]">
               {/* Background glow */}
               <div className="absolute -top-20 -right-20 w-52 h-52 bg-[#D4AF37]/20 rounded-full blur-[100px]" />
               <div className="absolute -bottom-20 -left-20 w-44 h-44 bg-[#F4D77F]/15 rounded-full blur-[80px]" />
