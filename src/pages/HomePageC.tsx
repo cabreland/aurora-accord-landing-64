@@ -13,12 +13,14 @@ import nextTierLogo from '@/assets/next-tier-logo.png';
 import heroCircuitImage from '@/assets/hero-circuit.png';
 import bgCircuitPattern from '@/assets/bg-circuit-pattern.png';
 import bgCircuitCta from '@/assets/bg-circuit-cta.png';
+import circuitTransitionBg from '@/assets/circuit-transition-bg.png';
 
 const HomePageC = () => {
   return (
     <div className="min-h-screen bg-[#0A0C10] text-white" style={{ fontFamily: "'Inter', sans-serif" }}>
       <Navigation />
       <Hero />
+      <CircuitTransition />
       <OurStory />
       <WhyNextTier />
       <FAQ />
@@ -163,6 +165,51 @@ function Hero() {
           <div className="hidden lg:block" />
         </div>
       </div>
+    </section>
+  );
+}
+
+// Circuit Chip Transition - bridges Hero to Our Story
+function CircuitTransition() {
+  return (
+    <section className="relative h-[40vh] md:h-[50vh] lg:h-[60vh] overflow-hidden">
+      {/* Base dark background */}
+      <div className="absolute inset-0 bg-[#0A0C10]" />
+      
+      {/* Circuit chip image - anchored right */}
+      <div className="absolute inset-0">
+        <div 
+          className="absolute inset-0"
+          style={{
+            backgroundImage: `url(${circuitTransitionBg})`,
+            backgroundPosition: 'center right',
+            backgroundSize: 'cover',
+            backgroundRepeat: 'no-repeat'
+          }}
+        />
+        
+        {/* Gradient fades for seamless blend */}
+        {/* Top fade - from Hero */}
+        <div 
+          className="absolute inset-x-0 top-0 h-1/3 pointer-events-none" 
+          style={{ background: 'linear-gradient(to bottom, #0A0C10 0%, transparent 100%)' }} 
+        />
+        
+        {/* Bottom fade - to Our Story */}
+        <div 
+          className="absolute inset-x-0 bottom-0 h-1/3 pointer-events-none" 
+          style={{ background: 'linear-gradient(to top, #0A0C10 0%, transparent 100%)' }} 
+        />
+        
+        {/* Left fade - for text readability on mobile */}
+        <div 
+          className="absolute inset-y-0 left-0 w-1/2 md:w-1/3 pointer-events-none" 
+          style={{ background: 'linear-gradient(to right, #0A0C10 0%, transparent 100%)' }} 
+        />
+      </div>
+      
+      {/* Subtle gold ambient glow */}
+      <div className="absolute bottom-0 right-1/4 w-[300px] h-[300px] bg-[#D4AF37]/10 rounded-full blur-[120px] pointer-events-none" />
     </section>
   );
 }
