@@ -8,14 +8,14 @@ import {
   CheckCircle2, 
   XCircle, 
   ChevronDown,
-  Play,
   Sparkles,
-  TrendingUp,
-  Users,
   Clock,
   Target,
-  Building2,
-  BarChart3
+  BarChart3,
+  AlertTriangle,
+  Calendar,
+  FileX,
+  Users
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import nextTierLogo from '@/assets/next-tier-logo.png';
@@ -28,18 +28,14 @@ const HomePageC = () => {
     <div className="min-h-screen bg-[#0A0C10] text-white" style={{ fontFamily: "'Inter', sans-serif" }}>
       <Navigation />
       <Hero />
-      <TrustStrip />
-      <WhatWeDo />
+      <TheProblem />
+      <HowItWorks />
       <WhyNextTier />
-      <Process />
-      <ExitPaths />
-      <ResultsTestimonials />
-      <WhoWeWorkWith />
       <FAQ />
       <FinalCTA />
       <Footer />
       
-      {/* Circuit pattern overlay - using generated asset for visual continuity */}
+      {/* Circuit pattern overlay */}
       <div 
         className="fixed inset-0 pointer-events-none z-0 opacity-[0.04]"
         style={{
@@ -79,14 +75,14 @@ function Navigation() {
   return <PremiumHeader />;
 }
 
-// Hero Section - Premium Dark Theme with Image on Right Side
+// Hero Section - The Hook
 function Hero() {
   return (
     <section className="relative min-h-screen flex items-center pt-24 pb-16 overflow-hidden">
       {/* Base dark background */}
       <div className="absolute inset-0 bg-[#0A0C10]" />
       
-      {/* YOUR custom hero image - positioned on right half only */}
+      {/* Hero image - positioned on right half */}
       <div className="absolute top-0 right-0 bottom-0 w-1/2 lg:w-[55%] overflow-hidden">
         <div 
           className="absolute inset-0"
@@ -97,11 +93,9 @@ function Hero() {
             backgroundRepeat: 'no-repeat'
           }}
         />
-        {/* Left edge fade for seamless blend */}
+        {/* Gradient fades for seamless blend */}
         <div className="absolute inset-y-0 left-0 w-1/3 pointer-events-none" style={{ background: 'linear-gradient(to right, #0A0C10 0%, transparent 100%)' }} />
-        {/* Top fade */}
         <div className="absolute inset-x-0 top-0 h-24 pointer-events-none" style={{ background: 'linear-gradient(to bottom, #0A0C10 0%, transparent 100%)' }} />
-        {/* Bottom fade */}
         <div className="absolute inset-x-0 bottom-0 h-24 pointer-events-none" style={{ background: 'linear-gradient(to top, #0A0C10 0%, transparent 100%)' }} />
       </div>
       
@@ -135,7 +129,7 @@ function Hero() {
             </h1>
             
             <p className="text-lg text-white/80 mb-8 leading-relaxed max-w-lg tracking-tight">
-              Next Tier Partners acquires digital businesses that are ready for professional ownership and strategic growth. If you've built a profitable SaaS, agency, or DTC brand and want a fast exit with certainty—we're your buyer.
+              Next Tier Partners acquires digital businesses that are ready for professional ownership. If you've built a profitable SaaS, agency, or content business and want a fast exit with certainty—we're your buyer.
             </p>
 
             <div className="space-y-3 mb-10">
@@ -170,7 +164,7 @@ function Hero() {
                 variant="outline" 
                 className="border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.02)] text-white hover:bg-[rgba(255,255,255,0.06)] hover:border-[rgba(255,255,255,0.15)] px-6 h-13 transition-all duration-300 tracking-tight"
               >
-                Learn More
+                <a href="#how-it-works">See How It Works</a>
               </Button>
             </div>
           </motion.div>
@@ -183,27 +177,36 @@ function Hero() {
   );
 }
 
-// Trust Strip - Refined
-function TrustStrip() {
-  return (
-    <div className="border-y border-[rgba(255,255,255,0.06)] bg-[rgba(10,12,16,0.6)] backdrop-blur-[30px]">
-      <div className="max-w-7xl mx-auto px-6 py-4">
-        <div className="flex items-center justify-center gap-3 text-sm text-white/50 tracking-tight">
-          <Shield className="w-4 h-4 text-[#F4D77F]" />
-          <span>Professional acquisition and exit facilitation — Fast, transparent, and confidential</span>
-        </div>
-      </div>
-    </div>
-  );
-}
+// The Problem Section - Agitate (NEW)
+function TheProblem() {
+  const painPoints = [
+    {
+      icon: <Calendar className="w-5 h-5" />,
+      title: "6-12 months of your life",
+      description: "NDAs, meetings, due diligence—only for deals to fall apart at the last minute."
+    },
+    {
+      icon: <Users className="w-5 h-5" />,
+      title: "Tire-kickers everywhere",
+      description: "Unqualified buyers wasting your time with lowball offers and endless questions."
+    },
+    {
+      icon: <FileX className="w-5 h-5" />,
+      title: "Broken promises",
+      description: "Buyers who ghost, change terms, or drag their feet while you're stuck in limbo."
+    },
+    {
+      icon: <AlertTriangle className="w-5 h-5" />,
+      title: "Another full-time job",
+      description: "Running your business AND managing a sale is exhausting. Something has to give."
+    }
+  ];
 
-// What We Do Section
-function WhatWeDo() {
   return (
-    <section className="py-28 relative overflow-hidden">
-      {/* Subtle background */}
+    <section className="py-24 relative overflow-hidden">
+      {/* Background */}
       <div className="absolute inset-0 bg-gradient-to-b from-[#0A0C10] via-[#0D0F14] to-[#0A0C10]" />
-      <div className="absolute top-1/2 left-1/2 w-[700px] h-[700px] bg-gradient-to-br from-[#F4D77F]/6 to-[#D4AF37]/4 rounded-full blur-[180px] -translate-x-1/2 -translate-y-1/2" />
+      <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-red-500/5 rounded-full blur-[180px]" />
       
       <div className="max-w-7xl mx-auto px-6 relative z-10">
         <motion.div 
@@ -212,214 +215,88 @@ function WhatWeDo() {
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] backdrop-blur-[30px] mb-6">
-            <Building2 className="w-4 h-4 text-[#F4D77F]" />
-            <span className="text-sm text-white/70 tracking-tight">Our Business Model</span>
-          </div>
-          <h2 className="text-3xl md:text-5xl font-bold text-white mb-4 tracking-[-0.02em]" style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}>
-            Two Paths to Your{' '}
-            <span className="bg-gradient-to-r from-[#F4D77F] via-[#D4AF37] to-[#F4D77F] bg-clip-text text-transparent">
-              Perfect Exit
+          <h2 className="text-3xl md:text-5xl font-bold text-white mb-6 tracking-[-0.02em]" style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}>
+            Tired of{' '}
+            <span className="text-red-400/90">
+              tire-kickers?
             </span>
           </h2>
-          <p className="text-lg text-white/50 max-w-2xl mx-auto tracking-tight">
-            We operate as both strategic buyers and exit facilitators for digital businesses
+          <p className="text-xl text-white/70 max-w-3xl mx-auto leading-relaxed tracking-tight">
+            Founders are burned out from wasting months with lowball offers and a process that feels like another full-time job. Selling a business shouldn't take 6–12 months of dead-end conversations.
           </p>
         </motion.div>
         
-        <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-          {/* Path 1: Acquisition */}
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.1 }}
-          >
-            <GlassCard className="p-8 h-full group">
-              <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-[#F4D77F]/15 to-[#D4AF37]/10 flex items-center justify-center mb-6 group-hover:from-[#F4D77F]/25 group-hover:to-[#D4AF37]/15 transition-colors">
-                <Target className="w-7 h-7 text-[#F4D77F]" />
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+          {painPoints.map((point, idx) => (
+            <motion.div 
+              key={idx}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: idx * 0.1 }}
+            >
+              <div className="p-6 rounded-2xl border border-red-500/20 bg-[rgba(255,255,255,0.02)] backdrop-blur-[30px] h-full">
+                <div className="w-10 h-10 rounded-lg bg-red-500/10 flex items-center justify-center mb-4 text-red-400/80">
+                  {point.icon}
+                </div>
+                <h3 className="text-lg font-semibold text-white mb-2 tracking-tight" style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}>
+                  {point.title}
+                </h3>
+                <p className="text-white/50 text-sm leading-relaxed tracking-tight">
+                  {point.description}
+                </p>
               </div>
-              
-              <h3 className="text-2xl font-bold text-white mb-4 tracking-tight" style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}>
-                Strategic Acquisitions
-              </h3>
-              
-              <p className="text-white/50 mb-6 tracking-tight">
-                We acquire stable, cash-flowing digital businesses for optimization and long-term growth.
-              </p>
-              
-              <ul className="space-y-3">
-                {[
-                  'Focus on SaaS, agencies, and e-commerce',
-                  'Operational improvements and growth strategies',
-                  'Portfolio approach with multiple holdings'
-                ].map((item, i) => (
-                  <li key={i} className="flex items-start gap-3 text-white/60">
-                    <CheckCircle2 className="w-4 h-4 text-[#F4D77F] mt-0.5 flex-shrink-0" />
-                    <span className="text-sm tracking-tight">{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </GlassCard>
-          </motion.div>
-          
-          {/* Path 2: Exit Facilitation */}
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.2 }}
-          >
-            <GlassCard highlight className="p-8 h-full group relative">
-              <div className="absolute -top-3 right-8 bg-gradient-to-r from-[#F4D77F] to-[#D4AF37] text-[#0A0C10] px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wide">
-                Most Popular
-              </div>
-              
-              <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-[#F4D77F]/15 to-[#D4AF37]/10 flex items-center justify-center mb-6 group-hover:from-[#F4D77F]/25 group-hover:to-[#D4AF37]/15 transition-colors">
-                <TrendingUp className="w-7 h-7 text-[#F4D77F]" />
-              </div>
-              
-              <h3 className="text-2xl font-bold text-white mb-4 tracking-tight" style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}>
-                Premium Exit Services
-              </h3>
-              
-              <p className="text-white/50 mb-6 tracking-tight">
-                Not ready to sell to us? We facilitate premium exits to qualified buyers in our network.
-              </p>
-              
-              <ul className="space-y-3">
-                {[
-                  'Curated buyer network of strategic acquirers',
-                  'Confidential deal structuring and negotiation',
-                  'Full transaction support from LOI to close'
-                ].map((item, i) => (
-                  <li key={i} className="flex items-start gap-3 text-white/60">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400 mt-0.5 flex-shrink-0" />
-                    <span className="text-sm tracking-tight">{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </GlassCard>
-          </motion.div>
+            </motion.div>
+          ))}
         </div>
-      </div>
-    </section>
-  );
-}
 
-// Why Next Tier - Comparison
-function WhyNextTier() {
-  return (
-    <section className="py-28 relative overflow-hidden">
-      <div className="absolute inset-0 bg-[#0A0C10]" />
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-red-500/5 rounded-full blur-[180px]" />
-      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-gradient-to-br from-[#F4D77F]/6 to-[#D4AF37]/4 rounded-full blur-[180px]" />
-      
-      <div className="max-w-7xl mx-auto px-6 relative z-10">
+        {/* Transition statement */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center mb-16"
+          className="text-center mt-16"
         >
-          <h2 className="text-3xl md:text-5xl font-bold text-white mb-4 tracking-[-0.02em]" style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}>
-            Why Next Tier Partners vs{' '}
-            <span className="text-white/40">Typical Buyers</span>
-          </h2>
+          <p className="text-lg text-white/60 tracking-tight">
+            There's a better way.{' '}
+            <span className="text-[#F4D77F] font-medium">One buyer. One conversation. 45-60 days.</span>
+          </p>
         </motion.div>
-        
-        <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-          {/* Typical Buyers */}
-          <motion.div 
-            initial={{ opacity: 0, x: -20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            className="rounded-2xl border border-red-500/20 bg-[rgba(255,255,255,0.02)] backdrop-blur-[30px] p-8"
-          >
-            <div className="flex items-center gap-2 mb-6">
-              <XCircle className="w-6 h-6 text-red-400" />
-              <h3 className="text-xl font-bold text-white tracking-tight" style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}>Typical Buyers & Flippers</h3>
-            </div>
-            <ul className="space-y-3">
-              {[
-                "Lowball offers and aggressive negotiation",
-                "No licensing or regulatory compliance",
-                "Opaque process with hidden fees",
-                "Slow timelines stretching 6–12+ months",
-                "No post-exit support options",
-                "High pressure and founder burnout"
-              ].map((item, idx) => (
-                <li key={idx} className="flex items-start gap-3 text-white/50">
-                  <XCircle className="w-4 h-4 text-red-400/60 mt-0.5 flex-shrink-0" />
-                  <span className="text-sm tracking-tight">{item}</span>
-                </li>
-              ))}
-            </ul>
-          </motion.div>
-          
-          {/* Next Tier Partners */}
-          <motion.div 
-            initial={{ opacity: 0, x: 20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-          >
-            <GlassCard highlight className="p-8 relative">
-              <div className="absolute -top-3 right-8 bg-gradient-to-r from-[#F4D77F] to-[#D4AF37] text-[#0A0C10] px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wide">
-                Our Approach
-              </div>
-              <div className="flex items-center gap-2 mb-6">
-                <CheckCircle2 className="w-6 h-6 text-[#F4D77F]" />
-                <h3 className="text-xl font-bold text-white tracking-tight" style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}>Next Tier Partners</h3>
-              </div>
-              <ul className="space-y-3">
-                {[
-                  "Strategic acquisitions and premium exits",
-                  "Founder-first approach with fair valuations",
-                  "45-60 day transaction timelines",
-                  "Transparent deal structure with clear pricing",
-                  "Multiple exit paths tailored to your goals",
-                  "Post-exit partnership and growth options"
-                ].map((item, idx) => (
-                  <li key={idx} className="flex items-start gap-3 text-white/70">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400 mt-0.5 flex-shrink-0" />
-                    <span className="text-sm tracking-tight">{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </GlassCard>
-          </motion.div>
-        </div>
       </div>
     </section>
   );
 }
 
-// Process Section
-function Process() {
+// How It Works - Solution (Merged Process)
+function HowItWorks() {
   const steps = [
     {
       number: "01",
       icon: <Zap className="w-6 h-6" />,
       title: "Apply",
-      description: "Share your business details and exit goals through our confidential application."
+      description: "Share your business details through our confidential application. Takes 5 minutes.",
+      highlight: "No NDAs, no tire-kickers"
     },
     {
       number: "02",
       icon: <BarChart3 className="w-6 h-6" />,
-      title: "Valuation & Exit Plan",
-      description: "We analyze your business and map the optimal path based on your objectives."
+      title: "Get Valued",
+      description: "We analyze your business and present a fair, transparent valuation within 7 days.",
+      highlight: "Real numbers, no games"
     },
     {
       number: "03",
       icon: <Target className="w-6 h-6" />,
-      title: "Exit Path Selection",
-      description: "Choose to sell via brokerage, direct acquisition, or scale before exit."
+      title: "Review Offer",
+      description: "If it's a fit, you receive a written offer. Clear terms, no hidden conditions.",
+      highlight: "Take it or leave it—no pressure"
     },
     {
       number: "04",
       icon: <CheckCircle2 className="w-6 h-6" />,
-      title: "Close & Next Chapter",
-      description: "Complete the transaction and step confidently into your next venture."
+      title: "Close & Cash",
+      description: "Complete due diligence and close in 45-60 days. Cash in your account.",
+      highlight: "Done. What's next for you?"
     }
   ];
 
@@ -437,13 +314,16 @@ function Process() {
         >
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] backdrop-blur-[30px] mb-6">
             <Clock className="w-4 h-4 text-[#F4D77F]" />
-            <span className="text-sm text-white/70 tracking-tight">45-Day Process</span>
+            <span className="text-sm text-white/70 tracking-tight">45-60 Day Process</span>
           </div>
           <h2 className="text-3xl md:text-5xl font-bold text-white mb-4 tracking-[-0.02em]" style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}>
-            How the Process Works
+            How It{' '}
+            <span className="bg-gradient-to-r from-[#F4D77F] via-[#D4AF37] to-[#F4D77F] bg-clip-text text-transparent">
+              Actually Works
+            </span>
           </h2>
-          <p className="text-lg text-white/50 tracking-tight">
-            Clear, professional guidance from first call to close.
+          <p className="text-lg text-white/50 max-w-2xl mx-auto tracking-tight">
+            No brokers. No middlemen. Direct from founder to buyer.
           </p>
         </motion.div>
         
@@ -463,7 +343,8 @@ function Process() {
                   {step.icon}
                 </div>
                 <h3 className="text-lg font-bold text-white mb-2 tracking-tight" style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}>{step.title}</h3>
-                <p className="text-white/50 text-sm leading-relaxed tracking-tight">{step.description}</p>
+                <p className="text-white/50 text-sm leading-relaxed tracking-tight mb-3">{step.description}</p>
+                <p className="text-[#F4D77F]/80 text-xs font-medium tracking-tight">{step.highlight}</p>
               </GlassCard>
               
               {idx < steps.length - 1 && (
@@ -477,33 +358,13 @@ function Process() {
   );
 }
 
-// Exit Paths
-function ExitPaths() {
-  const paths = [
-    {
-      title: "Sell My Business",
-      subtitle: "Premium Exit Facilitation",
-      description: "We connect you with qualified buyers from our network and manage the entire transaction process.",
-      highlight: true
-    },
-    {
-      title: "Get Acquired Directly",
-      subtitle: "We Buy",
-      description: "For the right businesses, we step in as the buyer with a clean, professional acquisition process.",
-      highlight: false
-    },
-    {
-      title: "Scale Before I Exit",
-      subtitle: "Growth Partnership",
-      description: "Use our growth systems to increase valuation before you sell for maximum return.",
-      highlight: false
-    }
-  ];
-
+// Why Next Tier - Credibility
+function WhyNextTier() {
   return (
-    <section id="exit-paths" className="py-28 relative overflow-hidden">
+    <section className="py-28 relative overflow-hidden">
       <div className="absolute inset-0 bg-[#0A0C10]" />
-      <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-gradient-to-br from-[#F4D77F]/6 to-[#D4AF37]/4 rounded-full blur-[180px]" />
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-red-500/5 rounded-full blur-[180px]" />
+      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-gradient-to-br from-[#F4D77F]/6 to-[#D4AF37]/4 rounded-full blur-[180px]" />
       
       <div className="max-w-7xl mx-auto px-6 relative z-10">
         <motion.div 
@@ -513,173 +374,86 @@ function ExitPaths() {
           className="text-center mb-16"
         >
           <h2 className="text-3xl md:text-5xl font-bold text-white mb-4 tracking-[-0.02em]" style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}>
-            Choose Your{' '}
+            Why Founders Choose{' '}
             <span className="bg-gradient-to-r from-[#F4D77F] via-[#D4AF37] to-[#F4D77F] bg-clip-text text-transparent">
-              Exit Path
+              Next Tier
             </span>
           </h2>
         </motion.div>
         
-        <div className="grid md:grid-cols-3 gap-6">
-          {paths.map((path, idx) => (
-            <motion.div 
-              key={idx}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: idx * 0.1 }}
-            >
-              <GlassCard highlight={path.highlight} className="p-8 h-full hover:scale-[1.02] transition-transform duration-300">
-                {path.highlight && (
-                  <div className="inline-block bg-gradient-to-r from-[#F4D77F] to-[#D4AF37] text-[#0A0C10] px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide mb-4">
-                    Most Popular
-                  </div>
-                )}
-                <h3 className="text-2xl font-bold text-white mb-2 tracking-tight" style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}>{path.title}</h3>
-                <div className="bg-gradient-to-r from-[#F4D77F] to-[#D4AF37] bg-clip-text text-transparent text-sm font-semibold mb-4">{path.subtitle}</div>
-                <p className="text-white/50 leading-relaxed mb-6 tracking-tight">{path.description}</p>
-                <Button 
-                  className={`w-full ${
-                    path.highlight 
-                      ? 'bg-gradient-to-r from-[#F4D77F] to-[#D4AF37] hover:from-[#D4AF37] hover:to-[#F4D77F] text-[#0A0C10]' 
-                      : 'bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.1)] hover:bg-[rgba(255,255,255,0.1)] text-white'
-                  } tracking-tight`}
-                >
-                  Learn More
-                </Button>
-              </GlassCard>
-            </motion.div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-// Results & Testimonials
-function ResultsTestimonials() {
-  const testimonials = [
-    {
-      quote: "Next Tier Partners handled everything professionally. The 45-day timeline was accurate, and I felt protected throughout.",
-      author: "Michael R.",
-      business: "Performance Marketing Agency"
-    },
-    {
-      quote: "I appreciated the transparency and licensing. It made the exit feel legitimate and safe.",
-      author: "Sarah T.",
-      business: "SaaS Product"
-    },
-    {
-      quote: "They gave me options I didn't know existed. We scaled first, then exited at a much higher valuation.",
-      author: "James K.",
-      business: "Content Media Property"
-    }
-  ];
-
-  return (
-    <section className="py-28 relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-b from-[#0A0C10] via-[#0D0F14] to-[#0A0C10]" />
-      <div className="absolute top-1/2 right-0 w-[500px] h-[500px] bg-gradient-to-br from-[#F4D77F]/6 to-[#D4AF37]/4 rounded-full blur-[180px]" />
-      
-      <div className="max-w-7xl mx-auto px-6 relative z-10">
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-16"
-        >
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] backdrop-blur-[30px] mb-6">
-            <Users className="w-4 h-4 text-[#F4D77F]" />
-            <span className="text-sm text-white/70 tracking-tight">Founder Stories</span>
-          </div>
-          <h2 className="text-3xl md:text-5xl font-bold text-white mb-4 tracking-[-0.02em]" style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}>
-            What Founders Say
-          </h2>
-        </motion.div>
-        
-        <div className="grid md:grid-cols-3 gap-6 mb-12">
-          {testimonials.map((testimonial, idx) => (
-            <motion.div 
-              key={idx}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: idx * 0.1 }}
-            >
-              <GlassCard className="p-8 h-full">
-                <p className="text-white/70 leading-relaxed mb-6 tracking-tight">"{testimonial.quote}"</p>
-                <div>
-                  <div className="font-bold text-white tracking-tight">{testimonial.author}</div>
-                  <div className="bg-gradient-to-r from-[#F4D77F] to-[#D4AF37] bg-clip-text text-transparent text-sm">{testimonial.business}</div>
-                </div>
-              </GlassCard>
-            </motion.div>
-          ))}
-        </div>
-        
-        <div className="flex items-center justify-center gap-8 text-sm text-white/40 flex-wrap">
-          {[
-            'Avg. timeline: 45 days',
-            'Licensed transactions via EBB',
-            'Digital-only focus'
-          ].map((item, i) => (
-            <div key={i} className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-gradient-to-r from-[#F4D77F] to-[#D4AF37]"></div>
-              <span className="tracking-tight">{item}</span>
+        <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+          {/* Traditional Process */}
+          <motion.div 
+            initial={{ opacity: 0, x: -20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            className="rounded-2xl border border-red-500/20 bg-[rgba(255,255,255,0.02)] backdrop-blur-[30px] p-8"
+          >
+            <div className="flex items-center gap-2 mb-6">
+              <XCircle className="w-6 h-6 text-red-400" />
+              <h3 className="text-xl font-bold text-white tracking-tight" style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}>The Traditional Way</h3>
             </div>
-          ))}
+            <ul className="space-y-4">
+              {[
+                "6-12 months of your time (minimum)",
+                "Dozens of NDAs and dead-end calls",
+                "Lowball offers from unqualified buyers",
+                "Brokers who don't understand digital",
+                "Uncertainty until the wire hits",
+                "Confidentiality leaks to competitors"
+              ].map((item, idx) => (
+                <li key={idx} className="flex items-start gap-3 text-white/50">
+                  <XCircle className="w-4 h-4 text-red-400/60 mt-0.5 flex-shrink-0" />
+                  <span className="text-sm tracking-tight">{item}</span>
+                </li>
+              ))}
+            </ul>
+          </motion.div>
+          
+          {/* Next Tier Partners */}
+          <motion.div 
+            initial={{ opacity: 0, x: 20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+          >
+            <GlassCard highlight className="p-8 relative">
+              <div className="absolute -top-3 right-8 bg-gradient-to-r from-[#F4D77F] to-[#D4AF37] text-[#0A0C10] px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wide">
+                The Next Tier Way
+              </div>
+              <div className="flex items-center gap-2 mb-6">
+                <CheckCircle2 className="w-6 h-6 text-[#F4D77F]" />
+                <h3 className="text-xl font-bold text-white tracking-tight" style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}>Our Approach</h3>
+              </div>
+              <ul className="space-y-4">
+                {[
+                  "45-60 days from application to close",
+                  "One conversation. One buyer. Done.",
+                  "Fair valuations—no games or lowballs",
+                  "We're principals—digital is all we do",
+                  "Cash payment at close, guaranteed",
+                  "Confidential until you decide to move"
+                ].map((item, idx) => (
+                  <li key={idx} className="flex items-start gap-3 text-white/70">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400 mt-0.5 flex-shrink-0" />
+                    <span className="text-sm tracking-tight">{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </GlassCard>
+          </motion.div>
         </div>
-      </div>
-    </section>
-  );
-}
 
-// Who We Work With
-function WhoWeWorkWith() {
-  const businessTypes = [
-    "Digital Agencies",
-    "Performance Marketing Shops",
-    "SaaS Products",
-    "Software Products",
-    "Online Service Businesses",
-    "Content & Media Properties",
-    "E-commerce Brands",
-    "Subscription Businesses"
-  ];
-
-  return (
-    <section className="py-28 relative overflow-hidden">
-      <div className="absolute inset-0 bg-[#0A0C10]" />
-      
-      <div className="max-w-7xl mx-auto px-6 relative z-10">
+        {/* Trust line */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center mb-12"
+          className="text-center mt-12"
         >
-          <h2 className="text-3xl md:text-5xl font-bold text-white mb-4 tracking-[-0.02em]" style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}>
-            Who We Work With
-          </h2>
-          <p className="text-lg text-white/50 max-w-2xl mx-auto tracking-tight">
-            Digital founders who are serious about a professional exit or scale path.
+          <p className="text-sm text-white/40 tracking-tight">
+            Not a fit for direct acquisition?{' '}
+            <span className="text-white/60">We guide founders through clean exits via our vetted partner network.</span>
           </p>
-        </motion.div>
-        
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="flex flex-wrap justify-center gap-3 max-w-4xl mx-auto"
-        >
-          {businessTypes.map((type, idx) => (
-            <div 
-              key={idx} 
-              className="px-6 py-3 rounded-full bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] backdrop-blur-[30px] text-white/70 text-sm hover:border-[#D4AF37]/30 hover:text-white transition-all duration-300 tracking-tight"
-            >
-              {type}
-            </div>
-          ))}
         </motion.div>
       </div>
     </section>
@@ -692,24 +466,28 @@ function FAQ() {
   
   const faqs = [
     {
-      question: "What deal sizes do you work with?",
-      answer: "We typically work with digital businesses generating $500K–$10M in annual revenue. However, we review each opportunity individually based on growth potential, business model, and strategic fit."
+      question: "What types of businesses do you acquire?",
+      answer: "We acquire profitable digital businesses: SaaS, agencies, content/media sites, e-commerce brands, and subscription businesses. Typically $300K–$2.5M in enterprise value with at least $100K in annual profit."
     },
     {
-      question: "How does the 45-day target work?",
-      answer: "The 45-day timeline begins after we complete initial due diligence and valuation. It covers buyer outreach, negotiation, and closing. Some deals close faster, others may take slightly longer depending on complexity."
+      question: "How does the 45-60 day timeline work?",
+      answer: "After you apply, we review and respond within 72 hours. If there's mutual interest, we present an offer within 7 days. From accepted offer to close is typically 45-60 days—including due diligence and legal."
     },
     {
-      question: "How are you different from a typical broker or buyer?",
-      answer: "We operate as both a licensed brokerage (through Exclusive Business Brokers) and a strategic acquirer. This gives founders multiple exit paths and ensures every transaction is compliant, professional, and founder-focused."
+      question: "What if my business isn't a fit for direct acquisition?",
+      answer: "We still help. If we can't buy directly, we connect you with qualified buyers in our vetted partner network and guide you through a clean, structured exit. One offer doesn't mean one option."
     },
     {
-      question: "How does confidentiality work?",
-      answer: "All initial conversations are confidential. When we market your business through our brokerage arm, we use blind profiles and NDAs. Your identity is only revealed to qualified, serious buyers you approve."
+      question: "How is this different from listing with a broker?",
+      answer: "Brokers list your business publicly, field dozens of unqualified inquiries, and the process takes 6-12+ months. We're the buyer. One conversation. No tire-kickers. 45-60 days."
     },
     {
       question: "What fees should I expect?",
-      answer: "For direct acquisitions, there are no seller-side fees. For brokered exits, we charge a standard success fee (a percentage of the sale price), only paid when the deal closes. We'll discuss specific terms during our initial consultation."
+      answer: "For direct acquisitions, there are no seller-side fees—we're the buyer. If we facilitate an exit through our partner network, we discuss terms upfront. No hidden costs, ever."
+    },
+    {
+      question: "Is the process confidential?",
+      answer: "Completely. We don't share your information with anyone until you explicitly approve. Your employees, customers, and competitors won't know you're exploring an exit."
     }
   ];
 
@@ -726,8 +504,11 @@ function FAQ() {
           className="text-center mb-12"
         >
           <h2 className="text-3xl md:text-5xl font-bold text-white mb-4 tracking-[-0.02em]" style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}>
-            Frequently Asked Questions
+            Questions?
           </h2>
+          <p className="text-white/50 tracking-tight">
+            Everything you need to know before applying.
+          </p>
         </motion.div>
         
         <div className="space-y-4">
@@ -770,11 +551,11 @@ function FAQ() {
   );
 }
 
-// Final CTA
+// Final CTA - The Offer
 function FinalCTA() {
   return (
     <section className="py-28 relative overflow-hidden">
-      {/* CTA circuit background - full immersive experience */}
+      {/* CTA circuit background */}
       <div className="absolute inset-0 bg-[#0A0C10]" />
       <div 
         className="absolute inset-0 opacity-70"
@@ -799,47 +580,37 @@ function FinalCTA() {
           </div>
           
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 tracking-[-0.02em]" style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}>
-            Let's Discuss Your{' '}
+            Skip the 12-month nightmare.{' '}
             <span className="bg-gradient-to-r from-[#F4D77F] via-[#D4AF37] to-[#F4D77F] bg-clip-text text-transparent">
-              Exit Strategy
+              Get an offer in 7 days.
             </span>
           </h2>
           
-          <p className="text-lg text-white/50 mb-10 max-w-2xl mx-auto tracking-tight">
-            Apply below for a confidential conversation. We'll assess your business, outline potential exit paths, and answer all your questions — no pressure, no commitment.
+          <p className="text-lg text-white/60 mb-10 max-w-2xl mx-auto tracking-tight">
+            Apply below for a confidential review. We'll assess your business and present an offer within 7 days—no pressure, no commitment, no tire-kickers.
           </p>
           
           <div className="flex flex-wrap items-center justify-center gap-4 mb-12">
             <Button 
               size="lg" 
-              className="bg-gradient-to-r from-[#F4D77F] to-[#D4AF37] hover:from-[#D4AF37] hover:to-[#F4D77F] text-[#0A0C10] font-semibold px-10 h-14 text-base shadow-2xl shadow-[#D4AF37]/30 transition-all duration-300 tracking-tight"
+              className="bg-gradient-to-r from-[#F4D77F] to-[#D4AF37] hover:from-[#D4AF37] hover:to-[#F4D77F] text-[#0A0C10] font-semibold px-10 h-14 shadow-xl shadow-[#D4AF37]/30 transition-all duration-300 text-lg tracking-tight"
             >
-              Get Your Free Valuation
+              Start Your Exit
               <ArrowRight className="w-5 h-5 ml-2" />
             </Button>
-            <Button 
-              size="lg" 
-              variant="outline" 
-              className="border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.02)] text-white hover:bg-[rgba(255,255,255,0.06)] hover:border-[rgba(255,255,255,0.15)] px-8 h-14 text-base transition-all duration-300 tracking-tight"
-            >
-              Talk to Our Team
-            </Button>
           </div>
-
-          {/* Trust indicators */}
-          <div className="flex flex-wrap items-center justify-center gap-8 text-sm text-white/40">
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-emerald-400" />
-              <span className="tracking-tight">100% Confidential</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-emerald-400" />
-              <span className="tracking-tight">No Obligation</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-emerald-400" />
-              <span className="tracking-tight">Licensed Brokerage</span>
-            </div>
+          
+          <div className="flex items-center justify-center gap-8 text-sm text-white/40 flex-wrap">
+            {[
+              'Cash payment',
+              '45-60 day close',
+              'Completely confidential'
+            ].map((item, i) => (
+              <div key={i} className="flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-[#F4D77F]/60" />
+                <span className="tracking-tight">{item}</span>
+              </div>
+            ))}
           </div>
         </motion.div>
       </div>
@@ -850,32 +621,23 @@ function FinalCTA() {
 // Footer
 function Footer() {
   return (
-    <footer className="py-12 border-t border-[rgba(255,255,255,0.06)] bg-[#0A0C10]">
-      <div className="max-w-7xl mx-auto px-6">
+    <footer className="border-t border-[rgba(255,255,255,0.06)] bg-[#0A0C10]">
+      <div className="max-w-7xl mx-auto px-6 py-12">
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-3">
-            <img 
-              src={nextTierLogo} 
-              alt="Next Tier Partners" 
-              className="h-10 w-auto"
-            />
+            <img src={nextTierLogo} alt="Next Tier Partners" className="h-8 w-auto" />
+            <span className="text-white/40 text-sm tracking-tight">Next Tier Partners</span>
           </div>
           
-          <div className="flex items-center gap-8">
-            <a href="#" className="text-white/50 hover:text-[#F4D77F] text-sm transition-colors tracking-tight">Privacy Policy</a>
-            <a href="#" className="text-white/50 hover:text-[#F4D77F] text-sm transition-colors tracking-tight">Terms of Service</a>
-            <a href="#" className="text-white/50 hover:text-[#F4D77F] text-sm transition-colors tracking-tight">Contact</a>
+          <div className="flex items-center gap-8 text-sm text-white/40">
+            <a href="#how-it-works" className="hover:text-white/60 transition-colors tracking-tight">How It Works</a>
+            <a href="#faq" className="hover:text-white/60 transition-colors tracking-tight">FAQ</a>
+            <Link to="/auth" className="hover:text-white/60 transition-colors tracking-tight">Investor Login</Link>
           </div>
           
-          <p className="text-white/30 text-sm tracking-tight">
-            © 2026 Next Tier Partners. All rights reserved.
-          </p>
-        </div>
-        
-        <div className="mt-8 pt-6 border-t border-[rgba(255,255,255,0.04)]">
-          <p className="text-center text-xs text-white/30 tracking-tight">
-            All transactions facilitated through Exclusive Business Brokers (License info where applicable).
-          </p>
+          <div className="text-sm text-white/30 tracking-tight">
+            © {new Date().getFullYear()} Next Tier Partners
+          </div>
         </div>
       </div>
     </footer>
