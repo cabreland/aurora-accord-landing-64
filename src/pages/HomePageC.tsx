@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { 
@@ -16,9 +16,73 @@ import bgCircuitCta from '@/assets/bg-circuit-cta.png';
 import circuitTransitionBg from '@/assets/circuit-transition-bg.png';
 import goldenDecisionPath from '@/assets/golden-decision-path.jpg';
 
+// Global Cursor Spotlight - reveals circuits across the entire page
+function GlobalCursorSpotlight() {
+  const [mousePos, setMousePos] = useState({ x: -500, y: -500 });
+  const [isActive, setIsActive] = useState(false);
+
+  const handleMouseMove = useCallback((e: MouseEvent) => {
+    setMousePos({ x: e.clientX, y: e.clientY + window.scrollY });
+    if (!isActive) setIsActive(true);
+  }, [isActive]);
+
+  const handleMouseLeave = useCallback(() => {
+    setIsActive(false);
+    setMousePos({ x: -500, y: -500 });
+  }, []);
+
+  useEffect(() => {
+    window.addEventListener('mousemove', handleMouseMove);
+    document.body.addEventListener('mouseleave', handleMouseLeave);
+    
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      document.body.removeEventListener('mouseleave', handleMouseLeave);
+    };
+  }, [handleMouseMove, handleMouseLeave]);
+
+  return (
+    <div className="fixed inset-0 pointer-events-none z-[1] overflow-hidden">
+      {/* Circuit pattern that reveals through spotlight */}
+      <div 
+        className="absolute transition-opacity duration-500 ease-out"
+        style={{
+          top: 0,
+          left: 0,
+          right: 0,
+          height: '200vh', // Extra height for scroll
+          backgroundImage: `url(${circuitTransitionBg})`,
+          backgroundPosition: 'center',
+          backgroundSize: 'cover',
+          backgroundRepeat: 'no-repeat',
+          opacity: isActive ? 0.6 : 0,
+          maskImage: `radial-gradient(circle 180px at ${mousePos.x}px ${mousePos.y}px, black 0%, transparent 100%)`,
+          WebkitMaskImage: `radial-gradient(circle 180px at ${mousePos.x}px ${mousePos.y}px, black 0%, transparent 100%)`
+        }}
+      />
+      
+      {/* Gold glow following cursor */}
+      <div 
+        className="absolute pointer-events-none transition-opacity duration-300 ease-out"
+        style={{
+          width: '400px',
+          height: '400px',
+          left: mousePos.x - 200,
+          top: mousePos.y - 200,
+          background: 'radial-gradient(circle, rgba(212,175,55,0.08) 0%, transparent 70%)',
+          opacity: isActive ? 1 : 0
+        }}
+      />
+    </div>
+  );
+}
+
 const HomePageC = () => {
   return (
-    <div className="min-h-screen bg-[#0A0C10] text-white" style={{ fontFamily: "'Inter', sans-serif" }}>
+    <div className="min-h-screen bg-[#0A0C10] text-white relative" style={{ fontFamily: "'Inter', sans-serif" }}>
+      {/* Global cursor spotlight effect */}
+      <GlobalCursorSpotlight />
+      
       <Navigation />
       <Hero />
       <OurStory />
@@ -28,9 +92,9 @@ const HomePageC = () => {
       <FinalCTA />
       <Footer />
       
-      {/* Circuit pattern overlay */}
+      {/* Static circuit pattern overlay - very subtle base layer */}
       <div 
-        className="fixed inset-0 pointer-events-none z-0 opacity-[0.04]"
+        className="fixed inset-0 pointer-events-none z-0 opacity-[0.02]"
         style={{
           backgroundImage: `url(${bgCircuitPattern})`,
           backgroundSize: '400px 400px',
