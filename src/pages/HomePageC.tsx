@@ -409,6 +409,73 @@ function OurStory() {
   );
 }
 
+// Glow Card Component - cursor-following glow effect with customizable color
+function GlowCard({ 
+  children, 
+  glowColor, 
+  className = "" 
+}: { 
+  children: React.ReactNode; 
+  glowColor: string;
+  className?: string;
+}) {
+  const cardRef = React.useRef<HTMLDivElement>(null);
+  const [mousePos, setMousePos] = useState({ x: -200, y: -200 });
+  const [isHovering, setIsHovering] = useState(false);
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (cardRef.current) {
+      const rect = cardRef.current.getBoundingClientRect();
+      setMousePos({
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top
+      });
+    }
+  };
+
+  const handleMouseLeave = () => {
+    setIsHovering(false);
+    setMousePos({ x: -200, y: -200 });
+  };
+
+  return (
+    <div 
+      ref={cardRef}
+      className={`relative overflow-hidden transition-all duration-300 ${className}`}
+      onMouseMove={handleMouseMove}
+      onMouseEnter={() => setIsHovering(true)}
+      onMouseLeave={handleMouseLeave}
+    >
+      {/* Cursor-following glow */}
+      <div 
+        className="absolute pointer-events-none transition-opacity duration-300 ease-out"
+        style={{
+          width: '300px',
+          height: '300px',
+          left: mousePos.x - 150,
+          top: mousePos.y - 150,
+          background: `radial-gradient(circle, ${glowColor} 0%, transparent 70%)`,
+          opacity: isHovering ? 1 : 0
+        }}
+      />
+      
+      {/* Arc/sweep effect on hover */}
+      <div 
+        className="absolute inset-0 pointer-events-none transition-opacity duration-500 ease-out"
+        style={{
+          background: `conic-gradient(from ${Math.atan2(mousePos.y - 150, mousePos.x - 150) * 180 / Math.PI}deg at ${mousePos.x}px ${mousePos.y}px, ${glowColor}, transparent 60%)`,
+          opacity: isHovering ? 0.2 : 0
+        }}
+      />
+      
+      {/* Content */}
+      <div className="relative z-10">
+        {children}
+      </div>
+    </div>
+  );
+}
+
 // Decision Path Section - Visual Comparison
 function DecisionPath() {
   const traditionalPains = [
@@ -467,18 +534,20 @@ function DecisionPath() {
 
         {/* Two Cards */}
         <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-          {/* Left Card - Traditional Way */}
+          {/* Left Card - Traditional Way with Red Glow */}
           <motion.div 
             initial={{ opacity: 0, x: -30 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="rounded-2xl border border-white/10 bg-[rgba(10,12,16,0.85)] backdrop-blur-[30px] p-8 relative overflow-hidden"
           >
-            {/* Subtle red glow */}
-            <div className="absolute -top-20 -left-20 w-40 h-40 bg-red-500/10 rounded-full blur-[80px]" />
-            
-            <div className="relative">
+            <GlowCard 
+              glowColor="rgba(239, 68, 68, 0.35)"
+              className="rounded-2xl border border-white/10 bg-[rgba(10,12,16,0.85)] backdrop-blur-[30px] p-8 h-full hover:border-red-500/40 transition-colors"
+            >
+              {/* Static subtle red glow */}
+              <div className="absolute -top-20 -left-20 w-40 h-40 bg-red-500/10 rounded-full blur-[80px] pointer-events-none" />
+              
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-10 h-10 rounded-xl border border-red-500/30 bg-red-500/10 flex items-center justify-center">
                   <XCircle className="w-5 h-5 text-red-400" />
@@ -502,26 +571,28 @@ function DecisionPath() {
                   Months of uncertainty. Endless back-and-forth. Still no guarantee.
                 </p>
               </div>
-            </div>
+            </GlowCard>
           </motion.div>
 
-          {/* Right Card - Our Approach */}
+          {/* Right Card - Our Approach with Gold Glow */}
           <motion.div 
             initial={{ opacity: 0, x: 30 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.15 }}
-            className="rounded-2xl border border-[#D4AF37]/30 bg-[rgba(10,12,16,0.85)] backdrop-blur-[30px] p-8 relative overflow-hidden shadow-lg shadow-[#D4AF37]/10"
           >
-            {/* Gold glow */}
-            <div className="absolute -top-20 -right-20 w-40 h-40 bg-[#D4AF37]/15 rounded-full blur-[80px]" />
-            
-            {/* Badge */}
-            <div className="absolute -top-px right-8 bg-gradient-to-r from-[#F4D77F] to-[#D4AF37] text-[#0A0C10] px-4 py-1.5 rounded-b-lg text-xs font-bold uppercase tracking-wide">
-              Recommended
-            </div>
-            
-            <div className="relative">
+            <GlowCard 
+              glowColor="rgba(212, 175, 55, 0.4)"
+              className="rounded-2xl border border-[#D4AF37]/30 bg-[rgba(10,12,16,0.85)] backdrop-blur-[30px] p-8 h-full shadow-lg shadow-[#D4AF37]/10 hover:border-[#D4AF37]/50 transition-colors"
+            >
+              {/* Static gold glow */}
+              <div className="absolute -top-20 -right-20 w-40 h-40 bg-[#D4AF37]/15 rounded-full blur-[80px] pointer-events-none" />
+              
+              {/* Badge */}
+              <div className="absolute -top-px right-8 bg-gradient-to-r from-[#F4D77F] to-[#D4AF37] text-[#0A0C10] px-4 py-1.5 rounded-b-lg text-xs font-bold uppercase tracking-wide">
+                Recommended
+              </div>
+              
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-10 h-10 rounded-xl border border-[#D4AF37]/30 bg-[#D4AF37]/10 flex items-center justify-center">
                   <CheckCircle2 className="w-5 h-5 text-[#F4D77F]" />
@@ -545,7 +616,7 @@ function DecisionPath() {
                   Cash at close. Certainty from day one.
                 </p>
               </div>
-            </div>
+            </GlowCard>
           </motion.div>
         </div>
       </div>
