@@ -20,7 +20,6 @@ const HomePageC = () => {
     <div className="min-h-screen bg-[#0A0C10] text-white" style={{ fontFamily: "'Inter', sans-serif" }}>
       <Navigation />
       <Hero />
-      <CircuitTransition />
       <OurStory />
       <WhyNextTier />
       <FAQ />
@@ -169,14 +168,21 @@ function Hero() {
   );
 }
 
-// Circuit Chip Transition - bridges Hero to Our Story
-function CircuitTransition() {
+// Section 2: Our Story - Premium Two-Column Layout with Circuit Background
+function OurStory() {
+  const evolutionPhases = [
+    { phase: "01", title: "Brokerage", description: "Helped founders exit $100M+ in digital businesses" },
+    { phase: "02", title: "Discovery", description: "Identified the broken parts of the industry" },
+    { phase: "03", title: "Innovation", description: "Built a faster, cleaner, founder-first process" },
+    { phase: "04", title: "Evolution", description: "Became the buyer we always wished existed" }
+  ];
+
   return (
-    <section className="relative h-[40vh] md:h-[50vh] lg:h-[60vh] overflow-hidden">
+    <section className="py-24 md:py-32 relative overflow-hidden">
       {/* Base dark background */}
       <div className="absolute inset-0 bg-[#0A0C10]" />
       
-      {/* Circuit chip image - anchored right */}
+      {/* Circuit chip background image - anchored right */}
       <div className="absolute inset-0">
         <div 
           className="absolute inset-0"
@@ -189,57 +195,27 @@ function CircuitTransition() {
         />
         
         {/* Gradient fades for seamless blend */}
-        {/* Top fade - from Hero */}
+        {/* Top fade */}
         <div 
-          className="absolute inset-x-0 top-0 h-1/3 pointer-events-none" 
+          className="absolute inset-x-0 top-0 h-1/4 pointer-events-none" 
           style={{ background: 'linear-gradient(to bottom, #0A0C10 0%, transparent 100%)' }} 
         />
         
-        {/* Bottom fade - to Our Story */}
+        {/* Bottom fade */}
         <div 
-          className="absolute inset-x-0 bottom-0 h-1/3 pointer-events-none" 
+          className="absolute inset-x-0 bottom-0 h-1/4 pointer-events-none" 
           style={{ background: 'linear-gradient(to top, #0A0C10 0%, transparent 100%)' }} 
         />
         
-        {/* Left fade - for text readability on mobile */}
+        {/* Left fade - ensures text readability */}
         <div 
-          className="absolute inset-y-0 left-0 w-1/2 md:w-1/3 pointer-events-none" 
-          style={{ background: 'linear-gradient(to right, #0A0C10 0%, transparent 100%)' }} 
+          className="absolute inset-y-0 left-0 w-2/3 md:w-1/2 pointer-events-none" 
+          style={{ background: 'linear-gradient(to right, #0A0C10 0%, #0A0C10 40%, transparent 100%)' }} 
         />
       </div>
       
       {/* Subtle gold ambient glow */}
-      <div className="absolute bottom-0 right-1/4 w-[300px] h-[300px] bg-[#D4AF37]/10 rounded-full blur-[120px] pointer-events-none" />
-    </section>
-  );
-}
-
-// Section 2: Our Story - Premium Two-Column Layout
-function OurStory() {
-  const evolutionPhases = [
-    { phase: "01", title: "Brokerage", description: "Helped founders exit $100M+ in digital businesses" },
-    { phase: "02", title: "Discovery", description: "Identified the broken parts of the industry" },
-    { phase: "03", title: "Innovation", description: "Built a faster, cleaner, founder-first process" },
-    { phase: "04", title: "Evolution", description: "Became the buyer we always wished existed" }
-  ];
-
-  return (
-    <section className="py-24 md:py-32 relative overflow-hidden">
-      {/* Background */}
-      <div className="absolute inset-0 bg-gradient-to-b from-[#0A0C10] via-[#080A0E] to-[#0A0C10]" />
-      
-      {/* Circuit grid overlay */}
-      <div className="absolute inset-0 opacity-[0.03]" style={{
-        backgroundImage: `
-          linear-gradient(rgba(212,175,55,0.3) 1px, transparent 1px),
-          linear-gradient(90deg, rgba(212,175,55,0.3) 1px, transparent 1px)
-        `,
-        backgroundSize: '60px 60px'
-      }} />
-      
-      {/* Glowing orbs */}
-      <div className="absolute top-1/4 left-0 w-[500px] h-[500px] bg-[#D4AF37]/5 rounded-full blur-[180px]" />
-      <div className="absolute bottom-1/4 right-0 w-[400px] h-[400px] bg-[#F4D77F]/5 rounded-full blur-[150px]" />
+      <div className="absolute top-1/3 right-1/4 w-[400px] h-[400px] bg-[#D4AF37]/8 rounded-full blur-[150px] pointer-events-none" />
       
       <div className="max-w-7xl mx-auto px-6 relative z-10">
         {/* Section header */}
