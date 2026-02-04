@@ -54,7 +54,7 @@ function GlobalCursorSpotlight() {
   const maskY = mousePos.y + scrollY;
 
   return (
-    <div className="fixed inset-0 pointer-events-none z-[5]">
+    <div className="fixed inset-0 pointer-events-none z-[1]">
       {/* NTP circuit pattern that scrolls with page - revealed by cursor */}
       <div 
         className="absolute inset-0"
