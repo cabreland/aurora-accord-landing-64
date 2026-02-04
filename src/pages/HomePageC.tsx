@@ -18,7 +18,7 @@ import decisionForkPath from '@/assets/decision-fork-path.jpg';
 import goldCircuitReveal from '@/assets/gold-circuit-reveal.png';
 import goldChipStack from '@/assets/gold-chip-stack.png';
 import nextTierCtaBg from '@/assets/next-tier-cta-bg.jpg';
-import ntpLogoFull from '@/assets/ntp-logo-full.jpg';
+import ntpLogoFull from '@/assets/ntp-logo-full.png';
 
 
 const HomePageC = () => {
@@ -794,7 +794,7 @@ function Footer() {
             <img 
               src={ntpLogoFull} 
               alt="Next Tier Partners" 
-              className="h-12 w-auto drop-shadow-[0_0_12px_rgba(212,175,55,0.35)]" 
+              className="h-16 md:h-20 w-auto drop-shadow-[0_0_25px_rgba(212,175,55,0.6)] filter brightness-110" 
             />
           </div>
           
