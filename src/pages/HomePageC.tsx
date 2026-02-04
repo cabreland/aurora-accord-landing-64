@@ -746,7 +746,7 @@ function FinalCTA() {
           </div>
           
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 tracking-[-0.02em] drop-shadow-lg" style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}>
-            Skip the 12-month nightmare.{' '}
+            Skip the 6-month nightmare.{' '}
             <span className="bg-gradient-to-r from-[#F4D77F] via-[#D4AF37] to-[#F4D77F] bg-clip-text text-transparent">
               Get an offer in 7 days.
             </span>
