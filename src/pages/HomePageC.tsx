@@ -586,7 +586,7 @@ function DecisionPath() {
     </section>
   );
 }
-// FAQ Section
+// FAQ Section - "Clarity Achieved" after choosing the gold path
 function FAQ() {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   
@@ -618,68 +618,133 @@ function FAQ() {
   ];
 
   return (
-    <section id="faq" className="py-16 md:py-20 relative overflow-hidden">
+    <section id="faq" className="py-20 md:py-28 relative overflow-hidden min-h-[800px]">
       {/* Base dark background */}
       <div className="absolute inset-0 bg-[#0A0C10]" />
       
-      {/* Left-side asymmetric gold glow (balances right-heavy sections above) */}
-      <div className="absolute top-1/4 -left-20 w-[500px] h-[600px] bg-gradient-to-r from-[#D4AF37]/10 via-[#F4D77F]/6 to-transparent rounded-full blur-[100px]" />
+      {/* Gold circuit reveal image - right side, continuing the gold path narrative */}
+      <div 
+        className="absolute right-0 top-0 bottom-0 w-1/2 lg:w-[45%] hidden md:block"
+        style={{
+          backgroundImage: `url(${goldCircuitReveal})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center left',
+          opacity: 0.7
+        }}
+      />
       
-      {/* Subtle center ambient glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-[#F4D77F]/4 rounded-full blur-[120px]" />
+      {/* Gradient overlays to blend image */}
+      <div className="absolute right-0 top-0 bottom-0 w-1/2 lg:w-[45%] hidden md:block bg-gradient-to-r from-[#0A0C10] via-[#0A0C10]/70 to-transparent" />
+      <div className="absolute right-0 top-0 w-1/2 lg:w-[45%] h-48 hidden md:block bg-gradient-to-b from-[#0A0C10] to-transparent" />
+      <div className="absolute right-0 bottom-0 w-1/2 lg:w-[45%] h-48 hidden md:block bg-gradient-to-t from-[#0A0C10] to-transparent" />
       
-      {/* Bottom fade transition to CTA */}
-      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#0A0C10] to-transparent" />
+      {/* Gold ambient glow behind the image */}
+      <div className="absolute top-1/2 right-[15%] -translate-y-1/2 w-[400px] h-[500px] bg-[#D4AF37]/12 rounded-full blur-[100px] hidden md:block" />
       
-      <div className="max-w-3xl mx-auto px-6 relative z-10">
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-12"
-        >
-          <h2 className="text-3xl md:text-5xl font-bold text-white mb-4 tracking-[-0.02em]" style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}>
-            Questions?
-          </h2>
-          <p className="text-white/50 tracking-tight">
-            Everything you need to know before applying.
-          </p>
-        </motion.div>
-        
-        <div className="space-y-4">
-          {faqs.map((faq, idx) => (
+      {/* Left-side subtle glow for balance */}
+      <div className="absolute top-1/3 -left-20 w-[300px] h-[400px] bg-gradient-to-r from-[#F4D77F]/8 to-transparent rounded-full blur-[80px]" />
+      
+      <div className="max-w-7xl mx-auto px-6 relative z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
+          {/* Left column - FAQ content */}
+          <div className="max-w-xl">
             <motion.div 
-              key={idx}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: idx * 0.05 }}
+              className="mb-10"
             >
-              <GlassCard className="overflow-hidden">
-                <button
-                  className="w-full flex items-center justify-between p-6 text-left"
-                  onClick={() => setOpenIndex(openIndex === idx ? null : idx)}
-                >
-                  <span className="font-semibold text-white tracking-tight">{faq.question}</span>
-                  <ChevronDown 
-                    className={`w-5 h-5 text-[#F4D77F] transition-transform duration-200 ${
-                      openIndex === idx ? 'rotate-180' : ''
-                    }`}
-                  />
-                </button>
-                {openIndex === idx && (
-                  <motion.div 
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className="px-6 pb-6"
-                  >
-                    <p className="text-white/60 leading-relaxed tracking-tight">{faq.answer}</p>
-                  </motion.div>
-                )}
-              </GlassCard>
+              {/* Section badge */}
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[rgba(212,175,55,0.1)] border border-[rgba(212,175,55,0.2)] mb-6">
+                <div className="w-2 h-2 rounded-full bg-[#D4AF37] animate-pulse" />
+                <span className="text-sm text-[#F4D77F] tracking-tight font-medium">Clarity</span>
+              </div>
+              
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 tracking-[-0.02em]" style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}>
+                You chose the{' '}
+                <span className="bg-gradient-to-r from-[#F4D77F] via-[#D4AF37] to-[#F4D77F] bg-clip-text text-transparent">
+                  clear path.
+                </span>
+              </h2>
+              <p className="text-white/50 text-lg tracking-tight">
+                Here's everything you need to know.
+              </p>
             </motion.div>
-          ))}
+            
+            <div className="space-y-3">
+              {faqs.map((faq, idx) => (
+                <motion.div 
+                  key={idx}
+                  initial={{ opacity: 0, x: -20 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: idx * 0.08 }}
+                >
+                  <div 
+                    className={`rounded-xl border transition-all duration-300 ${
+                      openIndex === idx 
+                        ? 'bg-[rgba(212,175,55,0.08)] border-[rgba(212,175,55,0.3)]' 
+                        : 'bg-[rgba(255,255,255,0.02)] border-[rgba(255,255,255,0.06)] hover:border-[rgba(212,175,55,0.2)]'
+                    }`}
+                  >
+                    <button
+                      className="w-full flex items-center justify-between p-5 text-left"
+                      onClick={() => setOpenIndex(openIndex === idx ? null : idx)}
+                    >
+                      <span className="font-semibold text-white tracking-tight pr-4">{faq.question}</span>
+                      <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 ${
+                        openIndex === idx 
+                          ? 'bg-[#D4AF37] rotate-180' 
+                          : 'bg-[rgba(255,255,255,0.05)]'
+                      }`}>
+                        <ChevronDown className={`w-4 h-4 transition-colors ${openIndex === idx ? 'text-[#0A0C10]' : 'text-[#F4D77F]'}`} />
+                      </div>
+                    </button>
+                    {openIndex === idx && (
+                      <motion.div 
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="px-5 pb-5"
+                      >
+                        <p className="text-white/60 leading-relaxed tracking-tight">{faq.answer}</p>
+                      </motion.div>
+                    )}
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+          
+          {/* Right column - Visual emphasis area (content shown via background image) */}
+          <div className="hidden lg:flex items-center justify-center relative">
+            {/* Floating stats or trust indicators */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.3 }}
+              className="absolute top-20 right-10"
+            >
+              <div className="bg-[rgba(10,12,16,0.9)] backdrop-blur-xl border border-[rgba(212,175,55,0.2)] rounded-2xl p-6 shadow-2xl">
+                <div className="text-4xl font-bold text-[#F4D77F] mb-1">45-60</div>
+                <div className="text-sm text-white/50">Days to close</div>
+              </div>
+            </motion.div>
+            
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.5 }}
+              className="absolute bottom-32 right-20"
+            >
+              <div className="bg-[rgba(10,12,16,0.9)] backdrop-blur-xl border border-[rgba(212,175,55,0.2)] rounded-2xl p-6 shadow-2xl">
+                <div className="text-4xl font-bold text-[#F4D77F] mb-1">$0</div>
+                <div className="text-sm text-white/50">Seller fees</div>
+              </div>
+            </motion.div>
+          </div>
         </div>
       </div>
     </section>
