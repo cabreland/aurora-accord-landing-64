@@ -2,18 +2,12 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { 
-  Shield, 
-  Zap, 
   ArrowRight, 
   CheckCircle2, 
   XCircle, 
   ChevronDown,
   Sparkles,
   Clock,
-  Target,
-  BarChart3,
-  AlertTriangle,
-  Calendar,
   FileX,
   Users
 } from 'lucide-react';
@@ -28,8 +22,7 @@ const HomePageC = () => {
     <div className="min-h-screen bg-[#0A0C10] text-white" style={{ fontFamily: "'Inter', sans-serif" }}>
       <Navigation />
       <Hero />
-      <TheProblem />
-      <HowItWorks />
+      <OurStory />
       <WhyNextTier />
       <FAQ />
       <FinalCTA />
@@ -164,7 +157,7 @@ function Hero() {
                 variant="outline" 
                 className="border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.02)] text-white hover:bg-[rgba(255,255,255,0.06)] hover:border-[rgba(255,255,255,0.15)] px-6 h-13 transition-all duration-300 tracking-tight"
               >
-                <a href="#how-it-works">See How It Works</a>
+                <a href="#faq">Learn More</a>
               </Button>
             </div>
           </motion.div>
@@ -177,182 +170,171 @@ function Hero() {
   );
 }
 
-// The Problem Section - Agitate (NEW)
-function TheProblem() {
-  const painPoints = [
+// Section 2: Our Story - About Us
+function OurStory() {
+  const painCards = [
     {
-      icon: <Calendar className="w-5 h-5" />,
-      title: "6-12 months of your life",
-      description: "NDAs, meetings, due diligence—only for deals to fall apart at the last minute."
+      icon: <Clock className="w-6 h-6" />,
+      title: "6–12 months wasted",
+      description: "Endless NDAs, meetings, and due diligence cycles that drag on forever."
     },
     {
-      icon: <Users className="w-5 h-5" />,
+      icon: <Users className="w-6 h-6" />,
       title: "Tire-kickers everywhere",
-      description: "Unqualified buyers wasting your time with lowball offers and endless questions."
+      description: "Unqualified buyers who waste your time with lowball offers."
     },
     {
-      icon: <FileX className="w-5 h-5" />,
-      title: "Broken promises",
-      description: "Buyers who ghost, change terms, or drag their feet while you're stuck in limbo."
-    },
-    {
-      icon: <AlertTriangle className="w-5 h-5" />,
-      title: "Another full-time job",
-      description: "Running your business AND managing a sale is exhausting. Something has to give."
+      icon: <FileX className="w-6 h-6" />,
+      title: "Broken promises and failed LOIs",
+      description: "Deals that collapse at the finish line after months of work."
     }
   ];
 
   return (
-    <section className="py-24 relative overflow-hidden">
+    <section className="py-28 relative overflow-hidden">
       {/* Background */}
       <div className="absolute inset-0 bg-gradient-to-b from-[#0A0C10] via-[#0D0F14] to-[#0A0C10]" />
-      <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-red-500/5 rounded-full blur-[180px]" />
+      <div className="absolute top-1/4 left-0 w-[600px] h-[600px] bg-gradient-to-br from-[#F4D77F]/6 to-[#D4AF37]/3 rounded-full blur-[180px]" />
       
       <div className="max-w-7xl mx-auto px-6 relative z-10">
+        {/* Section Header */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <h2 className="text-3xl md:text-5xl font-bold text-white mb-6 tracking-[-0.02em]" style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}>
-            Tired of{' '}
-            <span className="text-red-400/90">
-              tire-kickers?
+          <h2 className="text-3xl md:text-5xl font-bold text-white mb-4 tracking-[-0.02em]" style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}>
+            Built From Inside the{' '}
+            <span className="bg-gradient-to-r from-[#F4D77F] via-[#D4AF37] to-[#F4D77F] bg-clip-text text-transparent">
+              Digital Exit Process
             </span>
           </h2>
-          <p className="text-xl text-white/70 max-w-3xl mx-auto leading-relaxed tracking-tight">
-            Founders are burned out from wasting months with lowball offers and a process that feels like another full-time job. Selling a business shouldn't take 6–12 months of dead-end conversations.
+          <p className="text-lg text-white/60 max-w-2xl mx-auto tracking-tight">
+            Why We Created a Better Way to Sell Your Business
           </p>
         </motion.div>
         
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
-          {painPoints.map((point, idx) => (
-            <motion.div 
-              key={idx}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: idx * 0.1 }}
-            >
-              <div className="p-6 rounded-2xl border border-red-500/20 bg-[rgba(255,255,255,0.02)] backdrop-blur-[30px] h-full">
-                <div className="w-10 h-10 rounded-lg bg-red-500/10 flex items-center justify-center mb-4 text-red-400/80">
-                  {point.icon}
-                </div>
-                <h3 className="text-lg font-semibold text-white mb-2 tracking-tight" style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}>
-                  {point.title}
-                </h3>
-                <p className="text-white/50 text-sm leading-relaxed tracking-tight">
-                  {point.description}
-                </p>
+        {/* Two Column Layout */}
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-start">
+          {/* Left Column - Story */}
+          <motion.div 
+            initial={{ opacity: 0, x: -20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            className="space-y-6"
+          >
+            <div className="space-y-5 text-white/80 leading-relaxed tracking-tight">
+              <p>
+                We didn't start as buyers. We started on the other side — representing founders just like you.
+              </p>
+              
+              <p>
+                For years, we ran Exclusive Business Brokers and helped founders exit over{' '}
+                <span className="text-[#F4D77F] font-semibold">$100M+ in digital companies</span>. We've seen every angle of the process — the good, the bad, and the downright unbearable.
+              </p>
+              
+              <p className="text-white/60">
+                Here's the part no one likes to admit:
+              </p>
+              
+              <ul className="space-y-2 pl-1">
+                {[
+                  "Most 'buyers' never close.",
+                  "Most NDAs lead nowhere.",
+                  "Most LOIs collapse before funding.",
+                  "And founders waste months on conversations that should've taken days."
+                ].map((item, idx) => (
+                  <li key={idx} className="flex items-start gap-3">
+                    <span className="text-[#F4D77F] mt-1">•</span>
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+              
+              <p>
+                We watched incredible businesses get tied up in endless diligence loops… only for the deal to die because the buyer wasn't real, wasn't funded, or wasn't serious.
+              </p>
+              
+              <p>
+                After years of watching founders lose time, money, and momentum…{' '}
+                <span className="text-white font-semibold">we built a better way.</span>
+              </p>
+              
+              <p className="text-[#F4D77F]/90 font-medium">
+                Next Tier Partners was created so we could be the buyer we always wished existed.
+              </p>
+              
+              <div className="pt-2 space-y-2">
+                <p className="text-white font-semibold">Real capital. Real professional process. Real timeline.</p>
+                <p className="text-white/70">No middlemen. No games. No "we're still reviewing." No 6-month rollercoasters.</p>
               </div>
-            </motion.div>
-          ))}
+              
+              <p>
+                We buy businesses directly — fast, clean, and transparently.
+              </p>
+              
+              <p className="text-white/60">
+                And if your business isn't the right fit for our portfolio, we still help you exit through our vetted partner network using the same structured, founder-friendly process.
+              </p>
+              
+              <p className="text-white/80 font-medium pt-2">
+                Because your time shouldn't be wasted.
+              </p>
+              
+              <p className="text-white font-semibold">
+                And selling your business shouldn't feel like a second full-time job.
+              </p>
+            </div>
+          </motion.div>
+          
+          {/* Right Column - Pain Cards */}
+          <motion.div 
+            initial={{ opacity: 0, x: 20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            className="space-y-6"
+          >
+            {painCards.map((card, idx) => (
+              <motion.div
+                key={idx}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: idx * 0.1 }}
+              >
+                <div className="p-6 rounded-2xl border border-red-500/20 bg-[rgba(255,255,255,0.02)] backdrop-blur-[30px] hover:border-red-500/30 transition-colors">
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-red-500/10 flex items-center justify-center text-red-400/80 flex-shrink-0">
+                      {card.icon}
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-white mb-2 tracking-tight" style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}>
+                        {card.title}
+                      </h3>
+                      <p className="text-white/50 text-sm leading-relaxed tracking-tight">
+                        {card.description}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </motion.div>
         </div>
-
-        {/* Transition statement */}
+        
+        {/* Footer line */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center mt-16"
+          className="text-center mt-16 pt-8 border-t border-[rgba(255,255,255,0.06)]"
         >
           <p className="text-lg text-white/60 tracking-tight">
-            There's a better way.{' '}
-            <span className="text-[#F4D77F] font-medium">One buyer. One conversation. 45-60 days.</span>
+            There's a better way:{' '}
+            <span className="text-[#F4D77F] font-semibold">one buyer, one conversation, cash in 45–60 days.</span>
           </p>
         </motion.div>
-      </div>
-    </section>
-  );
-}
-
-// How It Works - Solution (Merged Process)
-function HowItWorks() {
-  const steps = [
-    {
-      number: "01",
-      icon: <Zap className="w-6 h-6" />,
-      title: "Apply",
-      description: "Share your business details through our confidential application. Takes 5 minutes.",
-      highlight: "No NDAs, no tire-kickers"
-    },
-    {
-      number: "02",
-      icon: <BarChart3 className="w-6 h-6" />,
-      title: "Get Valued",
-      description: "We analyze your business and present a fair, transparent valuation within 7 days.",
-      highlight: "Real numbers, no games"
-    },
-    {
-      number: "03",
-      icon: <Target className="w-6 h-6" />,
-      title: "Review Offer",
-      description: "If it's a fit, you receive a written offer. Clear terms, no hidden conditions.",
-      highlight: "Take it or leave it—no pressure"
-    },
-    {
-      number: "04",
-      icon: <CheckCircle2 className="w-6 h-6" />,
-      title: "Close & Cash",
-      description: "Complete due diligence and close in 45-60 days. Cash in your account.",
-      highlight: "Done. What's next for you?"
-    }
-  ];
-
-  return (
-    <section id="how-it-works" className="py-28 relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-b from-[#0A0C10] via-[#0D0F14] to-[#0A0C10]" />
-      <div className="absolute top-1/2 left-0 w-[500px] h-[500px] bg-gradient-to-br from-[#F4D77F]/6 to-[#D4AF37]/4 rounded-full blur-[180px]" />
-      
-      <div className="max-w-7xl mx-auto px-6 relative z-10">
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-16"
-        >
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] backdrop-blur-[30px] mb-6">
-            <Clock className="w-4 h-4 text-[#F4D77F]" />
-            <span className="text-sm text-white/70 tracking-tight">45-60 Day Process</span>
-          </div>
-          <h2 className="text-3xl md:text-5xl font-bold text-white mb-4 tracking-[-0.02em]" style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}>
-            How It{' '}
-            <span className="bg-gradient-to-r from-[#F4D77F] via-[#D4AF37] to-[#F4D77F] bg-clip-text text-transparent">
-              Actually Works
-            </span>
-          </h2>
-          <p className="text-lg text-white/50 max-w-2xl mx-auto tracking-tight">
-            No brokers. No middlemen. Direct from founder to buyer.
-          </p>
-        </motion.div>
-        
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {steps.map((step, idx) => (
-            <motion.div 
-              key={idx}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: idx * 0.1 }}
-              className="relative group"
-            >
-              <GlassCard className="p-6 h-full">
-                <div className="text-5xl font-bold bg-gradient-to-r from-[#F4D77F]/30 to-[#D4AF37]/20 bg-clip-text text-transparent mb-4">{step.number}</div>
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#F4D77F]/15 to-[#D4AF37]/10 flex items-center justify-center mb-4 text-[#F4D77F] group-hover:from-[#F4D77F]/25 group-hover:to-[#D4AF37]/15 transition-colors">
-                  {step.icon}
-                </div>
-                <h3 className="text-lg font-bold text-white mb-2 tracking-tight" style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}>{step.title}</h3>
-                <p className="text-white/50 text-sm leading-relaxed tracking-tight mb-3">{step.description}</p>
-                <p className="text-[#F4D77F]/80 text-xs font-medium tracking-tight">{step.highlight}</p>
-              </GlassCard>
-              
-              {idx < steps.length - 1 && (
-                <div className="hidden lg:block absolute top-1/2 -right-3 w-6 h-0.5 bg-gradient-to-r from-[#D4AF37]/40 to-transparent"></div>
-              )}
-            </motion.div>
-          ))}
-        </div>
       </div>
     </section>
   );
