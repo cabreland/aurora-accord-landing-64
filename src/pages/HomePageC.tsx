@@ -167,114 +167,141 @@ function Hero() {
   );
 }
 
-// Section 2: Our Story - About Us
+// Section 2: Our Story - The Problem We Solved
 function OurStory() {
+  const painPoints = [
+    { label: "Buyers who never close", delay: 0 },
+    { label: "NDAs that lead nowhere", delay: 0.1 },
+    { label: "LOIs that collapse", delay: 0.2 },
+    { label: "Months wasted", delay: 0.3 }
+  ];
+
   return (
-    <section className="py-24 relative overflow-hidden">
-      {/* Background */}
-      <div className="absolute inset-0 bg-gradient-to-b from-[#0A0C10] via-[#0D0F14] to-[#0A0C10]" />
-      <div className="absolute top-1/4 left-0 w-[600px] h-[600px] bg-gradient-to-br from-[#F4D77F]/6 to-[#D4AF37]/3 rounded-full blur-[180px]" />
+    <section className="py-20 md:py-28 relative overflow-hidden">
+      {/* Background with circuit pattern */}
+      <div className="absolute inset-0 bg-gradient-to-b from-[#0A0C10] via-[#080A0E] to-[#0A0C10]" />
       
-      <div className="max-w-3xl mx-auto px-6 relative z-10">
-        {/* Section Header */}
+      {/* Circuit grid overlay */}
+      <div className="absolute inset-0 opacity-[0.03]" style={{
+        backgroundImage: `
+          linear-gradient(rgba(212,175,55,0.3) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(212,175,55,0.3) 1px, transparent 1px)
+        `,
+        backgroundSize: '60px 60px'
+      }} />
+      
+      {/* Glowing orbs */}
+      <div className="absolute top-1/4 left-1/4 w-[400px] h-[400px] bg-[#D4AF37]/5 rounded-full blur-[150px]" />
+      <div className="absolute bottom-1/4 right-1/4 w-[300px] h-[300px] bg-red-500/5 rounded-full blur-[120px]" />
+      
+      <div className="max-w-5xl mx-auto px-6 relative z-10">
+        {/* Hook */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="text-center mb-16"
+        >
+          <p className="text-[#F4D77F] text-sm font-medium tracking-widest uppercase mb-6">Our Origin</p>
+          <h2 className="text-3xl md:text-5xl lg:text-6xl font-bold text-white mb-6 tracking-[-0.02em] leading-[1.1]" style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}>
+            We didn't start as buyers.
+            <br />
+            <span className="text-white/50">We started on your side.</span>
+          </h2>
+          <p className="text-lg text-white/60 max-w-2xl mx-auto tracking-tight">
+            For years, we helped founders exit. We saw every deal fall apart the same way.
+          </p>
+        </motion.div>
+
+        {/* Pain Points - Circuit Node Design */}
+        <div className="relative mb-16">
+          {/* Connecting line */}
+          <div className="absolute top-1/2 left-0 right-0 h-px bg-gradient-to-r from-transparent via-red-500/30 to-transparent hidden md:block" />
+          
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+            {painPoints.map((point, idx) => (
+              <motion.div
+                key={idx}
+                initial={{ opacity: 0, scale: 0.8 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: point.delay, duration: 0.4 }}
+                className="relative group"
+              >
+                {/* Circuit node */}
+                <div className="relative p-6 rounded-2xl border border-red-500/20 bg-[#0A0C10]/80 backdrop-blur-sm hover:border-red-500/40 transition-all duration-300">
+                  {/* Pulse dot */}
+                  <div className="absolute -top-1.5 -right-1.5 w-3 h-3">
+                    <span className="absolute inset-0 rounded-full bg-red-500/60 animate-ping" />
+                    <span className="absolute inset-0 rounded-full bg-red-500" />
+                  </div>
+                  
+                  {/* Index number */}
+                  <div className="text-red-500/30 text-xs font-mono mb-3">0{idx + 1}</div>
+                  
+                  {/* Label */}
+                  <p className="text-white/80 text-sm md:text-base font-medium tracking-tight leading-snug">
+                    {point.label}
+                  </p>
+                  
+                  {/* Corner accents */}
+                  <div className="absolute bottom-2 left-2 w-4 h-4 border-l border-b border-red-500/20" />
+                  <div className="absolute top-2 right-2 w-4 h-4 border-r border-t border-red-500/20" />
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+
+        {/* Pivot Statement */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           className="text-center mb-12"
         >
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4 tracking-[-0.02em]" style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}>
-            Built From Inside the{' '}
-            <span className="bg-gradient-to-r from-[#F4D77F] via-[#D4AF37] to-[#F4D77F] bg-clip-text text-transparent">
-              Digital Exit Process
-            </span>
-          </h2>
-          <p className="text-lg text-white/60 tracking-tight">
-            Why We Created a Better Way to Sell Your Business
+          <div className="inline-flex items-center gap-4 mb-8">
+            <div className="h-px w-12 bg-gradient-to-r from-transparent to-[#D4AF37]/50" />
+            <span className="text-[#F4D77F] text-sm font-medium tracking-widest uppercase">The Shift</span>
+            <div className="h-px w-12 bg-gradient-to-l from-transparent to-[#D4AF37]/50" />
+          </div>
+          
+          <p className="text-2xl md:text-3xl text-white font-semibold tracking-tight mb-4" style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}>
+            So we became the buyer we wished existed.
           </p>
         </motion.div>
-        
-        {/* Story Content */}
+
+        {/* Payoff - The Promise */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="space-y-6 text-white/80 leading-relaxed tracking-tight text-center"
+          className="relative"
         >
-          <p>
-            We didn't start as buyers. We started on the other side — representing founders just like you.
-          </p>
-          
-          <p>
-            For years, we helped founders exit their digital companies. We've seen every angle of the process — the good, the bad, and the downright unbearable.
-          </p>
-          
-          <p className="text-white/60">
-            Here's the part no one likes to admit:
-          </p>
-          
-          <div className="text-left max-w-xl mx-auto">
-            <ul className="space-y-2 pl-1">
-              {[
-                "Most 'buyers' never close.",
-                "Most NDAs lead nowhere.",
-                "Most LOIs collapse before funding.",
-                "And founders waste months on conversations that should've taken days."
-              ].map((item, idx) => (
-                <li key={idx} className="flex items-start gap-3">
-                  <span className="text-[#F4D77F] mt-1">•</span>
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
+          <div className="relative p-8 md:p-12 rounded-3xl border border-[#D4AF37]/20 bg-gradient-to-br from-[#D4AF37]/5 to-transparent backdrop-blur-sm overflow-hidden">
+            {/* Circuit pattern inside */}
+            <div className="absolute inset-0 opacity-[0.02]" style={{
+              backgroundImage: `url(${bgCircuitPattern})`,
+              backgroundSize: '200px 200px'
+            }} />
+            
+            {/* Glow */}
+            <div className="absolute -top-20 -right-20 w-40 h-40 bg-[#D4AF37]/10 rounded-full blur-[60px]" />
+            
+            <div className="relative text-center">
+              <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xl md:text-2xl lg:text-3xl font-bold tracking-tight" style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}>
+                <span className="text-[#F4D77F]">Real capital.</span>
+                <span className="text-white/40">|</span>
+                <span className="text-white">Real process.</span>
+                <span className="text-white/40">|</span>
+                <span className="text-[#F4D77F]">Real timeline.</span>
+              </div>
+              
+              <p className="mt-6 text-white/50 text-sm md:text-base tracking-tight">
+                No middlemen. No games. No 6-month rollercoasters.
+              </p>
+            </div>
           </div>
-          
-          <p>
-            We watched incredible businesses get tied up in endless diligence loops… only for the deal to die because the buyer wasn't real, wasn't funded, or wasn't serious.
-          </p>
-          
-          <p>
-            After years of watching founders lose time, money, and momentum…{' '}
-            <span className="text-white font-semibold">we built a better way.</span>
-          </p>
-          
-          <p className="text-[#F4D77F]/90 font-medium text-lg">
-            Next Tier Partners was created so we could be the buyer we always wished existed.
-          </p>
-          
-          <div className="space-y-2">
-            <p className="text-white font-semibold">Real capital. Real professional process. Real timeline.</p>
-            <p className="text-white/70">No middlemen. No games. No "we're still reviewing." No 6-month rollercoasters.</p>
-          </div>
-          
-          <p>
-            We buy businesses directly — fast, clean, and transparently.
-          </p>
-          
-          <p className="text-white/60">
-            And if your business isn't the right fit for our portfolio, we still help you exit through our vetted partner network using the same structured, founder-friendly process.
-          </p>
-          
-          <p className="text-white/80 font-medium">
-            Because your time shouldn't be wasted.
-          </p>
-          
-          <p className="text-white font-semibold">
-            And selling your business shouldn't feel like a second full-time job.
-          </p>
-        </motion.div>
-        
-        {/* Footer line */}
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mt-12 pt-8 border-t border-[rgba(255,255,255,0.06)]"
-        >
-          <p className="text-lg text-white/60 tracking-tight">
-            There's a better way:{' '}
-            <span className="text-[#F4D77F] font-semibold">one buyer, one conversation, cash in 45–60 days.</span>
-          </p>
         </motion.div>
       </div>
     </section>
