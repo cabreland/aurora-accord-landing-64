@@ -12,18 +12,18 @@ const HeroSection = () => {
         {/* Gradient layers */}
         <div className="absolute inset-0 bg-gradient-to-br from-[#0A0C10] via-[#111318] to-[#0A0C10]" />
         
-        {/* Gold accent glow - top left */}
-        <div className="absolute top-0 left-0 w-[600px] h-[600px] bg-[#D4AF37]/8 rounded-full blur-[150px] -translate-x-1/2 -translate-y-1/2" />
+        {/* Gold accent glow - top left - muted on mobile */}
+        <div className="absolute top-0 left-0 w-[400px] md:w-[600px] h-[400px] md:h-[600px] bg-[#D4AF37]/5 md:bg-[#D4AF37]/8 rounded-full blur-[150px] -translate-x-1/2 -translate-y-1/2" />
         
-        {/* Blue accent glow - bottom right */}
-        <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-blue-500/8 rounded-full blur-[120px] translate-x-1/4 translate-y-1/4" />
+        {/* Blue accent glow - bottom right - muted on mobile */}
+        <div className="absolute bottom-0 right-0 w-[300px] md:w-[500px] h-[300px] md:h-[500px] bg-blue-500/5 md:bg-blue-500/8 rounded-full blur-[120px] translate-x-1/4 translate-y-1/4" />
         
-        {/* Center subtle glow */}
-        <div className="absolute top-1/2 left-1/2 w-[800px] h-[400px] bg-[#D4AF37]/5 rounded-full blur-[180px] -translate-x-1/2 -translate-y-1/2" />
+        {/* Center subtle glow - hidden on mobile */}
+        <div className="hidden md:block absolute top-1/2 left-1/2 w-[800px] h-[400px] bg-[#D4AF37]/5 rounded-full blur-[180px] -translate-x-1/2 -translate-y-1/2" />
         
-        {/* Grid pattern overlay */}
+        {/* Grid pattern overlay - hidden on mobile for cleaner look */}
         <div 
-          className="absolute inset-0 opacity-[0.02]"
+          className="hidden md:block absolute inset-0 opacity-[0.02]"
           style={{
             backgroundImage: `linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), 
                              linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)`,
@@ -67,18 +67,18 @@ const HeroSection = () => {
               <Link to="/auth">
                 <Button 
                   size="lg" 
-                  className="bg-gradient-to-r from-[#D4AF37] to-[#B8962E] hover:from-[#B8962E] hover:to-[#D4AF37] text-[#0A0C10] font-semibold px-8 h-13 shadow-lg shadow-[#D4AF37]/20 transition-all duration-300"
+                  className="bg-gradient-to-r from-[#D4AF37] to-[#B8962E] hover:from-[#B8962E] hover:to-[#D4AF37] text-[#0A0C10] font-semibold px-8 py-4 h-14 text-base shadow-lg shadow-[#D4AF37]/20 transition-all duration-300"
                 >
                   Request a demo
-                  <ArrowRight className="w-4 h-4 ml-2" />
+                  <ArrowRight className="w-5 h-5 ml-2" />
                 </Button>
               </Link>
               <Button 
                 size="lg" 
                 variant="outline" 
-                className="border-white/[0.1] bg-white/[0.02] text-white hover:bg-white/[0.05] hover:border-white/[0.15] px-6 h-13 transition-all duration-300"
+                className="border-white/[0.1] bg-white/[0.02] text-white hover:bg-white/[0.05] hover:border-white/[0.15] px-8 py-4 h-14 text-base transition-all duration-300"
               >
-                <Play className="w-4 h-4 mr-2 fill-current" />
+                <Play className="w-5 h-5 mr-2 fill-current" />
                 Watch video
               </Button>
             </div>

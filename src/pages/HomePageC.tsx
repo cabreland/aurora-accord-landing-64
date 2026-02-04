@@ -63,7 +63,7 @@ function Navigation() {
 // Hero Section - The Hook
 function Hero() {
   return (
-    <section className="relative min-h-screen flex items-center pt-24 pb-16 overflow-hidden">
+    <section id="hero" className="relative min-h-screen flex items-center pt-24 pb-16 overflow-hidden">
       {/* Base dark background */}
       <div className="absolute inset-0 bg-[#0A0C10]" />
       
@@ -236,7 +236,7 @@ function OurStory() {
   ];
 
   return (
-    <section className="py-16 md:py-20 relative overflow-hidden">
+    <section id="how-it-works" className="py-16 md:py-20 relative overflow-hidden">
       {/* Base dark background */}
       <div className="absolute inset-0 bg-[#0A0C10]" />
       
@@ -412,7 +412,7 @@ function DecisionPath() {
   ];
 
   return (
-    <section className="py-16 md:py-20 relative overflow-hidden">
+    <section id="decision-path" className="py-16 md:py-20 relative overflow-hidden">
       {/* Background fork image - red left, gold right */}
       <div className="absolute inset-0">
         <div 
