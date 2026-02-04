@@ -4,9 +4,9 @@ import { Menu, X } from 'lucide-react';
 import nextTierLogo from '@/assets/next-tier-logo.png';
 
 const navItems = [
-  { label: 'Home', href: '#' },
+  { label: 'Home', href: '#hero' },
   { label: 'How It Works', href: '#how-it-works' },
-  { label: 'Exit Paths', href: '#exit-paths' },
+  { label: 'Why Next Tier', href: '#decision-path' },
   { label: 'FAQ', href: '#faq' },
 ];
 
