@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge';
 
 const Footer = () => {
   return (
-    <footer className="py-16 bg-[#0A0F0F] text-center border-t border-[#D4AF37]/30 relative overflow-hidden">
+    <footer className="py-16 bg-black text-center border-t border-[#D4AF37]/30 relative overflow-hidden">
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute inset-0" style={{

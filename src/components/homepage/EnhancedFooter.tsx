@@ -54,7 +54,7 @@ const footerSections = [
 
 const EnhancedFooter = () => {
   return (
-    <footer className="bg-[#0A0C10] border-t border-white/[0.06]">
+    <footer className="bg-black border-t border-white/[0.06]">
       <div className="max-w-7xl mx-auto px-6 py-16">
         {/* Main Footer Content */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8 mb-12">

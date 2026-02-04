@@ -11,8 +11,7 @@ const CleanFooter = () => {
   };
 
   return (
-    <footer className="relative bg-[#0A0C10] border-t border-white/[0.06]">
-      <div className="absolute top-0 left-1/2 w-[600px] h-px bg-gradient-to-r from-transparent via-[#D4AF37]/30 to-transparent -translate-x-1/2" />
+    <footer className="relative bg-black border-t border-white/[0.06]">
       <div className="max-w-7xl mx-auto px-6 py-16">
         <div className="grid lg:grid-cols-6 gap-12 mb-16">
           <div className="lg:col-span-2">
