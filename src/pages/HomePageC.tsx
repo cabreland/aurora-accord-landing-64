@@ -237,88 +237,29 @@ function OurStory() {
 
   return (
     <section className="py-24 md:py-32 relative overflow-hidden">
-      {/* === CINEMATIC BACKGROUND SYSTEM === */}
+      {/* Base dark background */}
+      <div className="absolute inset-0 bg-[#0A0C10]" />
       
-      {/* Layer 0: Deep base with subtle warmth */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#0A0C10] via-[#0D0F14] to-[#0A0C10]" />
-      
-      {/* Layer 1: Gold chip stack image with enhanced presence */}
-      <div className="absolute inset-0 pointer-events-none">
+      {/* Gold chip stack image - positioned on right half like Hero */}
+      <div className="absolute top-0 right-0 bottom-0 w-1/2 lg:w-[55%] overflow-hidden">
         <div 
           className="absolute inset-0"
           style={{
             backgroundImage: `url(${goldChipStack})`,
-            backgroundPosition: 'right center',
-            backgroundSize: '60% auto',
+            backgroundPosition: 'center',
+            backgroundSize: 'cover',
             backgroundRepeat: 'no-repeat',
-            opacity: 0.7,
-            filter: 'saturate(1.2) contrast(1.05)'
+            filter: 'saturate(1.1) contrast(1.05)'
           }}
         />
+        {/* Gradient fades for seamless blend - matching Hero approach */}
+        <div className="absolute inset-y-0 left-0 w-2/3 pointer-events-none" style={{ background: 'linear-gradient(to right, #0A0C10 0%, #0A0C10 30%, transparent 100%)' }} />
+        <div className="absolute inset-x-0 top-0 h-32 pointer-events-none" style={{ background: 'linear-gradient(to bottom, #0A0C10 0%, transparent 100%)' }} />
+        <div className="absolute inset-x-0 bottom-0 h-32 pointer-events-none" style={{ background: 'linear-gradient(to top, #0A0C10 0%, transparent 100%)' }} />
       </div>
       
-      {/* Layer 2: Gold color harmony overlay - tints the image */}
-      <div 
-        className="absolute inset-0 pointer-events-none mix-blend-overlay"
-        style={{
-          background: 'radial-gradient(ellipse 80% 60% at 75% 50%, rgba(212,175,55,0.15) 0%, transparent 70%)'
-        }}
-      />
-      
-      {/* Layer 3: Atmospheric depth glow - multiple layers */}
-      <div className="absolute inset-0 pointer-events-none">
-        {/* Primary warm glow behind image */}
-        <div 
-          className="absolute top-1/2 right-[10%] -translate-y-1/2 w-[700px] h-[600px] rounded-full blur-[150px]"
-          style={{ background: 'radial-gradient(circle, rgba(212,175,55,0.2) 0%, rgba(244,215,127,0.08) 50%, transparent 70%)' }}
-        />
-        {/* Secondary accent glow - higher */}
-        <div 
-          className="absolute top-[20%] right-[25%] w-[400px] h-[400px] rounded-full blur-[100px]"
-          style={{ background: 'radial-gradient(circle, rgba(244,215,127,0.12) 0%, transparent 60%)' }}
-        />
-        {/* Tertiary deep glow - lower */}
-        <div 
-          className="absolute bottom-[15%] right-[5%] w-[300px] h-[350px] rounded-full blur-[80px]"
-          style={{ background: 'radial-gradient(circle, rgba(212,175,55,0.1) 0%, transparent 70%)' }}
-        />
-      </div>
-      
-      {/* Layer 4: Sophisticated vignette system */}
-      <div className="absolute inset-0 pointer-events-none">
-        {/* Left content protection - smooth multi-stop gradient */}
-        <div 
-          className="absolute inset-0"
-          style={{ 
-            background: 'linear-gradient(to right, #0A0C10 0%, #0A0C10 15%, rgba(10,12,16,0.95) 25%, rgba(10,12,16,0.7) 40%, rgba(10,12,16,0.3) 55%, transparent 75%)' 
-          }} 
-        />
-        {/* Top cinematic fade */}
-        <div 
-          className="absolute inset-x-0 top-0 h-40"
-          style={{ background: 'linear-gradient(to bottom, #0A0C10 0%, rgba(10,12,16,0.8) 40%, transparent 100%)' }}
-        />
-        {/* Bottom cinematic fade */}
-        <div 
-          className="absolute inset-x-0 bottom-0 h-40"
-          style={{ background: 'linear-gradient(to top, #0A0C10 0%, rgba(10,12,16,0.8) 40%, transparent 100%)' }}
-        />
-        {/* Right edge softening */}
-        <div 
-          className="absolute inset-y-0 right-0 w-24"
-          style={{ background: 'linear-gradient(to left, rgba(10,12,16,0.5) 0%, transparent 100%)' }}
-        />
-      </div>
-      
-      {/* Layer 5: Subtle noise texture for depth */}
-      <div 
-        className="absolute inset-0 pointer-events-none opacity-[0.03]"
-        style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
-          backgroundRepeat: 'repeat',
-          backgroundSize: '128px 128px'
-        }}
-      />
+      {/* Subtle gold glow behind image */}
+      <div className="absolute top-1/3 right-1/4 w-[500px] h-[500px] bg-gradient-to-br from-[#F4D77F]/15 to-[#D4AF37]/5 rounded-full blur-[120px] pointer-events-none" />
       
       {/* === CONTENT === */}
       <div className="max-w-7xl mx-auto px-6 relative z-10">
