@@ -170,6 +170,8 @@ function Hero() {
 
 // Section 2: Our Story - Premium Two-Column Layout with Circuit Background
 function OurStory() {
+  const [isHovered, setIsHovered] = useState(false);
+  
   const evolutionPhases = [
     { phase: "01", title: "Brokerage", description: "Helped founders exit $100M+ in digital businesses" },
     { phase: "02", title: "Discovery", description: "Identified the broken parts of the industry" },
@@ -178,44 +180,67 @@ function OurStory() {
   ];
 
   return (
-    <section className="py-24 md:py-32 relative overflow-hidden">
+    <section 
+      className="py-24 md:py-32 relative overflow-hidden"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
       {/* Base dark background */}
-      <div className="absolute inset-0 bg-[#0A0C10]" />
+      <div 
+        className="absolute inset-0 bg-[#0A0C10] transition-opacity duration-700 ease-out"
+        style={{ opacity: isHovered ? 0.3 : 1 }}
+      />
       
       {/* Circuit chip background image - anchored right */}
       <div className="absolute inset-0">
         <div 
-          className="absolute inset-0"
+          className="absolute inset-0 transition-transform duration-700 ease-out"
           style={{
             backgroundImage: `url(${circuitTransitionBg})`,
             backgroundPosition: 'center right',
             backgroundSize: 'cover',
-            backgroundRepeat: 'no-repeat'
+            backgroundRepeat: 'no-repeat',
+            transform: isHovered ? 'scale(1.02)' : 'scale(1)'
           }}
         />
         
-        {/* Gradient fades for seamless blend */}
+        {/* Gradient fades for seamless blend - fade out on hover */}
         {/* Top fade */}
         <div 
-          className="absolute inset-x-0 top-0 h-1/4 pointer-events-none" 
-          style={{ background: 'linear-gradient(to bottom, #0A0C10 0%, transparent 100%)' }} 
+          className="absolute inset-x-0 top-0 h-1/4 pointer-events-none transition-opacity duration-700 ease-out" 
+          style={{ 
+            background: 'linear-gradient(to bottom, #0A0C10 0%, transparent 100%)',
+            opacity: isHovered ? 0.2 : 1
+          }} 
         />
         
         {/* Bottom fade */}
         <div 
-          className="absolute inset-x-0 bottom-0 h-1/4 pointer-events-none" 
-          style={{ background: 'linear-gradient(to top, #0A0C10 0%, transparent 100%)' }} 
+          className="absolute inset-x-0 bottom-0 h-1/4 pointer-events-none transition-opacity duration-700 ease-out" 
+          style={{ 
+            background: 'linear-gradient(to top, #0A0C10 0%, transparent 100%)',
+            opacity: isHovered ? 0.2 : 1
+          }} 
         />
         
         {/* Left fade - ensures text readability */}
         <div 
-          className="absolute inset-y-0 left-0 w-2/3 md:w-1/2 pointer-events-none" 
-          style={{ background: 'linear-gradient(to right, #0A0C10 0%, #0A0C10 40%, transparent 100%)' }} 
+          className="absolute inset-y-0 left-0 w-2/3 md:w-1/2 pointer-events-none transition-opacity duration-700 ease-out" 
+          style={{ 
+            background: 'linear-gradient(to right, #0A0C10 0%, #0A0C10 40%, transparent 100%)',
+            opacity: isHovered ? 0.5 : 1
+          }} 
         />
       </div>
       
-      {/* Subtle gold ambient glow */}
-      <div className="absolute top-1/3 right-1/4 w-[400px] h-[400px] bg-[#D4AF37]/8 rounded-full blur-[150px] pointer-events-none" />
+      {/* Subtle gold ambient glow - intensifies on hover */}
+      <div 
+        className="absolute top-1/3 right-1/4 w-[400px] h-[400px] bg-[#D4AF37]/8 rounded-full blur-[150px] pointer-events-none transition-all duration-700"
+        style={{ 
+          opacity: isHovered ? 1.5 : 1,
+          transform: isHovered ? 'scale(1.2)' : 'scale(1)'
+        }}
+      />
       
       <div className="max-w-7xl mx-auto px-6 relative z-10">
         {/* Section header */}
