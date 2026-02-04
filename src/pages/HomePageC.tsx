@@ -14,6 +14,7 @@ import heroCircuitImage from '@/assets/hero-circuit.png';
 import bgCircuitPattern from '@/assets/bg-circuit-pattern.png';
 import bgCircuitCta from '@/assets/bg-circuit-cta.png';
 import circuitTransitionBg from '@/assets/circuit-transition-bg.png';
+import goldenDecisionPath from '@/assets/golden-decision-path.jpg';
 
 const HomePageC = () => {
   return (
@@ -21,6 +22,7 @@ const HomePageC = () => {
       <Navigation />
       <Hero />
       <OurStory />
+      <DecisionPath />
       <WhyNextTier />
       <FAQ />
       <FinalCTA />
@@ -403,6 +405,149 @@ function OurStory() {
                 </div>
               </div>
             </SpotlightBox>
+          </motion.div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// Decision Path Section - Visual Comparison
+function DecisionPath() {
+  const traditionalPains = [
+    "6-12 month process (minimum)",
+    "Dozens of NDAs leading nowhere", 
+    "Lowball offers from tire-kickers",
+    "Brokers who don't get digital",
+    "Confidentiality at risk"
+  ];
+
+  const ourApproach = [
+    "45-60 days, start to close",
+    "One conversation. One buyer.",
+    "Fair valuations, no games",
+    "Digital-native principals",
+    "Confidential until close"
+  ];
+
+  return (
+    <section className="py-24 md:py-32 relative overflow-hidden">
+      {/* Background image with gradient overlays */}
+      <div className="absolute inset-0">
+        <div 
+          className="absolute inset-0"
+          style={{
+            backgroundImage: `url(${goldenDecisionPath})`,
+            backgroundPosition: 'center',
+            backgroundSize: 'cover',
+            backgroundRepeat: 'no-repeat'
+          }}
+        />
+        {/* Top/bottom fade to black */}
+        <div className="absolute inset-x-0 top-0 h-32" style={{ background: 'linear-gradient(to bottom, #0A0C10 0%, transparent 100%)' }} />
+        <div className="absolute inset-x-0 bottom-0 h-32" style={{ background: 'linear-gradient(to top, #0A0C10 0%, transparent 100%)' }} />
+        {/* Subtle dark overlay for text readability */}
+        <div className="absolute inset-0 bg-[#0A0C10]/40" />
+      </div>
+
+      <div className="max-w-7xl mx-auto px-6 relative z-10">
+        {/* Section header */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="text-center mb-16"
+        >
+          <p className="text-[#F4D77F] text-sm font-medium tracking-widest uppercase mb-4">Choose Your Path</p>
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white tracking-[-0.02em] leading-[1.1]" style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}>
+            Two ways to exit.{' '}
+            <span className="bg-gradient-to-r from-[#F4D77F] via-[#D4AF37] to-[#F4D77F] bg-clip-text text-transparent">
+              One clear choice.
+            </span>
+          </h2>
+        </motion.div>
+
+        {/* Two Cards */}
+        <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+          {/* Left Card - Traditional Way */}
+          <motion.div 
+            initial={{ opacity: 0, x: -30 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="rounded-2xl border border-white/10 bg-[rgba(10,12,16,0.85)] backdrop-blur-[30px] p-8 relative overflow-hidden"
+          >
+            {/* Subtle red glow */}
+            <div className="absolute -top-20 -left-20 w-40 h-40 bg-red-500/10 rounded-full blur-[80px]" />
+            
+            <div className="relative">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 rounded-xl border border-red-500/30 bg-red-500/10 flex items-center justify-center">
+                  <XCircle className="w-5 h-5 text-red-400" />
+                </div>
+                <h3 className="text-xl font-bold text-white tracking-tight" style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}>
+                  The Traditional Way
+                </h3>
+              </div>
+              
+              <ul className="space-y-4">
+                {traditionalPains.map((item, idx) => (
+                  <li key={idx} className="flex items-start gap-3 text-white/60">
+                    <XCircle className="w-4 h-4 text-red-400/60 mt-0.5 flex-shrink-0" />
+                    <span className="text-sm tracking-tight">{item}</span>
+                  </li>
+                ))}
+              </ul>
+              
+              <div className="mt-8 pt-6 border-t border-white/5">
+                <p className="text-white/40 text-sm tracking-tight">
+                  Months of uncertainty. Endless back-and-forth. Still no guarantee.
+                </p>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Right Card - Our Approach */}
+          <motion.div 
+            initial={{ opacity: 0, x: 30 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.15 }}
+            className="rounded-2xl border border-[#D4AF37]/30 bg-[rgba(10,12,16,0.85)] backdrop-blur-[30px] p-8 relative overflow-hidden shadow-lg shadow-[#D4AF37]/10"
+          >
+            {/* Gold glow */}
+            <div className="absolute -top-20 -right-20 w-40 h-40 bg-[#D4AF37]/15 rounded-full blur-[80px]" />
+            
+            {/* Badge */}
+            <div className="absolute -top-px right-8 bg-gradient-to-r from-[#F4D77F] to-[#D4AF37] text-[#0A0C10] px-4 py-1.5 rounded-b-lg text-xs font-bold uppercase tracking-wide">
+              Recommended
+            </div>
+            
+            <div className="relative">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 rounded-xl border border-[#D4AF37]/30 bg-[#D4AF37]/10 flex items-center justify-center">
+                  <CheckCircle2 className="w-5 h-5 text-[#F4D77F]" />
+                </div>
+                <h3 className="text-xl font-bold text-white tracking-tight" style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}>
+                  The Next Tier Way
+                </h3>
+              </div>
+              
+              <ul className="space-y-4">
+                {ourApproach.map((item, idx) => (
+                  <li key={idx} className="flex items-start gap-3 text-white/80">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400 mt-0.5 flex-shrink-0" />
+                    <span className="text-sm tracking-tight">{item}</span>
+                  </li>
+                ))}
+              </ul>
+              
+              <div className="mt-8 pt-6 border-t border-[#D4AF37]/10">
+                <p className="text-[#F4D77F]/80 text-sm tracking-tight font-medium">
+                  Cash at close. Certainty from day one.
+                </p>
+              </div>
+            </div>
           </motion.div>
         </div>
       </div>
