@@ -171,7 +171,7 @@ function Hero() {
 // Spotlight Box Component - cursor-following reveal effect
 function SpotlightBox({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   const boxRef = React.useRef<HTMLDivElement>(null);
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [mousePos, setMousePos] = useState({ x: -200, y: -200 });
   const [isHovering, setIsHovering] = useState(false);
 
   const handleMouseMove = (e: React.MouseEvent) => {
@@ -184,34 +184,36 @@ function SpotlightBox({ children, className = "" }: { children: React.ReactNode;
     }
   };
 
+  const handleMouseLeave = () => {
+    setIsHovering(false);
+    // Move spotlight off-screen to prevent flash
+    setMousePos({ x: -200, y: -200 });
+  };
+
   return (
     <div 
       ref={boxRef}
       className={`relative overflow-hidden ${className}`}
       onMouseMove={handleMouseMove}
       onMouseEnter={() => setIsHovering(true)}
-      onMouseLeave={() => setIsHovering(false)}
+      onMouseLeave={handleMouseLeave}
     >
-      {/* Circuit background that shows through spotlight */}
+      {/* Circuit background that shows through spotlight - always has mask applied */}
       <div 
-        className="absolute inset-0 transition-opacity duration-300"
+        className="absolute inset-0 transition-opacity duration-500 ease-out"
         style={{
           backgroundImage: `url(${circuitTransitionBg})`,
           backgroundPosition: 'center',
           backgroundSize: 'cover',
           opacity: isHovering ? 1 : 0,
-          maskImage: isHovering 
-            ? `radial-gradient(circle 120px at ${mousePos.x}px ${mousePos.y}px, black 0%, transparent 100%)`
-            : 'none',
-          WebkitMaskImage: isHovering 
-            ? `radial-gradient(circle 120px at ${mousePos.x}px ${mousePos.y}px, black 0%, transparent 100%)`
-            : 'none'
+          maskImage: `radial-gradient(circle 120px at ${mousePos.x}px ${mousePos.y}px, black 0%, transparent 100%)`,
+          WebkitMaskImage: `radial-gradient(circle 120px at ${mousePos.x}px ${mousePos.y}px, black 0%, transparent 100%)`
         }}
       />
       
       {/* Spotlight glow effect */}
       <div 
-        className="absolute pointer-events-none transition-opacity duration-300"
+        className="absolute pointer-events-none transition-opacity duration-500 ease-out"
         style={{
           width: '240px',
           height: '240px',
