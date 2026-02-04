@@ -407,26 +407,30 @@ function OurStory() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="relative"
           >
-            {/* Background circuit image behind the card - more visible with gold tint */}
-            <div className="absolute -inset-6 md:-inset-10 -z-10 overflow-hidden rounded-3xl">
+            {/* Seamless circuit glow behind card - no borders, fades naturally */}
+            <div className="absolute -inset-12 md:-inset-20 -z-10 pointer-events-none">
               <div 
                 className="absolute inset-0"
                 style={{
                   backgroundImage: `url(${circuitTransitionBg})`,
                   backgroundPosition: 'center',
                   backgroundSize: 'cover',
-                  opacity: 0.3
+                  opacity: 0.35,
+                  maskImage: 'radial-gradient(ellipse 70% 80% at 50% 50%, black 20%, transparent 70%)',
+                  WebkitMaskImage: 'radial-gradient(ellipse 70% 80% at 50% 50%, black 20%, transparent 70%)'
                 }}
               />
-              {/* Gold color overlay for pop */}
-              <div className="absolute inset-0 bg-gradient-to-br from-[#D4AF37]/20 via-[#F4D77F]/15 to-transparent" />
-              {/* Edge fades */}
-              <div className="absolute inset-0 bg-gradient-to-r from-[#0A0C10] via-transparent to-transparent" />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#0A0C10]/70 via-transparent to-[#0A0C10]/50" />
+              {/* Gold ambient glow */}
+              <div 
+                className="absolute inset-0"
+                style={{
+                  background: 'radial-gradient(ellipse 60% 70% at 50% 50%, rgba(212,175,55,0.25) 0%, rgba(244,215,127,0.1) 40%, transparent 70%)'
+                }}
+              />
             </div>
             
-            {/* Glassmorphism card */}
-            <SpotlightBox className="p-8 md:p-10 rounded-3xl border border-[#D4AF37]/40 bg-[rgba(10,12,16,0.65)] backdrop-blur-[50px] shadow-2xl shadow-[#D4AF37]/15">
+            {/* Glassmorphism card - enhanced brightness */}
+            <SpotlightBox className="p-8 md:p-10 rounded-3xl border border-[#D4AF37]/30 bg-[rgba(10,12,16,0.75)] backdrop-blur-[40px] shadow-[0_0_80px_-20px_rgba(212,175,55,0.4)]">
               {/* Background glow */}
               <div className="absolute -top-20 -right-20 w-52 h-52 bg-[#D4AF37]/20 rounded-full blur-[100px]" />
               <div className="absolute -bottom-20 -left-20 w-44 h-44 bg-[#F4D77F]/15 rounded-full blur-[80px]" />
