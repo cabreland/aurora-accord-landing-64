@@ -74,7 +74,7 @@ const PremiumHeader = () => {
               <img 
                 src={ntpLogoFull} 
                 alt="Next Tier Partners" 
-                className="h-16 md:h-20 w-auto object-contain drop-shadow-[0_0_25px_rgba(212,175,55,0.6)] filter brightness-110"
+                className="h-16 md:h-20 w-auto object-contain"
               />
             </motion.a>
 
