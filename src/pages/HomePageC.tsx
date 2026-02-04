@@ -14,7 +14,7 @@ import heroCircuitImage from '@/assets/hero-circuit.png';
 import bgCircuitPattern from '@/assets/bg-circuit-pattern.png';
 import bgCircuitCta from '@/assets/bg-circuit-cta.png';
 import circuitTransitionBg from '@/assets/circuit-transition-bg.png';
-import goldenDecisionPath from '@/assets/golden-decision-path.jpg';
+import decisionForkPath from '@/assets/decision-fork-path.jpg';
 
 // Global Cursor Spotlight - reveals circuits across the entire page
 function GlobalCursorSpotlight() {
@@ -480,75 +480,10 @@ function OurStory() {
   );
 }
 
-// Glow Card Component - cursor-following glow effect with customizable color
-function GlowCard({ 
-  children, 
-  glowColor, 
-  className = "" 
-}: { 
-  children: React.ReactNode; 
-  glowColor: string;
-  className?: string;
-}) {
-  const cardRef = React.useRef<HTMLDivElement>(null);
-  const [mousePos, setMousePos] = useState({ x: -200, y: -200 });
-  const [isHovering, setIsHovering] = useState(false);
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (cardRef.current) {
-      const rect = cardRef.current.getBoundingClientRect();
-      setMousePos({
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top
-      });
-    }
-  };
-
-  const handleMouseLeave = () => {
-    setIsHovering(false);
-    setMousePos({ x: -200, y: -200 });
-  };
-
-  return (
-    <div 
-      ref={cardRef}
-      className={`relative overflow-hidden transition-all duration-300 ${className}`}
-      onMouseMove={handleMouseMove}
-      onMouseEnter={() => setIsHovering(true)}
-      onMouseLeave={handleMouseLeave}
-    >
-      {/* Cursor-following glow */}
-      <div 
-        className="absolute pointer-events-none transition-opacity duration-300 ease-out"
-        style={{
-          width: '300px',
-          height: '300px',
-          left: mousePos.x - 150,
-          top: mousePos.y - 150,
-          background: `radial-gradient(circle, ${glowColor} 0%, transparent 70%)`,
-          opacity: isHovering ? 1 : 0
-        }}
-      />
-      
-      {/* Arc/sweep effect on hover */}
-      <div 
-        className="absolute inset-0 pointer-events-none transition-opacity duration-500 ease-out"
-        style={{
-          background: `conic-gradient(from ${Math.atan2(mousePos.y - 150, mousePos.x - 150) * 180 / Math.PI}deg at ${mousePos.x}px ${mousePos.y}px, ${glowColor}, transparent 60%)`,
-          opacity: isHovering ? 0.2 : 0
-        }}
-      />
-      
-      {/* Content */}
-      <div className="relative z-10">
-        {children}
-      </div>
-    </div>
-  );
-}
-
-// Decision Path Section - Visual Comparison
+// Decision Path Section - Visual Comparison with hover highlighting
 function DecisionPath() {
+  const [hoveredSide, setHoveredSide] = useState<'left' | 'right' | null>(null);
+  
   const traditionalPains = [
     "6-12 month process (minimum)",
     "Dozens of NDAs leading nowhere", 
@@ -567,23 +502,49 @@ function DecisionPath() {
 
   return (
     <section className="py-24 md:py-32 relative overflow-hidden">
-      {/* Background image with gradient overlays - subtle and scaled down */}
+      {/* Background fork image - red left, gold right */}
       <div className="absolute inset-0">
         <div 
-          className="absolute inset-0"
+          className="absolute inset-0 transition-opacity duration-500"
           style={{
-            backgroundImage: `url(${goldenDecisionPath})`,
-            backgroundPosition: 'center 40%',
-            backgroundSize: '150% auto',
+            backgroundImage: `url(${decisionForkPath})`,
+            backgroundPosition: 'center',
+            backgroundSize: 'cover',
             backgroundRepeat: 'no-repeat',
-            opacity: 0.35
+            opacity: hoveredSide ? 0.6 : 0.35
           }}
         />
+        
+        {/* Left red highlight overlay - shows when hovering left card */}
+        <div 
+          className="absolute inset-y-0 left-0 w-1/2 transition-opacity duration-500"
+          style={{
+            background: 'linear-gradient(to right, rgba(239,68,68,0.15) 0%, transparent 100%)',
+            opacity: hoveredSide === 'left' ? 1 : 0
+          }}
+        />
+        
+        {/* Right gold highlight overlay - shows when hovering right card */}
+        <div 
+          className="absolute inset-y-0 right-0 w-1/2 transition-opacity duration-500"
+          style={{
+            background: 'linear-gradient(to left, rgba(212,175,55,0.2) 0%, transparent 100%)',
+            opacity: hoveredSide === 'right' ? 1 : 0
+          }}
+        />
+        
         {/* Top/bottom fade to black */}
         <div className="absolute inset-x-0 top-0 h-48" style={{ background: 'linear-gradient(to bottom, #0A0C10 0%, transparent 100%)' }} />
         <div className="absolute inset-x-0 bottom-0 h-48" style={{ background: 'linear-gradient(to top, #0A0C10 0%, transparent 100%)' }} />
-        {/* Stronger dark overlay for subtlety */}
-        <div className="absolute inset-0 bg-[#0A0C10]/60" />
+        
+        {/* Base dark overlay */}
+        <div 
+          className="absolute inset-0 transition-opacity duration-500"
+          style={{ 
+            backgroundColor: '#0A0C10',
+            opacity: hoveredSide ? 0.4 : 0.55
+          }} 
+        />
       </div>
 
       <div className="max-w-7xl mx-auto px-6 relative z-10">
@@ -605,22 +566,32 @@ function DecisionPath() {
 
         {/* Two Cards */}
         <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-          {/* Left Card - Traditional Way with Red Glow */}
+          {/* Left Card - Traditional Way */}
           <motion.div 
             initial={{ opacity: 0, x: -30 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
+            onMouseEnter={() => setHoveredSide('left')}
+            onMouseLeave={() => setHoveredSide(null)}
+            className={`rounded-2xl border bg-[rgba(10,12,16,0.85)] backdrop-blur-[30px] p-8 relative overflow-hidden transition-all duration-300 ${
+              hoveredSide === 'left' 
+                ? 'border-red-500/50 shadow-lg shadow-red-500/20' 
+                : 'border-white/10'
+            }`}
           >
-            <GlowCard 
-              glowColor="rgba(239, 68, 68, 0.35)"
-              className="rounded-2xl border border-white/10 bg-[rgba(10,12,16,0.85)] backdrop-blur-[30px] p-8 h-full hover:border-red-500/40 transition-colors"
-            >
-              {/* Static subtle red glow */}
-              <div className="absolute -top-20 -left-20 w-40 h-40 bg-red-500/10 rounded-full blur-[80px] pointer-events-none" />
-              
+            {/* Static subtle red glow */}
+            <div className={`absolute -top-20 -left-20 w-40 h-40 rounded-full blur-[80px] pointer-events-none transition-opacity duration-300 ${
+              hoveredSide === 'left' ? 'bg-red-500/25' : 'bg-red-500/10'
+            }`} />
+            
+            <div className="relative">
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 rounded-xl border border-red-500/30 bg-red-500/10 flex items-center justify-center">
+                <div className={`w-10 h-10 rounded-xl border flex items-center justify-center transition-colors duration-300 ${
+                  hoveredSide === 'left' 
+                    ? 'border-red-500/50 bg-red-500/20' 
+                    : 'border-red-500/30 bg-red-500/10'
+                }`}>
                   <XCircle className="w-5 h-5 text-red-400" />
                 </div>
                 <h3 className="text-xl font-bold text-white tracking-tight" style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}>
@@ -642,30 +613,40 @@ function DecisionPath() {
                   Months of uncertainty. Endless back-and-forth. Still no guarantee.
                 </p>
               </div>
-            </GlowCard>
+            </div>
           </motion.div>
 
-          {/* Right Card - Our Approach with Gold Glow */}
+          {/* Right Card - Our Approach */}
           <motion.div 
             initial={{ opacity: 0, x: 30 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.15 }}
+            onMouseEnter={() => setHoveredSide('right')}
+            onMouseLeave={() => setHoveredSide(null)}
+            className={`rounded-2xl border bg-[rgba(10,12,16,0.85)] backdrop-blur-[30px] p-8 relative overflow-hidden transition-all duration-300 ${
+              hoveredSide === 'right' 
+                ? 'border-[#D4AF37]/60 shadow-xl shadow-[#D4AF37]/25' 
+                : 'border-[#D4AF37]/30 shadow-lg shadow-[#D4AF37]/10'
+            }`}
           >
-            <GlowCard 
-              glowColor="rgba(212, 175, 55, 0.4)"
-              className="rounded-2xl border border-[#D4AF37]/30 bg-[rgba(10,12,16,0.85)] backdrop-blur-[30px] p-8 h-full shadow-lg shadow-[#D4AF37]/10 hover:border-[#D4AF37]/50 transition-colors"
-            >
-              {/* Static gold glow */}
-              <div className="absolute -top-20 -right-20 w-40 h-40 bg-[#D4AF37]/15 rounded-full blur-[80px] pointer-events-none" />
-              
-              {/* Badge */}
-              <div className="absolute -top-px right-8 bg-gradient-to-r from-[#F4D77F] to-[#D4AF37] text-[#0A0C10] px-4 py-1.5 rounded-b-lg text-xs font-bold uppercase tracking-wide">
-                Recommended
-              </div>
-              
+            {/* Static gold glow */}
+            <div className={`absolute -top-20 -right-20 w-40 h-40 rounded-full blur-[80px] pointer-events-none transition-opacity duration-300 ${
+              hoveredSide === 'right' ? 'bg-[#D4AF37]/30' : 'bg-[#D4AF37]/15'
+            }`} />
+            
+            {/* Badge */}
+            <div className="absolute -top-px right-8 bg-gradient-to-r from-[#F4D77F] to-[#D4AF37] text-[#0A0C10] px-4 py-1.5 rounded-b-lg text-xs font-bold uppercase tracking-wide">
+              Recommended
+            </div>
+            
+            <div className="relative">
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 rounded-xl border border-[#D4AF37]/30 bg-[#D4AF37]/10 flex items-center justify-center">
+                <div className={`w-10 h-10 rounded-xl border flex items-center justify-center transition-colors duration-300 ${
+                  hoveredSide === 'right' 
+                    ? 'border-[#D4AF37]/60 bg-[#D4AF37]/25' 
+                    : 'border-[#D4AF37]/30 bg-[#D4AF37]/10'
+                }`}>
                   <CheckCircle2 className="w-5 h-5 text-[#F4D77F]" />
                 </div>
                 <h3 className="text-xl font-bold text-white tracking-tight" style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}>
@@ -687,7 +668,7 @@ function DecisionPath() {
                   Cash at close. Certainty from day one.
                 </p>
               </div>
-            </GlowCard>
+            </div>
           </motion.div>
         </div>
       </div>
