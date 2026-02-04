@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { 
@@ -16,6 +16,7 @@ import bgCircuitCta from '@/assets/bg-circuit-cta.png';
 import circuitTransitionBg from '@/assets/circuit-transition-bg.png';
 import decisionForkPath from '@/assets/decision-fork-path.jpg';
 import goldCircuitReveal from '@/assets/gold-circuit-reveal.png';
+import goldChipStack from '@/assets/gold-chip-stack.png';
 
 // Global Cursor Spotlight - reveals circuits across the entire page
 function GlobalCursorSpotlight() {
@@ -307,8 +308,12 @@ function SpotlightBox({ children, className = "" }: { children: React.ReactNode;
   );
 }
 
-// Section 2: Our Story - Premium Two-Column Layout with Circuit Background
+// Section 2: Our Story - Premium Two-Column Layout with Hover-Reveal Background
 function OurStory() {
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [isHovering, setIsHovering] = useState(false);
+  const sectionRef = useRef<HTMLElement>(null);
+  
   const evolutionPhases = [
     { phase: "01", title: "Brokerage", description: "Helped founders exit $100M+ in digital businesses" },
     { phase: "02", title: "Discovery", description: "Identified the broken parts of the industry" },
@@ -316,22 +321,68 @@ function OurStory() {
     { phase: "04", title: "Evolution", description: "Became the buyer we always wished existed" }
   ];
 
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (sectionRef.current) {
+      const rect = sectionRef.current.getBoundingClientRect();
+      setMousePos({
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top
+      });
+    }
+  };
+
   return (
-    <section className="py-24 md:py-32 relative overflow-hidden">
+    <section 
+      ref={sectionRef}
+      className="py-24 md:py-32 relative overflow-hidden"
+      onMouseMove={handleMouseMove}
+      onMouseEnter={() => setIsHovering(true)}
+      onMouseLeave={() => {
+        setIsHovering(false);
+        setMousePos({ x: -500, y: -500 });
+      }}
+    >
       {/* Base dark background */}
       <div className="absolute inset-0 bg-[#0A0C10]" />
       
-      {/* Circuit image as section background - prominent on right side */}
+      {/* Gold chip stack image - dark by default, revealed on hover */}
       <div className="absolute inset-0 pointer-events-none">
-        {/* Main circuit image - visible on right */}
+        {/* Base image - very dark, always visible subtly */}
         <div 
           className="absolute inset-0"
           style={{
-            backgroundImage: `url(${circuitTransitionBg})`,
+            backgroundImage: `url(${goldChipStack})`,
             backgroundPosition: 'right center',
-            backgroundSize: '60% auto',
+            backgroundSize: '65% auto',
             backgroundRepeat: 'no-repeat',
-            opacity: 0.5
+            opacity: 0.15
+          }}
+        />
+        
+        {/* Hover reveal layer - bright, masked to cursor */}
+        <div 
+          className="absolute inset-0 transition-opacity duration-300"
+          style={{
+            backgroundImage: `url(${goldChipStack})`,
+            backgroundPosition: 'right center',
+            backgroundSize: '65% auto',
+            backgroundRepeat: 'no-repeat',
+            opacity: isHovering ? 0.8 : 0,
+            maskImage: `radial-gradient(circle 200px at ${mousePos.x}px ${mousePos.y}px, black 0%, rgba(0,0,0,0.5) 50%, transparent 100%)`,
+            WebkitMaskImage: `radial-gradient(circle 200px at ${mousePos.x}px ${mousePos.y}px, black 0%, rgba(0,0,0,0.5) 50%, transparent 100%)`
+          }}
+        />
+        
+        {/* Cursor glow */}
+        <div 
+          className="absolute pointer-events-none transition-opacity duration-300"
+          style={{
+            width: '300px',
+            height: '300px',
+            left: mousePos.x - 150,
+            top: mousePos.y - 150,
+            background: 'radial-gradient(circle, rgba(212,175,55,0.25) 0%, rgba(244,215,127,0.1) 40%, transparent 70%)',
+            opacity: isHovering ? 1 : 0
           }}
         />
         
@@ -339,25 +390,22 @@ function OurStory() {
         <div 
           className="absolute inset-0"
           style={{ 
-            background: 'linear-gradient(to right, #0A0C10 30%, rgba(10,12,16,0.6) 50%, transparent 75%)' 
+            background: 'linear-gradient(to right, #0A0C10 25%, rgba(10,12,16,0.7) 45%, transparent 70%)' 
           }} 
         />
         
         {/* Top fade */}
         <div 
-          className="absolute inset-x-0 top-0 h-40" 
+          className="absolute inset-x-0 top-0 h-32" 
           style={{ background: 'linear-gradient(to bottom, #0A0C10 0%, transparent 100%)' }} 
         />
         
         {/* Bottom fade */}
         <div 
-          className="absolute inset-x-0 bottom-0 h-40" 
+          className="absolute inset-x-0 bottom-0 h-32" 
           style={{ background: 'linear-gradient(to top, #0A0C10 0%, transparent 100%)' }} 
         />
       </div>
-      
-      {/* Gold ambient glow on right side */}
-      <div className="absolute top-1/2 right-1/4 w-[400px] h-[400px] bg-[#D4AF37]/15 rounded-full blur-[150px] pointer-events-none" />
       
       <div className="max-w-7xl mx-auto px-6 relative z-10">
         {/* Section header */}
