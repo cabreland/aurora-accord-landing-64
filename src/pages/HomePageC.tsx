@@ -403,14 +403,40 @@ function OurStory() {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.2 }}
+            className="relative"
           >
-            <SpotlightBox className="p-8 md:p-10 rounded-3xl border border-[#D4AF37]/20 bg-[rgba(255,255,255,0.02)] backdrop-blur-[30px]">
-              {/* Background glow */}
-              <div className="absolute -top-20 -right-20 w-40 h-40 bg-[#D4AF37]/10 rounded-full blur-[80px]" />
-              <div className="absolute -bottom-20 -left-20 w-32 h-32 bg-[#F4D77F]/5 rounded-full blur-[60px]" />
+            {/* Circuit glow behind the box */}
+            <div className="absolute -inset-8 -z-10 overflow-hidden rounded-[40px]">
+              {/* Circuit image */}
+              <div 
+                className="absolute inset-0"
+                style={{
+                  backgroundImage: `url(${circuitTransitionBg})`,
+                  backgroundPosition: 'center',
+                  backgroundSize: 'cover',
+                  opacity: 0.25
+                }}
+              />
+              {/* Gold glow overlay */}
+              <div className="absolute inset-0 bg-gradient-to-br from-[#D4AF37]/20 via-[#F4D77F]/10 to-transparent" />
+              {/* Radial glow from center */}
+              <div 
+                className="absolute inset-0"
+                style={{
+                  background: 'radial-gradient(ellipse at center, rgba(212,175,55,0.15) 0%, transparent 70%)'
+                }}
+              />
+              {/* Blur the edges */}
+              <div className="absolute inset-0 backdrop-blur-[2px]" />
+            </div>
+            
+            <SpotlightBox className="p-8 md:p-10 rounded-3xl border border-[#D4AF37]/30 bg-[rgba(10,12,16,0.85)] backdrop-blur-[30px]">
+              {/* Background glow inside */}
+              <div className="absolute -top-20 -right-20 w-40 h-40 bg-[#D4AF37]/15 rounded-full blur-[80px]" />
+              <div className="absolute -bottom-20 -left-20 w-32 h-32 bg-[#F4D77F]/10 rounded-full blur-[60px]" />
               
               {/* Circuit pattern inside */}
-              <div className="absolute inset-0 opacity-[0.02]" style={{
+              <div className="absolute inset-0 rounded-3xl overflow-hidden opacity-[0.04]" style={{
                 backgroundImage: `url(${bgCircuitPattern})`,
                 backgroundSize: '150px 150px'
               }} />
