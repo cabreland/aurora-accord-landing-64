@@ -622,26 +622,12 @@ function FAQ() {
       {/* Base dark background */}
       <div className="absolute inset-0 bg-[#0A0C10]" />
       
-      {/* Subtle gold circuit reveal - faded behind content */}
-      <div 
-        className="absolute inset-0 opacity-20"
-        style={{
-          backgroundImage: `url(${goldCircuitReveal})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-        }}
-      />
+      {/* Subtle top gradient accent */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[1px] bg-gradient-to-r from-transparent via-[#D4AF37]/30 to-transparent" />
       
-      {/* Vignette to focus attention on center */}
-      <div 
-        className="absolute inset-0"
-        style={{
-          background: 'radial-gradient(ellipse 70% 50% at 50% 50%, transparent 0%, #0A0C10 100%)'
-        }}
-      />
-      
-      {/* Central gold ambient glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-[#D4AF37]/10 rounded-full blur-[100px]" />
+      {/* Ambient gold glows */}
+      <div className="absolute top-1/4 left-1/4 w-[300px] h-[300px] bg-[#D4AF37]/5 rounded-full blur-[120px]" />
+      <div className="absolute bottom-1/4 right-1/4 w-[250px] h-[250px] bg-[#F4D77F]/5 rounded-full blur-[100px]" />
       
       {/* Content - centered */}
       <div className="max-w-3xl mx-auto px-6 relative z-10">
@@ -652,19 +638,19 @@ function FAQ() {
           className="text-center mb-12"
         >
           {/* Section badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[rgba(212,175,55,0.1)] border border-[rgba(212,175,55,0.2)] mb-6">
-            <div className="w-2 h-2 rounded-full bg-[#D4AF37] animate-pulse" />
-            <span className="text-sm text-[#F4D77F] tracking-tight font-medium">Clarity</span>
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[rgba(212,175,55,0.08)] border border-[rgba(212,175,55,0.15)] mb-6">
+            <div className="w-1.5 h-1.5 rounded-full bg-[#D4AF37]" />
+            <span className="text-sm text-[#D4AF37] tracking-tight font-medium uppercase">Frequently Asked</span>
           </div>
           
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 tracking-[-0.02em]" style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}>
-            You chose the{' '}
+            Common{' '}
             <span className="bg-gradient-to-r from-[#F4D77F] via-[#D4AF37] to-[#F4D77F] bg-clip-text text-transparent">
-              clear path.
+              Questions
             </span>
           </h2>
-          <p className="text-white/50 text-lg tracking-tight">
-            Here's everything you need to know.
+          <p className="text-white/50 text-lg tracking-tight max-w-xl mx-auto">
+            Transparent answers for founders considering their next move.
           </p>
         </motion.div>
         
