@@ -18,6 +18,7 @@ import decisionForkPath from '@/assets/decision-fork-path.jpg';
 import goldCircuitReveal from '@/assets/gold-circuit-reveal.png';
 import goldChipStack from '@/assets/gold-chip-stack.png';
 import nextTierCtaBg from '@/assets/next-tier-cta-bg.jpg';
+import ntpLogoFull from '@/assets/ntp-logo-full.jpg';
 
 
 const HomePageC = () => {
@@ -790,8 +791,11 @@ function Footer() {
       <div className="max-w-7xl mx-auto px-6 py-12">
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-3">
-            <img src={nextTierLogo} alt="Next Tier Partners" className="h-8 w-auto" />
-            <span className="text-white/40 text-sm tracking-tight">Next Tier Partners</span>
+            <img 
+              src={ntpLogoFull} 
+              alt="Next Tier Partners" 
+              className="h-12 w-auto drop-shadow-[0_0_12px_rgba(212,175,55,0.35)]" 
+            />
           </div>
           
           <div className="flex items-center gap-8 text-sm text-white/40">

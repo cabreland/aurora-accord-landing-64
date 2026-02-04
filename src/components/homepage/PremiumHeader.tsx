@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
-import nextTierLogo from '@/assets/next-tier-logo.png';
+import ntpLogoFull from '@/assets/ntp-logo-full.jpg';
 
 const navItems = [
   { label: 'Home', href: '#hero' },
@@ -72,9 +72,9 @@ const PremiumHeader = () => {
               transition={{ duration: 0.2 }}
             >
               <img 
-                src={nextTierLogo} 
+                src={ntpLogoFull} 
                 alt="Next Tier Partners" 
-                className="h-10 md:h-12 w-auto object-contain"
+                className="h-12 md:h-14 w-auto object-contain drop-shadow-[0_0_15px_rgba(212,175,55,0.4)]"
               />
             </motion.a>
 
