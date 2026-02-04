@@ -111,7 +111,7 @@ function Hero() {
             <h1 className="text-4xl md:text-5xl lg:text-[58px] font-bold text-white leading-[1.08] tracking-[-0.02em] mb-6" style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}>
               We buy profitable digital businesses.{' '}
               <span className="bg-gradient-to-r from-[#F4D77F] via-[#D4AF37] to-[#F4D77F] bg-clip-text text-transparent">
-                Cash. 45-60 days.
+                Cash. 15-30 days.
               </span>
             </h1>
             
@@ -122,7 +122,7 @@ function Hero() {
             <div className="space-y-3 mb-10">
               {[
                 "Direct acquisitions—we're principals, not brokers",
-                "45-60 day closings with cash payment",
+                "15-30 day closings with cash payment",
                 "$300K-$2.5M deals—serious capital for serious founders"
               ].map((item, i) => (
                 <motion.p 
@@ -406,7 +406,7 @@ function DecisionPath() {
   ];
 
   const ourApproach = [
-    "45-60 days, start to close",
+    "15-30 days, start to close",
     "One conversation. One buyer.",
     "Fair valuations, no games",
     "Digital-native principals",
@@ -598,8 +598,8 @@ function FAQ() {
       answer: "We acquire profitable digital businesses: SaaS, agencies, content/media sites, e-commerce brands, and subscription businesses. Typically $300K–$2.5M in enterprise value with at least $100K in annual profit."
     },
     {
-      question: "How does the 45-60 day timeline work?",
-      answer: "After you apply, we review and respond within 72 hours. If there's mutual interest, we present an offer within 7 days. From accepted offer to close is typically 45-60 days—including due diligence and legal."
+      question: "How does the 15-30 day timeline work?",
+      answer: "After you apply, we review and respond within 72 hours. If there's mutual interest, we present an offer within 7 days. From accepted offer to close is typically 15-30 days—including due diligence and legal."
     },
     {
       question: "What if my business isn't a fit for direct acquisition?",
@@ -607,7 +607,7 @@ function FAQ() {
     },
     {
       question: "How is this different from listing with a broker?",
-      answer: "Brokers list your business publicly, field dozens of unqualified inquiries, and the process takes 6-12+ months. We're the buyer. One conversation. No tire-kickers. 45-60 days."
+      answer: "Brokers list your business publicly, field dozens of unqualified inquiries, and the process takes 6+ months. We're the buyer. One conversation. No tire-kickers. 15-30 days."
     },
     {
       question: "What fees should I expect?",
@@ -769,7 +769,7 @@ function FinalCTA() {
           <div className="flex items-center justify-center gap-8 text-sm text-white/50 flex-wrap">
             {[
               'Cash payment',
-              '45-60 day close',
+              '15-30 day close',
               'Completely confidential'
             ].map((item, i) => (
               <div key={i} className="flex items-center gap-2">
