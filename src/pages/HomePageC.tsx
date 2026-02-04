@@ -618,133 +618,98 @@ function FAQ() {
   ];
 
   return (
-    <section id="faq" className="py-20 md:py-28 relative overflow-hidden min-h-[800px]">
+    <section id="faq" className="py-20 md:py-28 relative overflow-hidden">
       {/* Base dark background */}
       <div className="absolute inset-0 bg-[#0A0C10]" />
       
-      {/* Gold circuit reveal image - right side, continuing the gold path narrative */}
+      {/* Subtle gold circuit reveal - faded behind content */}
       <div 
-        className="absolute right-0 top-0 bottom-0 w-1/2 lg:w-[45%] hidden md:block"
+        className="absolute inset-0 opacity-20"
         style={{
           backgroundImage: `url(${goldCircuitReveal})`,
           backgroundSize: 'cover',
-          backgroundPosition: 'center left',
-          opacity: 0.7
+          backgroundPosition: 'center',
         }}
       />
       
-      {/* Gradient overlays to blend image */}
-      <div className="absolute right-0 top-0 bottom-0 w-1/2 lg:w-[45%] hidden md:block bg-gradient-to-r from-[#0A0C10] via-[#0A0C10]/70 to-transparent" />
-      <div className="absolute right-0 top-0 w-1/2 lg:w-[45%] h-48 hidden md:block bg-gradient-to-b from-[#0A0C10] to-transparent" />
-      <div className="absolute right-0 bottom-0 w-1/2 lg:w-[45%] h-48 hidden md:block bg-gradient-to-t from-[#0A0C10] to-transparent" />
+      {/* Vignette to focus attention on center */}
+      <div 
+        className="absolute inset-0"
+        style={{
+          background: 'radial-gradient(ellipse 70% 50% at 50% 50%, transparent 0%, #0A0C10 100%)'
+        }}
+      />
       
-      {/* Gold ambient glow behind the image */}
-      <div className="absolute top-1/2 right-[15%] -translate-y-1/2 w-[400px] h-[500px] bg-[#D4AF37]/12 rounded-full blur-[100px] hidden md:block" />
+      {/* Central gold ambient glow */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-[#D4AF37]/10 rounded-full blur-[100px]" />
       
-      {/* Left-side subtle glow for balance */}
-      <div className="absolute top-1/3 -left-20 w-[300px] h-[400px] bg-gradient-to-r from-[#F4D77F]/8 to-transparent rounded-full blur-[80px]" />
-      
-      <div className="max-w-7xl mx-auto px-6 relative z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
-          {/* Left column - FAQ content */}
-          <div className="max-w-xl">
+      {/* Content - centered */}
+      <div className="max-w-3xl mx-auto px-6 relative z-10">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="text-center mb-12"
+        >
+          {/* Section badge */}
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[rgba(212,175,55,0.1)] border border-[rgba(212,175,55,0.2)] mb-6">
+            <div className="w-2 h-2 rounded-full bg-[#D4AF37] animate-pulse" />
+            <span className="text-sm text-[#F4D77F] tracking-tight font-medium">Clarity</span>
+          </div>
+          
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 tracking-[-0.02em]" style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}>
+            You chose the{' '}
+            <span className="bg-gradient-to-r from-[#F4D77F] via-[#D4AF37] to-[#F4D77F] bg-clip-text text-transparent">
+              clear path.
+            </span>
+          </h2>
+          <p className="text-white/50 text-lg tracking-tight">
+            Here's everything you need to know.
+          </p>
+        </motion.div>
+        
+        <div className="space-y-3">
+          {faqs.map((faq, idx) => (
             <motion.div 
+              key={idx}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="mb-10"
+              transition={{ delay: idx * 0.05 }}
             >
-              {/* Section badge */}
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[rgba(212,175,55,0.1)] border border-[rgba(212,175,55,0.2)] mb-6">
-                <div className="w-2 h-2 rounded-full bg-[#D4AF37] animate-pulse" />
-                <span className="text-sm text-[#F4D77F] tracking-tight font-medium">Clarity</span>
-              </div>
-              
-              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 tracking-[-0.02em]" style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}>
-                You chose the{' '}
-                <span className="bg-gradient-to-r from-[#F4D77F] via-[#D4AF37] to-[#F4D77F] bg-clip-text text-transparent">
-                  clear path.
-                </span>
-              </h2>
-              <p className="text-white/50 text-lg tracking-tight">
-                Here's everything you need to know.
-              </p>
-            </motion.div>
-            
-            <div className="space-y-3">
-              {faqs.map((faq, idx) => (
-                <motion.div 
-                  key={idx}
-                  initial={{ opacity: 0, x: -20 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: idx * 0.08 }}
+              <div 
+                className={`rounded-xl border transition-all duration-300 ${
+                  openIndex === idx 
+                    ? 'bg-[rgba(212,175,55,0.08)] border-[rgba(212,175,55,0.3)]' 
+                    : 'bg-[rgba(255,255,255,0.02)] border-[rgba(255,255,255,0.06)] hover:border-[rgba(212,175,55,0.2)]'
+                }`}
+              >
+                <button
+                  className="w-full flex items-center justify-between p-5 text-left"
+                  onClick={() => setOpenIndex(openIndex === idx ? null : idx)}
                 >
-                  <div 
-                    className={`rounded-xl border transition-all duration-300 ${
-                      openIndex === idx 
-                        ? 'bg-[rgba(212,175,55,0.08)] border-[rgba(212,175,55,0.3)]' 
-                        : 'bg-[rgba(255,255,255,0.02)] border-[rgba(255,255,255,0.06)] hover:border-[rgba(212,175,55,0.2)]'
-                    }`}
-                  >
-                    <button
-                      className="w-full flex items-center justify-between p-5 text-left"
-                      onClick={() => setOpenIndex(openIndex === idx ? null : idx)}
-                    >
-                      <span className="font-semibold text-white tracking-tight pr-4">{faq.question}</span>
-                      <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 ${
-                        openIndex === idx 
-                          ? 'bg-[#D4AF37] rotate-180' 
-                          : 'bg-[rgba(255,255,255,0.05)]'
-                      }`}>
-                        <ChevronDown className={`w-4 h-4 transition-colors ${openIndex === idx ? 'text-[#0A0C10]' : 'text-[#F4D77F]'}`} />
-                      </div>
-                    </button>
-                    {openIndex === idx && (
-                      <motion.div 
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: 'auto' }}
-                        exit={{ opacity: 0, height: 0 }}
-                        className="px-5 pb-5"
-                      >
-                        <p className="text-white/60 leading-relaxed tracking-tight">{faq.answer}</p>
-                      </motion.div>
-                    )}
+                  <span className="font-semibold text-white tracking-tight pr-4">{faq.question}</span>
+                  <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 ${
+                    openIndex === idx 
+                      ? 'bg-[#D4AF37] rotate-180' 
+                      : 'bg-[rgba(255,255,255,0.05)]'
+                  }`}>
+                    <ChevronDown className={`w-4 h-4 transition-colors ${openIndex === idx ? 'text-[#0A0C10]' : 'text-[#F4D77F]'}`} />
                   </div>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-          
-          {/* Right column - Visual emphasis area (content shown via background image) */}
-          <div className="hidden lg:flex items-center justify-center relative">
-            {/* Floating stats or trust indicators */}
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.3 }}
-              className="absolute top-20 right-10"
-            >
-              <div className="bg-[rgba(10,12,16,0.9)] backdrop-blur-xl border border-[rgba(212,175,55,0.2)] rounded-2xl p-6 shadow-2xl">
-                <div className="text-4xl font-bold text-[#F4D77F] mb-1">45-60</div>
-                <div className="text-sm text-white/50">Days to close</div>
+                </button>
+                {openIndex === idx && (
+                  <motion.div 
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="px-5 pb-5"
+                  >
+                    <p className="text-white/60 leading-relaxed tracking-tight">{faq.answer}</p>
+                  </motion.div>
+                )}
               </div>
             </motion.div>
-            
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.5 }}
-              className="absolute bottom-32 right-20"
-            >
-              <div className="bg-[rgba(10,12,16,0.9)] backdrop-blur-xl border border-[rgba(212,175,55,0.2)] rounded-2xl p-6 shadow-2xl">
-                <div className="text-4xl font-bold text-[#F4D77F] mb-1">$0</div>
-                <div className="text-sm text-white/50">Seller fees</div>
-              </div>
-            </motion.div>
-          </div>
+          ))}
         </div>
       </div>
     </section>
