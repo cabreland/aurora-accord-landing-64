@@ -19,13 +19,18 @@ import goldenDecisionPath from '@/assets/golden-decision-path.jpg';
 // Global Cursor Spotlight - reveals circuits across the entire page
 function GlobalCursorSpotlight() {
   const [mousePos, setMousePos] = useState({ x: -500, y: -500 });
+  const [scrollY, setScrollY] = useState(0);
   const [isActive, setIsActive] = useState(false);
 
   const handleMouseMove = useCallback((e: MouseEvent) => {
-    // Use clientX/Y directly since container is fixed to viewport
     setMousePos({ x: e.clientX, y: e.clientY });
+    setScrollY(window.scrollY);
     if (!isActive) setIsActive(true);
   }, [isActive]);
+
+  const handleScroll = useCallback(() => {
+    setScrollY(window.scrollY);
+  }, []);
 
   const handleMouseLeave = useCallback(() => {
     setIsActive(false);
@@ -34,39 +39,44 @@ function GlobalCursorSpotlight() {
 
   useEffect(() => {
     window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('scroll', handleScroll);
     document.body.addEventListener('mouseleave', handleMouseLeave);
     
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('scroll', handleScroll);
       document.body.removeEventListener('mouseleave', handleMouseLeave);
     };
-  }, [handleMouseMove, handleMouseLeave]);
+  }, [handleMouseMove, handleScroll, handleMouseLeave]);
+
+  // Calculate mask position relative to scrolling background
+  const maskY = mousePos.y + scrollY;
 
   return (
     <div className="fixed inset-0 pointer-events-none z-[1]">
-      {/* Circuit pattern that reveals through spotlight - fixed to viewport */}
+      {/* Tiling circuit pattern that scrolls with page */}
       <div 
         className="absolute inset-0 transition-opacity duration-300 ease-out"
         style={{
-          backgroundImage: `url(${circuitTransitionBg})`,
-          backgroundPosition: 'center',
-          backgroundSize: 'cover',
-          backgroundRepeat: 'no-repeat',
-          opacity: isActive ? 0.5 : 0,
-          maskImage: `radial-gradient(circle 150px at ${mousePos.x}px ${mousePos.y}px, black 0%, transparent 100%)`,
-          WebkitMaskImage: `radial-gradient(circle 150px at ${mousePos.x}px ${mousePos.y}px, black 0%, transparent 100%)`
+          backgroundImage: `url(${bgCircuitPattern})`,
+          backgroundPosition: `0px ${-scrollY}px`,
+          backgroundSize: '300px 300px',
+          backgroundRepeat: 'repeat',
+          opacity: isActive ? 0.4 : 0,
+          maskImage: `radial-gradient(circle 140px at ${mousePos.x}px ${mousePos.y}px, black 0%, transparent 100%)`,
+          WebkitMaskImage: `radial-gradient(circle 140px at ${mousePos.x}px ${mousePos.y}px, black 0%, transparent 100%)`
         }}
       />
       
-      {/* Gold glow following cursor */}
+      {/* Subtle gold glow following cursor */}
       <div 
         className="absolute pointer-events-none transition-opacity duration-200 ease-out"
         style={{
-          width: '350px',
-          height: '350px',
-          left: mousePos.x - 175,
-          top: mousePos.y - 175,
-          background: 'radial-gradient(circle, rgba(212,175,55,0.12) 0%, transparent 70%)',
+          width: '300px',
+          height: '300px',
+          left: mousePos.x - 150,
+          top: mousePos.y - 150,
+          background: 'radial-gradient(circle, rgba(212,175,55,0.1) 0%, transparent 70%)',
           opacity: isActive ? 1 : 0
         }}
       />
