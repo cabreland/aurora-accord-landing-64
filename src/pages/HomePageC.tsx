@@ -240,26 +240,28 @@ function OurStory() {
       {/* Base dark background */}
       <div className="absolute inset-0 bg-[#0A0C10]" />
       
-      {/* Gold chip stack image - positioned on right half like Hero */}
-      <div className="absolute top-0 right-0 bottom-0 w-1/2 lg:w-[55%] overflow-hidden">
+      {/* Gold chip stack image - smaller, contained on right */}
+      <div className="absolute top-0 right-0 bottom-0 w-[35%] lg:w-[40%] overflow-hidden">
         <div 
           className="absolute inset-0"
           style={{
             backgroundImage: `url(${goldChipStack})`,
-            backgroundPosition: 'center',
+            backgroundPosition: 'center right',
             backgroundSize: 'cover',
             backgroundRepeat: 'no-repeat',
-            filter: 'saturate(1.1) contrast(1.05)'
+            opacity: 0.6
           }}
         />
-        {/* Gradient fades for seamless blend - matching Hero approach */}
-        <div className="absolute inset-y-0 left-0 w-2/3 pointer-events-none" style={{ background: 'linear-gradient(to right, #0A0C10 0%, #0A0C10 30%, transparent 100%)' }} />
-        <div className="absolute inset-x-0 top-0 h-32 pointer-events-none" style={{ background: 'linear-gradient(to bottom, #0A0C10 0%, transparent 100%)' }} />
-        <div className="absolute inset-x-0 bottom-0 h-32 pointer-events-none" style={{ background: 'linear-gradient(to top, #0A0C10 0%, transparent 100%)' }} />
+        {/* Strong gradient fade from left */}
+        <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(to right, #0A0C10 0%, rgba(10,12,16,0.8) 30%, rgba(10,12,16,0.4) 60%, transparent 100%)' }} />
+        {/* Top fade */}
+        <div className="absolute inset-x-0 top-0 h-48 pointer-events-none" style={{ background: 'linear-gradient(to bottom, #0A0C10 0%, transparent 100%)' }} />
+        {/* Bottom fade */}
+        <div className="absolute inset-x-0 bottom-0 h-48 pointer-events-none" style={{ background: 'linear-gradient(to top, #0A0C10 0%, transparent 100%)' }} />
       </div>
       
-      {/* Subtle gold glow behind image */}
-      <div className="absolute top-1/3 right-1/4 w-[500px] h-[500px] bg-gradient-to-br from-[#F4D77F]/15 to-[#D4AF37]/5 rounded-full blur-[120px] pointer-events-none" />
+      {/* Subtle gold ambient glow */}
+      <div className="absolute top-1/2 right-[10%] -translate-y-1/2 w-[300px] h-[400px] bg-[#D4AF37]/8 rounded-full blur-[100px] pointer-events-none" />
       
       {/* === CONTENT === */}
       <div className="max-w-7xl mx-auto px-6 relative z-10">
