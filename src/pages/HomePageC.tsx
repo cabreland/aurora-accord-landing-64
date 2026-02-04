@@ -787,14 +787,14 @@ function FinalCTA() {
 // Footer
 function Footer() {
   return (
-    <footer className="border-t border-[rgba(255,255,255,0.06)] bg-[#0A0C10]">
+    <footer className="border-t border-[rgba(255,255,255,0.06)] bg-black">
       <div className="max-w-7xl mx-auto px-6 py-12">
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-3">
             <img 
               src={ntpLogoFull} 
               alt="Next Tier Partners" 
-              className="h-16 md:h-20 w-auto drop-shadow-[0_0_25px_rgba(212,175,55,0.6)] filter brightness-110" 
+              className="h-16 md:h-20 w-auto object-contain" 
             />
           </div>
           
