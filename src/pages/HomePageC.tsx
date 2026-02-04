@@ -680,19 +680,23 @@ function FAQ() {
 // Final CTA - The Offer
 function FinalCTA() {
   return (
-    <section className="py-16 md:py-20 relative overflow-hidden">
-      {/* CTA circuit background */}
+    <section className="py-20 md:py-28 relative overflow-hidden">
+      {/* Base dark background */}
       <div className="absolute inset-0 bg-[#0A0C10]" />
+      
+      {/* Vignette effect - darker edges draw focus to center */}
       <div 
-        className="absolute inset-0 opacity-70"
+        className="absolute inset-0"
         style={{
-          backgroundImage: `url(${bgCircuitCta})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
+          background: 'radial-gradient(ellipse 80% 60% at 50% 50%, transparent 0%, #0A0C10 100%)'
         }}
       />
-      {/* Gradient overlays for text readability */}
-      <div className="absolute inset-0 bg-gradient-to-t from-[#0A0C10]/80 via-transparent to-[#0A0C10]/60" />
+      
+      {/* Central gold spotlight glow */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[500px] bg-gradient-to-br from-[#D4AF37]/12 via-[#F4D77F]/8 to-transparent rounded-full blur-[120px]" />
+      
+      {/* Subtle secondary glow */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/3 w-[400px] h-[300px] bg-[#F4D77F]/10 rounded-full blur-[80px]" />
       
       <div className="max-w-4xl mx-auto px-6 relative z-10 text-center">
         <motion.div
