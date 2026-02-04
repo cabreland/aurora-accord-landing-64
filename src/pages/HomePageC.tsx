@@ -15,6 +15,7 @@ import bgCircuitPattern from '@/assets/bg-circuit-pattern.png';
 import bgCircuitCta from '@/assets/bg-circuit-cta.png';
 import circuitTransitionBg from '@/assets/circuit-transition-bg.png';
 import decisionForkPath from '@/assets/decision-fork-path.jpg';
+import goldCircuitReveal from '@/assets/gold-circuit-reveal.png';
 
 // Global Cursor Spotlight - reveals circuits across the entire page
 function GlobalCursorSpotlight() {
@@ -54,29 +55,29 @@ function GlobalCursorSpotlight() {
 
   return (
     <div className="fixed inset-0 pointer-events-none z-[1]">
-      {/* Tiling circuit pattern that scrolls with page */}
+      {/* Gold circuit pattern that scrolls with page - revealed by cursor */}
       <div 
         className="absolute inset-0 transition-opacity duration-300 ease-out"
         style={{
-          backgroundImage: `url(${bgCircuitPattern})`,
+          backgroundImage: `url(${goldCircuitReveal})`,
           backgroundPosition: `0px ${-scrollY}px`,
-          backgroundSize: '300px 300px',
+          backgroundSize: '400px 400px',
           backgroundRepeat: 'repeat',
-          opacity: isActive ? 0.4 : 0,
-          maskImage: `radial-gradient(circle 140px at ${mousePos.x}px ${mousePos.y}px, black 0%, transparent 100%)`,
-          WebkitMaskImage: `radial-gradient(circle 140px at ${mousePos.x}px ${mousePos.y}px, black 0%, transparent 100%)`
+          opacity: isActive ? 0.7 : 0,
+          maskImage: `radial-gradient(circle 160px at ${mousePos.x}px ${mousePos.y}px, black 0%, transparent 100%)`,
+          WebkitMaskImage: `radial-gradient(circle 160px at ${mousePos.x}px ${mousePos.y}px, black 0%, transparent 100%)`
         }}
       />
       
-      {/* Subtle gold glow following cursor */}
+      {/* Enhanced gold glow following cursor */}
       <div 
         className="absolute pointer-events-none transition-opacity duration-200 ease-out"
         style={{
-          width: '300px',
-          height: '300px',
-          left: mousePos.x - 150,
-          top: mousePos.y - 150,
-          background: 'radial-gradient(circle, rgba(212,175,55,0.1) 0%, transparent 70%)',
+          width: '350px',
+          height: '350px',
+          left: mousePos.x - 175,
+          top: mousePos.y - 175,
+          background: 'radial-gradient(circle, rgba(244,215,127,0.15) 0%, rgba(212,175,55,0.08) 40%, transparent 70%)',
           opacity: isActive ? 1 : 0
         }}
       />
