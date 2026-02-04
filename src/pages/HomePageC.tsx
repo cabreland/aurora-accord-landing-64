@@ -308,12 +308,8 @@ function SpotlightBox({ children, className = "" }: { children: React.ReactNode;
   );
 }
 
-// Section 2: Our Story - Premium Two-Column Layout with Hover-Reveal Background
+// Section 2: Our Story - Premium Two-Column Layout with Gold Chip Background
 function OurStory() {
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-  const [isHovering, setIsHovering] = useState(false);
-  const sectionRef = useRef<HTMLElement>(null);
-  
   const evolutionPhases = [
     { phase: "01", title: "Brokerage", description: "Helped founders exit $100M+ in digital businesses" },
     { phase: "02", title: "Discovery", description: "Identified the broken parts of the industry" },
@@ -321,91 +317,45 @@ function OurStory() {
     { phase: "04", title: "Evolution", description: "Became the buyer we always wished existed" }
   ];
 
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (sectionRef.current) {
-      const rect = sectionRef.current.getBoundingClientRect();
-      setMousePos({
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top
-      });
-    }
-  };
-
   return (
-    <section 
-      ref={sectionRef}
-      className="py-24 md:py-32 relative overflow-hidden"
-      onMouseMove={handleMouseMove}
-      onMouseEnter={() => setIsHovering(true)}
-      onMouseLeave={() => {
-        setIsHovering(false);
-        setMousePos({ x: -500, y: -500 });
-      }}
-    >
+    <section className="py-24 md:py-32 relative overflow-hidden">
       {/* Base dark background */}
       <div className="absolute inset-0 bg-[#0A0C10]" />
       
-      {/* Gold chip stack image - dark by default, revealed on hover */}
+      {/* Gold chip stack image - always visible, anchored right */}
       <div className="absolute inset-0 pointer-events-none">
-        {/* Base image - very dark, always visible subtly */}
         <div 
           className="absolute inset-0"
           style={{
             backgroundImage: `url(${goldChipStack})`,
             backgroundPosition: 'right center',
-            backgroundSize: '65% auto',
+            backgroundSize: '55% auto',
             backgroundRepeat: 'no-repeat',
-            opacity: 0.15
+            opacity: 0.5
           }}
         />
         
-        {/* Hover reveal layer - bright, masked to cursor */}
-        <div 
-          className="absolute inset-0 transition-opacity duration-300"
-          style={{
-            backgroundImage: `url(${goldChipStack})`,
-            backgroundPosition: 'right center',
-            backgroundSize: '65% auto',
-            backgroundRepeat: 'no-repeat',
-            opacity: isHovering ? 0.8 : 0,
-            maskImage: `radial-gradient(circle 200px at ${mousePos.x}px ${mousePos.y}px, black 0%, rgba(0,0,0,0.5) 50%, transparent 100%)`,
-            WebkitMaskImage: `radial-gradient(circle 200px at ${mousePos.x}px ${mousePos.y}px, black 0%, rgba(0,0,0,0.5) 50%, transparent 100%)`
-          }}
-        />
-        
-        {/* Cursor glow */}
-        <div 
-          className="absolute pointer-events-none transition-opacity duration-300"
-          style={{
-            width: '300px',
-            height: '300px',
-            left: mousePos.x - 150,
-            top: mousePos.y - 150,
-            background: 'radial-gradient(circle, rgba(212,175,55,0.25) 0%, rgba(244,215,127,0.1) 40%, transparent 70%)',
-            opacity: isHovering ? 1 : 0
-          }}
-        />
-        
-        {/* Left fade - keeps text readable */}
+        {/* Left fade only - protect text, let image breathe */}
         <div 
           className="absolute inset-0"
           style={{ 
-            background: 'linear-gradient(to right, #0A0C10 25%, rgba(10,12,16,0.7) 45%, transparent 70%)' 
+            background: 'linear-gradient(to right, #0A0C10 20%, rgba(10,12,16,0.5) 40%, transparent 60%)' 
           }} 
         />
         
-        {/* Top fade */}
+        {/* Subtle top/bottom fades */}
         <div 
-          className="absolute inset-x-0 top-0 h-32" 
+          className="absolute inset-x-0 top-0 h-24" 
           style={{ background: 'linear-gradient(to bottom, #0A0C10 0%, transparent 100%)' }} 
         />
-        
-        {/* Bottom fade */}
         <div 
-          className="absolute inset-x-0 bottom-0 h-32" 
+          className="absolute inset-x-0 bottom-0 h-24" 
           style={{ background: 'linear-gradient(to top, #0A0C10 0%, transparent 100%)' }} 
         />
       </div>
+      
+      {/* Ambient gold glow behind the image area */}
+      <div className="absolute top-1/2 right-[15%] -translate-y-1/2 w-[500px] h-[500px] bg-[#D4AF37]/10 rounded-full blur-[120px] pointer-events-none" />
       
       <div className="max-w-7xl mx-auto px-6 relative z-10">
         {/* Section header */}
@@ -461,17 +411,10 @@ function OurStory() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="relative"
           >
-            {/* Glassmorphism card - brighter, floating on section background */}
-            <SpotlightBox className="p-8 md:p-10 rounded-3xl border border-[#D4AF37]/40 bg-[rgba(20,24,32,0.85)] backdrop-blur-[30px] shadow-[0_0_60px_-10px_rgba(212,175,55,0.3)]">
-              {/* Background glow */}
-              <div className="absolute -top-20 -right-20 w-52 h-52 bg-[#D4AF37]/20 rounded-full blur-[100px]" />
-              <div className="absolute -bottom-20 -left-20 w-44 h-44 bg-[#F4D77F]/15 rounded-full blur-[80px]" />
-              
-              {/* Circuit pattern inside - subtle */}
-              <div className="absolute inset-0 opacity-[0.04] rounded-3xl overflow-hidden" style={{
-                backgroundImage: `url(${bgCircuitPattern})`,
-                backgroundSize: '150px 150px'
-              }} />
+            {/* Clean glassmorphism card - no competing hover effects */}
+            <div className="relative p-8 md:p-10 rounded-3xl border border-[#D4AF37]/30 bg-[rgba(15,18,25,0.9)] backdrop-blur-[20px] shadow-[0_0_80px_-15px_rgba(212,175,55,0.35)]">
+              {/* Outer glow */}
+              <div className="absolute -inset-px rounded-3xl bg-gradient-to-br from-[#D4AF37]/20 via-transparent to-[#F4D77F]/10 -z-10" />
               
               <div className="relative">
                 <h3 className="text-xl md:text-2xl font-bold text-white mb-8 tracking-tight flex items-center gap-3" style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}>
@@ -530,7 +473,7 @@ function OurStory() {
                   </div>
                 </div>
               </div>
-            </SpotlightBox>
+            </div>
           </motion.div>
         </div>
       </div>
