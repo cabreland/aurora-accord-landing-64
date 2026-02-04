@@ -236,7 +236,7 @@ function OurStory() {
   ];
 
   return (
-    <section className="py-24 md:py-32 relative overflow-hidden">
+    <section className="py-16 md:py-20 relative overflow-hidden">
       {/* Base dark background */}
       <div className="absolute inset-0 bg-[#0A0C10]" />
       
@@ -412,7 +412,7 @@ function DecisionPath() {
   ];
 
   return (
-    <section className="py-24 md:py-32 relative overflow-hidden">
+    <section className="py-16 md:py-20 relative overflow-hidden">
       {/* Background fork image - red left, gold right */}
       <div className="absolute inset-0">
         <div 
@@ -618,7 +618,7 @@ function FAQ() {
   ];
 
   return (
-    <section id="faq" className="py-28 relative overflow-hidden">
+    <section id="faq" className="py-16 md:py-20 relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-b from-[#0A0C10] via-[#0D0F14] to-[#0A0C10]" />
       <div className="absolute top-1/2 left-1/2 w-[600px] h-[600px] bg-gradient-to-br from-[#F4D77F]/5 to-[#D4AF37]/3 rounded-full blur-[180px] -translate-x-1/2 -translate-y-1/2" />
       
@@ -680,7 +680,7 @@ function FAQ() {
 // Final CTA - The Offer
 function FinalCTA() {
   return (
-    <section className="py-28 relative overflow-hidden">
+    <section className="py-16 md:py-20 relative overflow-hidden">
       {/* CTA circuit background */}
       <div className="absolute inset-0 bg-[#0A0C10]" />
       <div 
