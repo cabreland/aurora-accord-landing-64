@@ -54,7 +54,7 @@ function GlobalCursorSpotlight() {
   const maskY = mousePos.y + scrollY;
 
   return (
-    <div className="fixed inset-0 pointer-events-none z-[1]">
+    <div className="fixed inset-0 pointer-events-none z-0">
       {/* Gold circuit pattern that scrolls with page - revealed by cursor */}
       <div 
         className="absolute inset-0 transition-opacity duration-300 ease-out"
@@ -63,21 +63,21 @@ function GlobalCursorSpotlight() {
           backgroundPosition: `0px ${-scrollY}px`,
           backgroundSize: '400px 400px',
           backgroundRepeat: 'repeat',
-          opacity: isActive ? 0.7 : 0,
-          maskImage: `radial-gradient(circle 160px at ${mousePos.x}px ${mousePos.y}px, black 0%, transparent 100%)`,
-          WebkitMaskImage: `radial-gradient(circle 160px at ${mousePos.x}px ${mousePos.y}px, black 0%, transparent 100%)`
+          opacity: isActive ? 0.6 : 0,
+          maskImage: `radial-gradient(circle 90px at ${mousePos.x}px ${mousePos.y}px, black 0%, transparent 100%)`,
+          WebkitMaskImage: `radial-gradient(circle 90px at ${mousePos.x}px ${mousePos.y}px, black 0%, transparent 100%)`
         }}
       />
       
-      {/* Enhanced gold glow following cursor */}
+      {/* Subtle gold glow following cursor */}
       <div 
         className="absolute pointer-events-none transition-opacity duration-200 ease-out"
         style={{
-          width: '350px',
-          height: '350px',
-          left: mousePos.x - 175,
-          top: mousePos.y - 175,
-          background: 'radial-gradient(circle, rgba(244,215,127,0.15) 0%, rgba(212,175,55,0.08) 40%, transparent 70%)',
+          width: '200px',
+          height: '200px',
+          left: mousePos.x - 100,
+          top: mousePos.y - 100,
+          background: 'radial-gradient(circle, rgba(244,215,127,0.12) 0%, rgba(212,175,55,0.05) 50%, transparent 70%)',
           opacity: isActive ? 1 : 0
         }}
       />
