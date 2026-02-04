@@ -226,7 +226,7 @@ function SpotlightBox({ children, className = "" }: { children: React.ReactNode;
   );
 }
 
-// Section 2: Our Story - Premium Two-Column Layout with Gold Chip Background
+// Section 2: Our Story - Premium Cinematic Background Treatment
 function OurStory() {
   const evolutionPhases = [
     { phase: "01", title: "Brokerage", description: "Helped founders exit $100M+ in digital businesses" },
@@ -237,44 +237,90 @@ function OurStory() {
 
   return (
     <section className="py-24 md:py-32 relative overflow-hidden">
-      {/* Base dark background */}
-      <div className="absolute inset-0 bg-[#0A0C10]" />
+      {/* === CINEMATIC BACKGROUND SYSTEM === */}
       
-      {/* Gold chip stack image - always visible, anchored right */}
+      {/* Layer 0: Deep base with subtle warmth */}
+      <div className="absolute inset-0 bg-gradient-to-br from-[#0A0C10] via-[#0D0F14] to-[#0A0C10]" />
+      
+      {/* Layer 1: Gold chip stack image with enhanced presence */}
       <div className="absolute inset-0 pointer-events-none">
         <div 
           className="absolute inset-0"
           style={{
             backgroundImage: `url(${goldChipStack})`,
             backgroundPosition: 'right center',
-            backgroundSize: '55% auto',
+            backgroundSize: '60% auto',
             backgroundRepeat: 'no-repeat',
-            opacity: 0.5
+            opacity: 0.7,
+            filter: 'saturate(1.2) contrast(1.05)'
           }}
-        />
-        
-        {/* Left fade only - protect text, let image breathe */}
-        <div 
-          className="absolute inset-0"
-          style={{ 
-            background: 'linear-gradient(to right, #0A0C10 20%, rgba(10,12,16,0.5) 40%, transparent 60%)' 
-          }} 
-        />
-        
-        {/* Subtle top/bottom fades */}
-        <div 
-          className="absolute inset-x-0 top-0 h-24" 
-          style={{ background: 'linear-gradient(to bottom, #0A0C10 0%, transparent 100%)' }} 
-        />
-        <div 
-          className="absolute inset-x-0 bottom-0 h-24" 
-          style={{ background: 'linear-gradient(to top, #0A0C10 0%, transparent 100%)' }} 
         />
       </div>
       
-      {/* Ambient gold glow behind the image area */}
-      <div className="absolute top-1/2 right-[15%] -translate-y-1/2 w-[500px] h-[500px] bg-[#D4AF37]/10 rounded-full blur-[120px] pointer-events-none" />
+      {/* Layer 2: Gold color harmony overlay - tints the image */}
+      <div 
+        className="absolute inset-0 pointer-events-none mix-blend-overlay"
+        style={{
+          background: 'radial-gradient(ellipse 80% 60% at 75% 50%, rgba(212,175,55,0.15) 0%, transparent 70%)'
+        }}
+      />
       
+      {/* Layer 3: Atmospheric depth glow - multiple layers */}
+      <div className="absolute inset-0 pointer-events-none">
+        {/* Primary warm glow behind image */}
+        <div 
+          className="absolute top-1/2 right-[10%] -translate-y-1/2 w-[700px] h-[600px] rounded-full blur-[150px]"
+          style={{ background: 'radial-gradient(circle, rgba(212,175,55,0.2) 0%, rgba(244,215,127,0.08) 50%, transparent 70%)' }}
+        />
+        {/* Secondary accent glow - higher */}
+        <div 
+          className="absolute top-[20%] right-[25%] w-[400px] h-[400px] rounded-full blur-[100px]"
+          style={{ background: 'radial-gradient(circle, rgba(244,215,127,0.12) 0%, transparent 60%)' }}
+        />
+        {/* Tertiary deep glow - lower */}
+        <div 
+          className="absolute bottom-[15%] right-[5%] w-[300px] h-[350px] rounded-full blur-[80px]"
+          style={{ background: 'radial-gradient(circle, rgba(212,175,55,0.1) 0%, transparent 70%)' }}
+        />
+      </div>
+      
+      {/* Layer 4: Sophisticated vignette system */}
+      <div className="absolute inset-0 pointer-events-none">
+        {/* Left content protection - smooth multi-stop gradient */}
+        <div 
+          className="absolute inset-0"
+          style={{ 
+            background: 'linear-gradient(to right, #0A0C10 0%, #0A0C10 15%, rgba(10,12,16,0.95) 25%, rgba(10,12,16,0.7) 40%, rgba(10,12,16,0.3) 55%, transparent 75%)' 
+          }} 
+        />
+        {/* Top cinematic fade */}
+        <div 
+          className="absolute inset-x-0 top-0 h-40"
+          style={{ background: 'linear-gradient(to bottom, #0A0C10 0%, rgba(10,12,16,0.8) 40%, transparent 100%)' }}
+        />
+        {/* Bottom cinematic fade */}
+        <div 
+          className="absolute inset-x-0 bottom-0 h-40"
+          style={{ background: 'linear-gradient(to top, #0A0C10 0%, rgba(10,12,16,0.8) 40%, transparent 100%)' }}
+        />
+        {/* Right edge softening */}
+        <div 
+          className="absolute inset-y-0 right-0 w-24"
+          style={{ background: 'linear-gradient(to left, rgba(10,12,16,0.5) 0%, transparent 100%)' }}
+        />
+      </div>
+      
+      {/* Layer 5: Subtle noise texture for depth */}
+      <div 
+        className="absolute inset-0 pointer-events-none opacity-[0.03]"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+          backgroundRepeat: 'repeat',
+          backgroundSize: '128px 128px'
+        }}
+      />
+      
+      {/* === CONTENT === */}
       <div className="max-w-7xl mx-auto px-6 relative z-10">
         {/* Section header */}
         <motion.div 
@@ -302,7 +348,7 @@ function OurStory() {
               We started by helping founders exit.
             </p>
             
-            <div className="space-y-5 text-white/70 leading-relaxed tracking-tight">
+            <div className="space-y-5 text-white/75 leading-relaxed tracking-tight">
               <p>
                 We didn't start as buyers — we started on the other side. For years we ran Exclusive Business Brokers and watched great founders get dragged through a broken system. NDAs that led nowhere. LOIs that collapsed before funding. "Buyers" who were never actually buyers. Deals that should've taken weeks dragged into 6–12-month nightmares.
               </p>
@@ -314,10 +360,10 @@ function OurStory() {
               </p>
             </div>
 
-            {/* Bottom accent */}
+            {/* Bottom accent with glow */}
             <div className="mt-10 flex items-center gap-4">
-              <div className="h-px flex-1 bg-gradient-to-r from-[#D4AF37]/40 to-transparent" />
-              <span className="text-[#F4D77F]/60 text-xs font-medium tracking-widest uppercase">Built Different</span>
+              <div className="h-px flex-1 bg-gradient-to-r from-[#D4AF37]/50 via-[#F4D77F]/30 to-transparent" />
+              <span className="text-[#F4D77F]/70 text-xs font-medium tracking-widest uppercase">Built Different</span>
             </div>
           </motion.div>
 
@@ -329,14 +375,17 @@ function OurStory() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="relative"
           >
-            {/* Clean glassmorphism card - no competing hover effects */}
-            <div className="relative p-8 md:p-10 rounded-3xl border border-[#D4AF37]/30 bg-[rgba(15,18,25,0.9)] backdrop-blur-[20px] shadow-[0_0_80px_-15px_rgba(212,175,55,0.35)]">
-              {/* Outer glow */}
-              <div className="absolute -inset-px rounded-3xl bg-gradient-to-br from-[#D4AF37]/20 via-transparent to-[#F4D77F]/10 -z-10" />
+            {/* Card outer glow */}
+            <div className="absolute -inset-4 rounded-[32px] bg-gradient-to-br from-[#D4AF37]/10 via-transparent to-[#F4D77F]/5 blur-xl opacity-60" />
+            
+            {/* Premium glassmorphism card */}
+            <div className="relative p-8 md:p-10 rounded-3xl border border-[#D4AF37]/25 bg-[rgba(10,12,16,0.85)] backdrop-blur-[30px] shadow-[0_0_100px_-20px_rgba(212,175,55,0.3),inset_0_1px_0_0_rgba(255,255,255,0.05)]">
+              {/* Inner highlight edge */}
+              <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-[#D4AF37]/10 via-transparent to-transparent opacity-50" />
               
               <div className="relative">
                 <h3 className="text-xl md:text-2xl font-bold text-white mb-8 tracking-tight flex items-center gap-3" style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}>
-                  <span className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#F4D77F] to-[#D4AF37] flex items-center justify-center">
+                  <span className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#F4D77F] to-[#D4AF37] flex items-center justify-center shadow-lg shadow-[#D4AF37]/30">
                     <Sparkles className="w-4 h-4 text-[#0A0C10]" />
                   </span>
                   How We Evolved
@@ -355,16 +404,16 @@ function OurStory() {
                     >
                       {/* Timeline line */}
                       {idx < evolutionPhases.length - 1 && (
-                        <div className="absolute left-[19px] top-10 bottom-0 w-px bg-gradient-to-b from-[#D4AF37]/40 to-[#D4AF37]/10" />
+                        <div className="absolute left-[19px] top-10 bottom-0 w-px bg-gradient-to-b from-[#D4AF37]/40 via-[#D4AF37]/20 to-[#D4AF37]/5" />
                       )}
                       
                       {/* Phase indicator */}
                       <div className="relative flex-shrink-0">
-                        <div className="w-10 h-10 rounded-xl border border-[#D4AF37]/30 bg-[#0A0C10]/60 flex items-center justify-center group-hover:border-[#D4AF37]/60 group-hover:bg-[#D4AF37]/10 transition-all duration-300">
+                        <div className="w-10 h-10 rounded-xl border border-[#D4AF37]/30 bg-[#0A0C10]/80 flex items-center justify-center group-hover:border-[#D4AF37]/60 group-hover:bg-[#D4AF37]/10 transition-all duration-300 shadow-lg shadow-black/20">
                           <span className="text-[#F4D77F] text-xs font-mono font-bold">{item.phase}</span>
                         </div>
                         {/* Glow on hover */}
-                        <div className="absolute inset-0 rounded-xl bg-[#D4AF37]/20 blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                        <div className="absolute inset-0 rounded-xl bg-[#D4AF37]/25 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                       </div>
                       
                       {/* Content */}
@@ -372,7 +421,7 @@ function OurStory() {
                         <h4 className="text-white font-semibold text-base mb-1 tracking-tight group-hover:text-[#F4D77F] transition-colors duration-300">
                           {item.title}
                         </h4>
-                        <p className="text-white/60 text-sm leading-relaxed tracking-tight">
+                        <p className="text-white/55 text-sm leading-relaxed tracking-tight">
                           {item.description}
                         </p>
                       </div>
@@ -381,7 +430,7 @@ function OurStory() {
                 </div>
 
                 {/* Bottom tagline */}
-                <div className="mt-8 pt-6 border-t border-[#D4AF37]/30">
+                <div className="mt-8 pt-6 border-t border-[#D4AF37]/20">
                   <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm font-semibold tracking-tight" style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}>
                     <span className="text-[#F4D77F]">Real capital</span>
                     <span className="text-white/30">·</span>
