@@ -168,11 +168,70 @@ function Hero() {
   );
 }
 
+// Spotlight Box Component - cursor-following reveal effect
+function SpotlightBox({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  const boxRef = React.useRef<HTMLDivElement>(null);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [isHovering, setIsHovering] = useState(false);
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (boxRef.current) {
+      const rect = boxRef.current.getBoundingClientRect();
+      setMousePos({
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top
+      });
+    }
+  };
+
+  return (
+    <div 
+      ref={boxRef}
+      className={`relative overflow-hidden ${className}`}
+      onMouseMove={handleMouseMove}
+      onMouseEnter={() => setIsHovering(true)}
+      onMouseLeave={() => setIsHovering(false)}
+    >
+      {/* Circuit background that shows through spotlight */}
+      <div 
+        className="absolute inset-0 transition-opacity duration-300"
+        style={{
+          backgroundImage: `url(${circuitTransitionBg})`,
+          backgroundPosition: 'center',
+          backgroundSize: 'cover',
+          opacity: isHovering ? 1 : 0,
+          maskImage: isHovering 
+            ? `radial-gradient(circle 120px at ${mousePos.x}px ${mousePos.y}px, black 0%, transparent 100%)`
+            : 'none',
+          WebkitMaskImage: isHovering 
+            ? `radial-gradient(circle 120px at ${mousePos.x}px ${mousePos.y}px, black 0%, transparent 100%)`
+            : 'none'
+        }}
+      />
+      
+      {/* Spotlight glow effect */}
+      <div 
+        className="absolute pointer-events-none transition-opacity duration-300"
+        style={{
+          width: '240px',
+          height: '240px',
+          left: mousePos.x - 120,
+          top: mousePos.y - 120,
+          background: 'radial-gradient(circle, rgba(212,175,55,0.15) 0%, transparent 70%)',
+          opacity: isHovering ? 1 : 0
+        }}
+      />
+      
+      {/* Content */}
+      <div className="relative z-10">
+        {children}
+      </div>
+    </div>
+  );
+}
+
 // Section 2: Our Story - Premium Two-Column Layout with Circuit Background
 function OurStory() {
-  const [isHovered, setIsHovered] = useState(false);
-  const sectionRef = React.useRef<HTMLElement>(null);
-  
   const evolutionPhases = [
     { phase: "01", title: "Brokerage", description: "Helped founders exit $100M+ in digital businesses" },
     { phase: "02", title: "Discovery", description: "Identified the broken parts of the industry" },
@@ -180,83 +239,45 @@ function OurStory() {
     { phase: "04", title: "Evolution", description: "Became the buyer we always wished existed" }
   ];
 
-  // Track mouse position relative to section
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (sectionRef.current) {
-      const rect = sectionRef.current.getBoundingClientRect();
-      const isInside = (
-        e.clientX >= rect.left &&
-        e.clientX <= rect.right &&
-        e.clientY >= rect.top &&
-        e.clientY <= rect.bottom
-      );
-      setIsHovered(isInside);
-    }
-  };
-
   return (
-    <section 
-      ref={sectionRef}
-      className="py-24 md:py-32 relative overflow-hidden"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-      {/* Base dark background - fades completely on hover */}
-      <div 
-        className="absolute inset-0 bg-[#0A0C10] transition-opacity duration-500 ease-out pointer-events-none"
-        style={{ opacity: isHovered ? 0 : 1 }}
-      />
+    <section className="py-24 md:py-32 relative overflow-hidden group">
+      {/* Base dark background - subtle fade on section hover */}
+      <div className="absolute inset-0 bg-[#0A0C10] transition-opacity duration-700 ease-out pointer-events-none group-hover:opacity-80" />
       
       {/* Circuit chip background image - anchored right */}
       <div className="absolute inset-0 pointer-events-none">
         <div 
-          className="absolute inset-0 transition-transform duration-500 ease-out"
+          className="absolute inset-0 transition-all duration-700 ease-out group-hover:scale-[1.01]"
           style={{
             backgroundImage: `url(${circuitTransitionBg})`,
             backgroundPosition: 'center right',
             backgroundSize: 'cover',
-            backgroundRepeat: 'no-repeat',
-            transform: isHovered ? 'scale(1.03)' : 'scale(1)'
+            backgroundRepeat: 'no-repeat'
           }}
         />
         
-        {/* Gradient fades for seamless blend - fade out on hover */}
+        {/* Gradient fades for seamless blend - slightly reduce on hover */}
         {/* Top fade */}
         <div 
-          className="absolute inset-x-0 top-0 h-1/4 transition-opacity duration-500 ease-out" 
-          style={{ 
-            background: 'linear-gradient(to bottom, #0A0C10 0%, transparent 100%)',
-            opacity: isHovered ? 0 : 1
-          }} 
+          className="absolute inset-x-0 top-0 h-1/4 transition-opacity duration-700 ease-out group-hover:opacity-70" 
+          style={{ background: 'linear-gradient(to bottom, #0A0C10 0%, transparent 100%)' }} 
         />
         
         {/* Bottom fade */}
         <div 
-          className="absolute inset-x-0 bottom-0 h-1/4 transition-opacity duration-500 ease-out" 
-          style={{ 
-            background: 'linear-gradient(to top, #0A0C10 0%, transparent 100%)',
-            opacity: isHovered ? 0 : 1
-          }} 
+          className="absolute inset-x-0 bottom-0 h-1/4 transition-opacity duration-700 ease-out group-hover:opacity-70" 
+          style={{ background: 'linear-gradient(to top, #0A0C10 0%, transparent 100%)' }} 
         />
         
-        {/* Left fade - keeps some opacity for text readability */}
+        {/* Left fade - keeps readability */}
         <div 
-          className="absolute inset-y-0 left-0 w-2/3 md:w-1/2 transition-opacity duration-500 ease-out" 
-          style={{ 
-            background: 'linear-gradient(to right, #0A0C10 0%, #0A0C10 40%, transparent 100%)',
-            opacity: isHovered ? 0.3 : 1
-          }} 
+          className="absolute inset-y-0 left-0 w-2/3 md:w-1/2 transition-opacity duration-700 ease-out group-hover:opacity-85" 
+          style={{ background: 'linear-gradient(to right, #0A0C10 0%, #0A0C10 40%, transparent 100%)' }} 
         />
       </div>
       
-      {/* Subtle gold ambient glow - intensifies on hover */}
-      <div 
-        className="absolute top-1/3 right-1/4 w-[400px] h-[400px] bg-[#D4AF37]/8 rounded-full blur-[150px] pointer-events-none transition-all duration-500"
-        style={{ 
-          opacity: isHovered ? 1 : 0.8,
-          transform: isHovered ? 'scale(1.5)' : 'scale(1)'
-        }}
-      />
+      {/* Subtle gold ambient glow */}
+      <div className="absolute top-1/3 right-1/4 w-[400px] h-[400px] bg-[#D4AF37]/8 rounded-full blur-[150px] pointer-events-none transition-all duration-700 group-hover:opacity-100 group-hover:scale-110" />
       
       <div className="max-w-7xl mx-auto px-6 relative z-10">
         {/* Section header */}
@@ -311,7 +332,7 @@ function OurStory() {
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
-            <div className="relative p-8 md:p-10 rounded-3xl border border-[#D4AF37]/20 bg-[rgba(255,255,255,0.02)] backdrop-blur-[30px] overflow-hidden">
+            <SpotlightBox className="p-8 md:p-10 rounded-3xl border border-[#D4AF37]/20 bg-[rgba(255,255,255,0.02)] backdrop-blur-[30px]">
               {/* Background glow */}
               <div className="absolute -top-20 -right-20 w-40 h-40 bg-[#D4AF37]/10 rounded-full blur-[80px]" />
               <div className="absolute -bottom-20 -left-20 w-32 h-32 bg-[#F4D77F]/5 rounded-full blur-[60px]" />
@@ -379,7 +400,7 @@ function OurStory() {
                   </div>
                 </div>
               </div>
-            </div>
+            </SpotlightBox>
           </motion.div>
         </div>
       </div>
