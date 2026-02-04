@@ -403,14 +403,34 @@ function OurStory() {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.2 }}
+            className="relative"
           >
-            <SpotlightBox className="p-8 md:p-10 rounded-3xl border border-[#D4AF37]/20 bg-[rgba(255,255,255,0.02)] backdrop-blur-[30px]">
+            {/* Background circuit image behind the card - more visible with gold tint */}
+            <div className="absolute -inset-6 md:-inset-10 -z-10 overflow-hidden rounded-3xl">
+              <div 
+                className="absolute inset-0"
+                style={{
+                  backgroundImage: `url(${circuitTransitionBg})`,
+                  backgroundPosition: 'center',
+                  backgroundSize: 'cover',
+                  opacity: 0.3
+                }}
+              />
+              {/* Gold color overlay for pop */}
+              <div className="absolute inset-0 bg-gradient-to-br from-[#D4AF37]/20 via-[#F4D77F]/15 to-transparent" />
+              {/* Edge fades */}
+              <div className="absolute inset-0 bg-gradient-to-r from-[#0A0C10] via-transparent to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0A0C10]/70 via-transparent to-[#0A0C10]/50" />
+            </div>
+            
+            {/* Glassmorphism card */}
+            <SpotlightBox className="p-8 md:p-10 rounded-3xl border border-[#D4AF37]/40 bg-[rgba(10,12,16,0.65)] backdrop-blur-[50px] shadow-2xl shadow-[#D4AF37]/15">
               {/* Background glow */}
-              <div className="absolute -top-20 -right-20 w-40 h-40 bg-[#D4AF37]/10 rounded-full blur-[80px]" />
-              <div className="absolute -bottom-20 -left-20 w-32 h-32 bg-[#F4D77F]/5 rounded-full blur-[60px]" />
+              <div className="absolute -top-20 -right-20 w-52 h-52 bg-[#D4AF37]/20 rounded-full blur-[100px]" />
+              <div className="absolute -bottom-20 -left-20 w-44 h-44 bg-[#F4D77F]/15 rounded-full blur-[80px]" />
               
-              {/* Circuit pattern inside */}
-              <div className="absolute inset-0 opacity-[0.02]" style={{
+              {/* Circuit pattern inside - subtle */}
+              <div className="absolute inset-0 opacity-[0.04] rounded-3xl overflow-hidden" style={{
                 backgroundImage: `url(${bgCircuitPattern})`,
                 backgroundSize: '150px 150px'
               }} />
@@ -441,7 +461,7 @@ function OurStory() {
                       
                       {/* Phase indicator */}
                       <div className="relative flex-shrink-0">
-                        <div className="w-10 h-10 rounded-xl border border-[#D4AF37]/30 bg-[#0A0C10] flex items-center justify-center group-hover:border-[#D4AF37]/60 group-hover:bg-[#D4AF37]/10 transition-all duration-300">
+                        <div className="w-10 h-10 rounded-xl border border-[#D4AF37]/30 bg-[#0A0C10]/60 flex items-center justify-center group-hover:border-[#D4AF37]/60 group-hover:bg-[#D4AF37]/10 transition-all duration-300">
                           <span className="text-[#F4D77F] text-xs font-mono font-bold">{item.phase}</span>
                         </div>
                         {/* Glow on hover */}
@@ -453,7 +473,7 @@ function OurStory() {
                         <h4 className="text-white font-semibold text-base mb-1 tracking-tight group-hover:text-[#F4D77F] transition-colors duration-300">
                           {item.title}
                         </h4>
-                        <p className="text-white/50 text-sm leading-relaxed tracking-tight">
+                        <p className="text-white/60 text-sm leading-relaxed tracking-tight">
                           {item.description}
                         </p>
                       </div>
@@ -462,12 +482,12 @@ function OurStory() {
                 </div>
 
                 {/* Bottom tagline */}
-                <div className="mt-8 pt-6 border-t border-[rgba(255,255,255,0.06)]">
+                <div className="mt-8 pt-6 border-t border-[#D4AF37]/30">
                   <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm font-semibold tracking-tight" style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}>
                     <span className="text-[#F4D77F]">Real capital</span>
-                    <span className="text-white/20">·</span>
+                    <span className="text-white/30">·</span>
                     <span className="text-white">Real process</span>
-                    <span className="text-white/20">·</span>
+                    <span className="text-white/30">·</span>
                     <span className="text-[#F4D77F]">Real timeline</span>
                   </div>
                 </div>
