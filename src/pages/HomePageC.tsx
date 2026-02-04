@@ -167,18 +167,18 @@ function Hero() {
   );
 }
 
-// Section 2: Our Story - The Problem We Solved
+// Section 2: Our Story - Premium Two-Column Layout
 function OurStory() {
-  const painPoints = [
-    { label: "Buyers who never close", delay: 0 },
-    { label: "NDAs that lead nowhere", delay: 0.1 },
-    { label: "LOIs that collapse", delay: 0.2 },
-    { label: "Months wasted", delay: 0.3 }
+  const evolutionPhases = [
+    { phase: "01", title: "Brokerage", description: "Helped founders exit $100M+ in digital businesses" },
+    { phase: "02", title: "Discovery", description: "Identified the broken parts of the industry" },
+    { phase: "03", title: "Innovation", description: "Built a faster, cleaner, founder-first process" },
+    { phase: "04", title: "Evolution", description: "Became the buyer we always wished existed" }
   ];
 
   return (
-    <section className="py-20 md:py-28 relative overflow-hidden">
-      {/* Background with circuit pattern */}
+    <section className="py-24 md:py-32 relative overflow-hidden">
+      {/* Background */}
       <div className="absolute inset-0 bg-gradient-to-b from-[#0A0C10] via-[#080A0E] to-[#0A0C10]" />
       
       {/* Circuit grid overlay */}
@@ -191,118 +191,133 @@ function OurStory() {
       }} />
       
       {/* Glowing orbs */}
-      <div className="absolute top-1/4 left-1/4 w-[400px] h-[400px] bg-[#D4AF37]/5 rounded-full blur-[150px]" />
-      <div className="absolute bottom-1/4 right-1/4 w-[300px] h-[300px] bg-red-500/5 rounded-full blur-[120px]" />
+      <div className="absolute top-1/4 left-0 w-[500px] h-[500px] bg-[#D4AF37]/5 rounded-full blur-[180px]" />
+      <div className="absolute bottom-1/4 right-0 w-[400px] h-[400px] bg-[#F4D77F]/5 rounded-full blur-[150px]" />
       
-      <div className="max-w-5xl mx-auto px-6 relative z-10">
-        {/* Hook */}
+      <div className="max-w-7xl mx-auto px-6 relative z-10">
+        {/* Section header */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center mb-16"
+          className="mb-16"
         >
-          <p className="text-[#F4D77F] text-sm font-medium tracking-widest uppercase mb-6">Our Origin</p>
-          <h2 className="text-3xl md:text-5xl lg:text-6xl font-bold text-white mb-6 tracking-[-0.02em] leading-[1.1]" style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}>
-            We didn't start as buyers.
-            <br />
-            <span className="text-white/50">We started on your side.</span>
-          </h2>
-          <p className="text-lg text-white/60 max-w-2xl mx-auto tracking-tight">
-            For years, we helped founders exit. We saw every deal fall apart the same way.
-          </p>
+          <p className="text-[#F4D77F] text-sm font-medium tracking-widest uppercase mb-4">Our Origin</p>
         </motion.div>
 
-        {/* Pain Points - Circuit Node Design */}
-        <div className="relative mb-16">
-          {/* Connecting line */}
-          <div className="absolute top-1/2 left-0 right-0 h-px bg-gradient-to-r from-transparent via-red-500/30 to-transparent hidden md:block" />
-          
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-            {painPoints.map((point, idx) => (
-              <motion.div
-                key={idx}
-                initial={{ opacity: 0, scale: 0.8 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ delay: point.delay, duration: 0.4 }}
-                className="relative group"
-              >
-                {/* Circuit node */}
-                <div className="relative p-6 rounded-2xl border border-red-500/20 bg-[#0A0C10]/80 backdrop-blur-sm hover:border-red-500/40 transition-all duration-300">
-                  {/* Pulse dot */}
-                  <div className="absolute -top-1.5 -right-1.5 w-3 h-3">
-                    <span className="absolute inset-0 rounded-full bg-red-500/60 animate-ping" />
-                    <span className="absolute inset-0 rounded-full bg-red-500" />
-                  </div>
-                  
-                  {/* Index number */}
-                  <div className="text-red-500/30 text-xs font-mono mb-3">0{idx + 1}</div>
-                  
-                  {/* Label */}
-                  <p className="text-white/80 text-sm md:text-base font-medium tracking-tight leading-snug">
-                    {point.label}
-                  </p>
-                  
-                  {/* Corner accents */}
-                  <div className="absolute bottom-2 left-2 w-4 h-4 border-l border-b border-red-500/20" />
-                  <div className="absolute top-2 right-2 w-4 h-4 border-r border-t border-red-500/20" />
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-
-        {/* Pivot Statement */}
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-12"
-        >
-          <div className="inline-flex items-center gap-4 mb-8">
-            <div className="h-px w-12 bg-gradient-to-r from-transparent to-[#D4AF37]/50" />
-            <span className="text-[#F4D77F] text-sm font-medium tracking-widest uppercase">The Shift</span>
-            <div className="h-px w-12 bg-gradient-to-l from-transparent to-[#D4AF37]/50" />
-          </div>
-          
-          <p className="text-2xl md:text-3xl text-white font-semibold tracking-tight mb-4" style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}>
-            So we became the buyer we wished existed.
-          </p>
-        </motion.div>
-
-        {/* Payoff - The Promise */}
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="relative"
-        >
-          <div className="relative p-8 md:p-12 rounded-3xl border border-[#D4AF37]/20 bg-gradient-to-br from-[#D4AF37]/5 to-transparent backdrop-blur-sm overflow-hidden">
-            {/* Circuit pattern inside */}
-            <div className="absolute inset-0 opacity-[0.02]" style={{
-              backgroundImage: `url(${bgCircuitPattern})`,
-              backgroundSize: '200px 200px'
-            }} />
+        {/* Two Column Layout */}
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-start">
+          {/* LEFT COLUMN - Story */}
+          <motion.div 
+            initial={{ opacity: 0, x: -30 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+          >
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-3 tracking-[-0.02em] leading-[1.1]" style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}>
+              We didn't start as buyers.
+            </h2>
+            <p className="text-xl md:text-2xl text-[#F4D77F] font-semibold mb-8 tracking-tight" style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}>
+              We started by helping founders exit.
+            </p>
             
-            {/* Glow */}
-            <div className="absolute -top-20 -right-20 w-40 h-40 bg-[#D4AF37]/10 rounded-full blur-[60px]" />
-            
-            <div className="relative text-center">
-              <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xl md:text-2xl lg:text-3xl font-bold tracking-tight" style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}>
-                <span className="text-[#F4D77F]">Real capital.</span>
-                <span className="text-white/40">|</span>
-                <span className="text-white">Real process.</span>
-                <span className="text-white/40">|</span>
-                <span className="text-[#F4D77F]">Real timeline.</span>
-              </div>
-              
-              <p className="mt-6 text-white/50 text-sm md:text-base tracking-tight">
-                No middlemen. No games. No 6-month rollercoasters.
+            <div className="space-y-5 text-white/70 leading-relaxed tracking-tight">
+              <p>
+                We didn't start as buyers — we started on the other side. For years we ran Exclusive Business Brokers and watched great founders get dragged through a broken system. NDAs that led nowhere. LOIs that collapsed before funding. "Buyers" who were never actually buyers. Deals that should've taken weeks dragged into 6–12-month nightmares.
+              </p>
+              <p>
+                After seeing too many founders lose time, money, and momentum, we built something different. <span className="text-white font-medium">Next Tier Partners is the evolution</span> — a real buyer with real capital, a real process, and a real timeline. No middlemen, no games, no waiting.
+              </p>
+              <p>
+                If your business is a fit, we acquire it directly. And if not, we still guide you through our vetted exit network using the same fast, founder-first process.
               </p>
             </div>
-          </div>
-        </motion.div>
+
+            {/* Bottom accent */}
+            <div className="mt-10 flex items-center gap-4">
+              <div className="h-px flex-1 bg-gradient-to-r from-[#D4AF37]/40 to-transparent" />
+              <span className="text-[#F4D77F]/60 text-xs font-medium tracking-widest uppercase">Built Different</span>
+            </div>
+          </motion.div>
+
+          {/* RIGHT COLUMN - Evolution Timeline */}
+          <motion.div 
+            initial={{ opacity: 0, x: 30 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
+            <div className="relative p-8 md:p-10 rounded-3xl border border-[#D4AF37]/20 bg-[rgba(255,255,255,0.02)] backdrop-blur-[30px] overflow-hidden">
+              {/* Background glow */}
+              <div className="absolute -top-20 -right-20 w-40 h-40 bg-[#D4AF37]/10 rounded-full blur-[80px]" />
+              <div className="absolute -bottom-20 -left-20 w-32 h-32 bg-[#F4D77F]/5 rounded-full blur-[60px]" />
+              
+              {/* Circuit pattern inside */}
+              <div className="absolute inset-0 opacity-[0.02]" style={{
+                backgroundImage: `url(${bgCircuitPattern})`,
+                backgroundSize: '150px 150px'
+              }} />
+              
+              <div className="relative">
+                <h3 className="text-xl md:text-2xl font-bold text-white mb-8 tracking-tight flex items-center gap-3" style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}>
+                  <span className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#F4D77F] to-[#D4AF37] flex items-center justify-center">
+                    <Sparkles className="w-4 h-4 text-[#0A0C10]" />
+                  </span>
+                  How We Evolved
+                </h3>
+                
+                {/* Timeline */}
+                <div className="space-y-6">
+                  {evolutionPhases.map((item, idx) => (
+                    <motion.div
+                      key={idx}
+                      initial={{ opacity: 0, y: 20 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: 0.3 + idx * 0.1 }}
+                      className="relative flex gap-4 group"
+                    >
+                      {/* Timeline line */}
+                      {idx < evolutionPhases.length - 1 && (
+                        <div className="absolute left-[19px] top-10 bottom-0 w-px bg-gradient-to-b from-[#D4AF37]/40 to-[#D4AF37]/10" />
+                      )}
+                      
+                      {/* Phase indicator */}
+                      <div className="relative flex-shrink-0">
+                        <div className="w-10 h-10 rounded-xl border border-[#D4AF37]/30 bg-[#0A0C10] flex items-center justify-center group-hover:border-[#D4AF37]/60 group-hover:bg-[#D4AF37]/10 transition-all duration-300">
+                          <span className="text-[#F4D77F] text-xs font-mono font-bold">{item.phase}</span>
+                        </div>
+                        {/* Glow on hover */}
+                        <div className="absolute inset-0 rounded-xl bg-[#D4AF37]/20 blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                      </div>
+                      
+                      {/* Content */}
+                      <div className="pt-1.5">
+                        <h4 className="text-white font-semibold text-base mb-1 tracking-tight group-hover:text-[#F4D77F] transition-colors duration-300">
+                          {item.title}
+                        </h4>
+                        <p className="text-white/50 text-sm leading-relaxed tracking-tight">
+                          {item.description}
+                        </p>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+
+                {/* Bottom tagline */}
+                <div className="mt-8 pt-6 border-t border-[rgba(255,255,255,0.06)]">
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm font-semibold tracking-tight" style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}>
+                    <span className="text-[#F4D77F]">Real capital</span>
+                    <span className="text-white/20">·</span>
+                    <span className="text-white">Real process</span>
+                    <span className="text-white/20">·</span>
+                    <span className="text-[#F4D77F]">Real timeline</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </div>
       </div>
     </section>
   );
