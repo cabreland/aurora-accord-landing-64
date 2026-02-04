@@ -17,6 +17,7 @@ import circuitTransitionBg from '@/assets/circuit-transition-bg.png';
 import decisionForkPath from '@/assets/decision-fork-path.jpg';
 import goldCircuitReveal from '@/assets/gold-circuit-reveal.png';
 import goldChipStack from '@/assets/gold-chip-stack.png';
+import nextTierCtaBg from '@/assets/next-tier-cta-bg.jpg';
 
 
 const HomePageC = () => {
@@ -709,19 +710,28 @@ function FinalCTA() {
       {/* Base dark background */}
       <div className="absolute inset-0 bg-[#0A0C10]" />
       
+      {/* Background image - cityscape with circuits */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-40"
+        style={{
+          backgroundImage: `url(${nextTierCtaBg})`
+        }}
+      />
+      
+      {/* Gradient overlays for text readability */}
+      <div className="absolute inset-0 bg-gradient-to-t from-[#0A0C10] via-[#0A0C10]/70 to-[#0A0C10]/50" />
+      <div className="absolute inset-0 bg-gradient-to-b from-[#0A0C10] via-transparent to-[#0A0C10]" />
+      
       {/* Vignette effect - darker edges draw focus to center */}
       <div 
         className="absolute inset-0"
         style={{
-          background: 'radial-gradient(ellipse 80% 60% at 50% 50%, transparent 0%, #0A0C10 100%)'
+          background: 'radial-gradient(ellipse 70% 50% at 50% 50%, transparent 0%, #0A0C10 100%)'
         }}
       />
       
       {/* Central gold spotlight glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[500px] bg-gradient-to-br from-[#D4AF37]/12 via-[#F4D77F]/8 to-transparent rounded-full blur-[120px]" />
-      
-      {/* Subtle secondary glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/3 w-[400px] h-[300px] bg-[#F4D77F]/10 rounded-full blur-[80px]" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[500px] bg-gradient-to-br from-[#D4AF37]/15 via-[#F4D77F]/10 to-transparent rounded-full blur-[120px]" />
       
       <div className="max-w-4xl mx-auto px-6 relative z-10 text-center">
         <motion.div
@@ -729,19 +739,19 @@ function FinalCTA() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
         >
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] backdrop-blur-[30px] mb-8">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[rgba(0,0,0,0.5)] border border-[rgba(255,255,255,0.1)] backdrop-blur-[30px] mb-8">
             <Sparkles className="w-4 h-4 text-[#F4D77F]" />
-            <span className="text-sm text-white/70 tracking-tight">Ready to Exit?</span>
+            <span className="text-sm text-white/80 tracking-tight">Ready to Exit?</span>
           </div>
           
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 tracking-[-0.02em]" style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}>
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 tracking-[-0.02em] drop-shadow-lg" style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}>
             Skip the 12-month nightmare.{' '}
             <span className="bg-gradient-to-r from-[#F4D77F] via-[#D4AF37] to-[#F4D77F] bg-clip-text text-transparent">
               Get an offer in 7 days.
             </span>
           </h2>
           
-          <p className="text-lg text-white/60 mb-10 max-w-2xl mx-auto tracking-tight">
+          <p className="text-lg text-white/70 mb-10 max-w-2xl mx-auto tracking-tight drop-shadow-md">
             Apply below for a confidential review. We'll assess your business and present an offer within 7 days—no pressure, no commitment, no tire-kickers.
           </p>
           
@@ -755,14 +765,14 @@ function FinalCTA() {
             </Button>
           </div>
           
-          <div className="flex items-center justify-center gap-8 text-sm text-white/40 flex-wrap">
+          <div className="flex items-center justify-center gap-8 text-sm text-white/50 flex-wrap">
             {[
               'Cash payment',
               '45-60 day close',
               'Completely confidential'
             ].map((item, i) => (
               <div key={i} className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-[#F4D77F]/60" />
+                <CheckCircle2 className="w-4 h-4 text-[#F4D77F]/70" />
                 <span className="tracking-tight">{item}</span>
               </div>
             ))}
