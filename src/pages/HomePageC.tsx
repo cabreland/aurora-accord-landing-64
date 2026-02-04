@@ -170,6 +170,9 @@ function Hero() {
 
 // Section 2: Our Story - Premium Two-Column Layout with Circuit Background
 function OurStory() {
+  const [isHovered, setIsHovered] = useState(false);
+  const sectionRef = React.useRef<HTMLElement>(null);
+  
   const evolutionPhases = [
     { phase: "01", title: "Brokerage", description: "Helped founders exit $100M+ in digital businesses" },
     { phase: "02", title: "Discovery", description: "Identified the broken parts of the industry" },
@@ -177,45 +180,83 @@ function OurStory() {
     { phase: "04", title: "Evolution", description: "Became the buyer we always wished existed" }
   ];
 
+  // Track mouse position relative to section
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (sectionRef.current) {
+      const rect = sectionRef.current.getBoundingClientRect();
+      const isInside = (
+        e.clientX >= rect.left &&
+        e.clientX <= rect.right &&
+        e.clientY >= rect.top &&
+        e.clientY <= rect.bottom
+      );
+      setIsHovered(isInside);
+    }
+  };
+
   return (
-    <section className="group py-24 md:py-32 relative overflow-hidden">
-      {/* Base dark background - fades on hover */}
-      <div className="absolute inset-0 bg-[#0A0C10] transition-opacity duration-700 ease-out group-hover:opacity-30" />
+    <section 
+      ref={sectionRef}
+      className="py-24 md:py-32 relative overflow-hidden"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      {/* Base dark background - fades completely on hover */}
+      <div 
+        className="absolute inset-0 bg-[#0A0C10] transition-opacity duration-500 ease-out pointer-events-none"
+        style={{ opacity: isHovered ? 0 : 1 }}
+      />
       
       {/* Circuit chip background image - anchored right */}
-      <div className="absolute inset-0">
+      <div className="absolute inset-0 pointer-events-none">
         <div 
-          className="absolute inset-0 transition-transform duration-700 ease-out group-hover:scale-[1.02]"
+          className="absolute inset-0 transition-transform duration-500 ease-out"
           style={{
             backgroundImage: `url(${circuitTransitionBg})`,
             backgroundPosition: 'center right',
             backgroundSize: 'cover',
-            backgroundRepeat: 'no-repeat'
+            backgroundRepeat: 'no-repeat',
+            transform: isHovered ? 'scale(1.03)' : 'scale(1)'
           }}
         />
         
         {/* Gradient fades for seamless blend - fade out on hover */}
         {/* Top fade */}
         <div 
-          className="absolute inset-x-0 top-0 h-1/4 pointer-events-none transition-opacity duration-700 ease-out group-hover:opacity-20" 
-          style={{ background: 'linear-gradient(to bottom, #0A0C10 0%, transparent 100%)' }} 
+          className="absolute inset-x-0 top-0 h-1/4 transition-opacity duration-500 ease-out" 
+          style={{ 
+            background: 'linear-gradient(to bottom, #0A0C10 0%, transparent 100%)',
+            opacity: isHovered ? 0 : 1
+          }} 
         />
         
         {/* Bottom fade */}
         <div 
-          className="absolute inset-x-0 bottom-0 h-1/4 pointer-events-none transition-opacity duration-700 ease-out group-hover:opacity-20" 
-          style={{ background: 'linear-gradient(to top, #0A0C10 0%, transparent 100%)' }} 
+          className="absolute inset-x-0 bottom-0 h-1/4 transition-opacity duration-500 ease-out" 
+          style={{ 
+            background: 'linear-gradient(to top, #0A0C10 0%, transparent 100%)',
+            opacity: isHovered ? 0 : 1
+          }} 
         />
         
-        {/* Left fade - ensures text readability */}
+        {/* Left fade - keeps some opacity for text readability */}
         <div 
-          className="absolute inset-y-0 left-0 w-2/3 md:w-1/2 pointer-events-none transition-opacity duration-700 ease-out group-hover:opacity-50" 
-          style={{ background: 'linear-gradient(to right, #0A0C10 0%, #0A0C10 40%, transparent 100%)' }} 
+          className="absolute inset-y-0 left-0 w-2/3 md:w-1/2 transition-opacity duration-500 ease-out" 
+          style={{ 
+            background: 'linear-gradient(to right, #0A0C10 0%, #0A0C10 40%, transparent 100%)',
+            opacity: isHovered ? 0.3 : 1
+          }} 
         />
       </div>
       
       {/* Subtle gold ambient glow - intensifies on hover */}
-      <div className="absolute top-1/3 right-1/4 w-[400px] h-[400px] bg-[#D4AF37]/8 rounded-full blur-[150px] pointer-events-none transition-all duration-700 group-hover:opacity-100 group-hover:scale-125" />
+      <div 
+        className="absolute top-1/3 right-1/4 w-[400px] h-[400px] bg-[#D4AF37]/8 rounded-full blur-[150px] pointer-events-none transition-all duration-500"
+        style={{ 
+          opacity: isHovered ? 1 : 0.8,
+          transform: isHovered ? 'scale(1.5)' : 'scale(1)'
+        }}
+      />
       
       <div className="max-w-7xl mx-auto px-6 relative z-10">
         {/* Section header */}
