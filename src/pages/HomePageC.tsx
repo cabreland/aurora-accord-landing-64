@@ -22,7 +22,8 @@ function GlobalCursorSpotlight() {
   const [isActive, setIsActive] = useState(false);
 
   const handleMouseMove = useCallback((e: MouseEvent) => {
-    setMousePos({ x: e.clientX, y: e.clientY + window.scrollY });
+    // Use clientX/Y directly since container is fixed to viewport
+    setMousePos({ x: e.clientX, y: e.clientY });
     if (!isActive) setIsActive(true);
   }, [isActive]);
 
@@ -42,34 +43,30 @@ function GlobalCursorSpotlight() {
   }, [handleMouseMove, handleMouseLeave]);
 
   return (
-    <div className="fixed inset-0 pointer-events-none z-[1] overflow-hidden">
-      {/* Circuit pattern that reveals through spotlight */}
+    <div className="fixed inset-0 pointer-events-none z-[1]">
+      {/* Circuit pattern that reveals through spotlight - fixed to viewport */}
       <div 
-        className="absolute transition-opacity duration-500 ease-out"
+        className="absolute inset-0 transition-opacity duration-300 ease-out"
         style={{
-          top: 0,
-          left: 0,
-          right: 0,
-          height: '200vh', // Extra height for scroll
           backgroundImage: `url(${circuitTransitionBg})`,
           backgroundPosition: 'center',
           backgroundSize: 'cover',
           backgroundRepeat: 'no-repeat',
-          opacity: isActive ? 0.6 : 0,
-          maskImage: `radial-gradient(circle 180px at ${mousePos.x}px ${mousePos.y}px, black 0%, transparent 100%)`,
-          WebkitMaskImage: `radial-gradient(circle 180px at ${mousePos.x}px ${mousePos.y}px, black 0%, transparent 100%)`
+          opacity: isActive ? 0.5 : 0,
+          maskImage: `radial-gradient(circle 150px at ${mousePos.x}px ${mousePos.y}px, black 0%, transparent 100%)`,
+          WebkitMaskImage: `radial-gradient(circle 150px at ${mousePos.x}px ${mousePos.y}px, black 0%, transparent 100%)`
         }}
       />
       
       {/* Gold glow following cursor */}
       <div 
-        className="absolute pointer-events-none transition-opacity duration-300 ease-out"
+        className="absolute pointer-events-none transition-opacity duration-200 ease-out"
         style={{
-          width: '400px',
-          height: '400px',
-          left: mousePos.x - 200,
-          top: mousePos.y - 200,
-          background: 'radial-gradient(circle, rgba(212,175,55,0.08) 0%, transparent 70%)',
+          width: '350px',
+          height: '350px',
+          left: mousePos.x - 175,
+          top: mousePos.y - 175,
+          background: 'radial-gradient(circle, rgba(212,175,55,0.12) 0%, transparent 70%)',
           opacity: isActive ? 1 : 0
         }}
       />
