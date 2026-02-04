@@ -15,7 +15,7 @@ import bgCircuitPattern from '@/assets/bg-circuit-pattern.png';
 import bgCircuitCta from '@/assets/bg-circuit-cta.png';
 import circuitTransitionBg from '@/assets/circuit-transition-bg.png';
 import decisionForkPath from '@/assets/decision-fork-path.jpg';
-import ntpCircuitPattern from '@/assets/ntp-circuit-pattern.png';
+import goldCircuitReveal from '@/assets/gold-circuit-reveal.png';
 
 // Global Cursor Spotlight - reveals circuits across the entire page
 function GlobalCursorSpotlight() {
@@ -59,7 +59,7 @@ function GlobalCursorSpotlight() {
       <div 
         className="absolute inset-0"
         style={{
-          backgroundImage: `url(${ntpCircuitPattern})`,
+          backgroundImage: `url(${goldCircuitReveal})`,
           backgroundPosition: `0px ${-scrollY}px`,
           backgroundSize: '500px 500px',
           backgroundRepeat: 'repeat',
