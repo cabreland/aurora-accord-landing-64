@@ -619,8 +619,17 @@ function FAQ() {
 
   return (
     <section id="faq" className="py-16 md:py-20 relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-b from-[#0A0C10] via-[#0D0F14] to-[#0A0C10]" />
-      <div className="absolute top-1/2 left-1/2 w-[600px] h-[600px] bg-gradient-to-br from-[#F4D77F]/5 to-[#D4AF37]/3 rounded-full blur-[180px] -translate-x-1/2 -translate-y-1/2" />
+      {/* Base dark background */}
+      <div className="absolute inset-0 bg-[#0A0C10]" />
+      
+      {/* Left-side asymmetric gold glow (balances right-heavy sections above) */}
+      <div className="absolute top-1/4 -left-20 w-[500px] h-[600px] bg-gradient-to-r from-[#D4AF37]/10 via-[#F4D77F]/6 to-transparent rounded-full blur-[100px]" />
+      
+      {/* Subtle center ambient glow */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-[#F4D77F]/4 rounded-full blur-[120px]" />
+      
+      {/* Bottom fade transition to CTA */}
+      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#0A0C10] to-transparent" />
       
       <div className="max-w-3xl mx-auto px-6 relative z-10">
         <motion.div 
