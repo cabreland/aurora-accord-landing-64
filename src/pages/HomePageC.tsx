@@ -54,16 +54,17 @@ function GlobalCursorSpotlight() {
   const maskY = mousePos.y + scrollY;
 
   return (
-    <div className="fixed inset-0 pointer-events-none z-0">
+    <div className="fixed inset-0 pointer-events-none z-[5]">
       {/* NTP circuit pattern that scrolls with page - revealed by cursor */}
       <div 
-        className="absolute inset-0 transition-opacity duration-300 ease-out"
+        className="absolute inset-0"
         style={{
           backgroundImage: `url(${ntpCircuitPattern})`,
           backgroundPosition: `0px ${-scrollY}px`,
           backgroundSize: '500px 500px',
           backgroundRepeat: 'repeat',
-          opacity: isActive ? 0.9 : 0,
+          opacity: isActive ? 0.85 : 0,
+          transition: 'opacity 0.15s ease-out',
           maskImage: `radial-gradient(circle 80px at ${mousePos.x}px ${mousePos.y}px, black 0%, transparent 100%)`,
           WebkitMaskImage: `radial-gradient(circle 80px at ${mousePos.x}px ${mousePos.y}px, black 0%, transparent 100%)`
         }}
@@ -71,14 +72,15 @@ function GlobalCursorSpotlight() {
       
       {/* Subtle gold glow following cursor */}
       <div 
-        className="absolute pointer-events-none transition-opacity duration-200 ease-out"
+        className="absolute pointer-events-none"
         style={{
           width: '180px',
           height: '180px',
           left: mousePos.x - 90,
           top: mousePos.y - 90,
-          background: 'radial-gradient(circle, rgba(244,215,127,0.18) 0%, rgba(212,175,55,0.08) 50%, transparent 70%)',
-          opacity: isActive ? 1 : 0
+          background: 'radial-gradient(circle, rgba(244,215,127,0.2) 0%, rgba(212,175,55,0.1) 50%, transparent 70%)',
+          opacity: isActive ? 1 : 0,
+          transition: 'opacity 0.15s ease-out'
         }}
       />
     </div>
