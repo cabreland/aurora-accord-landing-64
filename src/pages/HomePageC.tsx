@@ -6,10 +6,7 @@ import {
   CheckCircle2, 
   XCircle, 
   ChevronDown,
-  Sparkles,
-  Clock,
-  FileX,
-  Users
+  Sparkles
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import nextTierLogo from '@/assets/next-tier-logo.png';
@@ -172,163 +169,107 @@ function Hero() {
 
 // Section 2: Our Story - About Us
 function OurStory() {
-  const painCards = [
-    {
-      icon: <Clock className="w-6 h-6" />,
-      title: "6–12 months wasted",
-      description: "Endless NDAs, meetings, and due diligence cycles that drag on forever."
-    },
-    {
-      icon: <Users className="w-6 h-6" />,
-      title: "Tire-kickers everywhere",
-      description: "Unqualified buyers who waste your time with lowball offers."
-    },
-    {
-      icon: <FileX className="w-6 h-6" />,
-      title: "Broken promises and failed LOIs",
-      description: "Deals that collapse at the finish line after months of work."
-    }
-  ];
-
   return (
-    <section className="py-28 relative overflow-hidden">
+    <section className="py-24 relative overflow-hidden">
       {/* Background */}
       <div className="absolute inset-0 bg-gradient-to-b from-[#0A0C10] via-[#0D0F14] to-[#0A0C10]" />
       <div className="absolute top-1/4 left-0 w-[600px] h-[600px] bg-gradient-to-br from-[#F4D77F]/6 to-[#D4AF37]/3 rounded-full blur-[180px]" />
       
-      <div className="max-w-7xl mx-auto px-6 relative z-10">
+      <div className="max-w-3xl mx-auto px-6 relative z-10">
         {/* Section Header */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center mb-16"
+          className="text-center mb-12"
         >
-          <h2 className="text-3xl md:text-5xl font-bold text-white mb-4 tracking-[-0.02em]" style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}>
+          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4 tracking-[-0.02em]" style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}>
             Built From Inside the{' '}
             <span className="bg-gradient-to-r from-[#F4D77F] via-[#D4AF37] to-[#F4D77F] bg-clip-text text-transparent">
               Digital Exit Process
             </span>
           </h2>
-          <p className="text-lg text-white/60 max-w-2xl mx-auto tracking-tight">
+          <p className="text-lg text-white/60 tracking-tight">
             Why We Created a Better Way to Sell Your Business
           </p>
         </motion.div>
         
-        {/* Two Column Layout */}
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-start">
-          {/* Left Column - Story */}
-          <motion.div 
-            initial={{ opacity: 0, x: -20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            className="space-y-6"
-          >
-            <div className="space-y-5 text-white/80 leading-relaxed tracking-tight">
-              <p>
-                We didn't start as buyers. We started on the other side — representing founders just like you.
-              </p>
-              
-              <p>
-                For years, we ran Exclusive Business Brokers and helped founders exit over{' '}
-                <span className="text-[#F4D77F] font-semibold">$100M+ in digital companies</span>. We've seen every angle of the process — the good, the bad, and the downright unbearable.
-              </p>
-              
-              <p className="text-white/60">
-                Here's the part no one likes to admit:
-              </p>
-              
-              <ul className="space-y-2 pl-1">
-                {[
-                  "Most 'buyers' never close.",
-                  "Most NDAs lead nowhere.",
-                  "Most LOIs collapse before funding.",
-                  "And founders waste months on conversations that should've taken days."
-                ].map((item, idx) => (
-                  <li key={idx} className="flex items-start gap-3">
-                    <span className="text-[#F4D77F] mt-1">•</span>
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-              
-              <p>
-                We watched incredible businesses get tied up in endless diligence loops… only for the deal to die because the buyer wasn't real, wasn't funded, or wasn't serious.
-              </p>
-              
-              <p>
-                After years of watching founders lose time, money, and momentum…{' '}
-                <span className="text-white font-semibold">we built a better way.</span>
-              </p>
-              
-              <p className="text-[#F4D77F]/90 font-medium">
-                Next Tier Partners was created so we could be the buyer we always wished existed.
-              </p>
-              
-              <div className="pt-2 space-y-2">
-                <p className="text-white font-semibold">Real capital. Real professional process. Real timeline.</p>
-                <p className="text-white/70">No middlemen. No games. No "we're still reviewing." No 6-month rollercoasters.</p>
-              </div>
-              
-              <p>
-                We buy businesses directly — fast, clean, and transparently.
-              </p>
-              
-              <p className="text-white/60">
-                And if your business isn't the right fit for our portfolio, we still help you exit through our vetted partner network using the same structured, founder-friendly process.
-              </p>
-              
-              <p className="text-white/80 font-medium pt-2">
-                Because your time shouldn't be wasted.
-              </p>
-              
-              <p className="text-white font-semibold">
-                And selling your business shouldn't feel like a second full-time job.
-              </p>
-            </div>
-          </motion.div>
+        {/* Story Content */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="space-y-6 text-white/80 leading-relaxed tracking-tight text-center"
+        >
+          <p>
+            We didn't start as buyers. We started on the other side — representing founders just like you.
+          </p>
           
-          {/* Right Column - Pain Cards */}
-          <motion.div 
-            initial={{ opacity: 0, x: 20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            className="space-y-6"
-          >
-            {painCards.map((card, idx) => (
-              <motion.div
-                key={idx}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: idx * 0.1 }}
-              >
-                <div className="p-6 rounded-2xl border border-red-500/20 bg-[rgba(255,255,255,0.02)] backdrop-blur-[30px] hover:border-red-500/30 transition-colors">
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-red-500/10 flex items-center justify-center text-red-400/80 flex-shrink-0">
-                      {card.icon}
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-bold text-white mb-2 tracking-tight" style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}>
-                        {card.title}
-                      </h3>
-                      <p className="text-white/50 text-sm leading-relaxed tracking-tight">
-                        {card.description}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </motion.div>
-        </div>
+          <p>
+            For years, we helped founders exit their digital companies. We've seen every angle of the process — the good, the bad, and the downright unbearable.
+          </p>
+          
+          <p className="text-white/60">
+            Here's the part no one likes to admit:
+          </p>
+          
+          <div className="text-left max-w-xl mx-auto">
+            <ul className="space-y-2 pl-1">
+              {[
+                "Most 'buyers' never close.",
+                "Most NDAs lead nowhere.",
+                "Most LOIs collapse before funding.",
+                "And founders waste months on conversations that should've taken days."
+              ].map((item, idx) => (
+                <li key={idx} className="flex items-start gap-3">
+                  <span className="text-[#F4D77F] mt-1">•</span>
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+          
+          <p>
+            We watched incredible businesses get tied up in endless diligence loops… only for the deal to die because the buyer wasn't real, wasn't funded, or wasn't serious.
+          </p>
+          
+          <p>
+            After years of watching founders lose time, money, and momentum…{' '}
+            <span className="text-white font-semibold">we built a better way.</span>
+          </p>
+          
+          <p className="text-[#F4D77F]/90 font-medium text-lg">
+            Next Tier Partners was created so we could be the buyer we always wished existed.
+          </p>
+          
+          <div className="space-y-2">
+            <p className="text-white font-semibold">Real capital. Real professional process. Real timeline.</p>
+            <p className="text-white/70">No middlemen. No games. No "we're still reviewing." No 6-month rollercoasters.</p>
+          </div>
+          
+          <p>
+            We buy businesses directly — fast, clean, and transparently.
+          </p>
+          
+          <p className="text-white/60">
+            And if your business isn't the right fit for our portfolio, we still help you exit through our vetted partner network using the same structured, founder-friendly process.
+          </p>
+          
+          <p className="text-white/80 font-medium">
+            Because your time shouldn't be wasted.
+          </p>
+          
+          <p className="text-white font-semibold">
+            And selling your business shouldn't feel like a second full-time job.
+          </p>
+        </motion.div>
         
         {/* Footer line */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center mt-16 pt-8 border-t border-[rgba(255,255,255,0.06)]"
+          className="text-center mt-12 pt-8 border-t border-[rgba(255,255,255,0.06)]"
         >
           <p className="text-lg text-white/60 tracking-tight">
             There's a better way:{' '}
