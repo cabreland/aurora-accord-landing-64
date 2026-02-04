@@ -18,82 +18,10 @@ import decisionForkPath from '@/assets/decision-fork-path.jpg';
 import goldCircuitReveal from '@/assets/gold-circuit-reveal.png';
 import goldChipStack from '@/assets/gold-chip-stack.png';
 
-// Global Cursor Spotlight - reveals circuits across the entire page
-function GlobalCursorSpotlight() {
-  const [mousePos, setMousePos] = useState({ x: -500, y: -500 });
-  const [scrollY, setScrollY] = useState(0);
-  const [isActive, setIsActive] = useState(false);
-
-  const handleMouseMove = useCallback((e: MouseEvent) => {
-    setMousePos({ x: e.clientX, y: e.clientY });
-    setScrollY(window.scrollY);
-    if (!isActive) setIsActive(true);
-  }, [isActive]);
-
-  const handleScroll = useCallback(() => {
-    setScrollY(window.scrollY);
-  }, []);
-
-  const handleMouseLeave = useCallback(() => {
-    setIsActive(false);
-    setMousePos({ x: -500, y: -500 });
-  }, []);
-
-  useEffect(() => {
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('scroll', handleScroll);
-    document.body.addEventListener('mouseleave', handleMouseLeave);
-    
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('scroll', handleScroll);
-      document.body.removeEventListener('mouseleave', handleMouseLeave);
-    };
-  }, [handleMouseMove, handleScroll, handleMouseLeave]);
-
-  // Calculate mask position relative to scrolling background
-  const maskY = mousePos.y + scrollY;
-
-  return (
-    <div className="fixed inset-0 pointer-events-none z-[1]">
-      {/* NTP circuit pattern that scrolls with page - revealed by cursor */}
-      <div 
-        className="absolute inset-0"
-        style={{
-          backgroundImage: `url(${bgCircuitPattern})`,
-          backgroundPosition: `0px ${-scrollY}px`,
-          backgroundSize: '500px 500px',
-          backgroundRepeat: 'repeat',
-          opacity: isActive ? 0.85 : 0,
-          transition: 'opacity 0.15s ease-out',
-          maskImage: `radial-gradient(circle 80px at ${mousePos.x}px ${mousePos.y}px, black 0%, transparent 100%)`,
-          WebkitMaskImage: `radial-gradient(circle 80px at ${mousePos.x}px ${mousePos.y}px, black 0%, transparent 100%)`
-        }}
-      />
-      
-      {/* Subtle gold glow following cursor */}
-      <div 
-        className="absolute pointer-events-none"
-        style={{
-          width: '180px',
-          height: '180px',
-          left: mousePos.x - 90,
-          top: mousePos.y - 90,
-          background: 'radial-gradient(circle, rgba(244,215,127,0.2) 0%, rgba(212,175,55,0.1) 50%, transparent 70%)',
-          opacity: isActive ? 1 : 0,
-          transition: 'opacity 0.15s ease-out'
-        }}
-      />
-    </div>
-  );
-}
 
 const HomePageC = () => {
   return (
     <div className="min-h-screen bg-[#0A0C10] text-white relative" style={{ fontFamily: "'Inter', sans-serif" }}>
-      {/* Global cursor spotlight effect */}
-      <GlobalCursorSpotlight />
-      
       <Navigation />
       <Hero />
       <OurStory />
@@ -101,16 +29,6 @@ const HomePageC = () => {
       <FAQ />
       <FinalCTA />
       <Footer />
-      
-      {/* Static circuit pattern overlay - very subtle base layer */}
-      <div 
-        className="fixed inset-0 pointer-events-none z-0 opacity-[0.02]"
-        style={{
-          backgroundImage: `url(${bgCircuitPattern})`,
-          backgroundSize: '400px 400px',
-          backgroundRepeat: 'repeat'
-        }}
-      />
     </div>
   );
 };
