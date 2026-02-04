@@ -37,16 +37,16 @@ const PremiumHeader = () => {
           }
         `}
       >
-        {/* Background with glassmorphism */}
+        {/* Background with black glass effect */}
         <div 
           className={`
             absolute inset-0 
-            bg-gradient-to-b from-[#0A0C10]/95 via-[#0A0C10]/90 to-transparent
-            backdrop-blur-[10px]
-            rounded-b-lg
+            bg-[#0A0C10]/80
+            backdrop-blur-[20px]
+            border-b border-[#D4AF37]/10
             transition-all duration-500
             ${isScrolled 
-              ? 'bg-[#0A0C10]/95 backdrop-blur-[12px]' 
+              ? 'bg-[#0A0C10]/90 backdrop-blur-[24px] shadow-[0_4px_30px_rgba(0,0,0,0.5)]' 
               : ''
             }
           `}
