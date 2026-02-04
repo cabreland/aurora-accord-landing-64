@@ -41,7 +41,7 @@ const PremiumHeader = () => {
         <div 
           className={`
             absolute inset-0 
-            bg-[#0A0C10]
+            bg-black
             border-b border-[#D4AF37]/10
             transition-all duration-500
             ${isScrolled 
