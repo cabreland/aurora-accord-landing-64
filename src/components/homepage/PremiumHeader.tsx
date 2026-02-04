@@ -37,16 +37,15 @@ const PremiumHeader = () => {
           }
         `}
       >
-        {/* Background with black glass effect */}
+        {/* Solid black background */}
         <div 
           className={`
             absolute inset-0 
-            bg-[#0A0C10]/80
-            backdrop-blur-[20px]
+            bg-[#0A0C10]
             border-b border-[#D4AF37]/10
             transition-all duration-500
             ${isScrolled 
-              ? 'bg-[#0A0C10]/90 backdrop-blur-[24px] shadow-[0_4px_30px_rgba(0,0,0,0.5)]' 
+              ? 'shadow-[0_4px_30px_rgba(0,0,0,0.5)]' 
               : ''
             }
           `}
