@@ -59,7 +59,7 @@ function GlobalCursorSpotlight() {
       <div 
         className="absolute inset-0"
         style={{
-          backgroundImage: `url(${goldCircuitReveal})`,
+          backgroundImage: `url(${bgCircuitPattern})`,
           backgroundPosition: `0px ${-scrollY}px`,
           backgroundSize: '500px 500px',
           backgroundRepeat: 'repeat',
