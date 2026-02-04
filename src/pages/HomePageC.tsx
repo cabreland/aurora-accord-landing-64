@@ -28,8 +28,8 @@ const HomePageC = () => {
       <Hero />
       <OurStory />
       <DecisionPath />
-      <FAQ />
       <FinalCTA />
+      <FAQ />
       <Footer />
     </div>
   );
