@@ -432,22 +432,23 @@ function DecisionPath() {
 
   return (
     <section className="py-24 md:py-32 relative overflow-hidden">
-      {/* Background image with gradient overlays */}
+      {/* Background image with gradient overlays - subtle and scaled down */}
       <div className="absolute inset-0">
         <div 
           className="absolute inset-0"
           style={{
             backgroundImage: `url(${goldenDecisionPath})`,
-            backgroundPosition: 'center',
-            backgroundSize: 'cover',
-            backgroundRepeat: 'no-repeat'
+            backgroundPosition: 'center 40%',
+            backgroundSize: '150% auto',
+            backgroundRepeat: 'no-repeat',
+            opacity: 0.35
           }}
         />
         {/* Top/bottom fade to black */}
-        <div className="absolute inset-x-0 top-0 h-32" style={{ background: 'linear-gradient(to bottom, #0A0C10 0%, transparent 100%)' }} />
-        <div className="absolute inset-x-0 bottom-0 h-32" style={{ background: 'linear-gradient(to top, #0A0C10 0%, transparent 100%)' }} />
-        {/* Subtle dark overlay for text readability */}
-        <div className="absolute inset-0 bg-[#0A0C10]/40" />
+        <div className="absolute inset-x-0 top-0 h-48" style={{ background: 'linear-gradient(to bottom, #0A0C10 0%, transparent 100%)' }} />
+        <div className="absolute inset-x-0 bottom-0 h-48" style={{ background: 'linear-gradient(to top, #0A0C10 0%, transparent 100%)' }} />
+        {/* Stronger dark overlay for subtlety */}
+        <div className="absolute inset-0 bg-[#0A0C10]/60" />
       </div>
 
       <div className="max-w-7xl mx-auto px-6 relative z-10">
