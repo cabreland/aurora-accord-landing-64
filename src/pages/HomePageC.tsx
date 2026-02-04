@@ -94,7 +94,6 @@ const HomePageC = () => {
       <Hero />
       <OurStory />
       <DecisionPath />
-      <WhyNextTier />
       <FAQ />
       <FinalCTA />
       <Footer />
@@ -695,109 +694,6 @@ function DecisionPath() {
     </section>
   );
 }
-
-// Why Next Tier - Credibility
-function WhyNextTier() {
-  return (
-    <section className="py-28 relative overflow-hidden">
-      <div className="absolute inset-0 bg-[#0A0C10]" />
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-red-500/5 rounded-full blur-[180px]" />
-      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-gradient-to-br from-[#F4D77F]/6 to-[#D4AF37]/4 rounded-full blur-[180px]" />
-      
-      <div className="max-w-7xl mx-auto px-6 relative z-10">
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-16"
-        >
-          <h2 className="text-3xl md:text-5xl font-bold text-white mb-4 tracking-[-0.02em]" style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}>
-            Why Founders Choose{' '}
-            <span className="bg-gradient-to-r from-[#F4D77F] via-[#D4AF37] to-[#F4D77F] bg-clip-text text-transparent">
-              Next Tier
-            </span>
-          </h2>
-        </motion.div>
-        
-        <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-          {/* Traditional Process */}
-          <motion.div 
-            initial={{ opacity: 0, x: -20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            className="rounded-2xl border border-red-500/20 bg-[rgba(255,255,255,0.02)] backdrop-blur-[30px] p-8"
-          >
-            <div className="flex items-center gap-2 mb-6">
-              <XCircle className="w-6 h-6 text-red-400" />
-              <h3 className="text-xl font-bold text-white tracking-tight" style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}>The Traditional Way</h3>
-            </div>
-            <ul className="space-y-4">
-              {[
-                "6-12 months of your time (minimum)",
-                "Dozens of NDAs and dead-end calls",
-                "Lowball offers from unqualified buyers",
-                "Brokers who don't understand digital",
-                "Uncertainty until the wire hits",
-                "Confidentiality leaks to competitors"
-              ].map((item, idx) => (
-                <li key={idx} className="flex items-start gap-3 text-white/50">
-                  <XCircle className="w-4 h-4 text-red-400/60 mt-0.5 flex-shrink-0" />
-                  <span className="text-sm tracking-tight">{item}</span>
-                </li>
-              ))}
-            </ul>
-          </motion.div>
-          
-          {/* Next Tier Partners */}
-          <motion.div 
-            initial={{ opacity: 0, x: 20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-          >
-            <GlassCard highlight className="p-8 relative">
-              <div className="absolute -top-3 right-8 bg-gradient-to-r from-[#F4D77F] to-[#D4AF37] text-[#0A0C10] px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wide">
-                The Next Tier Way
-              </div>
-              <div className="flex items-center gap-2 mb-6">
-                <CheckCircle2 className="w-6 h-6 text-[#F4D77F]" />
-                <h3 className="text-xl font-bold text-white tracking-tight" style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}>Our Approach</h3>
-              </div>
-              <ul className="space-y-4">
-                {[
-                  "45-60 days from application to close",
-                  "One conversation. One buyer. Done.",
-                  "Fair valuations—no games or lowballs",
-                  "We're principals—digital is all we do",
-                  "Cash payment at close, guaranteed",
-                  "Confidential until you decide to move"
-                ].map((item, idx) => (
-                  <li key={idx} className="flex items-start gap-3 text-white/70">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400 mt-0.5 flex-shrink-0" />
-                    <span className="text-sm tracking-tight">{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </GlassCard>
-          </motion.div>
-        </div>
-
-        {/* Trust line */}
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mt-12"
-        >
-          <p className="text-sm text-white/40 tracking-tight">
-            Not a fit for direct acquisition?{' '}
-            <span className="text-white/60">We guide founders through clean exits via our vetted partner network.</span>
-          </p>
-        </motion.div>
-      </div>
-    </section>
-  );
-}
-
 // FAQ Section
 function FAQ() {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
