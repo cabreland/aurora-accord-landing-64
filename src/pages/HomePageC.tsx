@@ -244,44 +244,41 @@ function OurStory() {
   ];
 
   return (
-    <section className="py-24 md:py-32 relative overflow-hidden group">
-      {/* Base dark background - subtle fade on section hover */}
-      <div className="absolute inset-0 bg-[#0A0C10] transition-opacity duration-700 ease-out pointer-events-none group-hover:opacity-80" />
+    <section className="py-24 md:py-32 relative overflow-hidden">
+      {/* Base dark background - matching header darkness */}
+      <div className="absolute inset-0 bg-[#0A0C10]" />
       
-      {/* Circuit chip background image - anchored right */}
+      {/* Very subtle circuit pattern - barely visible, like header */}
       <div className="absolute inset-0 pointer-events-none">
         <div 
-          className="absolute inset-0 transition-all duration-700 ease-out group-hover:scale-[1.01]"
+          className="absolute inset-0"
           style={{
             backgroundImage: `url(${circuitTransitionBg})`,
             backgroundPosition: 'center right',
             backgroundSize: 'cover',
-            backgroundRepeat: 'no-repeat'
+            backgroundRepeat: 'no-repeat',
+            opacity: 0.08
           }}
         />
         
-        {/* Gradient fades for seamless blend - slightly reduce on hover */}
+        {/* Strong gradient overlays to keep it dark */}
+        <div className="absolute inset-0 bg-[#0A0C10]/85" />
+        
         {/* Top fade */}
         <div 
-          className="absolute inset-x-0 top-0 h-1/4 transition-opacity duration-700 ease-out group-hover:opacity-70" 
+          className="absolute inset-x-0 top-0 h-32" 
           style={{ background: 'linear-gradient(to bottom, #0A0C10 0%, transparent 100%)' }} 
         />
         
         {/* Bottom fade */}
         <div 
-          className="absolute inset-x-0 bottom-0 h-1/4 transition-opacity duration-700 ease-out group-hover:opacity-70" 
+          className="absolute inset-x-0 bottom-0 h-32" 
           style={{ background: 'linear-gradient(to top, #0A0C10 0%, transparent 100%)' }} 
-        />
-        
-        {/* Left fade - keeps readability */}
-        <div 
-          className="absolute inset-y-0 left-0 w-2/3 md:w-1/2 transition-opacity duration-700 ease-out group-hover:opacity-85" 
-          style={{ background: 'linear-gradient(to right, #0A0C10 0%, #0A0C10 40%, transparent 100%)' }} 
         />
       </div>
       
-      {/* Subtle gold ambient glow */}
-      <div className="absolute top-1/3 right-1/4 w-[400px] h-[400px] bg-[#D4AF37]/8 rounded-full blur-[150px] pointer-events-none transition-all duration-700 group-hover:opacity-100 group-hover:scale-110" />
+      {/* Very subtle gold ambient glow */}
+      <div className="absolute top-1/2 left-1/4 w-[300px] h-[300px] bg-[#D4AF37]/5 rounded-full blur-[150px] pointer-events-none" />
       
       <div className="max-w-7xl mx-auto px-6 relative z-10">
         {/* Section header */}
