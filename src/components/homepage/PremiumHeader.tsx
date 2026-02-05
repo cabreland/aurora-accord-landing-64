@@ -146,7 +146,7 @@ const NavLink = ({ href, children }: { href: string; children: React.ReactNode }
 const ApplyButton = () => {
   return (
     <motion.a
-      href="#apply"
+      href="/apply"
       className="
         relative inline-flex items-center justify-center
         px-6 py-2.5
@@ -231,7 +231,7 @@ const MobileMenu = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
             transition={{ delay: isOpen ? 0.3 : 0 }}
           >
             <a
-              href="#apply"
+              href="/apply"
               onClick={onClose}
               className="
                 inline-flex items-center justify-center
