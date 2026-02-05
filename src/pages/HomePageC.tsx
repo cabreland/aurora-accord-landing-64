@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef, createContext, useContext } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { 
@@ -6,17 +6,9 @@ import {
   CheckCircle2, 
   XCircle, 
   ChevronDown,
-  Sparkles,
-  X
+  Sparkles
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import IntakeForm from '@/components/IntakeForm';
 import nextTierLogo from '@/assets/next-tier-logo.png';
 import heroCircuitImage from '@/assets/hero-circuit.png';
 import bgCircuitPattern from '@/assets/bg-circuit-pattern.png';
@@ -28,45 +20,18 @@ import goldChipStack from '@/assets/gold-chip-stack.png';
 import nextTierCtaBg from '@/assets/next-tier-cta-bg.jpg';
 import ntpLogoFull from '@/assets/ntp-logo-full.png';
 
-// Context for sharing form dialog state
-const FormDialogContext = createContext<{
-  isOpen: boolean;
-  setIsOpen: (open: boolean) => void;
-}>({ isOpen: false, setIsOpen: () => {} });
-
 
 const HomePageC = () => {
-  const [isFormOpen, setIsFormOpen] = useState(false);
-  
   return (
-    <FormDialogContext.Provider value={{ isOpen: isFormOpen, setIsOpen: setIsFormOpen }}>
-      <div className="min-h-screen bg-[#0A0C10] text-white relative" style={{ fontFamily: "'Inter', sans-serif" }}>
-        <Navigation />
-        <Hero />
-        <OurStory />
-        <DecisionPath />
-        <FinalCTA />
-        <FAQ />
-        <Footer />
-        
-        {/* Intake Form Dialog */}
-        <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
-          <DialogContent className="bg-[#0A1628] border-white/10 max-w-2xl max-h-[90vh] overflow-y-auto p-0">
-            <DialogHeader className="p-6 pb-0">
-              <DialogTitle className="text-2xl font-bold text-white" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                Start Your Exit Journey
-              </DialogTitle>
-              <p className="text-white/60 text-sm mt-2">
-                Complete this quick form and we'll review your business within 24 hours.
-              </p>
-            </DialogHeader>
-            <div className="p-6">
-              <IntakeForm onClose={() => setIsFormOpen(false)} />
-            </div>
-          </DialogContent>
-        </Dialog>
-      </div>
-    </FormDialogContext.Provider>
+    <div className="min-h-screen bg-[#0A0C10] text-white relative" style={{ fontFamily: "'Inter', sans-serif" }}>
+      <Navigation />
+      <Hero />
+      <OurStory />
+      <DecisionPath />
+      <FinalCTA />
+      <FAQ />
+      <Footer />
+    </div>
   );
 };
 
@@ -99,7 +64,6 @@ function Navigation() {
 
 // Hero Section - The Hook
 function Hero() {
-  const { setIsOpen } = useContext(FormDialogContext);
   return (
     <section id="hero" className="relative min-h-screen flex items-center pt-24 pb-16 overflow-hidden">
       {/* Base dark background */}
@@ -175,14 +139,15 @@ function Hero() {
             </div>
 
             <div className="flex flex-wrap items-center gap-4">
-              <Button 
-                size="lg" 
-                onClick={() => setIsOpen(true)}
-                className="bg-gradient-to-r from-[#F4D77F] to-[#D4AF37] hover:from-[#D4AF37] hover:to-[#F4D77F] text-[#0A0C10] font-semibold px-10 h-14 md:h-[52px] text-base shadow-xl shadow-[#D4AF37]/25 transition-all duration-300 tracking-tight"
-              >
-                Start Your Exit
-                <ArrowRight className="w-5 h-5 ml-2" />
-              </Button>
+              <Link to="/apply">
+                <Button 
+                  size="lg" 
+                  className="bg-gradient-to-r from-[#F4D77F] to-[#D4AF37] hover:from-[#D4AF37] hover:to-[#F4D77F] text-[#0A0C10] font-semibold px-10 h-14 md:h-[52px] text-base shadow-xl shadow-[#D4AF37]/25 transition-all duration-300 tracking-tight"
+                >
+                  Start Your Exit
+                  <ArrowRight className="w-5 h-5 ml-2" />
+                </Button>
+              </Link>
               <Button 
                 size="lg" 
                 variant="outline" 
@@ -743,7 +708,6 @@ function FAQ() {
 
 // Final CTA - The Offer
 function FinalCTA() {
-  const { setIsOpen } = useContext(FormDialogContext);
   return (
     <section className="py-20 md:py-28 relative overflow-hidden">
       {/* Base dark background */}
@@ -795,14 +759,15 @@ function FinalCTA() {
           </p>
           
           <div className="flex flex-wrap items-center justify-center gap-4 mb-12">
-            <Button 
-              size="lg" 
-              onClick={() => setIsOpen(true)}
-              className="bg-gradient-to-r from-[#F4D77F] to-[#D4AF37] hover:from-[#D4AF37] hover:to-[#F4D77F] text-[#0A0C10] font-semibold px-10 h-14 shadow-xl shadow-[#D4AF37]/30 transition-all duration-300 text-lg tracking-tight"
-            >
-              Start Your Exit
-              <ArrowRight className="w-5 h-5 ml-2" />
-            </Button>
+            <Link to="/apply">
+              <Button 
+                size="lg" 
+                className="bg-gradient-to-r from-[#F4D77F] to-[#D4AF37] hover:from-[#D4AF37] hover:to-[#F4D77F] text-[#0A0C10] font-semibold px-10 h-14 shadow-xl shadow-[#D4AF37]/30 transition-all duration-300 text-lg tracking-tight"
+              >
+                Start Your Exit
+                <ArrowRight className="w-5 h-5 ml-2" />
+              </Button>
+            </Link>
           </div>
           
           <div className="flex items-center justify-center gap-8 text-sm text-white/50 flex-wrap">

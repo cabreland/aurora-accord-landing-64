@@ -54,6 +54,7 @@ const DealWorkspace = lazy(() => import("./pages/DealWorkspace"));
 const TrainingCenter = lazy(() => import("./pages/TrainingCenter"));
 const CreateDeal = lazy(() => import("./pages/CreateDeal"));
 const FinancingTracker = lazy(() => import("./pages/FinancingTracker"));
+const Apply = lazy(() => import("./pages/Apply"));
 
 // Wrap protected components with authentication
 const ProtectedDashboard = withAuth('investor')(Dashboard);
@@ -115,6 +116,7 @@ const AppContent = () => {
               <Route path="/home-page-a" element={<HomePageA />} />
               <Route path="/home-page-b" element={<HomePageB />} />
               <Route path="/home-page-c" element={<HomePageC />} />
+              <Route path="/apply" element={<Apply />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/auth/accept" element={<AuthAccept />} />
               <Route path="/demo" element={<Demo />} />
