@@ -43,10 +43,12 @@ export type DealView = 'grid' | 'list';
 
 interface DealFilters {
   status?: string;
+  deal_status?: string;
   industry?: string;
   priority?: string;
   search?: string;
 }
+
 
 export const useMyDeals = () => {
   const { user } = useAuth();
@@ -105,6 +107,10 @@ export const useMyDeals = () => {
       filtered = filtered.filter(deal => deal.status === filters.status);
     }
 
+    if (filters.deal_status && filters.deal_status !== 'all') {
+      filtered = filtered.filter(deal => (deal as any).deal_status === filters.deal_status);
+    }
+
     if (filters.industry && filters.industry !== 'all') {
       filtered = filtered.filter(deal => 
         deal.industry?.toLowerCase().includes(filters.industry!.toLowerCase())
@@ -126,6 +132,7 @@ export const useMyDeals = () => {
 
     return filtered;
   }, [deals, filters]);
+
 
   const updateFilters = (newFilters: Partial<DealFilters>) => {
     setFilters(prev => ({ ...prev, ...newFilters }));
