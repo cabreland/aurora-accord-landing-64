@@ -1,24 +1,51 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MoreVertical, Building2, ArrowUpDown } from 'lucide-react';
+import { MoreVertical, Building2, ArrowUpDown, Pencil, Archive, Trash2 } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { MyDeal } from '@/hooks/useMyDeals';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useUserProfile } from '@/hooks/useUserProfile';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 interface DealListViewProps {
   deals: MyDeal[];
   loading: boolean;
   onDealSelect: (dealId: string | null) => void;
   selectedDealId: string | null;
+  onDealDeleted?: () => void;
 }
 
 export const DealListView: React.FC<DealListViewProps> = ({
   deals,
   loading,
   onDealSelect,
-  selectedDealId
+  selectedDealId,
+  onDealDeleted,
 }) => {
+  const { isAdmin } = useUserProfile();
+  const { toast } = useToast();
+  const [deleteTarget, setDeleteTarget] = useState<MyDeal | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
   const getStatusVariant = (status: string) => {
     switch (status) {
       case 'active': return 'default';
@@ -34,6 +61,34 @@ export const DealListView: React.FC<DealListViewProps> = ({
       case 'medium': return 'text-yellow-600 bg-yellow-50 border-yellow-200';
       case 'low': return 'text-green-600 bg-green-50 border-green-200';
       default: return 'text-gray-600 bg-gray-50 border-gray-200';
+    }
+  };
+
+  const handleArchive = async (deal: MyDeal, e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      const { error } = await supabase.from('deals').update({ status: 'archived' as any }).eq('id', deal.id);
+      if (error) throw error;
+      toast({ title: "Deal archived", description: `"${deal.title}" has been archived.` });
+      onDealDeleted?.();
+    } catch (err: any) {
+      toast({ title: "Error", description: "Failed to archive deal.", variant: "destructive" });
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    try {
+      setDeleting(true);
+      const { error } = await supabase.from('deals').delete().eq('id', deleteTarget.id);
+      if (error) throw error;
+      toast({ title: "Deal deleted", description: `"${deleteTarget.title}" has been permanently deleted.` });
+      onDealDeleted?.();
+    } catch (err: any) {
+      toast({ title: "Error", description: "Failed to delete deal. You may not have permission.", variant: "destructive" });
+    } finally {
+      setDeleting(false);
+      setDeleteTarget(null);
     }
   };
 
@@ -97,8 +152,8 @@ export const DealListView: React.FC<DealListViewProps> = ({
 
         {/* Table Body */}
         <div>
-          {deals.map((deal, index) => (
-            <div 
+          {deals.map((deal) => (
+            <div
               key={deal.id}
               className={`grid grid-cols-12 gap-4 p-4 border-b last:border-b-0 hover:bg-muted/30 cursor-pointer transition-colors ${
                 selectedDealId === deal.id ? 'bg-muted/50 border-l-4 border-l-primary' : ''
@@ -110,37 +165,37 @@ export const DealListView: React.FC<DealListViewProps> = ({
                   {deal.title}
                 </div>
               </div>
-              
+
               <div className="col-span-2">
                 <div className="text-sm text-muted-foreground truncate" title={deal.company_name}>
                   {deal.company_name}
                 </div>
               </div>
-              
+
               <div className="col-span-1">
                 <div className="text-sm text-muted-foreground truncate">
                   {deal.industry || '-'}
                 </div>
               </div>
-              
+
               <div className="col-span-1">
                 <div className="text-sm font-medium truncate" title={deal.revenue}>
                   {deal.revenue || '-'}
                 </div>
               </div>
-              
+
               <div className="col-span-1">
                 <div className="text-sm font-medium truncate" title={deal.ebitda}>
                   {deal.ebitda || '-'}
                 </div>
               </div>
-              
+
               <div className="col-span-1">
                 <Badge variant={getStatusVariant(deal.status)} className="text-xs">
                   {deal.status}
                 </Badge>
               </div>
-              
+
               <div className="col-span-1">
                 {deal.priority ? (
                   <Badge variant="outline" className={`text-xs ${getPriorityColor(deal.priority)}`}>
@@ -150,30 +205,75 @@ export const DealListView: React.FC<DealListViewProps> = ({
                   <span className="text-muted-foreground">-</span>
                 )}
               </div>
-              
+
               <div className="col-span-1">
                 <div className="text-xs text-muted-foreground">
                   {new Date(deal.updated_at).toLocaleDateString()}
                 </div>
               </div>
-              
+
               <div className="col-span-1 flex justify-end">
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="h-8 w-8 p-0"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    // Handle menu actions
-                  }}
-                >
-                  <MoreVertical className="w-4 h-4" />
-                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 w-8 p-0"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <MoreVertical className="w-4 h-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onDealSelect(deal.id); }}>
+                      <Pencil className="w-4 h-4 mr-2" />
+                      View / Edit
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={(e) => handleArchive(deal, e)}>
+                      <Archive className="w-4 h-4 mr-2" />
+                      Archive Deal
+                    </DropdownMenuItem>
+                    {isAdmin() && (
+                      <>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                          className="text-destructive focus:text-destructive"
+                          onClick={(e) => { e.stopPropagation(); setDeleteTarget(deal); }}
+                        >
+                          <Trash2 className="w-4 h-4 mr-2" />
+                          Delete Deal
+                        </DropdownMenuItem>
+                      </>
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </div>
           ))}
         </div>
       </Card>
+
+      {/* Delete Confirmation */}
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete this deal?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete <strong>{deleteTarget?.title}</strong> and all associated data. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              disabled={deleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleting ? 'Deleting...' : 'Yes, delete deal'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

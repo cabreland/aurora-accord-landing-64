@@ -76,11 +76,12 @@ const DealManagement: React.FC = () => {
     switch (currentView) {
       case 'list':
         return (
-          <DealListView 
-            deals={deals} 
-            loading={loading} 
+          <DealListView
+            deals={deals}
+            loading={loading}
             onDealSelect={handleDealSelect}
             selectedDealId={selectedDealId}
+            onDealDeleted={refresh}
           />
         );
       case 'kanban':

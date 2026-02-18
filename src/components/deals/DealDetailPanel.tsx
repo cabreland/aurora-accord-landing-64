@@ -1,15 +1,33 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { X, FileText, MoreVertical, ExternalLink } from 'lucide-react';
+import { FileText, MoreVertical, ExternalLink, Pencil, Archive, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { supabase } from '@/integrations/supabase/client';
 import { MyDeal } from '@/hooks/useMyDeals';
 import { useToast } from '@/hooks/use-toast';
+import { useUserProfile } from '@/hooks/useUserProfile';
 import { DealEditModal } from './DealEditModal';
 import { cn } from '@/lib/utils';
 
@@ -28,7 +46,10 @@ export const DealDetailPanel: React.FC<DealDetailPanelProps> = ({
   const [deal, setDeal] = useState<MyDeal | null>(null);
   const [loading, setLoading] = useState(true);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const { toast } = useToast();
+  const { isAdmin } = useUserProfile();
 
   useEffect(() => {
     fetchDeal();
@@ -57,6 +78,37 @@ export const DealDetailPanel: React.FC<DealDetailPanelProps> = ({
     }
   };
 
+  const handleDelete = async () => {
+    if (!deal) return;
+    try {
+      setDeleting(true);
+      const { error } = await supabase.from('deals').delete().eq('id', deal.id);
+      if (error) throw error;
+      toast({ title: "Deal deleted", description: `"${deal.title}" has been permanently deleted.` });
+      onClose();
+      onDealUpdated();
+    } catch (error: any) {
+      console.error('Error deleting deal:', error);
+      toast({ title: "Error", description: "Failed to delete deal. You may not have permission.", variant: "destructive" });
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const handleArchive = async () => {
+    if (!deal) return;
+    try {
+      const { error } = await supabase.from('deals').update({ status: 'archived' as any }).eq('id', deal.id);
+      if (error) throw error;
+      toast({ title: "Deal archived", description: `"${deal.title}" has been archived.` });
+      fetchDeal();
+      onDealUpdated();
+    } catch (error: any) {
+      console.error('Error archiving deal:', error);
+      toast({ title: "Error", description: "Failed to archive deal.", variant: "destructive" });
+    }
+  };
+
   const getStatusVariant = (status: string) => {
     switch (status) {
       case 'active': return 'default';
@@ -82,7 +134,7 @@ export const DealDetailPanel: React.FC<DealDetailPanelProps> = ({
           </div>
         ) : (
           <>
-            {/* Header - Light theme with subtle border */}
+            {/* Header */}
             <DialogHeader className="p-6 pb-4 border-b border-border bg-secondary/30">
               <div className="flex items-center justify-between">
                 <div className="space-y-2">
@@ -97,8 +149,8 @@ export const DealDetailPanel: React.FC<DealDetailPanelProps> = ({
                       {deal.status}
                     </Badge>
                     {deal.priority && (
-                      <Badge 
-                        variant="outline" 
+                      <Badge
+                        variant="outline"
                         className={cn(
                           "capitalize",
                           deal.priority === 'high' && "border-destructive/50 text-destructive bg-destructive/5",
@@ -112,8 +164,8 @@ export const DealDetailPanel: React.FC<DealDetailPanelProps> = ({
                   </div>
                 </div>
                 <div className="flex items-center gap-1">
-                  <Button 
-                    variant="ghost" 
+                  <Button
+                    variant="ghost"
                     size="icon"
                     onClick={() => navigate(`/deals/${deal.id}`)}
                     title="Open Deal Workspace"
@@ -121,9 +173,36 @@ export const DealDetailPanel: React.FC<DealDetailPanelProps> = ({
                   >
                     <ExternalLink className="w-4 h-4" />
                   </Button>
-                  <Button variant="ghost" size="icon" className="hover:bg-muted">
-                    <MoreVertical className="w-4 h-4" />
-                  </Button>
+
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="hover:bg-muted">
+                        <MoreVertical className="w-4 h-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-48">
+                      <DropdownMenuItem onClick={() => setShowEditModal(true)}>
+                        <Pencil className="w-4 h-4 mr-2" />
+                        Edit Deal
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={handleArchive}>
+                        <Archive className="w-4 h-4 mr-2" />
+                        Archive Deal
+                      </DropdownMenuItem>
+                      {isAdmin() && (
+                        <>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            className="text-destructive focus:text-destructive"
+                            onClick={() => setShowDeleteConfirm(true)}
+                          >
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Delete Deal
+                          </DropdownMenuItem>
+                        </>
+                      )}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
               </div>
             </DialogHeader>
@@ -205,14 +284,14 @@ export const DealDetailPanel: React.FC<DealDetailPanelProps> = ({
 
                     {/* Actions */}
                     <div className="space-y-2 pt-2">
-                      <Button 
-                        className="w-full" 
+                      <Button
+                        className="w-full"
                         onClick={() => setShowEditModal(true)}
                       >
                         Edit Deal
                       </Button>
-                      <Button 
-                        variant="outline" 
+                      <Button
+                        variant="outline"
                         className="w-full"
                         onClick={() => {
                           onClose();
@@ -226,8 +305,8 @@ export const DealDetailPanel: React.FC<DealDetailPanelProps> = ({
 
                   <TabsContent value="documents" className="space-y-4 mt-0">
                     <div className="space-y-3">
-                      <Button 
-                        className="w-full" 
+                      <Button
+                        className="w-full"
                         onClick={() => {
                           onClose();
                           navigate(`/deals/${deal.id}?tab=data-room`);
@@ -236,7 +315,7 @@ export const DealDetailPanel: React.FC<DealDetailPanelProps> = ({
                         <FileText className="w-4 h-4 mr-2" />
                         Open Data Room
                       </Button>
-                      
+
                       <div className="text-center text-sm text-muted-foreground">
                         Click above to access the full document management interface for this deal
                       </div>
@@ -261,6 +340,28 @@ export const DealDetailPanel: React.FC<DealDetailPanelProps> = ({
             }}
           />
         )}
+
+        {/* Delete Confirmation */}
+        <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete this deal?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This will permanently delete <strong>{deal?.title}</strong> and all associated data. This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleDelete}
+                disabled={deleting}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                {deleting ? 'Deleting...' : 'Yes, delete deal'}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </DialogContent>
     </Dialog>
   );
