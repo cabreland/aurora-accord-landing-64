@@ -5,6 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DealFormData } from './DealWizard';
 
+
 interface BasicInfoStepProps {
   data: DealFormData;
   onChange: (updates: Partial<DealFormData>) => void;
@@ -27,30 +28,32 @@ export const BasicInfoStep: React.FC<BasicInfoStepProps> = ({
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
-          <Label htmlFor="title">Deal Title *</Label>
+          <Label htmlFor="title">Deal Code Name *</Label>
           <Input
             id="title"
             value={data.title}
             onChange={(e) => onChange({ title: e.target.value })}
-            placeholder="e.g., SaaS Platform Acquisition"
+            placeholder="e.g., Project Aurora"
             className={!data.title ? 'border-destructive/50' : ''}
           />
+          <p className="text-xs text-muted-foreground">Internal reference name — not shown to sellers or investors</p>
           {!data.title && (
-            <p className="text-xs text-destructive">Deal title is required</p>
+            <p className="text-xs text-destructive">Deal code name is required</p>
           )}
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="company_name">Company Name *</Label>
+          <Label htmlFor="company_name">Legal / Trading Name *</Label>
           <Input
             id="company_name"
             value={data.company_name}
             onChange={(e) => onChange({ company_name: e.target.value })}
-            placeholder="e.g., Green Energy Corp"
+            placeholder="e.g., Green Energy Corp Pty Ltd"
             className={!data.company_name ? 'border-destructive/50' : ''}
           />
+          <p className="text-xs text-muted-foreground">Shown on cards, investor views, and external facing pages</p>
           {!data.company_name && (
-            <p className="text-xs text-destructive">Company name is required</p>
+            <p className="text-xs text-destructive">Legal name is required</p>
           )}
         </div>
 
@@ -71,6 +74,28 @@ export const BasicInfoStep: React.FC<BasicInfoStepProps> = ({
               <SelectItem value="Education">Education</SelectItem>
               <SelectItem value="Media & Entertainment">Media & Entertainment</SelectItem>
               <SelectItem value="Food & Beverage">Food & Beverage</SelectItem>
+              <SelectItem value="Other">Other</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="business_type">Business Type</Label>
+          <Select value={data.business_type || ''} onValueChange={(value) => onChange({ business_type: value })}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select business type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="SaaS / Software">SaaS / Software</SelectItem>
+              <SelectItem value="Digital Agency">Digital Agency</SelectItem>
+              <SelectItem value="Professional Services">Professional Services</SelectItem>
+              <SelectItem value="E-commerce / Retail">E-commerce / Retail</SelectItem>
+              <SelectItem value="Franchise / Multi-Unit">Franchise / Multi-Unit</SelectItem>
+              <SelectItem value="Physical Product / Manufacturing">Physical Product / Manufacturing</SelectItem>
+              <SelectItem value="Marketplace / Platform">Marketplace / Platform</SelectItem>
+              <SelectItem value="Media / Content">Media / Content</SelectItem>
+              <SelectItem value="Healthcare Services">Healthcare Services</SelectItem>
+              <SelectItem value="Holding Company / Portfolio">Holding Company / Portfolio</SelectItem>
               <SelectItem value="Other">Other</SelectItem>
             </SelectContent>
           </Select>

@@ -1044,6 +1044,47 @@ export type Database = {
           },
         ]
       }
+      deal_share_tokens: {
+        Row: {
+          access_level: string | null
+          created_at: string | null
+          created_by: string | null
+          deal_id: string | null
+          expires_at: string | null
+          id: string
+          is_active: boolean | null
+          token: string
+        }
+        Insert: {
+          access_level?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          deal_id?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          token?: string
+        }
+        Update: {
+          access_level?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          deal_id?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deal_share_tokens_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       deal_stage_history: {
         Row: {
           created_at: string
@@ -1189,6 +1230,7 @@ export type Database = {
           approved_at: string | null
           approved_by: string | null
           asking_price: string | null
+          business_type: string | null
           cac_ltv_ratio: string | null
           closed_at: string | null
           company_id: string | null
@@ -1229,6 +1271,7 @@ export type Database = {
           revision_notes: string | null
           revision_requested_at: string | null
           rollup_potential: string | null
+          settings: Json | null
           stage_entered_at: string | null
           status: Database["public"]["Enums"]["deal_status"]
           submitted_for_review_at: string | null
@@ -1243,6 +1286,7 @@ export type Database = {
           approved_at?: string | null
           approved_by?: string | null
           asking_price?: string | null
+          business_type?: string | null
           cac_ltv_ratio?: string | null
           closed_at?: string | null
           company_id?: string | null
@@ -1283,6 +1327,7 @@ export type Database = {
           revision_notes?: string | null
           revision_requested_at?: string | null
           rollup_potential?: string | null
+          settings?: Json | null
           stage_entered_at?: string | null
           status?: Database["public"]["Enums"]["deal_status"]
           submitted_for_review_at?: string | null
@@ -1297,6 +1342,7 @@ export type Database = {
           approved_at?: string | null
           approved_by?: string | null
           asking_price?: string | null
+          business_type?: string | null
           cac_ltv_ratio?: string | null
           closed_at?: string | null
           company_id?: string | null
@@ -1337,6 +1383,7 @@ export type Database = {
           revision_notes?: string | null
           revision_requested_at?: string | null
           rollup_potential?: string | null
+          settings?: Json | null
           stage_entered_at?: string | null
           status?: Database["public"]["Enums"]["deal_status"]
           submitted_for_review_at?: string | null
@@ -3142,6 +3189,68 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      team_group_members: {
+        Row: {
+          added_at: string | null
+          group_id: string | null
+          id: string
+          permissions: Json | null
+          role: string | null
+          user_id: string
+        }
+        Insert: {
+          added_at?: string | null
+          group_id?: string | null
+          id?: string
+          permissions?: Json | null
+          role?: string | null
+          user_id: string
+        }
+        Update: {
+          added_at?: string | null
+          group_id?: string | null
+          id?: string
+          permissions?: Json | null
+          role?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_group_members_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "team_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      team_groups: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          id: string
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       team_invitations: {
         Row: {

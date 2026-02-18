@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { 
   Upload,
   Plus,
@@ -31,7 +31,9 @@ import {
   PublishDealButton,
   type AttentionAlert,
 } from './overview';
+import { InlineUploadPanel } from './overview/InlineUploadPanel';
 import * as Icons from 'lucide-react';
+
 
 interface DealOverviewTabProps {
   deal: {

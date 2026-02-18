@@ -32,6 +32,7 @@ export interface DealFormData {
   title: string;
   company_name: string;
   industry: string;
+  business_type: string;
   location: string;
   description: string;
   
@@ -84,6 +85,7 @@ export interface DealFormData {
   createDataRoom: boolean;
 }
 
+
 const steps = [
   { id: 'basic', title: 'Basic Info', component: BasicInfoStep },
   { id: 'company', title: 'Company Details', component: CompanyDetailsStep },
@@ -105,6 +107,7 @@ const getInitialFormData = (): DealFormData => ({
   title: '',
   company_name: '',
   industry: '',
+  business_type: '',
   location: '',
   description: '',
   company_overview: '',
@@ -140,6 +143,7 @@ const getInitialFormData = (): DealFormData => ({
   createDueDiligence: true,
   createDataRoom: true,
 });
+
 
 export const DealWizard: React.FC<DealWizardProps> = ({
   open,
@@ -380,6 +384,7 @@ export const DealWizard: React.FC<DealWizardProps> = ({
           title: formData.title,
           company_name: formData.company_name,
           industry: formData.industry,
+          business_type: formData.business_type || null,
           location: formData.location,
           description: formData.description,
           company_overview: formData.company_overview,
@@ -410,49 +415,60 @@ export const DealWizard: React.FC<DealWizardProps> = ({
 
       if (dealError) throw dealError;
 
-      // Upload documents if any exist
+      // Upload documents to the data room if any exist
       if (formData.documents.length > 0) {
         console.log(`Uploading ${formData.documents.length} documents for deal ${deal.id}`);
         
+        // Fetch data room folders for intelligent assignment
+        const { data: dataRoomFolders } = await supabase
+          .from('data_room_folders')
+          .select('*')
+          .eq('deal_id', deal.id);
+
+        const { mapFileToFolder } = await import('@/lib/data/mapFileToFolder');
+
         for (const file of formData.documents) {
           try {
-            // Generate unique filename
-            const fileExt = file.name.split('.').pop();
             const fileName = `${deal.id}/${Date.now()}-${file.name}`;
             
-            // Upload to Supabase Storage
+            // Upload to the data-room-documents bucket
             const { data: storageData, error: storageError } = await supabase.storage
-              .from('deal-documents')
+              .from('data-room-documents')
               .upload(fileName, file);
 
             if (storageError) {
               console.error('Storage upload error for', file.name, ':', storageError);
-              continue; // Skip this file but continue with others
+              continue;
             }
 
-            // Save document metadata to database
+            // Auto-detect folder assignment
+            const folderId = dataRoomFolders 
+              ? mapFileToFolder(file.name, dataRoomFolders as any)
+              : null;
+
+            // Save to data_room_documents table
             const { error: docError } = await supabase
-              .from('documents')
+              .from('data_room_documents')
               .insert({
                 deal_id: deal.id,
-                name: file.name,
+                file_name: file.name,
                 file_path: fileName,
                 file_size: file.size,
                 file_type: file.type,
-                tag: 'other', // Default tag, can be enhanced later
-                uploaded_by: user.id
+                mime_type: file.type,
+                folder_id: folderId,
+                uploaded_by: user.id,
+                status: 'pending_review',
               });
 
             if (docError) {
               console.error('Document metadata save error for', file.name, ':', docError);
-              // Continue with other files even if one fails
             } else {
-              console.log('Successfully uploaded document:', file.name);
+              console.log('Successfully uploaded document:', file.name, 'to folder:', folderId || 'Unassigned');
             }
 
           } catch (error) {
             console.error('Error processing document:', file.name, error);
-            // Continue with other files
           }
         }
       }
@@ -551,22 +567,24 @@ export const DealWizard: React.FC<DealWizardProps> = ({
         {/* Draft Resume Prompt */}
         {showDraftPrompt && draftData && (
           <div className="absolute inset-0 bg-background/95 z-50 flex items-center justify-center p-6">
-            <Alert className="max-w-md">
+            <Alert className="max-w-md shadow-lg">
               <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Resume Previous Draft?</AlertTitle>
-              <AlertDescription className="mt-2">
-                <p className="mb-2">
-                  You have an unsaved draft for <strong>{draftData.formData.company_name || 'a new deal'}</strong> 
-                  from {formatDistanceToNow(new Date(draftData.timestamp), { addSuffix: true })}.
+              <AlertTitle className="text-base font-semibold">Resume Previous Draft?</AlertTitle>
+              <AlertDescription className="mt-3">
+                <p className="font-semibold text-foreground mb-0.5">
+                  {draftData.formData.company_name || 'Unnamed Deal'}
+                </p>
+                <p className="text-sm text-muted-foreground mb-1">
+                  Picked up at Step {draftData.currentStep + 1} of {steps.length} — {steps[draftData.currentStep]?.title}
                 </p>
                 <p className="text-xs text-muted-foreground mb-4">
-                  Step {draftData.currentStep + 1} of {steps.length}: {steps[draftData.currentStep]?.title}
+                  Auto-saved {formatDistanceToNow(new Date(draftData.timestamp), { addSuffix: true })}
                 </p>
-                <div className="flex gap-2">
-                  <Button onClick={handleResumeDraft} size="sm">
+                <div className="flex flex-col gap-2">
+                  <Button onClick={handleResumeDraft} className="w-full">
                     Resume Draft
                   </Button>
-                  <Button onClick={handleStartFresh} variant="outline" size="sm">
+                  <Button onClick={handleStartFresh} variant="ghost" className="w-full text-destructive hover:text-destructive">
                     Start Fresh
                   </Button>
                 </div>

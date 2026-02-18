@@ -43,6 +43,7 @@ const getInitialFormData = (): DealFormData => ({
   title: '',
   company_name: '',
   industry: '',
+  business_type: '',
   location: '',
   description: '',
   company_overview: '',

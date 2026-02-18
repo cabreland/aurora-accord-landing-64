@@ -161,14 +161,21 @@ export const DealListView: React.FC<DealListViewProps> = ({
               onClick={() => onDealSelect(deal.id)}
             >
               <div className="col-span-3">
-                <div className="font-medium text-foreground truncate" title={deal.title}>
+                <div className="font-medium text-foreground truncate" title={deal.company_name}>
+                  {deal.company_name}
+                </div>
+                <div className="text-xs text-muted-foreground truncate" title={deal.title}>
                   {deal.title}
                 </div>
               </div>
 
               <div className="col-span-2">
-                <div className="text-sm text-muted-foreground truncate" title={deal.company_name}>
-                  {deal.company_name}
+                <div className="text-sm text-muted-foreground truncate" title={(deal as any).deal_status || deal.status}>
+                  {(deal as any).deal_status ? (
+                    <span className="capitalize">{String((deal as any).deal_status).replace(/_/g, ' ')}</span>
+                  ) : (
+                    <span>{deal.status}</span>
+                  )}
                 </div>
               </div>
 
