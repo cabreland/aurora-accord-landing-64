@@ -3,7 +3,8 @@ import {
   Users, 
   UserPlus, 
   Search,
-  Filter
+  Filter,
+  UsersRound
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -32,7 +33,9 @@ import {
   InviteMemberModal,
   MemberDetailModal 
 } from './team';
+import { AddGroupModal } from '@/components/team/AddGroupModal';
 import { cn } from '@/lib/utils';
+
 
 interface TeamTabProps {
   dealId: string;
@@ -47,6 +50,7 @@ export const TeamTab: React.FC<TeamTabProps> = ({ dealId }) => {
   const updateMember = useUpdateTeamMember();
   
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
+  const [isAddGroupModalOpen, setIsAddGroupModalOpen] = useState(false);
   const [selectedMember, setSelectedMember] = useState<DealTeamMember | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState<DealTeamRole | 'all'>('all');
@@ -133,10 +137,16 @@ export const TeamTab: React.FC<TeamTabProps> = ({ dealId }) => {
               </Badge>
             )}
           </CardTitle>
-          <Button onClick={() => setIsInviteModalOpen(true)} className="gap-2">
-            <UserPlus className="h-4 w-4" />
-            Add Member
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" onClick={() => setIsAddGroupModalOpen(true)} className="gap-2">
+              <UsersRound className="h-4 w-4" />
+              Add Group
+            </Button>
+            <Button onClick={() => setIsInviteModalOpen(true)} className="gap-2">
+              <UserPlus className="h-4 w-4" />
+              Add Member
+            </Button>
+          </div>
         </CardHeader>
         
         <CardContent className="space-y-6">

@@ -60,10 +60,11 @@ export const DealSettingsTab = () => {
   const { dealId } = useParams();
   const queryClient = useQueryClient();
   
-  // Local state for settings
+  // Local state for settings (seeded from DB via useDealStageManager)
   const [autoProgressionEnabled, setAutoProgressionEnabled] = useState(true);
   const [ddThreshold, setDdThreshold] = useState(90);
   const [emailNotificationsEnabled, setEmailNotificationsEnabled] = useState(true);
+  const [settingsLoaded, setSettingsLoaded] = useState(false);
   const [stageChangeReason, setStageChangeReason] = useState('');
   const [selectedStage, setSelectedStage] = useState<DealStage | null>(null);
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
@@ -466,7 +467,10 @@ export const DealSettingsTab = () => {
               </div>
               <Switch 
                 checked={autoProgressionEnabled}
-                onCheckedChange={setAutoProgressionEnabled}
+                onCheckedChange={(val) => {
+                  setAutoProgressionEnabled(val);
+                  updateDealMutation.mutate({ settings: { auto_progression: val, dd_threshold: ddThreshold, email_notifications: emailNotificationsEnabled } });
+                }}
               />
             </div>
 
@@ -486,9 +490,10 @@ export const DealSettingsTab = () => {
                 </Badge>
               </div>
               <div className="flex items-center gap-4">
-                <Slider
+              <Slider
                   value={[ddThreshold]}
                   onValueChange={(value) => setDdThreshold(value[0])}
+                  onPointerUp={() => updateDealMutation.mutate({ settings: { auto_progression: autoProgressionEnabled, dd_threshold: ddThreshold, email_notifications: emailNotificationsEnabled } })}
                   min={50}
                   max={100}
                   step={5}
@@ -498,6 +503,7 @@ export const DealSettingsTab = () => {
                   type="number"
                   value={ddThreshold}
                   onChange={(e) => setDdThreshold(Math.min(100, Math.max(50, parseInt(e.target.value) || 50)))}
+                  onBlur={() => updateDealMutation.mutate({ settings: { auto_progression: autoProgressionEnabled, dd_threshold: ddThreshold, email_notifications: emailNotificationsEnabled } })}
                   min={50}
                   max={100}
                   className="w-20 text-center"
@@ -517,7 +523,10 @@ export const DealSettingsTab = () => {
               </div>
               <Switch 
                 checked={emailNotificationsEnabled}
-                onCheckedChange={setEmailNotificationsEnabled}
+                onCheckedChange={(val) => {
+                  setEmailNotificationsEnabled(val);
+                  updateDealMutation.mutate({ settings: { auto_progression: autoProgressionEnabled, dd_threshold: ddThreshold, email_notifications: val } });
+                }}
               />
             </div>
           </CardContent>
