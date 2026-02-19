@@ -3,8 +3,10 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { 
   Search,
   Filter,
-  AlertCircle
+  AlertCircle,
+  FolderOpen
 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
   Select,
@@ -28,7 +30,11 @@ import DiligenceHeader from './DiligenceHeader';
 import EnhancedCategorySidebar from './EnhancedCategorySidebar';
 import DiligenceTableSkeleton from './DiligenceTableSkeleton';
 
-const DealDiligenceTracker: React.FC = () => {
+interface DealDiligenceTrackerProps {
+  onNavigateToDataRoom?: () => void;
+}
+
+const DealDiligenceTracker: React.FC<DealDiligenceTrackerProps> = ({ onNavigateToDataRoom }) => {
   const { dealId } = useParams<{ dealId: string }>();
   const navigate = useNavigate();
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
@@ -174,6 +180,7 @@ const DealDiligenceTracker: React.FC = () => {
         totalCount={totalRequests}
         activeFiltersCount={activeFiltersCount}
         onAddRequest={() => setAddRequestOpen(true)}
+        onNavigateToDataRoom={onNavigateToDataRoom}
       />
       
       <div className="flex-1 flex overflow-hidden">

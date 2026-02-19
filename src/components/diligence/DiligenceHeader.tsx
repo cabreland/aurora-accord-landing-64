@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Plus, Filter, Download, Building2 } from 'lucide-react';
+import { ArrowLeft, Plus, Filter, Download, Building2, FolderOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
@@ -18,6 +18,7 @@ interface DiligenceHeaderProps {
   onToggleFilters?: () => void;
   onExport?: () => void;
   onAddRequest?: () => void;
+  onNavigateToDataRoom?: () => void;
 }
 
 const DiligenceHeader: React.FC<DiligenceHeaderProps> = ({
@@ -28,7 +29,8 @@ const DiligenceHeader: React.FC<DiligenceHeaderProps> = ({
   activeFiltersCount = 0,
   onToggleFilters,
   onExport,
-  onAddRequest
+  onAddRequest,
+  onNavigateToDataRoom,
 }) => {
   const navigate = useNavigate();
   const percentComplete = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
@@ -131,43 +133,23 @@ const DiligenceHeader: React.FC<DiligenceHeaderProps> = ({
 
         {/* Quick Actions */}
         <div className="flex items-center gap-2">
-          {onToggleFilters && (
+          {onNavigateToDataRoom && (
             <Button
               variant="outline"
               size="sm"
-              onClick={onToggleFilters}
-              className={cn(
-                "gap-2 hidden sm:flex",
-                showFilters && "bg-blue-50 border-blue-300 text-blue-700"
-              )}
+              onClick={onNavigateToDataRoom}
+              className="gap-2 hidden sm:flex"
             >
-              <Filter className="w-4 h-4" />
-              Filters
-              {activeFiltersCount > 0 && (
-                <Badge className="ml-1 h-5 w-5 rounded-full p-0 flex items-center justify-center bg-blue-600 text-white text-[10px]">
-                  {activeFiltersCount}
-                </Badge>
-              )}
+              <FolderOpen className="w-4 h-4" />
+              Data Room
             </Button>
           )}
-          
-          {onExport && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={onExport}
-              className="gap-2 hidden lg:flex"
-            >
-              <Download className="w-4 h-4" />
-              Export
-            </Button>
-          )}
-          
+
           {onAddRequest && (
             <Button
               size="sm"
               onClick={onAddRequest}
-              className="gap-2 bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
+              className="gap-2"
             >
               <Plus className="w-4 h-4" />
               <span className="hidden sm:inline">Add Request</span>
