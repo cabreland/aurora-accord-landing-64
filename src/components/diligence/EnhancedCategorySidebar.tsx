@@ -46,11 +46,11 @@ const EnhancedCategorySidebar: React.FC<EnhancedCategorySidebarProps> = ({
   onToggleCategory,
 }) => {
   const getProgressColor = (completed: number, total: number) => {
-    if (total === 0) return 'bg-gray-200';
+    if (total === 0) return 'bg-muted';
     const pct = (completed / total) * 100;
-    if (pct >= 70) return 'bg-emerald-500';
-    if (pct >= 40) return 'bg-amber-500';
-    return 'bg-red-500';
+    if (pct >= 70) return 'bg-success';
+    if (pct >= 40) return 'bg-warning';
+    return 'bg-destructive';
   };
 
   const getCategoryProgressIndicator = (categoryId: string) => {
@@ -60,19 +60,19 @@ const EnhancedCategorySidebar: React.FC<EnhancedCategorySidebarProps> = ({
     const pct = (count.completed / count.total) * 100;
     
     if (pct === 100) {
-      return <CheckCircle className="w-4 h-4 text-emerald-500" />;
+      return <CheckCircle className="w-4 h-4 text-success" />;
     } else if (pct > 0) {
-      return <div className="w-2 h-2 rounded-full bg-amber-500" />;
+      return <div className="w-2 h-2 rounded-full bg-warning" />;
     } else {
-      return <div className="w-2 h-2 rounded-full bg-red-500" />;
+      return <div className="w-2 h-2 rounded-full bg-destructive" />;
     }
   };
 
   return (
-    <div className="w-72 bg-gray-50 border-r border-gray-200 flex flex-col h-full">
+    <div className="w-72 bg-card border-r border-border flex flex-col h-full">
       {/* Header */}
-      <div className="p-4 border-b border-gray-200 bg-white">
-        <h2 className="text-xs font-bold text-gray-500 uppercase tracking-wider">
+      <div className="p-4 border-b border-border bg-card">
+        <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
           Categories
         </h2>
       </div>
@@ -85,20 +85,20 @@ const EnhancedCategorySidebar: React.FC<EnhancedCategorySidebarProps> = ({
           className={cn(
             'w-full flex items-center justify-between px-4 py-2.5 rounded-lg text-sm transition-all duration-150 mb-2',
             selectedCategoryId === null && !selectedSubcategoryId
-              ? 'bg-blue-50 text-blue-700 font-medium border border-blue-200 shadow-sm'
-              : 'text-gray-700 hover:bg-gray-100'
+              ? 'bg-primary/10 text-primary font-medium border border-primary/20 shadow-sm'
+              : 'text-foreground hover:bg-muted'
           )}
         >
           <div className="flex items-center gap-2">
             <Folder className="w-4 h-4" />
             <span className="font-medium">All Requests</span>
           </div>
-          <Badge variant="secondary" className="text-xs bg-gray-200 text-gray-700 tabular-nums">
+          <Badge variant="secondary" className="text-xs tabular-nums">
             {totalRequests}
           </Badge>
         </button>
 
-        <div className="h-px bg-gray-200 my-3" />
+        <div className="h-px bg-border my-3" />
 
         {/* Main Categories */}
         <div className="space-y-1">
@@ -118,15 +118,15 @@ const EnhancedCategorySidebar: React.FC<EnhancedCategorySidebarProps> = ({
                   className={cn(
                     'rounded-lg transition-all duration-150',
                     isSelected
-                      ? 'bg-blue-50 border border-blue-200 shadow-sm'
-                      : 'hover:bg-gray-100 border border-transparent'
+                      ? 'bg-primary/10 border border-primary/20 shadow-sm'
+                      : 'hover:bg-muted border border-transparent'
                   )}
                 >
                   <div className="flex items-center">
                     {hasSubcategories && (
                       <button
                         onClick={() => onToggleCategory(category.id)}
-                        className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+                        className="p-2 text-muted-foreground hover:text-foreground transition-colors"
                       >
                         <div className={cn(
                           "transition-transform duration-200",
@@ -145,21 +145,21 @@ const EnhancedCategorySidebar: React.FC<EnhancedCategorySidebarProps> = ({
                     >
                       <Icon
                         className="w-4 h-4 flex-shrink-0"
-                        style={{ color: category.color || '#6B7280' }}
+                        style={{ color: category.color || undefined }}
                       />
                       <span className={cn(
                         'flex-1 text-sm font-semibold truncate',
-                        isSelected ? 'text-blue-700' : 'text-gray-800'
+                        isSelected ? 'text-primary' : 'text-foreground'
                       )}>
                         {category.name}
                       </span>
                     </button>
                   </div>
                   
-                  {/* Progress Bar - Inside card */}
+                  {/* Progress Bar */}
                   {count.total > 0 && (
                     <div className="px-3 pb-2.5 flex items-center gap-2">
-                      <div className="flex-1 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                      <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
                         <div
                           className={cn(
                             "h-full rounded-full transition-all duration-300",
@@ -170,7 +170,7 @@ const EnhancedCategorySidebar: React.FC<EnhancedCategorySidebarProps> = ({
                       </div>
                       <span className={cn(
                         'text-xs font-medium tabular-nums min-w-[40px] text-right',
-                        isSelected ? 'text-blue-600' : 'text-gray-500'
+                        isSelected ? 'text-primary' : 'text-muted-foreground'
                       )}>
                         {count.completed}/{count.total}
                       </span>
@@ -180,7 +180,7 @@ const EnhancedCategorySidebar: React.FC<EnhancedCategorySidebarProps> = ({
 
                 {/* Subcategories */}
                 {isExpanded && hasSubcategories && (
-                  <div className="ml-5 mt-1 space-y-0.5 border-l-2 border-gray-200 pl-3">
+                  <div className="ml-5 mt-1 space-y-0.5 border-l-2 border-border pl-3">
                     {catSubs.map((subcategory) => {
                       const subCount = subcategoryCounts[subcategory.id] || { total: 0, completed: 0 };
                       const isSubSelected = selectedSubcategoryId === subcategory.id;
@@ -193,23 +193,23 @@ const EnhancedCategorySidebar: React.FC<EnhancedCategorySidebarProps> = ({
                           className={cn(
                             'w-full flex items-center justify-between px-3 py-2 rounded-md text-sm transition-all duration-150 border-l-2 -ml-[2px]',
                             isSubSelected
-                              ? 'bg-blue-50 text-blue-700 border-blue-500 font-medium'
-                              : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100 border-transparent hover:border-gray-300'
+                              ? 'bg-primary/10 text-primary border-primary font-medium'
+                              : 'text-muted-foreground hover:text-foreground hover:bg-muted border-transparent hover:border-border'
                           )}
                         >
                           <div className="flex items-center gap-2">
-                            <span className="text-gray-400">•</span>
+                            <span className="text-muted-foreground">•</span>
                             <span className="truncate">{subcategory.name}</span>
                           </div>
                           <div className="flex items-center gap-2">
                             <span className={cn(
                               'text-xs tabular-nums',
-                              isSubSelected ? 'text-blue-600' : 'text-gray-400'
+                              isSubSelected ? 'text-primary' : 'text-muted-foreground'
                             )}>
                               {subCount.completed}/{subCount.total}
                             </span>
                             {subComplete && subCount.total > 0 && (
-                              <CheckCircle className="w-3.5 h-3.5 text-emerald-500" />
+                              <CheckCircle className="w-3.5 h-3.5 text-success" />
                             )}
                           </div>
                         </button>

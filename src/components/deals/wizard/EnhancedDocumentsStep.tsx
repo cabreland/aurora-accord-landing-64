@@ -2,352 +2,233 @@ import React, { useCallback, useState } from 'react';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Upload, FileText, X, AlertCircle, CheckCircle2, Clock } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Upload, FileText, X, SkipForward } from 'lucide-react';
 import { useDropzone } from 'react-dropzone';
 import { DealFormData } from './DealWizard';
+import { mapFileToFolder } from '@/lib/data/mapFileToFolder';
 
 interface EnhancedDocumentsStepProps {
   data: DealFormData;
   onChange: (updates: Partial<DealFormData>) => void;
   isValid: boolean;
+  onSkip?: () => void;
 }
 
-type DocumentType = {
+type QueuedFile = {
+  file: File;
   id: string;
-  label: string;
-  description: string;
-  required: boolean;
-  acceptedFiles: string[];
-  maxFiles?: number;
-  files: File[];
+  detectedFolder: string | null;
+  selectedFolder: string | null;
+};
+
+const FOLDER_OPTIONS = [
+  { value: 'financials', label: 'Financials' },
+  { value: 'corporate_legal', label: 'Corporate & Legal' },
+  { value: 'operations', label: 'Operations' },
+  { value: 'client_contracts', label: 'Client Base & Contracts' },
+  { value: 'marketing_sales', label: 'Marketing & Sales' },
+  { value: 'hr_team', label: 'HR & Team' },
+  { value: 'ip_technology', label: 'IP & Technology' },
+  { value: 'real_estate', label: 'Real Estate / Assets' },
+  { value: 'unassigned', label: 'Unassigned' },
+];
+
+const formatFileSize = (bytes: number): string => {
+  if (bytes === 0) return '0 B';
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 };
 
 export const EnhancedDocumentsStep: React.FC<EnhancedDocumentsStepProps> = ({
   data,
   onChange,
-  isValid
+  isValid,
+  onSkip,
 }) => {
-  const [documentTypes, setDocumentTypes] = useState<DocumentType[]>([
-    {
-      id: 'cim',
-      label: 'Confidential Information Memorandum',
-      description: 'Detailed business overview, strategy, and opportunity summary',
-      required: true,
-      acceptedFiles: ['.pdf', '.docx', '.pptx'],
-      maxFiles: 1,
-      files: []
-    },
-    {
-      id: 'financials',
-      label: 'Financial Statements (3 Years)',
-      description: 'P&L, Balance Sheet, Cash Flow statements for the last 3 years',
-      required: true,
-      acceptedFiles: ['.pdf', '.xlsx', '.xls'],
-      maxFiles: 6,
-      files: []
-    },
-    {
-      id: 'assets',
-      label: 'Asset List & Inventory',
-      description: 'Complete inventory of business assets, equipment, and property',
-      required: false,
-      acceptedFiles: ['.pdf', '.xlsx', '.csv'],
-      maxFiles: 3,
-      files: []
-    },
-    {
-      id: 'contracts',
-      label: 'Customer Contracts',
-      description: 'Key customer agreements, recurring revenue contracts',
-      required: false,
-      acceptedFiles: ['.pdf', '.docx'],
-      maxFiles: 10,
-      files: []
-    },
-    {
-      id: 'legal',
-      label: 'Legal Documentation',
-      description: 'Business licenses, IP documentation, legal compliance',
-      required: false,
-      acceptedFiles: ['.pdf', '.docx'],
-      maxFiles: 5,
-      files: []
-    }
-  ]);
+  const [queue, setQueue] = useState<QueuedFile[]>([]);
 
-  const updateDocumentType = (typeId: string, files: File[]) => {
-    setDocumentTypes(prev => 
-      prev.map(type => 
-        type.id === typeId ? { ...type, files } : type
-      )
-    );
-    
-    // Update parent component with all files
-    const allFiles = documentTypes.reduce((acc, type) => {
-      if (type.id === typeId) {
-        return [...acc, ...files];
-      }
-      return [...acc, ...type.files];
-    }, [] as File[]);
-    
-    onChange({ documents: allFiles });
-  };
+  const onDrop = useCallback((acceptedFiles: File[]) => {
+    const newFiles: QueuedFile[] = acceptedFiles.map(file => {
+      // Use keyword matching — pass empty folders array since we're pre-wizard
+      const detected = mapFileToFolder(file.name, []);
+      return {
+        file,
+        id: `${file.name}-${Date.now()}-${Math.random()}`,
+        detectedFolder: detected,
+        selectedFolder: detected,
+      };
+    });
+    setQueue(prev => {
+      const updated = [...prev, ...newFiles];
+      onChange({ documents: updated.map(q => q.file) });
+      return updated;
+    });
+  }, [onChange]);
 
-  const createDropzone = (documentType: DocumentType) => {
-    const onDrop = useCallback((acceptedFiles: File[]) => {
-      const currentFiles = documentType.files;
-      const newFiles = documentType.maxFiles 
-        ? [...currentFiles, ...acceptedFiles].slice(0, documentType.maxFiles)
-        : [...currentFiles, ...acceptedFiles];
-      
-      updateDocumentType(documentType.id, newFiles);
-    }, [documentType]);
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: {
+      'application/pdf': ['.pdf'],
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],
+      'application/msword': ['.doc'],
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'],
+      'application/vnd.ms-excel': ['.xls'],
+      'text/csv': ['.csv'],
+      'application/vnd.openxmlformats-officedocument.presentationml.presentation': ['.pptx'],
+      'image/png': ['.png'],
+      'image/jpeg': ['.jpg', '.jpeg'],
+    },
+    maxSize: 20 * 1024 * 1024,
+  });
 
-    return useDropzone({
-      onDrop,
-      accept: documentType.acceptedFiles.reduce((acc, ext) => {
-        const mimeTypes: Record<string, string[]> = {
-          '.pdf': ['application/pdf'],
-          '.docx': ['application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
-          '.doc': ['application/msword'],
-          '.xlsx': ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'],
-          '.xls': ['application/vnd.ms-excel'],
-          '.csv': ['text/csv'],
-          '.pptx': ['application/vnd.openxmlformats-officedocument.presentationml.presentation']
-        };
-        
-        const mimeType = mimeTypes[ext];
-        if (mimeType) {
-          acc[mimeType[0]] = [ext];
-        }
-        return acc;
-      }, {} as Record<string, string[]>),
-      maxSize: 20 * 1024 * 1024, // 20MB
-      disabled: documentType.maxFiles ? documentType.files.length >= documentType.maxFiles : false
+  const removeFile = (id: string) => {
+    setQueue(prev => {
+      const updated = prev.filter(q => q.id !== id);
+      onChange({ documents: updated.map(q => q.file) });
+      return updated;
     });
   };
 
-  const removeFile = (typeId: string, fileIndex: number) => {
-    const documentType = documentTypes.find(type => type.id === typeId);
-    if (documentType) {
-      const newFiles = documentType.files.filter((_, index) => index !== fileIndex);
-      updateDocumentType(typeId, newFiles);
-    }
+  const updateFolder = (id: string, folder: string) => {
+    setQueue(prev => prev.map(q => q.id === id ? { ...q, selectedFolder: folder } : q));
   };
-
-  const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-  };
-
-  const getUploadStatus = (documentType: DocumentType) => {
-    if (documentType.files.length === 0) {
-      return documentType.required ? 'missing' : 'optional';
-    }
-    if (documentType.maxFiles && documentType.files.length >= documentType.maxFiles) {
-      return 'complete';
-    }
-    return 'partial';
-  };
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'complete':
-        return <CheckCircle2 className="w-4 h-4 text-success" />;
-      case 'partial':
-        return <Clock className="w-4 h-4 text-warning" />;
-      case 'missing':
-        return <AlertCircle className="w-4 h-4 text-destructive" />;
-      default:
-        return <Clock className="w-4 h-4 text-muted-foreground" />;
-    }
-  };
-
-  const getCompletionPercentage = () => {
-    const requiredTypes = documentTypes.filter(type => type.required);
-    const completedRequired = requiredTypes.filter(type => type.files.length > 0);
-    const optionalTypes = documentTypes.filter(type => !type.required);
-    const completedOptional = optionalTypes.filter(type => type.files.length > 0);
-    
-    const requiredScore = requiredTypes.length > 0 ? (completedRequired.length / requiredTypes.length) * 70 : 70;
-    const optionalScore = optionalTypes.length > 0 ? (completedOptional.length / optionalTypes.length) * 30 : 0;
-    
-    return Math.round(requiredScore + optionalScore);
-  };
-
-  const totalFiles = documentTypes.reduce((sum, type) => sum + type.files.length, 0);
-  const completionPercentage = getCompletionPercentage();
 
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-semibold text-foreground mb-2">Document Upload Center</h3>
-        <p className="text-sm text-muted-foreground mb-4">
-          Upload documents organized by category to provide comprehensive deal information.
+        <h3 className="text-lg font-semibold text-foreground mb-1">Upload Documents</h3>
+        <p className="text-sm text-muted-foreground">
+          Drop files here and we'll auto-detect the right folder. You can adjust assignments before saving.
         </p>
       </div>
 
-      {/* Progress Overview */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base flex items-center justify-between">
-            Upload Progress
-            <Badge variant="outline">{totalFiles} files uploaded</Badge>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span>Overall Completion</span>
-              <span>{completionPercentage}%</span>
+      <div className="grid md:grid-cols-5 gap-6">
+        {/* Left: Drop Zone (60%) */}
+        <div className="md:col-span-3">
+          <div
+            {...getRootProps()}
+            className={`
+              min-h-[280px] flex flex-col items-center justify-center
+              border-2 border-dashed rounded-xl p-8 text-center cursor-pointer
+              transition-all duration-200
+              ${isDragActive
+                ? 'border-primary bg-primary/5 scale-[1.01]'
+                : 'border-border hover:border-primary/50 hover:bg-muted/30'
+              }
+            `}
+          >
+            <input {...getInputProps()} />
+            <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-4 transition-colors ${isDragActive ? 'bg-primary/10' : 'bg-muted'}`}>
+              <Upload className={`w-8 h-8 ${isDragActive ? 'text-primary' : 'text-muted-foreground'}`} />
             </div>
-            <Progress value={completionPercentage} className="h-2" />
-            <p className="text-xs text-muted-foreground">
-              Required documents provide 70% completion, optional documents add 30%
-            </p>
+            {isDragActive ? (
+              <p className="text-primary font-semibold text-base">Drop your files here…</p>
+            ) : (
+              <>
+                <p className="font-semibold text-foreground text-base mb-1">
+                  Drop all files here
+                </p>
+                <p className="text-sm text-muted-foreground mb-3">
+                  or click to browse your computer
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  PDF, Word, Excel, PowerPoint, CSV, Images • Max 20MB each
+                </p>
+              </>
+            )}
           </div>
-        </CardContent>
-      </Card>
 
-      {/* Document Upload Sections */}
-      <div className="space-y-4">
-        {documentTypes.map((documentType) => {
-          const dropzone = createDropzone(documentType);
-          const status = getUploadStatus(documentType);
-          
-          return (
-            <Card key={documentType.id} className="border-2 hover:border-primary/20 transition-colors">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    {getStatusIcon(status)}
-                    <span>{documentType.label}</span>
-                    {documentType.required && <Badge variant="destructive" className="text-xs">Required</Badge>}
-                  </div>
-                  <Badge variant="outline" className="text-xs">
-                    {documentType.files.length}
-                    {documentType.maxFiles && ` / ${documentType.maxFiles}`}
-                  </Badge>
-                </CardTitle>
-                <p className="text-xs text-muted-foreground">{documentType.description}</p>
-              </CardHeader>
-              
-              <CardContent className="space-y-3">
-                {/* Drop Zone */}
-                {(!documentType.maxFiles || documentType.files.length < documentType.maxFiles) && (
-                  <div
-                    {...dropzone.getRootProps()}
-                    className={`
-                      border-2 border-dashed rounded-lg p-4 text-center cursor-pointer transition-colors
-                      ${dropzone.isDragActive 
-                        ? 'border-primary bg-primary/5' 
-                        : dropzone.isDragReject 
-                          ? 'border-destructive bg-destructive/5'
-                          : 'border-muted-foreground/25 hover:border-primary/50 hover:bg-muted/25'
-                      }
-                    `}
-                  >
-                    <input {...dropzone.getInputProps()} />
-                    <Upload className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
-                    
-                    {dropzone.isDragActive ? (
-                      <p className="text-primary font-medium text-sm">Drop files here...</p>
-                    ) : dropzone.isDragReject ? (
-                      <div>
-                        <p className="text-destructive font-medium text-sm mb-1">Invalid file type</p>
-                        <p className="text-xs text-muted-foreground">
-                          Accepts: {documentType.acceptedFiles.join(', ')}
-                        </p>
-                      </div>
-                    ) : (
-                      <div>
-                        <p className="font-medium text-sm text-foreground mb-1">
-                          Click to upload or drag files here
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          Accepts: {documentType.acceptedFiles.join(', ')} (max 20MB)
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* Uploaded Files */}
-                {documentType.files.length > 0 && (
-                  <div className="space-y-2">
-                    {documentType.files.map((file, index) => (
-                      <div key={index} className="flex items-center justify-between p-2 bg-muted/30 rounded-md">
-                        <div className="flex items-center space-x-2">
-                          <FileText className="w-4 h-4 text-muted-foreground" />
-                          <div>
-                            <p className="font-medium text-xs text-foreground">{file.name}</p>
-                            <p className="text-xs text-muted-foreground">{formatFileSize(file.size)}</p>
-                          </div>
-                        </div>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => removeFile(documentType.id, index)}
-                          className="h-6 w-6 p-0 text-muted-foreground hover:text-destructive"
-                        >
-                          <X className="w-3 h-3" />
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* Status Message */}
-                {documentType.maxFiles && documentType.files.length >= documentType.maxFiles && (
-                  <div className="bg-success/10 border border-success/20 rounded-md p-2">
-                    <p className="text-xs text-success-foreground font-medium">
-                      Maximum files uploaded for this category
-                    </p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
-
-      {/* Summary Tips */}
-      <Card className="bg-primary/5 border-primary/20">
-        <CardContent className="pt-4">
-          <div className="flex items-start space-x-2">
-            <AlertCircle className="w-5 h-5 text-primary mt-0.5 shrink-0" />
-            <div>
-              <h4 className="font-medium text-primary mb-2">Document Preparation Tips</h4>
-              <ul className="text-sm text-muted-foreground space-y-1">
-                <li>• <strong>CIM:</strong> Create a professional presentation highlighting your business opportunity</li>
-                <li>• <strong>Financials:</strong> Include audited statements when available, show clear trends</li>
-                <li>• <strong>Assets:</strong> Detailed inventory helps buyers understand the full scope</li>
-                <li>• <strong>Contracts:</strong> Focus on your largest and most strategic customer agreements</li>
-                <li>• <strong>Legal:</strong> Ensure all compliance documentation is current and complete</li>
-              </ul>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Completion Status */}
-      {completionPercentage < 50 && (
-        <div className="bg-warning/10 border border-warning/20 rounded-lg p-4">
-          <div className="flex items-center space-x-2">
-            <AlertCircle className="w-4 h-4 text-warning" />
-            <p className="text-sm text-warning-foreground">
-              <strong>Incomplete:</strong> Consider uploading required documents to attract serious buyers.
-              Current completion: {completionPercentage}%
-            </p>
+          {/* Skip CTA */}
+          <div className="mt-4 text-center">
+            <button
+              type="button"
+              onClick={onSkip}
+              className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <SkipForward className="w-4 h-4" />
+              Skip for now — upload directly in the Data Room
+            </button>
           </div>
         </div>
-      )}
+
+        {/* Right: File Queue (40%) */}
+        <div className="md:col-span-2">
+          <Label className="text-sm font-medium text-muted-foreground mb-3 block">
+            {queue.length === 0 ? 'Files will appear here' : `${queue.length} file${queue.length > 1 ? 's' : ''} queued`}
+          </Label>
+
+          {queue.length === 0 ? (
+            <div className="h-[240px] border border-dashed border-border rounded-xl flex items-center justify-center">
+              <p className="text-sm text-muted-foreground text-center px-4">
+                No files yet. Drop files on the left to get started.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-2 max-h-[320px] overflow-y-auto pr-1">
+              {queue.map((item) => {
+                const folder = FOLDER_OPTIONS.find(f => f.value === item.selectedFolder);
+                const isAutoDetected = item.detectedFolder !== null;
+
+                return (
+                  <div key={item.id} className="bg-muted/40 border border-border rounded-lg p-3">
+                    {/* File name row */}
+                    <div className="flex items-start gap-2 mb-2">
+                      <FileText className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <p className="text-sm font-medium text-foreground truncate flex-1 cursor-default">
+                              {item.file.name}
+                            </p>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>{item.file.name}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                      <button
+                        type="button"
+                        onClick={() => removeFile(item.id)}
+                        className="text-muted-foreground hover:text-destructive transition-colors shrink-0"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+
+                    {/* Folder assignment row */}
+                    <div className="flex items-center gap-2">
+                      <Select
+                        value={item.selectedFolder || 'unassigned'}
+                        onValueChange={(v) => updateFolder(item.id, v)}
+                      >
+                        <SelectTrigger className="h-7 text-xs flex-1">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {FOLDER_OPTIONS.map(opt => (
+                            <SelectItem key={opt.value} value={opt.value} className="text-xs">
+                              {opt.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      {isAutoDetected && (
+                        <Badge variant="secondary" className="text-xs shrink-0 h-5">
+                          Auto
+                        </Badge>
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">{formatFileSize(item.file.size)}</p>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 };

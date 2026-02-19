@@ -278,12 +278,7 @@ const DealWorkspace: React.FC = () => {
               </div>
             </div>
             
-            {canEdit && (
-              <Button variant="outline" className="shadow-sm">
-                <Edit className="h-4 w-4 mr-2" />
-                Edit Deal
-              </Button>
-            )}
+            {/* Edit Deal button removed — use Settings tab for deal editing */}
           </div>
         </div>
 
@@ -413,7 +408,7 @@ const DealWorkspace: React.FC = () => {
         )}
 
         {activeTab === 'requests' && deal && (
-          <DealDiligenceTracker />
+          <DealDiligenceTracker onNavigateToDataRoom={() => handleTabChange('data-room')} />
         )}
 
         {activeTab === 'activity' && (
