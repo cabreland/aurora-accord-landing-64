@@ -55,6 +55,7 @@ const TrainingCenter = lazy(() => import("./pages/TrainingCenter"));
 const CreateDeal = lazy(() => import("./pages/CreateDeal"));
 const FinancingTracker = lazy(() => import("./pages/FinancingTracker"));
 const Apply = lazy(() => import("./pages/Apply"));
+const DealShareView = lazy(() => import("./pages/DealShareView"));
 
 // Wrap protected components with authentication
 const ProtectedDashboard = withAuth('investor')(Dashboard);
@@ -155,6 +156,7 @@ const AppContent = () => {
               <Route path="/financing/:applicationId" element={<ProtectedFinancingTracker />} />
               <Route path="/investor-portal/profile" element={<ProtectedInvestorProfile />} />
               <Route path="/investor/profile" element={<Navigate to="/investor-portal/profile" replace />} />
+              <Route path="/share/:token" element={<DealShareView />} />
               <Route path="/403" element={<Forbidden />} />
               <Route path="*" element={<NotFound />} />
             </Routes>

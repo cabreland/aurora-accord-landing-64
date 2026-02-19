@@ -13,6 +13,7 @@ import {
   Eye,
   Loader2,
 } from 'lucide-react';
+import { DocumentViewerModal } from './DocumentViewerModal';
 import { formatDistanceToNow } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -123,6 +124,7 @@ export const DataRoomDocumentTable: React.FC<DataRoomDocumentTableProps> = ({
   const [rejectionReason, setRejectionReason] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
+  const [viewingDoc, setViewingDoc] = useState<DataRoomDocument | null>(null);
 
   const allSelected = documents.length > 0 && selectedDocuments.size === documents.length;
   const someSelected = selectedDocuments.size > 0 && selectedDocuments.size < documents.length;
@@ -174,6 +176,14 @@ export const DataRoomDocumentTable: React.FC<DataRoomDocumentTableProps> = ({
 
   return (
     <>
+      {viewingDoc && (
+        <DocumentViewerModal
+          document={viewingDoc}
+          open={!!viewingDoc}
+          onOpenChange={(open) => !open && setViewingDoc(null)}
+        />
+      )}
+
       <div className="bg-card rounded-xl border border-border overflow-hidden">
         <Table>
           <TableHeader>
@@ -269,7 +279,7 @@ export const DataRoomDocumentTable: React.FC<DataRoomDocumentTableProps> = ({
                           <Download className="h-4 w-4 mr-2" />
                           Download
                         </DropdownMenuItem>
-                        <DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setViewingDoc(doc)}>
                           <Eye className="h-4 w-4 mr-2" />
                           Preview
                         </DropdownMenuItem>
