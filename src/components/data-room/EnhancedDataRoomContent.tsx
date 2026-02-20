@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { toast } from 'sonner';
 import { 
   LayoutGrid, 
   List, 
@@ -299,6 +300,53 @@ export const EnhancedDataRoomContent: React.FC<EnhancedDataRoomContentProps> = (
           </div>
         )}
       </div>
+
+      {/* Unassigned Documents — files with no folder */}
+      {!selectedFolderId && !selectedCategoryId && (() => {
+        const unassigned = documents.filter(d => !d.folder_id);
+        if (unassigned.length === 0) return null;
+        return (
+          <div className="bg-card border border-border rounded-lg p-4 space-y-3">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-semibold text-foreground">
+                Unassigned Documents
+                <Badge variant="secondary" className="ml-2 text-xs">{unassigned.length}</Badge>
+              </h3>
+              <p className="text-xs text-muted-foreground">
+                These files haven't been assigned to a folder yet
+              </p>
+            </div>
+            <div className="divide-y divide-border">
+              {unassigned.map(doc => (
+                <div key={doc.id} className="flex items-center justify-between py-2">
+                  <span className="text-sm truncate flex-1">{doc.file_name}</span>
+                  <Select
+                    onValueChange={async (folderId) => {
+                      const { error } = await (await import('@/integrations/supabase/client')).supabase
+                        .from('data_room_documents')
+                        .update({ folder_id: folderId })
+                        .eq('id', doc.id);
+                      if (!error) {
+                        toast.success(`Moved "${doc.file_name}" to folder`);
+                        onRefresh?.();
+                      }
+                    }}
+                  >
+                    <SelectTrigger className="w-[180px] h-8 text-xs">
+                      <SelectValue placeholder="Assign to folder..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {folders.map(f => (
+                        <SelectItem key={f.id} value={f.id}>{f.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Upload Zone - Always visible when folder is selected and user can upload */}
       {canUploadDocuments && selectedFolderId && (

@@ -272,12 +272,18 @@ export const MyTasksWidget = () => {
                         {task.title}
                       </p>
                       {task.dealName && (
-                        <p className={cn(
-                          "text-xs mt-0.5 truncate",
-                          isCompleted ? "text-muted-foreground/60" : "text-muted-foreground"
-                        )}>
-                          {task.dealName}
-                        </p>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/deals?deal=${task.dealId}`);
+                          }}
+                          className={cn(
+                            "text-xs mt-0.5 truncate block hover:underline",
+                            isCompleted ? "text-muted-foreground/60" : "text-primary/80 hover:text-primary"
+                          )}
+                        >
+                          → {task.dealName}
+                        </button>
                       )}
                     </div>
 

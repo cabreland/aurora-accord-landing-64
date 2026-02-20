@@ -244,6 +244,13 @@ export const TeamTab: React.FC<TeamTabProps> = ({ dealId }) => {
         dealId={dealId}
         isCurrentUser={selectedMember?.user_id === user?.id}
       />
+
+      {/* Add Group Modal */}
+      <AddGroupModal
+        open={isAddGroupModalOpen}
+        onOpenChange={setIsAddGroupModalOpen}
+        dealId={dealId}
+      />
     </>
   );
 };
