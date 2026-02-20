@@ -166,7 +166,7 @@ export const EnhancedDataRoomContent: React.FC<EnhancedDataRoomContentProps> = (
   // If viewing a document inline, show the viewer
   if (viewingDocument) {
     return (
-      <div className="flex-1 min-w-0 bg-card rounded-xl border border-border overflow-hidden" style={{ minHeight: '600px' }}>
+      <div className="flex-1 min-w-0 bg-card rounded-xl border border-border overflow-hidden" style={{ height: 'calc(100vh - 340px)', minHeight: '500px' }}>
         <InlineDocumentViewer
           document={viewingDocument}
           onBack={() => setViewingDocumentId(null)}

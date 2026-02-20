@@ -190,7 +190,7 @@ export const InlineDocumentViewer: React.FC<InlineDocumentViewerProps> = ({
   };
 
   return (
-    <div className="flex-1 flex flex-col min-w-0 h-full">
+    <div className="flex flex-col min-w-0 w-full" style={{ height: '100%' }}>
       {/* Header Bar */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-card shrink-0">
         <div className="flex items-center gap-3 min-w-0">

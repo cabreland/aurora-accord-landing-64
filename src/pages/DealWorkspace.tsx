@@ -344,7 +344,7 @@ const DealWorkspace: React.FC = () => {
                 onApplyTemplate={applyTemplate} 
               />
             ) : (
-              <div className="flex gap-6">
+              <div className="flex gap-6" style={{ height: 'calc(100vh - 400px)', minHeight: '500px' }}>
                 <EnhancedDataRoomSidebar
                   categories={categories}
                   folders={folders}
