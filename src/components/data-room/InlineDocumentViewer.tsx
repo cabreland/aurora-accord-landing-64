@@ -59,6 +59,7 @@ export const InlineDocumentViewer: React.FC<InlineDocumentViewerProps> = ({
   onBack,
 }) => {
   const [signedUrl, setSignedUrl] = useState<string | null>(null);
+  const [blobUrl, setBlobUrl] = useState<string | null>(null);
   const [isLoadingUrl, setIsLoadingUrl] = useState(false);
   const [iframeLoaded, setIframeLoaded] = useState(false);
   const [urlError, setUrlError] = useState<string | null>(null);
@@ -66,32 +67,59 @@ export const InlineDocumentViewer: React.FC<InlineDocumentViewerProps> = ({
 
   useEffect(() => {
     setSignedUrl(null);
+    setBlobUrl(null);
     setIframeLoaded(false);
     setUrlError(null);
 
-    const fetchSignedUrl = async () => {
+    const fetchAndPrepare = async () => {
       setIsLoadingUrl(true);
       try {
+        // Get signed URL
         const { data, error } = await supabase.storage
           .from('data-room-documents')
           .createSignedUrl(document.file_path, 900);
-        if (error) throw error;
-        setSignedUrl(data.signedUrl);
-      } catch (err: any) {
-        console.error('Failed to generate signed URL:', err);
-        // Fallback: try file_url if available (for publicly uploaded files)
-        if (document.file_url) {
-          console.log('Using fallback file_url:', document.file_url);
-          setSignedUrl(document.file_url);
+        
+        let url: string | null = null;
+        if (error) {
+          // Fallback to file_url
+          if (document.file_url) {
+            url = document.file_url;
+          } else {
+            throw error;
+          }
         } else {
-          setUrlError('Could not load preview. The file may not exist in storage.');
+          url = data.signedUrl;
         }
+        
+        setSignedUrl(url);
+
+        // For PDFs, fetch as blob to bypass CSP iframe restrictions
+        const cat = getFileCategory(document.file_name, document.mime_type);
+        if (cat === 'pdf' && url) {
+          try {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error('Fetch failed');
+            const blob = await response.blob();
+            const objectUrl = URL.createObjectURL(blob);
+            setBlobUrl(objectUrl);
+          } catch (blobErr) {
+            console.warn('Blob fetch failed, will try direct URL:', blobErr);
+          }
+        }
+      } catch (err: any) {
+        console.error('Failed to load document:', err);
+        setUrlError('Could not load preview. The file may not be accessible.');
       } finally {
         setIsLoadingUrl(false);
       }
     };
 
-    fetchSignedUrl();
+    fetchAndPrepare();
+
+    // Cleanup blob URL on unmount
+    return () => {
+      if (blobUrl) URL.revokeObjectURL(blobUrl);
+    };
   }, [document.id, document.file_path, document.file_url]);
 
   const handleDownload = () => {
@@ -144,6 +172,7 @@ export const InlineDocumentViewer: React.FC<InlineDocumentViewerProps> = ({
     }
 
     if (category === 'pdf') {
+      const pdfSrc = blobUrl || signedUrl;
       return (
         <div className="relative h-full">
           {!iframeLoaded && (
@@ -152,7 +181,7 @@ export const InlineDocumentViewer: React.FC<InlineDocumentViewerProps> = ({
             </div>
           )}
           <iframe
-            src={signedUrl}
+            src={pdfSrc}
             className="w-full h-full border-0"
             title={document.file_name}
             onLoad={() => setIframeLoaded(true)}
