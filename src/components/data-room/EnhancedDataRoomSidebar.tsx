@@ -32,6 +32,21 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   Building2,
 };
 
+// Color mapping for data room categories (mirrors diligence category colors)
+const CATEGORY_COLOR_MAP: Record<string, string> = {
+  'FileText': '#5B8CFF',
+  'DollarSign': '#10B981',
+  'Settings': '#F59E0B',
+  'Users': '#8B5CF6',
+  'Package': '#EC4899',
+  'TrendingUp': '#F97316',
+  'BarChart': '#06B6D4',
+  'Code': '#6366F1',
+  'FolderOpen': '#94A3B8',
+  'Building2': '#5B8CFF',
+  'FileCheck': '#10B981',
+};
+
 // Default folder categories from SOP 03.1
 const DEFAULT_FOLDER_CATEGORIES = [
   { id: '1', name: 'Corporate & Legal', icon: 'Building2', index_number: 1 },
@@ -220,7 +235,7 @@ export const EnhancedDataRoomSidebar: React.FC<EnhancedDataRoomSidebarProps> = (
                         !hasSubfolders && 'pl-3'
                       )}
                     >
-                      <IconComponent className="w-4 h-4 flex-shrink-0" />
+                      <IconComponent className="w-4 h-4 flex-shrink-0" style={{ color: CATEGORY_COLOR_MAP[category.icon || 'FolderOpen'] || undefined }} />
                       <span className={cn(
                         'flex-1 text-sm font-semibold truncate',
                         isSelected ? 'text-primary' : 'text-foreground'

@@ -211,7 +211,7 @@ export const DealDataRoomTab = () => {
   }
 
   return (
-    <div className="h-full flex flex-col bg-card rounded-lg shadow-sm border border-border overflow-hidden">
+    <div className="flex flex-col bg-card rounded-lg shadow-sm border border-border overflow-hidden" style={{ height: 'calc(100vh - 200px)', minHeight: '500px' }}>
       {/* Header */}
       <EnterpriseDataRoomHeader
         deal={deal || undefined}
@@ -260,10 +260,12 @@ export const DealDataRoomTab = () => {
 
         {/* Main Content — either inline viewer or document list */}
         {viewingDocument ? (
-          <InlineDocumentViewer
-            document={viewingDocument}
-            onBack={() => setViewingDocumentId(null)}
-          />
+          <div className="flex-1 overflow-hidden">
+            <InlineDocumentViewer
+              document={viewingDocument}
+              onBack={() => setViewingDocumentId(null)}
+            />
+          </div>
         ) : (
           <div className="flex-1 flex flex-col overflow-hidden bg-card">
             {/* Filter Bar */}
