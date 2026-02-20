@@ -44,12 +44,14 @@ interface TaskDetailDialogProps {
 
 export const TaskDetailDialog = ({ open, onOpenChange, task }: TaskDetailDialogProps) => {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [priority, setPriority] = useState<TaskPriority>('medium');
   const [dealId, setDealId] = useState<string | null>(null);
   const [dueDate, setDueDate] = useState<Date | undefined>();
   const [isEditing, setIsEditing] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   useEffect(() => {
     if (task) {
@@ -59,6 +61,7 @@ export const TaskDetailDialog = ({ open, onOpenChange, task }: TaskDetailDialogP
       setDealId(task.dealId);
       setDueDate(task.dueDate ? new Date(task.dueDate) : undefined);
       setIsEditing(false);
+      setShowDeleteConfirm(false);
     }
   }, [task]);
 
@@ -148,190 +151,233 @@ export const TaskDetailDialog = ({ open, onOpenChange, task }: TaskDetailDialogP
   const isCompleted = task.status === 'completed';
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            {isCompleted && <span className="text-muted-foreground line-through">{task.title}</span>}
-            {!isCompleted && task.title}
-          </DialogTitle>
-        </DialogHeader>
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-1">
+              <span>Dashboard</span>
+              <span>›</span>
+              <span>My Tasks</span>
+              <span>›</span>
+              <span className="text-foreground truncate max-w-[200px]">{task.title}</span>
+            </div>
+            <DialogTitle className="flex items-center gap-2">
+              {isCompleted && <span className="text-muted-foreground line-through">{task.title}</span>}
+              {!isCompleted && task.title}
+            </DialogTitle>
+          </DialogHeader>
 
-        <div className="space-y-4 pt-2">
-          {isEditing ? (
-            <>
-              <div className="space-y-2">
-                <Label htmlFor="title">Title</Label>
-                <Input
-                  id="title"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  placeholder="Task title"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="description">Description</Label>
-                <Textarea
-                  id="description"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Add a description..."
-                  rows={3}
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-4 pt-2">
+            {isEditing ? (
+              <>
                 <div className="space-y-2">
-                  <Label>Priority</Label>
-                  <Select value={priority} onValueChange={(v: TaskPriority) => setPriority(v)}>
+                  <Label htmlFor="title">Title</Label>
+                  <Input
+                    id="title"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder="Task title"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="description">Description</Label>
+                  <Textarea
+                    id="description"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    placeholder="Add a description..."
+                    rows={3}
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Priority</Label>
+                    <Select value={priority} onValueChange={(v: TaskPriority) => setPriority(v)}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="high">High</SelectItem>
+                        <SelectItem value="medium">Medium</SelectItem>
+                        <SelectItem value="low">Low</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Due Date</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "w-full justify-start text-left font-normal",
+                            !dueDate && "text-muted-foreground"
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {dueDate ? format(dueDate, "PPP") : "Pick a date"}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={dueDate}
+                          onSelect={setDueDate}
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Related Deal (optional)</Label>
+                  <Select value={dealId || 'none'} onValueChange={(v) => setDealId(v === 'none' ? null : v)}>
                     <SelectTrigger>
-                      <SelectValue />
+                      <SelectValue placeholder="No deal selected" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="high">High</SelectItem>
-                      <SelectItem value="medium">Medium</SelectItem>
-                      <SelectItem value="low">Low</SelectItem>
+                      <SelectItem value="none">No deal</SelectItem>
+                      {deals.map((deal) => (
+                        <SelectItem key={deal.id} value={deal.id}>
+                          {deal.company_name}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
 
-                <div className="space-y-2">
-                  <Label>Due Date</Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          "w-full justify-start text-left font-normal",
-                          !dueDate && "text-muted-foreground"
-                        )}
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {dueDate ? format(dueDate, "PPP") : "Pick a date"}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={dueDate}
-                        onSelect={setDueDate}
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label>Related Deal (optional)</Label>
-                <Select value={dealId || 'none'} onValueChange={(v) => setDealId(v === 'none' ? null : v)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="No deal selected" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">No deal</SelectItem>
-                    {deals.map((deal) => (
-                      <SelectItem key={deal.id} value={deal.id}>
-                        {deal.company_name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="flex justify-end gap-2 pt-2">
-                <Button variant="outline" onClick={() => setIsEditing(false)}>
-                  Cancel
-                </Button>
-                <Button 
-                  onClick={() => updateMutation.mutate()}
-                  disabled={!title.trim() || updateMutation.isPending}
-                  className="bg-[#D4AF37] hover:bg-[#B8962E] text-[#0A0F0F]"
-                >
-                  Save Changes
-                </Button>
-              </div>
-            </>
-          ) : (
-            <>
-              {task.description && (
-                <div className="space-y-1">
-                  <Label className="text-muted-foreground text-xs">Description</Label>
-                  <p className={cn(
-                    "text-sm",
-                    isCompleted && "text-muted-foreground"
-                  )}>
-                    {task.description}
-                  </p>
-                </div>
-              )}
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <Label className="text-muted-foreground text-xs">Priority</Label>
-                  <p className="text-sm capitalize">{task.priority}</p>
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-muted-foreground text-xs">Due Date</Label>
-                  <p className={cn(
-                    "text-sm",
-                    task.dueDateFormatted === 'Overdue' && !isCompleted && "text-red-500"
-                  )}>
-                    {task.dueDateFormatted}
-                  </p>
-                </div>
-              </div>
-
-              {task.dealName && (
-                <div className="space-y-1">
-                  <Label className="text-muted-foreground text-xs">Related Deal</Label>
-                  <p className="text-sm">{task.dealName}</p>
-                </div>
-              )}
-
-              <div className="flex justify-between pt-4 border-t border-border">
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={() => deleteMutation.mutate()}
-                  disabled={deleteMutation.isPending}
-                >
-                  <Trash2 className="w-4 h-4 mr-1" />
-                  Delete
-                </Button>
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => toggleStatusMutation.mutate()}
-                    disabled={toggleStatusMutation.isPending}
-                  >
-                    {isCompleted ? (
-                      <>
-                        <RotateCcw className="w-4 h-4 mr-1" />
-                        Reopen
-                      </>
-                    ) : (
-                      <>
-                        <Check className="w-4 h-4 mr-1" />
-                        Complete
-                      </>
-                    )}
+                <div className="flex justify-end gap-2 pt-2">
+                  <Button variant="outline" onClick={() => setIsEditing(false)}>
+                    Cancel
                   </Button>
-                  <Button
-                    size="sm"
-                    onClick={() => setIsEditing(true)}
+                  <Button 
+                    onClick={() => updateMutation.mutate()}
+                    disabled={!title.trim() || updateMutation.isPending}
                     className="bg-[#D4AF37] hover:bg-[#B8962E] text-[#0A0F0F]"
                   >
-                    Edit
+                    Save Changes
                   </Button>
                 </div>
-              </div>
-            </>
-          )}
-        </div>
-      </DialogContent>
-    </Dialog>
+              </>
+            ) : (
+              <>
+                {task.description && (
+                  <div className="space-y-1">
+                    <Label className="text-muted-foreground text-xs">Description</Label>
+                    <p className={cn(
+                      "text-sm",
+                      isCompleted && "text-muted-foreground"
+                    )}>
+                      {task.description}
+                    </p>
+                  </div>
+                )}
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <Label className="text-muted-foreground text-xs">Priority</Label>
+                    <p className="text-sm capitalize">{task.priority}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-muted-foreground text-xs">Due Date</Label>
+                    <p className={cn(
+                      "text-sm",
+                      task.dueDateFormatted === 'Overdue' && !isCompleted && "text-destructive"
+                    )}>
+                      {task.dueDateFormatted}
+                    </p>
+                  </div>
+                </div>
+
+                {task.dealName && (
+                  <div className="space-y-1">
+                    <Label className="text-muted-foreground text-xs">Related Deal</Label>
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm">{task.dealName}</p>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 px-2 text-xs text-primary"
+                        onClick={() => {
+                          onOpenChange(false);
+                          navigate(`/deals?deal=${task.dealId}`);
+                        }}
+                      >
+                        <ExternalLink className="w-3 h-3 mr-1" />
+                        Go to Deal
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex justify-between pt-4 border-t border-border">
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => setShowDeleteConfirm(true)}
+                    disabled={deleteMutation.isPending}
+                  >
+                    <Trash2 className="w-4 h-4 mr-1" />
+                    Delete
+                  </Button>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => toggleStatusMutation.mutate()}
+                      disabled={toggleStatusMutation.isPending}
+                    >
+                      {isCompleted ? (
+                        <>
+                          <RotateCcw className="w-4 h-4 mr-1" />
+                          Reopen
+                        </>
+                      ) : (
+                        <>
+                          <Check className="w-4 h-4 mr-1" />
+                          Complete
+                        </>
+                      )}
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={() => setIsEditing(true)}
+                      className="bg-[#D4AF37] hover:bg-[#B8962E] text-[#0A0F0F]"
+                    >
+                      Edit
+                    </Button>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete this task?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently remove this task and cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => deleteMutation.mutate()}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Yes, delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 };
