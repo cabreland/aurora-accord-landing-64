@@ -40,6 +40,7 @@ interface DataRoomDocumentGridProps {
     status: 'approved' | 'rejected',
     reason?: string
   ) => Promise<boolean>;
+  onViewDocument?: (documentId: string) => void;
 }
 
 const STATUS_CONFIG: Record<string, { label: string; icon: typeof CheckCircle; className: string }> = {
@@ -91,6 +92,7 @@ export const DataRoomDocumentGrid: React.FC<DataRoomDocumentGridProps> = ({
   onSelectDocument,
   onDelete,
   onUpdateStatus,
+  onViewDocument,
 }) => {
   const [viewingDoc, setViewingDoc] = useState<DataRoomDocument | null>(null);
   const handleDownload = async (document: DataRoomDocument) => {
@@ -136,7 +138,7 @@ export const DataRoomDocumentGrid: React.FC<DataRoomDocumentGridProps> = ({
               {/* File Preview Area — click icon to open viewer */}
               <div
                 className={cn('relative h-32 flex items-center justify-center cursor-pointer', fileIconConfig.bgColor)}
-                onClick={() => setViewingDoc(doc)}
+                onClick={() => onViewDocument ? onViewDocument(doc.id) : setViewingDoc(doc)}
               >
                 <FileIcon className={cn('h-12 w-12', fileIconConfig.color)} />
 
@@ -162,7 +164,7 @@ export const DataRoomDocumentGrid: React.FC<DataRoomDocumentGridProps> = ({
                         <Download className="h-4 w-4 mr-2" />
                         Download
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => setViewingDoc(doc)}>
+                      <DropdownMenuItem onClick={() => onViewDocument ? onViewDocument(doc.id) : setViewingDoc(doc)}>
                         <Eye className="h-4 w-4 mr-2" />
                         Preview
                       </DropdownMenuItem>
@@ -205,7 +207,7 @@ export const DataRoomDocumentGrid: React.FC<DataRoomDocumentGridProps> = ({
                 <h4
                   className="font-medium text-sm text-foreground truncate cursor-pointer hover:text-primary transition-colors"
                   title={doc.file_name}
-                  onClick={() => setViewingDoc(doc)}
+                  onClick={() => onViewDocument ? onViewDocument(doc.id) : setViewingDoc(doc)}
                 >
                   {doc.file_name}
                 </h4>

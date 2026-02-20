@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { toast } from 'sonner';
 import { 
   LayoutGrid, 
@@ -28,6 +28,7 @@ import { DataRoomEmptyContent } from './DataRoomEmptyContent';
 import { DataRoomBulkActions } from './DataRoomBulkActions';
 import { DataRoomSubmitForReview } from './DataRoomSubmitForReview';
 import { FolderActionButtons } from './FolderActionButtons';
+import { InlineDocumentViewer } from './InlineDocumentViewer';
 
 interface EnhancedDataRoomContentProps {
   documents: DataRoomDocument[];
@@ -84,6 +85,12 @@ export const EnhancedDataRoomContent: React.FC<EnhancedDataRoomContentProps> = (
   const [statusFilter, setStatusFilter] = useState('all');
   const [sortBy, setSortBy] = useState('date');
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
+  const [viewingDocumentId, setViewingDocumentId] = useState<string | null>(null);
+
+  const viewingDocument = useMemo(() => {
+    if (!viewingDocumentId) return null;
+    return documents.find(d => d.id === viewingDocumentId) || null;
+  }, [viewingDocumentId, documents]);
 
   // Get selected folder and category objects
   const selectedFolder = selectedFolderId
@@ -155,6 +162,18 @@ export const EnhancedDataRoomContent: React.FC<EnhancedDataRoomContentProps> = (
   };
 
   const hasActiveFilters = searchQuery || statusFilter !== 'all';
+
+  // If viewing a document inline, show the viewer
+  if (viewingDocument) {
+    return (
+      <div className="flex-1 min-w-0 bg-card rounded-xl border border-border overflow-hidden" style={{ minHeight: '600px' }}>
+        <InlineDocumentViewer
+          document={viewingDocument}
+          onBack={() => setViewingDocumentId(null)}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="flex-1 space-y-4 min-w-0">
@@ -231,7 +250,6 @@ export const EnhancedDataRoomContent: React.FC<EnhancedDataRoomContentProps> = (
 
           {/* Right: View Toggle and Upload */}
           <div className="flex items-center gap-2">
-            {/* View Toggle */}
             <div className="flex items-center bg-muted rounded-lg p-0.5">
               <button
                 onClick={() => setViewMode('list')}
@@ -255,12 +273,10 @@ export const EnhancedDataRoomContent: React.FC<EnhancedDataRoomContentProps> = (
 
             <div className="h-6 w-px bg-border" />
 
-            {/* Folder Action Buttons - shown when a folder is selected */}
             {enableFolderManagement && selectedFolder && dealId && (
               <FolderActionButtons folder={selectedFolder} dealId={dealId} onFolderUpdate={onFolderUpdate} />
             )}
 
-            {/* Submit for Review - for deal owners with approval permission */}
             {dealId && onRefresh && canApproveDataRoom && (
               <DataRoomSubmitForReview
                 dealId={dealId}
@@ -274,7 +290,6 @@ export const EnhancedDataRoomContent: React.FC<EnhancedDataRoomContentProps> = (
           </div>
         </div>
 
-        {/* Active Filters Display */}
         {hasActiveFilters && (
           <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border">
             <span className="text-xs text-muted-foreground">Active filters:</span>
@@ -301,7 +316,7 @@ export const EnhancedDataRoomContent: React.FC<EnhancedDataRoomContentProps> = (
         )}
       </div>
 
-      {/* Unassigned Documents — files with no folder */}
+      {/* Unassigned Documents */}
       {!selectedFolderId && !selectedCategoryId && (() => {
         const unassigned = documents.filter(d => !d.folder_id);
         if (unassigned.length === 0) return null;
@@ -348,7 +363,7 @@ export const EnhancedDataRoomContent: React.FC<EnhancedDataRoomContentProps> = (
         );
       })()}
 
-      {/* Upload Zone - Always visible when folder is selected and user can upload */}
+      {/* Upload Zone */}
       {canUploadDocuments && selectedFolderId && (
         <DataRoomUploadZone
           folderName={currentLocation}
@@ -370,6 +385,7 @@ export const EnhancedDataRoomContent: React.FC<EnhancedDataRoomContentProps> = (
           onSelectAll={handleSelectAll}
           onDelete={onDelete}
           onUpdateStatus={onUpdateStatus}
+          onViewDocument={setViewingDocumentId}
         />
       ) : (
         <DataRoomDocumentGrid
@@ -379,6 +395,7 @@ export const EnhancedDataRoomContent: React.FC<EnhancedDataRoomContentProps> = (
           onSelectDocument={handleSelectDocument}
           onDelete={onDelete}
           onUpdateStatus={onUpdateStatus}
+          onViewDocument={setViewingDocumentId}
         />
       )}
 

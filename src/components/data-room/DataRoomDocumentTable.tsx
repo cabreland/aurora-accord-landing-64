@@ -63,6 +63,7 @@ interface DataRoomDocumentTableProps {
   ) => Promise<boolean>;
   canApprove?: boolean;
   canDelete?: boolean;
+  onViewDocument?: (documentId: string) => void;
 }
 
 const STATUS_CONFIG: Record<string, { label: string; icon: typeof CheckCircle; className: string }> = {
@@ -118,6 +119,7 @@ export const DataRoomDocumentTable: React.FC<DataRoomDocumentTableProps> = ({
   onUpdateStatus,
   canApprove = true,
   canDelete = true,
+  onViewDocument,
 }) => {
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
   const [rejectingDocId, setRejectingDocId] = useState<string | null>(null);
@@ -230,7 +232,7 @@ export const DataRoomDocumentTable: React.FC<DataRoomDocumentTableProps> = ({
                     <div className="flex items-center gap-3">
                       <FileIcon className={cn('h-5 w-5', fileIconConfig.color)} />
                       <div>
-                        <div className="font-medium text-foreground">{doc.file_name}</div>
+                        <div className="font-medium text-foreground cursor-pointer hover:text-primary transition-colors" onClick={() => onViewDocument ? onViewDocument(doc.id) : setViewingDoc(doc)}>{doc.file_name}</div>
                         {doc.index_number && (
                           <div className="text-xs text-muted-foreground">
                             {doc.index_number}
@@ -279,7 +281,7 @@ export const DataRoomDocumentTable: React.FC<DataRoomDocumentTableProps> = ({
                           <Download className="h-4 w-4 mr-2" />
                           Download
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => setViewingDoc(doc)}>
+                        <DropdownMenuItem onClick={() => onViewDocument ? onViewDocument(doc.id) : setViewingDoc(doc)}>
                           <Eye className="h-4 w-4 mr-2" />
                           Preview
                         </DropdownMenuItem>

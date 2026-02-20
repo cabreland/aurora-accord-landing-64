@@ -24,3 +24,4 @@ export { CreateDataRoomModal } from './CreateDataRoomModal';
 export { FolderActionsMenu } from './FolderActionsMenu';
 export { FolderBulkActions } from './FolderBulkActions';
 export { FolderActionButtons } from './FolderActionButtons';
+export { InlineDocumentViewer } from './InlineDocumentViewer';
