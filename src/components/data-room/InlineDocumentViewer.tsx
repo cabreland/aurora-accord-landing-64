@@ -79,14 +79,20 @@ export const InlineDocumentViewer: React.FC<InlineDocumentViewerProps> = ({
         setSignedUrl(data.signedUrl);
       } catch (err: any) {
         console.error('Failed to generate signed URL:', err);
-        setUrlError('Could not load preview. The file may not be accessible.');
+        // Fallback: try file_url if available (for publicly uploaded files)
+        if (document.file_url) {
+          console.log('Using fallback file_url:', document.file_url);
+          setSignedUrl(document.file_url);
+        } else {
+          setUrlError('Could not load preview. The file may not exist in storage.');
+        }
       } finally {
         setIsLoadingUrl(false);
       }
     };
 
     fetchSignedUrl();
-  }, [document.id, document.file_path]);
+  }, [document.id, document.file_path, document.file_url]);
 
   const handleDownload = () => {
     if (signedUrl) {
