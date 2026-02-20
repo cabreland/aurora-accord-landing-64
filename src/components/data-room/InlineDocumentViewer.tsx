@@ -180,12 +180,22 @@ export const InlineDocumentViewer: React.FC<InlineDocumentViewerProps> = ({
               <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
             </div>
           )}
-          <iframe
-            src={pdfSrc}
+          <object
+            data={pdfSrc}
+            type="application/pdf"
             className="w-full h-full border-0"
             title={document.file_name}
             onLoad={() => setIframeLoaded(true)}
-          />
+          >
+            <div className="flex flex-col items-center justify-center h-full gap-4 text-muted-foreground">
+              <FileText className="h-16 w-16 opacity-40" />
+              <p className="text-sm">PDF preview not supported in this browser</p>
+              <Button variant="outline" size="sm" onClick={handleDownload} disabled={!signedUrl}>
+                <Download className="h-4 w-4 mr-2" />
+                Download PDF
+              </Button>
+            </div>
+          </object>
         </div>
       );
     }
