@@ -70,6 +70,7 @@ export interface FinancingApplication {
   created_by: string;
   created_at: string;
   updated_at: string;
+  deal_buyer_id: string | null;
   // Joined data
   lender?: Lender;
   deal?: {
@@ -78,6 +79,16 @@ export interface FinancingApplication {
     asking_price: string | null;
     status: string;
   };
+  deal_buyer?: {
+    id: string;
+    buyer: {
+      id: string;
+      full_name: string;
+      email: string | null;
+      phone: string | null;
+      entity_name: string | null;
+    } | null;
+  } | null;
 }
 
 export interface FinancingDocument {
@@ -165,7 +176,8 @@ export const useFinancingApplications = (filters?: {
         .select(`
           *,
           lender:lenders(*),
-          deal:deals(id, company_name, asking_price, status)
+          deal:deals(id, company_name, asking_price, status),
+          deal_buyer:deal_buyers(id, buyer:buyers(id, full_name, email, phone, entity_name))
         `)
         .order('created_at', { ascending: false });
       
@@ -199,7 +211,8 @@ export const useFinancingApplication = (applicationId: string) => {
         .select(`
           *,
           lender:lenders(*),
-          deal:deals(id, company_name, asking_price, status, industry, location)
+          deal:deals(id, company_name, asking_price, status, industry, location),
+          deal_buyer:deal_buyers(id, buyer:buyers(id, full_name, email, phone, entity_name))
         `)
         .eq('id', applicationId)
         .single();

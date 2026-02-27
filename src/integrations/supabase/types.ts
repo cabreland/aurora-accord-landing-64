@@ -88,6 +88,33 @@ export type Database = {
           },
         ]
       }
+      buyers: {
+        Row: {
+          created_at: string
+          email: string | null
+          entity_name: string | null
+          full_name: string
+          id: string
+          phone: string | null
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          entity_name?: string | null
+          full_name: string
+          id?: string
+          phone?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          entity_name?: string | null
+          full_name?: string
+          id?: string
+          phone?: string | null
+        }
+        Relationships: []
+      }
       call_requests: {
         Row: {
           additional_message: string | null
@@ -952,6 +979,48 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "deal_assignments_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      deal_buyers: {
+        Row: {
+          buyer_id: string
+          created_at: string
+          deal_id: string
+          id: string
+          role: string | null
+          status: string | null
+        }
+        Insert: {
+          buyer_id: string
+          created_at?: string
+          deal_id: string
+          id?: string
+          role?: string | null
+          status?: string | null
+        }
+        Update: {
+          buyer_id?: string
+          created_at?: string
+          deal_id?: string
+          id?: string
+          role?: string | null
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deal_buyers_buyer_id_fkey"
+            columns: ["buyer_id"]
+            isOneToOne: false
+            referencedRelation: "buyers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deal_buyers_deal_id_fkey"
             columns: ["deal_id"]
             isOneToOne: false
             referencedRelation: "deals"
@@ -2003,6 +2072,7 @@ export type Database = {
           created_at: string | null
           created_by: string
           days_in_stage: number | null
+          deal_buyer_id: string | null
           deal_id: string
           decline_reason: string | null
           down_payment_percent: number | null
@@ -2032,6 +2102,7 @@ export type Database = {
           created_at?: string | null
           created_by: string
           days_in_stage?: number | null
+          deal_buyer_id?: string | null
           deal_id: string
           decline_reason?: string | null
           down_payment_percent?: number | null
@@ -2061,6 +2132,7 @@ export type Database = {
           created_at?: string | null
           created_by?: string
           days_in_stage?: number | null
+          deal_buyer_id?: string | null
           deal_id?: string
           decline_reason?: string | null
           down_payment_percent?: number | null
@@ -2082,6 +2154,13 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "financing_applications_deal_buyer_id_fkey"
+            columns: ["deal_buyer_id"]
+            isOneToOne: false
+            referencedRelation: "deal_buyers"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "financing_applications_deal_id_fkey"
             columns: ["deal_id"]
