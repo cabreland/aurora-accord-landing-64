@@ -100,6 +100,7 @@ export const AddTaskDialog = ({ open, onOpenChange }: AddTaskDialogProps) => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['dashboard-tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['tasks-page'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard-action-stats'] });
       toast.success('Task created successfully');
       form.reset();
@@ -214,6 +215,7 @@ export const AddTaskDialog = ({ open, onOpenChange }: AddTaskDialogProps) => {
                           selected={field.value}
                           onSelect={field.onChange}
                           initialFocus
+                          className={cn("p-3 pointer-events-auto")}
                         />
                       </PopoverContent>
                     </Popover>
