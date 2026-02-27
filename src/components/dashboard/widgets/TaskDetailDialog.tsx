@@ -96,6 +96,7 @@ export const TaskDetailDialog = ({ open, onOpenChange, task }: TaskDetailDialogP
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['dashboard-tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['tasks-page'] });
       toast.success('Task updated');
       setIsEditing(false);
     },
@@ -118,6 +119,7 @@ export const TaskDetailDialog = ({ open, onOpenChange, task }: TaskDetailDialogP
     onSuccess: (newStatus) => {
       queryClient.invalidateQueries({ queryKey: ['dashboard-tasks'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard-action-stats'] });
+      queryClient.invalidateQueries({ queryKey: ['tasks-page'] });
       toast.success(newStatus === 'completed' ? 'Task completed!' : 'Task reopened');
       onOpenChange(false);
     },
@@ -138,6 +140,7 @@ export const TaskDetailDialog = ({ open, onOpenChange, task }: TaskDetailDialogP
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['dashboard-tasks'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard-action-stats'] });
+      queryClient.invalidateQueries({ queryKey: ['tasks-page'] });
       toast.success('Task deleted');
       onOpenChange(false);
     },
@@ -228,6 +231,7 @@ export const TaskDetailDialog = ({ open, onOpenChange, task }: TaskDetailDialogP
                           selected={dueDate}
                           onSelect={setDueDate}
                           initialFocus
+                          className={cn("p-3 pointer-events-auto")}
                         />
                       </PopoverContent>
                     </Popover>

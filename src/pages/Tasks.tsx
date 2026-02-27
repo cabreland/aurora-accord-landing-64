@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Search, CalendarDays, RotateCcw, CheckCircle2 } from 'lucide-react';
+import { Search, CalendarDays, RotateCcw, CheckCircle2, Plus } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import AdminDashboardLayout from '@/layouts/AdminDashboardLayout';
@@ -18,6 +18,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { Database } from '@/integrations/supabase/types';
+import { AddTaskDialog } from '@/components/dashboard/widgets/AddTaskDialog';
+import { TaskDetailDialog } from '@/components/dashboard/widgets/TaskDetailDialog';
 
 type TaskPriority = Database['public']['Enums']['task_priority'];
 type TaskStatus = Database['public']['Enums']['task_status'];
@@ -40,12 +42,20 @@ const priorityClasses: Record<TaskPriority, string> = {
   low: 'bg-slate-100 text-slate-700 border-slate-200',
 };
 
+const statusLabels: Record<TaskStatus, string> = {
+  open: 'Open',
+  in_progress: 'In Progress',
+  completed: 'Completed',
+};
+
 const TasksPage = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | TaskStatus>('all');
   const [dateFilter, setDateFilter] = useState<'all' | 'today' | 'week' | 'month'>('all');
+  const [showAddDialog, setShowAddDialog] = useState(false);
+  const [selectedTask, setSelectedTask] = useState<TaskRow | null>(null);
 
   const { data: tasks = [], isLoading } = useQuery({
     queryKey: ['tasks-page', user?.id],
@@ -125,6 +135,39 @@ const TasksPage = () => {
 
   const completedCount = tasks.filter((t) => t.status === 'completed').length;
 
+  // Map TaskRow to the shape TaskDetailDialog expects
+  const mapToDetailTask = (task: TaskRow) => {
+    let dueDateFormatted = 'No date';
+    if (task.due_date) {
+      const d = new Date(task.due_date);
+      const now = new Date();
+      if (task.status !== 'completed' && d < now) {
+        dueDateFormatted = 'Overdue';
+      } else {
+        dueDateFormatted = format(d, 'MMM d, yyyy');
+      }
+    }
+    return {
+      id: task.id,
+      title: task.title,
+      description: task.description,
+      dealId: task.deal?.id || null,
+      dealName: task.deal?.company_name || null,
+      priority: task.priority,
+      status: task.status,
+      dueDate: task.due_date,
+      dueDateFormatted,
+    };
+  };
+
+  const handleAddDialogChange = (open: boolean) => {
+    setShowAddDialog(open);
+    if (!open) {
+      // Refetch tasks-page list after dialog closes (creation invalidates dashboard-tasks already)
+      queryClient.invalidateQueries({ queryKey: ['tasks-page'] });
+    }
+  };
+
   return (
     <AdminDashboardLayout
       activeTab="dashboard"
@@ -138,10 +181,16 @@ const TasksPage = () => {
           <div>
             <h1 className="text-2xl font-semibold text-foreground">Task Manager</h1>
             <p className="text-sm text-muted-foreground">
-              Transparent task history with completion tracking and search.
+              Manage tasks, track progress, and search completed work.
             </p>
           </div>
-          <Badge variant="secondary">{completedCount} completed</Badge>
+          <div className="flex items-center gap-3">
+            <Badge variant="secondary">{completedCount} completed</Badge>
+            <Button onClick={() => setShowAddDialog(true)}>
+              <Plus className="h-4 w-4 mr-1.5" />
+              New Task
+            </Button>
+          </div>
         </div>
 
         <div className="bg-card border border-border rounded-xl p-4 flex flex-col lg:flex-row gap-3">
@@ -162,7 +211,7 @@ const TasksPage = () => {
             <SelectContent>
               <SelectItem value="all">All statuses</SelectItem>
               <SelectItem value="open">Open</SelectItem>
-              <SelectItem value="in_progress">In progress</SelectItem>
+              <SelectItem value="in_progress">In Progress</SelectItem>
               <SelectItem value="completed">Completed</SelectItem>
             </SelectContent>
           </Select>
@@ -189,13 +238,21 @@ const TasksPage = () => {
               ))}
             </div>
           ) : filteredTasks.length === 0 ? (
-            <div className="p-10 text-center text-muted-foreground">No tasks match your filters.</div>
+            <div className="p-10 text-center text-muted-foreground">
+              {tasks.length === 0
+                ? 'No tasks yet. Click "New Task" to get started.'
+                : 'No tasks match your filters.'}
+            </div>
           ) : (
             <div className="divide-y divide-border">
               {filteredTasks.map((task) => {
                 const completed = task.status === 'completed';
                 return (
-                  <div key={task.id} className="p-4 flex items-center justify-between gap-4">
+                  <div
+                    key={task.id}
+                    className="p-4 flex items-center justify-between gap-4 hover:bg-muted/50 cursor-pointer transition-colors"
+                    onClick={() => setSelectedTask(task)}
+                  >
                     <div className="min-w-0">
                       <p className={`font-medium truncate ${completed ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
                         {task.title}
@@ -208,16 +265,23 @@ const TasksPage = () => {
                       </p>
                     </div>
 
-                    <div className="flex items-center gap-2">
-                      <Badge variant="outline" className={priorityClasses[task.priority]}>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <Badge variant="outline" className={`text-xs ${priorityClasses[task.priority]}`}>
                         {task.priority}
+                      </Badge>
+
+                      <Badge variant="secondary" className="text-xs">
+                        {statusLabels[task.status]}
                       </Badge>
 
                       {completed ? (
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => toggleTaskMutation.mutate({ taskId: task.id, currentStatus: task.status })}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleTaskMutation.mutate({ taskId: task.id, currentStatus: task.status });
+                          }}
                         >
                           <RotateCcw className="h-4 w-4 mr-1" />
                           Reopen
@@ -225,7 +289,10 @@ const TasksPage = () => {
                       ) : (
                         <Button
                           size="sm"
-                          onClick={() => toggleTaskMutation.mutate({ taskId: task.id, currentStatus: task.status })}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleTaskMutation.mutate({ taskId: task.id, currentStatus: task.status });
+                          }}
                         >
                           <CheckCircle2 className="h-4 w-4 mr-1" />
                           Complete
@@ -239,6 +306,19 @@ const TasksPage = () => {
           )}
         </div>
       </div>
+
+      <AddTaskDialog open={showAddDialog} onOpenChange={handleAddDialogChange} />
+
+      <TaskDetailDialog
+        open={!!selectedTask}
+        onOpenChange={(open) => {
+          if (!open) {
+            setSelectedTask(null);
+            queryClient.invalidateQueries({ queryKey: ['tasks-page'] });
+          }
+        }}
+        task={selectedTask ? mapToDetailTask(selectedTask) : null}
+      />
     </AdminDashboardLayout>
   );
 };
