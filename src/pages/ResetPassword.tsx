@@ -55,14 +55,12 @@ const ResetPassword = () => {
     });
 
     if (error) {
-      toast({
-        title: 'Error',
-        description: error.message,
-        variant: 'destructive',
-      });
-    } else {
-      setStep('success');
+      // Always show the safe success screen — never reveal whether the email exists
+      // or expose rate-limit / internal errors to the user
+      console.warn('Password reset request error (hidden from user):', error.message);
     }
+    // Always go to success regardless of error — safe UX pattern
+    setStep('success');
     setLoading(false);
   };
 
