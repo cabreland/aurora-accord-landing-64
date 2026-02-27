@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { FeedbackWidget } from '@/components/feedback/FeedbackWidget';
 import { 
   BarChart3, 
   FileText, 
@@ -268,6 +269,7 @@ const AdminDashboardLayout = ({ children, activeTab = 'dashboard', breadcrumbs }
           {children}
         </div>
       </div>
+      <FeedbackWidget />
     </div>
   );
 };
