@@ -95,7 +95,7 @@ const EnhancedFooter = () => {
         <div className="pt-8 border-t border-white/[0.06]">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <p className="text-sm text-white/40">
-              © 2024 DealFlow. All rights reserved.
+              © {new Date().getFullYear()} DealFlow. All rights reserved.
             </p>
             
             {/* Social Icons */}

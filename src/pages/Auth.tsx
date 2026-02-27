@@ -163,11 +163,11 @@ const Auth = () => {
             transition={{ duration: 0.6, delay: 0.8 }}
             className="flex items-center gap-6 text-sm text-white/40"
           >
-            <span>© 2024 EBB Partners</span>
+            <span>© {new Date().getFullYear()} EBB Partners</span>
             <span className="w-1 h-1 rounded-full bg-white/20" />
-            <a href="#" className="hover:text-white/60 transition-colors">Privacy</a>
+            <span className="text-white/40">Privacy</span>
             <span className="w-1 h-1 rounded-full bg-white/20" />
-            <a href="#" className="hover:text-white/60 transition-colors">Terms</a>
+            <span className="text-white/40">Terms</span>
           </motion.div>
         </div>
       </div>
@@ -278,10 +278,7 @@ const Auth = () => {
 
             {/* Footer Links */}
             <p className="text-center text-xs text-white/40">
-              By continuing, you agree to our{' '}
-              <a href="#" className="text-white/60 hover:text-white transition-colors">Terms of Service</a>
-              {' '}and{' '}
-              <a href="#" className="text-white/60 hover:text-white transition-colors">Privacy Policy</a>
+              By continuing, you agree to our Terms of Service and Privacy Policy.
             </p>
           </motion.div>
         </div>

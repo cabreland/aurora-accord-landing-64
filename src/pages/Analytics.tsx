@@ -2,15 +2,54 @@ import React from 'react';
 import AdminDashboardLayout from '@/layouts/AdminDashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TrendingUp, DollarSign, Target, Activity } from 'lucide-react';
-
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 
 const Analytics = () => {
+  const { data: metrics, isLoading } = useQuery({
+    queryKey: ['deal-analytics'],
+    queryFn: async () => {
+      const { data: deals, error } = await supabase
+        .from('deals')
+        .select('id, revenue, ebitda, status, asking_price')
+        .eq('is_test_data', false);
+
+      if (error) throw error;
+
+      const activeDeals = (deals || []).filter(d => d.status === 'active');
+      
+      const parseNum = (val: string | null): number => {
+        if (!val) return 0;
+        const cleaned = val.replace(/[^0-9.]/g, '');
+        return parseFloat(cleaned) || 0;
+      };
+
+      const totalRevenue = activeDeals.reduce((sum, d) => sum + parseNum(d.revenue), 0);
+      const avgDealSize = activeDeals.length > 0 
+        ? activeDeals.reduce((sum, d) => sum + parseNum(d.asking_price), 0) / activeDeals.length 
+        : 0;
+
+      return {
+        totalDeals: deals?.length || 0,
+        activeDeals: activeDeals.length,
+        totalRevenue,
+        avgDealSize,
+      };
+    },
+  });
+
+  const formatCurrency = (val: number) => {
+    if (val >= 1_000_000) return `$${(val / 1_000_000).toFixed(1)}M`;
+    if (val >= 1_000) return `$${(val / 1_000).toFixed(0)}K`;
+    return `$${val.toFixed(0)}`;
+  };
+
   return (
     <AdminDashboardLayout activeTab="analytics">
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold text-foreground mb-2">Deal Analytics</h1>
-          <p className="text-muted-foreground">Performance metrics and investment insights</p>
+          <p className="text-muted-foreground">Performance metrics based on your deal data</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -18,10 +57,11 @@ const Analytics = () => {
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <TrendingUp className="w-8 h-8 text-primary" />
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
               </div>
-              <div className="text-2xl font-bold text-foreground">$45.2M</div>
-              <div className="text-sm text-muted-foreground">Total Deal Value</div>
+              <div className="text-2xl font-bold text-foreground">
+                {isLoading ? '—' : formatCurrency(metrics?.totalRevenue || 0)}
+              </div>
+              <div className="text-sm text-muted-foreground">Total Pipeline Revenue</div>
             </CardContent>
           </Card>
 
@@ -29,9 +69,10 @@ const Analytics = () => {
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <DollarSign className="w-8 h-8 text-primary" />
-                <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
               </div>
-              <div className="text-2xl font-bold text-foreground">$8.5M</div>
+              <div className="text-2xl font-bold text-foreground">
+                {isLoading ? '—' : formatCurrency(metrics?.avgDealSize || 0)}
+              </div>
               <div className="text-sm text-muted-foreground">Avg Deal Size</div>
             </CardContent>
           </Card>
@@ -40,10 +81,11 @@ const Analytics = () => {
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <Target className="w-8 h-8 text-primary" />
-                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
               </div>
-              <div className="text-2xl font-bold text-foreground">87%</div>
-              <div className="text-sm text-muted-foreground">Avg Fit Score</div>
+              <div className="text-2xl font-bold text-foreground">
+                {isLoading ? '—' : metrics?.totalDeals || 0}
+              </div>
+              <div className="text-sm text-muted-foreground">Total Deals</div>
             </CardContent>
           </Card>
 
@@ -51,9 +93,10 @@ const Analytics = () => {
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <Activity className="w-8 h-8 text-primary" />
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
               </div>
-              <div className="text-2xl font-bold text-foreground">12</div>
+              <div className="text-2xl font-bold text-foreground">
+                {isLoading ? '—' : metrics?.activeDeals || 0}
+              </div>
               <div className="text-sm text-muted-foreground">Active Deals</div>
             </CardContent>
           </Card>
@@ -61,13 +104,13 @@ const Analytics = () => {
 
         <Card className="bg-card border-border">
           <CardHeader>
-            <CardTitle>Analytics Dashboard</CardTitle>
+            <CardTitle>Advanced Analytics</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-center py-12">
-              <TrendingUp className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-              <p className="text-muted-foreground">Advanced analytics features coming soon</p>
-              <p className="text-sm text-muted-foreground mt-2">Track deal progress, ROI projections, and market trends</p>
+            <div className="text-center py-12 text-muted-foreground">
+              <TrendingUp className="w-12 h-12 text-muted-foreground/50 mx-auto mb-3" />
+              <p className="font-medium text-foreground mb-1">Coming Soon</p>
+              <p className="text-sm">Charts, ROI projections, and market trend analysis are being finalized.</p>
             </div>
           </CardContent>
         </Card>
