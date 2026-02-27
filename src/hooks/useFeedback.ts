@@ -101,14 +101,25 @@ export const useCreateFeedback = () => {
     mutationFn: async (data: {
       created_by: string;
       page_path: string;
+      page_context?: Record<string, unknown> | null;
       type: string;
       severity?: string;
       summary: string;
       details?: string;
     }) => {
+      const insertData = {
+          created_by: data.created_by,
+          page_path: data.page_path,
+          page_context: (data.page_context ?? null) as any,
+          type: data.type,
+          severity: data.severity ?? null,
+          summary: data.summary,
+          details: data.details ?? null,
+          status: 'open' as const,
+        };
       const { data: result, error } = await supabase
         .from('product_feedback')
-        .insert({ ...data, status: 'open' })
+        .insert(insertData)
         .select()
         .single();
       if (error) throw error;
