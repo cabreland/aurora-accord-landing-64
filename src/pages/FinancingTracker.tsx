@@ -61,9 +61,13 @@ const FinancingTracker = () => {
     return applications.filter(app => {
       if (filters.search) {
         const s = filters.search.toLowerCase();
+        const buyerName = app.deal_buyer?.buyer?.full_name?.toLowerCase() || '';
+        const buyerEmail = app.deal_buyer?.buyer?.email?.toLowerCase() || '';
         const match = app.deal?.company_name?.toLowerCase().includes(s) ||
           app.lender?.name?.toLowerCase().includes(s) ||
-          app.application_number?.toLowerCase().includes(s);
+          app.application_number?.toLowerCase().includes(s) ||
+          buyerName.includes(s) ||
+          buyerEmail.includes(s);
         if (!match) return false;
       }
       if (filters.stage && filters.stage !== 'all' && app.stage !== filters.stage) return false;
@@ -156,6 +160,7 @@ const FinancingTracker = () => {
                     <thead>
                       <tr className="border-b border-border bg-muted/50">
                         <th className="text-left p-3 font-medium text-muted-foreground">Deal</th>
+                        <th className="text-left p-3 font-medium text-muted-foreground">Buyer</th>
                         <th className="text-left p-3 font-medium text-muted-foreground">Lender</th>
                         <th className="text-left p-3 font-medium text-muted-foreground">Type</th>
                         <th className="text-right p-3 font-medium text-muted-foreground">Amount</th>
@@ -181,6 +186,9 @@ const FinancingTracker = () => {
                                   {app.deal?.company_name || 'Unknown'}
                                 </span>
                               </div>
+                            </td>
+                            <td className="p-3 text-sm text-foreground truncate max-w-[140px]">
+                              {app.deal_buyer?.buyer?.full_name || <span className="text-muted-foreground italic">Unassigned</span>}
                             </td>
                             <td className="p-3 text-muted-foreground truncate max-w-[120px]">
                               {app.lender?.name || '—'}

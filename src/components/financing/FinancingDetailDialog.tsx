@@ -144,6 +144,25 @@ export const FinancingDetailDialog: React.FC<FinancingDetailDialogProps> = ({
           </DialogHeader>
 
           <div className="space-y-4 pt-2">
+            {/* Buyer Info */}
+            {application.deal_buyer?.buyer ? (
+              <div className="bg-muted/30 border border-border rounded-lg p-3">
+                <p className="text-xs font-medium text-muted-foreground mb-1">Buyer</p>
+                <p className="text-sm font-medium text-foreground">{application.deal_buyer.buyer.full_name}</p>
+                {application.deal_buyer.buyer.entity_name && (
+                  <p className="text-xs text-muted-foreground">{application.deal_buyer.buyer.entity_name}</p>
+                )}
+                <div className="flex gap-3 mt-1">
+                  {application.deal_buyer.buyer.email && <span className="text-xs text-muted-foreground">{application.deal_buyer.buyer.email}</span>}
+                  {application.deal_buyer.buyer.phone && <span className="text-xs text-muted-foreground">{application.deal_buyer.buyer.phone}</span>}
+                </div>
+              </div>
+            ) : (
+              <div className="bg-muted/30 border border-border rounded-lg p-3">
+                <p className="text-xs text-muted-foreground italic">No buyer assigned (legacy record)</p>
+              </div>
+            )}
+
             {/* Row 1: Stage + Priority */}
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
