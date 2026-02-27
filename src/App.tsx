@@ -8,6 +8,7 @@ import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { withAuth } from "@/utils/withAuth";
 import React, { Suspense, lazy } from "react";
 import { FloatingChatWidget } from "@/components/chat/FloatingChatWidget";
+import { FeedbackWidget } from "@/components/feedback/FeedbackWidget";
 import { ChatWidgetProvider } from "@/contexts/ChatWidgetContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { DevTools } from "@/components/dev/DevTools";
@@ -58,6 +59,7 @@ const Apply = lazy(() => import("./pages/Apply"));
 const DealShareView = lazy(() => import("./pages/DealShareView"));
 const Tasks = lazy(() => import("./pages/Tasks"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
+const FeedbackReview = lazy(() => import("./pages/FeedbackReview"));
 
 // Wrap protected components with authentication
 const ProtectedDashboard = withAuth('investor')(Dashboard);
@@ -87,6 +89,7 @@ const ProtectedTrainingCenter = withAuth('staff')(TrainingCenter);
 const ProtectedCreateDeal = withAuth('staff')(CreateDeal);
 const ProtectedFinancingTracker = withAuth('staff')(FinancingTracker);
 const ProtectedTasks = withAuth('staff')(Tasks);
+const ProtectedFeedbackReview = withAuth('admin')(FeedbackReview);
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -106,6 +109,7 @@ const AppContent = () => {
   return (
     <>
       <FloatingChatWidget />
+      <FeedbackWidget />
             <Suspense
             fallback={
               <div className="min-h-screen bg-[#1C2526] flex items-center justify-center">
@@ -162,6 +166,7 @@ const AppContent = () => {
               <Route path="/investor-portal/profile" element={<ProtectedInvestorProfile />} />
               <Route path="/investor/profile" element={<Navigate to="/investor-portal/profile" replace />} />
               <Route path="/share/:token" element={<DealShareView />} />
+              <Route path="/feedback-review" element={<ProtectedFeedbackReview />} />
               <Route path="/403" element={<Forbidden />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
