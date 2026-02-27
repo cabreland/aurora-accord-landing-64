@@ -338,6 +338,47 @@ export const useUpdateFinancingApplication = () => {
   });
 };
 
+// Delete application
+export const useDeleteFinancingApplication = () => {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from('financing_applications')
+        .delete()
+        .eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['financing-applications'] });
+      toast({ title: 'Financing record deleted' });
+    },
+    onError: (error) => {
+      toast({ title: 'Failed to delete record', description: error.message, variant: 'destructive' });
+    },
+  });
+};
+
+// Update stage only (lightweight)
+export const useUpdateFinancingStage = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, stage }: { id: string; stage: FinancingStage }) => {
+      const { error } = await supabase
+        .from('financing_applications')
+        .update({ stage })
+        .eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['financing-applications'] });
+    },
+  });
+};
+
 // Stage labels for display
 export const FINANCING_STAGE_LABELS: Record<FinancingStage, string> = {
   pre_qualification: 'Pre-Qualification',
