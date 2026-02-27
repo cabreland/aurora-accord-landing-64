@@ -121,7 +121,7 @@ export const DealStatusHeader: React.FC<DealStatusHeaderProps> = ({
       });
 
       queryClient.invalidateQueries({ queryKey: ['deal', deal.id] });
-      queryClient.invalidateQueries({ queryKey: ['workflow-phase', deal.id] });
+      queryClient.invalidateQueries({ queryKey: ['deal-workflow-phase', deal.id] });
 
       toast({
         title: 'Phase Updated',

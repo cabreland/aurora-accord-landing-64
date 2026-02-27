@@ -59,7 +59,7 @@ export function SellSideDataRoomCard({ dataRoom, isAdmin = false, isBroker = tru
 
   const handleContinueBuilding = (e: React.MouseEvent) => {
     e.stopPropagation();
-    navigate(`/deals/${dataRoom.id}?tab=data-room`);
+    navigate(`/deals/${dataRoom.id}?tab=data-room&from=data-room`);
   };
 
   const handlePreview = (e: React.MouseEvent) => {
@@ -80,7 +80,7 @@ export function SellSideDataRoomCard({ dataRoom, isAdmin = false, isBroker = tru
 
   return (
     <div 
-      onClick={() => navigate(`/deals/${dataRoom.id}?tab=data-room`)}
+      onClick={() => navigate(`/deals/${dataRoom.id}?tab=data-room&from=data-room`)}
       className="border border-border rounded-lg p-5 bg-card hover:shadow-lg transition-all cursor-pointer group"
     >
       {/* Header */}
