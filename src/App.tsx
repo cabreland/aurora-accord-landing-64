@@ -7,11 +7,8 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { withAuth } from "@/utils/withAuth";
 import React, { Suspense, lazy } from "react";
-import { FloatingChatWidget } from "@/components/chat/FloatingChatWidget";
 import { FeedbackWidget } from "@/components/feedback/FeedbackWidget";
-import { ChatWidgetProvider } from "@/contexts/ChatWidgetContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
-import { DevTools } from "@/components/dev/DevTools";
 import { useOnboardingCheck } from "@/hooks/useOnboardingCheck";
 
 import Demo from "./pages/Demo";
@@ -108,7 +105,6 @@ const AppContent = () => {
   
   return (
     <>
-      <FloatingChatWidget />
       <FeedbackWidget />
             <Suspense
             fallback={
@@ -171,7 +167,6 @@ const AppContent = () => {
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>
-          <DevTools />
     </>
   );
 };
@@ -184,9 +179,7 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
-            <ChatWidgetProvider>
-              <AppContent />
-            </ChatWidgetProvider>
+            <AppContent />
           </BrowserRouter>
         </TooltipProvider>
       </ThemeProvider>
