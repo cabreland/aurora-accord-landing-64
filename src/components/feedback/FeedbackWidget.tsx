@@ -67,8 +67,7 @@ export const FeedbackWidget = () => {
       <Button
         onClick={() => setOpen(true)}
         size="sm"
-        variant="outline"
-        className="fixed bottom-6 right-6 z-50 gap-1.5 shadow-lg rounded-full px-4 bg-background border-border hover:bg-accent"
+        className="fixed bottom-6 right-6 z-50 gap-1.5 shadow-lg rounded-full px-4 bg-primary text-primary-foreground hover:bg-primary/90"
       >
         <MessageSquarePlus className="h-4 w-4" />
         Feedback
