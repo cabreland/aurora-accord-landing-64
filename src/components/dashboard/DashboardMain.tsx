@@ -40,7 +40,7 @@ const DashboardMain = () => {
           {/* Page Header */}
           <div className="mb-2">
             <h1 className="text-2xl lg:text-3xl font-bold text-foreground tracking-tight">
-              Mission Control
+              Dashboard
             </h1>
             <p className="text-sm text-muted-foreground mt-1">
               Monitor deals, track tasks, and manage your M&A pipeline

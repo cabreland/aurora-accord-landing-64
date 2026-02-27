@@ -24,6 +24,7 @@ interface DealWithMetrics {
   company_name: string;
   industry: string | null;
   status: string;
+  workflow_phase: string | null;
   location: string | null;
   asking_price: string | null;
   document_count: number;
@@ -55,7 +56,7 @@ const DataRoom = () => {
       // Fetch deals with document and folder counts
       const { data: dealsData, error: dealsError } = await supabase
         .from('deals')
-        .select('id, title, company_name, industry, status, location, asking_price, created_by, updated_at')
+        .select('id, title, company_name, industry, status, workflow_phase, location, asking_price, created_by, updated_at')
         .order('updated_at', { ascending: false });
 
       if (dealsError) throw dealsError;
@@ -134,7 +135,7 @@ const DataRoom = () => {
     }
   };
 
-  // Separate deals into sell-side and buy-side
+  // Separate deals into sell-side and buy-side using workflow_phase
   const { sellSideDataRooms, buySideDataRooms } = useMemo(() => {
     const filtered = deals.filter(deal => {
       if (!searchQuery) return true;
@@ -145,24 +146,38 @@ const DataRoom = () => {
       );
     });
 
-    // Sell-side: draft, under_review, needs_revision, approved (not yet live)
-    const sellSide = filtered.filter(d => 
-      ['draft', 'under_review', 'needs_revision', 'approved'].includes(d.status)
-    );
+    const sellSidePhases = ['listing_received', 'under_review', 'approved', 'data_room_prep'];
+    const buySidePhases = ['live_active', 'under_loi', 'due_diligence', 'closing', 'closed'];
 
-    // Buy-side: active or closed (live for buyers)
-    const buySide = filtered.filter(d => 
-      ['active', 'closed'].includes(d.status)
-    );
+    // Use workflow_phase if set, fall back to status mapping
+    const sellSide = filtered.filter(d => {
+      const phase = d.workflow_phase;
+      if (phase) return sellSidePhases.includes(phase);
+      return ['draft', 'under_review', 'needs_revision', 'approved'].includes(d.status);
+    });
+
+    const buySide = filtered.filter(d => {
+      const phase = d.workflow_phase;
+      if (phase) return buySidePhases.includes(phase);
+      return ['active', 'closed'].includes(d.status);
+    });
 
     return { sellSideDataRooms: sellSide, buySideDataRooms: buySide };
   }, [deals, searchQuery]);
 
-  // Calculate stats
-  const inProgressCount = sellSideDataRooms.filter(d => d.status === 'draft').length;
-  const pendingApprovalCount = sellSideDataRooms.filter(d => d.status === 'under_review').length;
-  const needsRevisionCount = sellSideDataRooms.filter(d => d.status === 'needs_revision').length;
-  const activeCount = buySideDataRooms.filter(d => d.status === 'active').length;
+  // Calculate stats using workflow_phase with fallback
+  const inProgressCount = sellSideDataRooms.filter(d => 
+    (d.workflow_phase === 'listing_received' || d.workflow_phase === 'data_room_prep') || (!d.workflow_phase && d.status === 'draft')
+  ).length;
+  const pendingApprovalCount = sellSideDataRooms.filter(d => 
+    d.workflow_phase === 'under_review' || (!d.workflow_phase && d.status === 'under_review')
+  ).length;
+  const needsRevisionCount = sellSideDataRooms.filter(d => 
+    !d.workflow_phase && d.status === 'needs_revision'
+  ).length;
+  const activeCount = buySideDataRooms.filter(d => 
+    d.workflow_phase === 'live_active' || (!d.workflow_phase && d.status === 'active')
+  ).length;
   const totalBuyers = buySideDataRooms.reduce((sum, d) => sum + (d.active_buyers_count || 0), 0);
 
   const breadcrumbs = [

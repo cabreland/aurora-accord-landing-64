@@ -16,6 +16,13 @@ const Auth = () => {
   const { loading, handleGoogleSignIn, handleSignIn, handleSignUp } = useAuthHandlers();
   const { onboardingCompleted, loading: onboardingLoading } = useOnboardingStatus();
   const [activeTab, setActiveTab] = useState<'signin' | 'signup'>('signin');
+  const [signupEmail, setSignupEmail] = useState<string | null>(null);
+
+  const wrappedHandleSignUp = async (email: string, password: string, firstName: string, lastName: string) => {
+    await handleSignUp(email, password, firstName, lastName);
+    // If no immediate redirect happened, show the check-email screen
+    setSignupEmail(email);
+  };
 
   const redirectToAppropriateRoute = async (userId: string) => {
     try {
@@ -246,8 +253,25 @@ const Auth = () => {
               >
                 {activeTab === 'signin' ? (
                   <SignInForm onSubmit={handleSignIn} loading={loading} />
+                ) : signupEmail ? (
+                  <div className="text-center space-y-4 py-6">
+                    <div className="w-14 h-14 mx-auto rounded-full bg-[#D4AF37]/20 flex items-center justify-center">
+                      <Lock className="w-7 h-7 text-[#D4AF37]" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-white">Check your email</h3>
+                    <p className="text-white/50 text-sm">
+                      We sent a confirmation link to <span className="text-white font-medium">{signupEmail}</span>.
+                      Click the link to activate your account.
+                    </p>
+                    <button 
+                      onClick={() => { setSignupEmail(null); setActiveTab('signin'); }}
+                      className="text-[#D4AF37]/80 hover:text-[#D4AF37] text-sm transition-colors"
+                    >
+                      Back to sign in
+                    </button>
+                  </div>
                 ) : (
-                  <SignUpForm onSubmit={handleSignUp} loading={loading} />
+                  <SignUpForm onSubmit={wrappedHandleSignUp} loading={loading} />
                 )}
               </motion.div>
             </AnimatePresence>

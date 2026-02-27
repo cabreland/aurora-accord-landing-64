@@ -57,6 +57,7 @@ const FinancingTracker = lazy(() => import("./pages/FinancingTracker"));
 const Apply = lazy(() => import("./pages/Apply"));
 const DealShareView = lazy(() => import("./pages/DealShareView"));
 const Tasks = lazy(() => import("./pages/Tasks"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 
 // Wrap protected components with authentication
 const ProtectedDashboard = withAuth('investor')(Dashboard);
@@ -121,6 +122,7 @@ const AppContent = () => {
               <Route path="/home-page-c" element={<HomePageC />} />
               <Route path="/apply" element={<Apply />} />
               <Route path="/auth" element={<Auth />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/auth/accept" element={<AuthAccept />} />
               <Route path="/demo" element={<Demo />} />
               <Route path="/dashboard" element={<ProtectedDashboard />} />
@@ -131,7 +133,7 @@ const AppContent = () => {
               <Route path="/documents" element={<ProtectedDocuments />} />
               <Route path="/users" element={<ProtectedUserManagement />} />
         <Route path="/settings" element={<ProtectedSettings />} />
-              <Route path="/activity" element={<ProtectedActivity />} />
+              {/* Activity removed from nav - stub page */}
               <Route path="/onboarding" element={<ProtectedOnboarding />} />
               <Route path="/investor/onboarding" element={<ProtectedInvestorOnboarding />} />
               <Route path="/investor/onboarding-v2" element={<ProtectedInvestorOnboardingV2 />} />

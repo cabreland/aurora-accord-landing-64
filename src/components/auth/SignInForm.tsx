@@ -41,7 +41,7 @@ export const SignInForm = ({ onSubmit, loading }: SignInFormProps) => {
           <Label htmlFor="password" className="text-sm font-medium text-white/70">
             Password
           </Label>
-          <a href="#" className="text-xs text-[#D4AF37]/80 hover:text-[#D4AF37] transition-colors">
+          <a href="/reset-password" className="text-xs text-[#D4AF37]/80 hover:text-[#D4AF37] transition-colors">
             Forgot password?
           </a>
         </div>
