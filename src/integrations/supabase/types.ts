@@ -1899,6 +1899,39 @@ export type Database = {
           },
         ]
       }
+      feedback: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          page_area: string
+          route: string
+          severity: string
+          user_id: string | null
+          user_identifier: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          page_area: string
+          route: string
+          severity: string
+          user_id?: string | null
+          user_identifier?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          page_area?: string
+          route?: string
+          severity?: string
+          user_id?: string | null
+          user_identifier?: string | null
+        }
+        Relationships: []
+      }
       financing_activity: {
         Row: {
           activity_type: string
