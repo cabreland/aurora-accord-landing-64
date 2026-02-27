@@ -2959,6 +2959,54 @@ export type Database = {
         }
         Relationships: []
       }
+      product_feedback: {
+        Row: {
+          created_at: string
+          created_by: string
+          details: string | null
+          id: string
+          page_context: Json | null
+          page_path: string
+          resolution_notes: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          severity: string | null
+          status: string
+          summary: string
+          type: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          details?: string | null
+          id?: string
+          page_context?: Json | null
+          page_path: string
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string | null
+          status?: string
+          summary: string
+          type: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          details?: string | null
+          id?: string
+          page_context?: Json | null
+          page_path?: string
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string | null
+          status?: string
+          summary?: string
+          type?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
