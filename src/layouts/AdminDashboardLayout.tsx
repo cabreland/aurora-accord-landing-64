@@ -16,7 +16,8 @@ import {
   ClipboardCheck,
   FolderOpen,
   GraduationCap,
-  DollarSign
+  DollarSign,
+  MessageSquarePlus
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -48,10 +49,10 @@ const AdminDashboardLayout = ({ children, activeTab = 'dashboard', breadcrumbs }
   const [settingsExpanded, setSettingsExpanded] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
-  const { profile, getDisplayName, getRoleDisplayName, loading } = useUserProfile();
+  const { profile, getDisplayName, getRoleDisplayName, loading, isAdmin } = useUserProfile();
   const { count: pendingAccessCount } = usePendingAccessRequests();
 
-  const isDemo = location.pathname === '/demo';
+  const isDemo = false; // Demo route removed
 
   // Helper function to determine if nav item is active
   const isNavItemActive = (path: string) => {
@@ -100,6 +101,7 @@ const AdminDashboardLayout = ({ children, activeTab = 'dashboard', breadcrumbs }
     { id: 'ndas', label: 'Signed NDAs', icon: FileCheck, path: '/dashboard/ndas' },
     { id: 'investor-relations', label: 'Investor Relations', icon: Mail, path: '/investor-invitations' },
     { id: 'training', label: 'Training Center', icon: GraduationCap, path: '/training' },
+    ...(isAdmin() ? [{ id: 'feedback-review', label: 'Feedback', icon: MessageSquarePlus, path: '/feedback-review' }] : []),
     { 
       id: 'settings', 
       label: 'Settings', 

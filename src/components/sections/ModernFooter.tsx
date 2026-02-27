@@ -78,7 +78,7 @@ const ModernFooter = () => {
 
         <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-gray-400 text-sm">
-            © 2024 EXIT. All rights reserved.
+            © {new Date().getFullYear()} EXIT. All rights reserved.
           </p>
           <div className="flex gap-6 text-sm">
             <a href="#" className="text-gray-400 hover:text-white transition-colors">

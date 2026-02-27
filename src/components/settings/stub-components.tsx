@@ -1,21 +1,37 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Lock } from 'lucide-react';
 import { NDASettingsTab } from './NDASettingsTab';
 import { CompanySettingsTab } from './CompanySettingsTab';
 import { FormFieldsTab } from './FormFieldsTab';
 import { EmailTemplatesTab } from './EmailTemplatesTab';
 import { ValidationRulesTab } from './ValidationRulesTab';
 
-// Placeholder components for missing settings tabs
+const ComingSoonStub = ({ title }: { title: string }) => (
+  <Card>
+    <CardHeader>
+      <CardTitle>{title}</CardTitle>
+    </CardHeader>
+    <CardContent>
+      <div className="text-center py-12 text-muted-foreground">
+        <Lock className="w-10 h-10 mx-auto mb-3 text-muted-foreground/50" />
+        <p className="font-medium text-foreground mb-1">Coming Soon</p>
+        <p className="text-sm">This feature is being finalized for the next release.</p>
+      </div>
+    </CardContent>
+  </Card>
+);
 export const RolePermissionsTab: React.FC = () => (
   <Card>
     <CardHeader>
       <CardTitle>Role & Permissions Management</CardTitle>
     </CardHeader>
     <CardContent>
-      <div className="text-center py-8 text-muted-foreground">
-        Role and permissions management interface coming soon.
+      <div className="text-center py-12 text-muted-foreground">
+        <Lock className="w-10 h-10 mx-auto mb-3 text-muted-foreground/50" />
+        <p className="font-medium text-foreground mb-1">Coming Soon</p>
+        <p className="text-sm">Role and permissions management is being finalized for the next release.</p>
       </div>
     </CardContent>
   </Card>
@@ -66,122 +82,15 @@ export const RegistrationConfigTab: React.FC = () => {
   );
 };
 
-export const AuthenticationTab: React.FC = () => (
-  <Card>
-    <CardHeader>
-      <CardTitle>Authentication Settings</CardTitle>
-    </CardHeader>
-    <CardContent>
-      <div className="text-center py-8 text-muted-foreground">
-        Authentication settings interface coming soon.
-      </div>
-    </CardContent>
-  </Card>
-);
-
-export const AuditLoggingTab: React.FC = () => (
-  <Card>
-    <CardHeader>
-      <CardTitle>Audit Logging</CardTitle>
-    </CardHeader>
-    <CardContent>
-      <div className="text-center py-8 text-muted-foreground">
-        Audit logging interface coming soon.
-      </div>
-    </CardContent>
-  </Card>
-);
-
-export const SecurityMonitoringTab: React.FC = () => (
-  <Card>
-    <CardHeader>
-      <CardTitle>Security Monitoring</CardTitle>
-    </CardHeader>
-    <CardContent>
-      <div className="text-center py-8 text-muted-foreground">
-        Security monitoring interface coming soon.
-      </div>
-    </CardContent>
-  </Card>
-);
-
-export const DocumentPoliciesTab: React.FC = () => (
-  <Card>
-    <CardHeader>
-      <CardTitle>Document Management Policies</CardTitle>
-    </CardHeader>
-    <CardContent>
-      <div className="text-center py-8 text-muted-foreground">
-        Document policies interface coming soon.
-      </div>
-    </CardContent>
-  </Card>
-);
-
-export const FileStorageTab: React.FC = () => (
-  <Card>
-    <CardHeader>
-      <CardTitle>File Storage Settings</CardTitle>
-    </CardHeader>
-    <CardContent>
-      <div className="text-center py-8 text-muted-foreground">
-        File storage settings interface coming soon.
-      </div>
-    </CardContent>
-  </Card>
-);
-
-export const VersionControlTab: React.FC = () => (
-  <Card>
-    <CardHeader>
-      <CardTitle>Version Control Rules</CardTitle>
-    </CardHeader>
-    <CardContent>
-      <div className="text-center py-8 text-muted-foreground">
-        Version control interface coming soon.
-      </div>
-    </CardContent>
-  </Card>
-);
-
-export const EmailProviderTab: React.FC = () => (
-  <Card>
-    <CardHeader>
-      <CardTitle>Email Provider Configuration</CardTitle>
-    </CardHeader>
-    <CardContent>
-      <div className="text-center py-8 text-muted-foreground">
-        Email provider configuration interface coming soon.
-      </div>
-    </CardContent>
-  </Card>
-);
-
-export const WebhookManagementTab: React.FC = () => (
-  <Card>
-    <CardHeader>
-      <CardTitle>Webhook Management</CardTitle>
-    </CardHeader>
-    <CardContent>
-      <div className="text-center py-8 text-muted-foreground">
-        Webhook management interface coming soon.
-      </div>
-    </CardContent>
-  </Card>
-);
-
-export const APISettingsTab: React.FC = () => (
-  <Card>
-    <CardHeader>
-      <CardTitle>API Settings</CardTitle>
-    </CardHeader>
-    <CardContent>
-      <div className="text-center py-8 text-muted-foreground">
-        API settings interface coming soon.
-      </div>
-    </CardContent>
-  </Card>
-);
+export const AuthenticationTab: React.FC = () => <ComingSoonStub title="Authentication Settings" />;
+export const AuditLoggingTab: React.FC = () => <ComingSoonStub title="Audit Logging" />;
+export const SecurityMonitoringTab: React.FC = () => <ComingSoonStub title="Security Monitoring" />;
+export const DocumentPoliciesTab: React.FC = () => <ComingSoonStub title="Document Management Policies" />;
+export const FileStorageTab: React.FC = () => <ComingSoonStub title="File Storage Settings" />;
+export const VersionControlTab: React.FC = () => <ComingSoonStub title="Version Control Rules" />;
+export const EmailProviderTab: React.FC = () => <ComingSoonStub title="Email Provider Configuration" />;
+export const WebhookManagementTab: React.FC = () => <ComingSoonStub title="Webhook Management" />;
+export const APISettingsTab: React.FC = () => <ComingSoonStub title="API Settings" />;
 
 export default {
   RolePermissionsTab,

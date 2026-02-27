@@ -11,16 +11,10 @@ import { FeedbackWidget } from "@/components/feedback/FeedbackWidget";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { useOnboardingCheck } from "@/hooks/useOnboardingCheck";
 
-import Demo from "./pages/Demo";
 import InvestorPortal from "./pages/InvestorPortal";
 import Homepage from "./pages/Homepage";
 
 // Lazy-load remaining pages to reduce initial bundle size
-const Index = lazy(() => import("./pages/Index"));
-const IndexV2 = lazy(() => import("./pages/IndexV2"));
-const HomePageA = lazy(() => import("./pages/HomePageA"));
-const HomePageB = lazy(() => import("./pages/HomePageB"));
-const HomePageC = lazy(() => import("./pages/HomePageC"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Auth = lazy(() => import("./pages/Auth"));
 const AuthAccept = lazy(() => import("./pages/AuthAccept"));
@@ -29,17 +23,12 @@ const Forbidden = lazy(() => import("./pages/Forbidden"));
 const UserManagement = lazy(() => import("./pages/UserManagement"));
 const Onboarding = lazy(() => import("./pages/Onboarding"));
 const InvestorOnboarding = lazy(() => import("./pages/InvestorOnboardingNew"));
-const InvestorOnboardingV2 = lazy(() => import("./pages/InvestorOnboardingV2"));
 const DealManagement = lazy(() => import("./pages/DealManagement"));
 const DealDetail = lazy(() => import("./pages/DealDetail"));
 const Documents = lazy(() => import("./pages/Documents"));
 const Settings = lazy(() => import("./pages/Settings"));
-const Activity = lazy(() => import("./pages/Activity"));
 const InvestorInvitations = lazy(() => import("./pages/InvestorInvitations"));
 const InvestorRegistration = lazy(() => import("./pages/InvestorRegistration"));
-const TestRegistration = lazy(() => import("./pages/TestRegistration"));
-const Analytics = lazy(() => import("./pages/Analytics"));
-const Compliance = lazy(() => import("./pages/Compliance"));
 const InvestorMessages = lazy(() => import("./pages/InvestorMessages"));
 const TeamConversations = lazy(() => import("./pages/TeamConversations"));
 const NDAManagement = lazy(() => import("./pages/NDAManagement"));
@@ -52,7 +41,6 @@ const DealWorkspace = lazy(() => import("./pages/DealWorkspace"));
 const TrainingCenter = lazy(() => import("./pages/TrainingCenter"));
 const CreateDeal = lazy(() => import("./pages/CreateDeal"));
 const FinancingTracker = lazy(() => import("./pages/FinancingTracker"));
-const Apply = lazy(() => import("./pages/Apply"));
 const DealShareView = lazy(() => import("./pages/DealShareView"));
 const Tasks = lazy(() => import("./pages/Tasks"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
@@ -66,13 +54,9 @@ const ProtectedDealDetail = withAuth('investor')(DealDetail);
 const ProtectedDocuments = withAuth('staff')(Documents);
 const ProtectedUserManagement = withAuth('admin')(UserManagement);
 const ProtectedSettings = withAuth('staff')(Settings);
-const ProtectedActivity = withAuth('staff')(Activity);
 const ProtectedOnboarding = withAuth('investor')(Onboarding);
 const ProtectedInvestorOnboarding = withAuth('investor', { skipOnboardingCheck: true })(InvestorOnboarding);
-const ProtectedInvestorOnboardingV2 = withAuth('investor', { skipOnboardingCheck: true })(InvestorOnboardingV2);
 const ProtectedInvestorInvitations = withAuth('admin')(InvestorInvitations);
-const ProtectedAnalytics = withAuth('investor')(Analytics);
-const ProtectedCompliance = withAuth('investor')(Compliance);
 const ProtectedInvestorMessages = withAuth('investor')(InvestorMessages);
 const ProtectedTeamConversations = withAuth('staff')(TeamConversations);
 const ProtectedNDAManagement = withAuth('admin')(NDAManagement);
@@ -91,8 +75,8 @@ const ProtectedFeedbackReview = withAuth('admin')(FeedbackReview);
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 60 * 1000, // 1 minute
-      gcTime: 10 * 60 * 1000, // 10 minutes
+      staleTime: 60 * 1000,
+      gcTime: 10 * 60 * 1000,
       refetchOnWindowFocus: false,
       retry: 1,
     },
@@ -100,7 +84,6 @@ const queryClient = new QueryClient({
 });
 
 const AppContent = () => {
-  // Check onboarding status on every page load
   useOnboardingCheck();
   
   return (
@@ -115,33 +98,23 @@ const AppContent = () => {
           >
             <Routes>
               <Route path="/" element={<Homepage />} />
-              <Route path="/index" element={<Index />} />
-              <Route path="/v2" element={<IndexV2 />} />
-              <Route path="/home-page-a" element={<HomePageA />} />
-              <Route path="/home-page-b" element={<HomePageB />} />
-              <Route path="/home-page-c" element={<HomePageC />} />
-              <Route path="/apply" element={<Apply />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/auth/accept" element={<AuthAccept />} />
-              <Route path="/demo" element={<Demo />} />
               <Route path="/dashboard" element={<ProtectedDashboard />} />
               <Route path="/investor-portal" element={<ProtectedInvestorPortal />} />
               <Route path="/deals" element={<ProtectedDealManagement />} />
               <Route path="/deals/new" element={<ProtectedCreateDeal />} />
-              <Route path="/deal/:id" element={<ProtectedDealDetail />} />
+              <Route path="/deals/:dealId" element={<ProtectedDealWorkspace />} />
+              {/* Legacy deal detail route — redirect to workspace */}
+              <Route path="/deal/:id" element={<Navigate to="/deals" replace />} />
               <Route path="/documents" element={<ProtectedDocuments />} />
               <Route path="/users" element={<ProtectedUserManagement />} />
-        <Route path="/settings" element={<ProtectedSettings />} />
-              {/* Activity removed from nav - stub page */}
+              <Route path="/settings" element={<ProtectedSettings />} />
               <Route path="/onboarding" element={<ProtectedOnboarding />} />
               <Route path="/investor/onboarding" element={<ProtectedInvestorOnboarding />} />
-              <Route path="/investor/onboarding-v2" element={<ProtectedInvestorOnboardingV2 />} />
               <Route path="/investor-invitations" element={<ProtectedInvestorInvitations />} />
               <Route path="/investor-registration" element={<InvestorRegistration />} />
-              <Route path="/test-registration" element={<TestRegistration />} />
-              <Route path="/analytics" element={<ProtectedAnalytics />} />
-              <Route path="/compliance" element={<ProtectedCompliance />} />
               <Route path="/investor-portal/messages" element={<ProtectedInvestorMessages />} />
               <Route path="/investor-portal/messages/:conversationId" element={<ProtectedInvestorMessages />} />
               <Route path="/dashboard/conversations" element={<ProtectedTeamConversations />} />
@@ -153,10 +126,7 @@ const AppContent = () => {
               <Route path="/dashboard/diligence-tracker/:dealId" element={<ProtectedDiligenceTracker />} />
               <Route path="/data-room" element={<ProtectedDataRoom />} />
               <Route path="/tasks" element={<ProtectedTasks />} />
-              {/* Deal Workspace - unified deal management hub */}
-              <Route path="/deals/:dealId" element={<ProtectedDealWorkspace />} />
               <Route path="/training" element={<ProtectedTrainingCenter />} />
-              {/* Financing Tracker */}
               <Route path="/financing" element={<ProtectedFinancingTracker />} />
               <Route path="/financing/:applicationId" element={<ProtectedFinancingTracker />} />
               <Route path="/investor-portal/profile" element={<ProtectedInvestorProfile />} />
