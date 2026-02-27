@@ -9,7 +9,7 @@ import { Shield, Eye, EyeOff, ArrowRight, Loader2, CheckCircle, Mail } from 'luc
 import { motion } from 'framer-motion';
 import { validatePassword } from '@/lib/security';
 
-type ResetStep = 'request' | 'confirm' | 'success';
+type ResetStep = 'request' | 'confirm' | 'success' | 'expired';
 
 const ResetPassword = () => {
   const navigate = useNavigate();
@@ -21,15 +21,22 @@ const ResetPassword = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
-  // Check if we have a recovery token in the URL hash
+  // Check if we have a recovery token or error in the URL hash
   useEffect(() => {
     const hashParams = new URLSearchParams(window.location.hash.substring(1));
     const type = hashParams.get('type');
+    const errorCode = hashParams.get('error_code');
+    const errorDescription = hashParams.get('error_description');
+
+    if (errorCode || errorDescription) {
+      setStep('expired');
+      return;
+    }
+
     if (type === 'recovery') {
       setStep('confirm');
     }
 
-    // Also listen for auth state changes (recovery event)
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       if (event === 'PASSWORD_RECOVERY') {
         setStep('confirm');
@@ -81,7 +88,11 @@ const ResetPassword = () => {
     const { error } = await supabase.auth.updateUser({ password });
 
     if (error) {
-      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+      if (/expired|invalid/i.test(error.message)) {
+        setStep('expired');
+      } else {
+        toast({ title: 'Error', description: error.message, variant: 'destructive' });
+      }
     } else {
       toast({ title: 'Password updated successfully!' });
       setTimeout(() => navigate('/auth'), 2000);
@@ -195,8 +206,7 @@ const ResetPassword = () => {
             </div>
             <h2 className="text-2xl font-semibold text-white">Check your email</h2>
             <p className="text-white/50 text-sm">
-              We've sent a password reset link to <span className="text-white font-medium">{email}</span>. 
-              Click the link in the email to set your new password.
+              If an account exists for <span className="text-white font-medium">{email}</span>, you'll receive a password reset link. Please check your inbox.
             </p>
             <p className="text-white/40 text-xs">
               Didn't receive the email? Check your spam folder or try again.
@@ -207,6 +217,24 @@ const ResetPassword = () => {
               className="border-white/10 text-white/70 hover:text-white hover:bg-white/5"
             >
               Try again
+            </Button>
+          </div>
+        )}
+
+        {step === 'expired' && (
+          <div className="text-center space-y-4">
+            <div className="w-16 h-16 mx-auto rounded-full bg-red-500/20 flex items-center justify-center">
+              <Shield className="w-8 h-8 text-red-400" />
+            </div>
+            <h2 className="text-2xl font-semibold text-white">Link expired</h2>
+            <p className="text-white/50 text-sm">
+              This reset link has expired or has already been used.
+            </p>
+            <Button
+              onClick={() => setStep('request')}
+              className="w-full h-11 bg-gradient-to-r from-[#D4AF37] to-[#B8962E] hover:from-[#E5C04A] hover:to-[#D4AF37] text-[#0A0C10] font-semibold"
+            >
+              Request new reset link
             </Button>
           </div>
         )}
