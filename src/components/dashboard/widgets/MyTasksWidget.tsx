@@ -2,12 +2,22 @@ import React, { useState } from 'react';
 import { CheckSquare, Clock, ChevronRight, Inbox, Plus, Check, Filter, Calendar } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Skeleton } from '@/components/ui/skeleton';
-import { format, isToday, isTomorrow, isPast, addDays } from 'date-fns';
+import { format, isToday, isTomorrow, isPast } from 'date-fns';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { AddTaskDialog } from './AddTaskDialog';
@@ -54,6 +64,7 @@ export const MyTasksWidget = () => {
   const [showTodayOnly, setShowTodayOnly] = useState(false);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [pendingCompleteTask, setPendingCompleteTask] = useState<Task | null>(null);
 
   const { data: tasks = [], isLoading } = useQuery({
     queryKey: ['dashboard-tasks', showCompleted, showTodayOnly],
@@ -136,9 +147,15 @@ export const MyTasksWidget = () => {
     },
   });
 
-  const handleToggleTask = (e: React.MouseEvent, taskId: string, currentStatus: TaskStatus) => {
+  const handleToggleTask = (e: React.MouseEvent, task: Task) => {
     e.stopPropagation();
-    toggleTaskMutation.mutate({ taskId, currentStatus });
+
+    if (task.status === 'completed') {
+      toggleTaskMutation.mutate({ taskId: task.id, currentStatus: task.status });
+      return;
+    }
+
+    setPendingCompleteTask(task);
   };
 
   const pendingCount = tasks.filter(t => t.status !== 'completed').length;
@@ -184,14 +201,25 @@ export const MyTasksWidget = () => {
               </p>
             </div>
           </div>
-          <Button
-            size="sm"
-            onClick={() => setIsAddDialogOpen(true)}
-            className="bg-[#D4AF37] hover:bg-[#B8962E] text-[#0A0F0F]"
-          >
-            <Plus className="w-4 h-4 mr-1" />
-            Add Task
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate('/tasks')}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              View All
+              <ChevronRight className="w-4 h-4 ml-1" />
+            </Button>
+            <Button
+              size="sm"
+              onClick={() => setIsAddDialogOpen(true)}
+              className="bg-[#D4AF37] hover:bg-[#B8962E] text-[#0A0F0F]"
+            >
+              <Plus className="w-4 h-4 mr-1" />
+              Add Task
+            </Button>
+          </div>
         </div>
 
         {/* Filters */}
@@ -251,7 +279,7 @@ export const MyTasksWidget = () => {
                   <div className="flex items-start gap-3">
                     {/* Checkbox */}
                     <button
-                      onClick={(e) => handleToggleTask(e, task.id, task.status)}
+                      onClick={(e) => handleToggleTask(e, task)}
                       className={cn(
                         "w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 mt-0.5 transition-colors",
                         isCompleted
@@ -326,6 +354,37 @@ export const MyTasksWidget = () => {
         onOpenChange={(open) => !open && setSelectedTask(null)}
         task={selectedTask}
       />
+
+      <AlertDialog
+        open={!!pendingCompleteTask}
+        onOpenChange={(open) => {
+          if (!open) setPendingCompleteTask(null);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Mark task as complete?</AlertDialogTitle>
+            <AlertDialogDescription>
+              "{pendingCompleteTask?.title}" will be moved to completed tasks and included in your activity history.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (!pendingCompleteTask) return;
+                toggleTaskMutation.mutate({
+                  taskId: pendingCompleteTask.id,
+                  currentStatus: pendingCompleteTask.status,
+                });
+                setPendingCompleteTask(null);
+              }}
+            >
+              Mark Complete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 };

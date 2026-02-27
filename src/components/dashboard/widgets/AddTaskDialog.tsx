@@ -74,7 +74,7 @@ export const AddTaskDialog = ({ open, onOpenChange }: AddTaskDialogProps) => {
         .from('deals')
         .select('id, company_name')
         .eq('is_test_data', false)
-        .or('status.eq.active,current_stage.not.in.(archived,closed)')
+        .or('status.eq.active,workflow_phase.not.in.(closed)')
         .order('company_name');
 
       if (error) throw error;

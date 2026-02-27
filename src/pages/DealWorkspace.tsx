@@ -157,7 +157,10 @@ const DealWorkspace: React.FC = () => {
   // Update URL when tab changes
   const handleTabChange = (tab: DealTab) => {
     setActiveTab(tab);
-    setSearchParams({ tab });
+    const from = searchParams.get('from');
+    const nextParams = new URLSearchParams({ tab });
+    if (from) nextParams.set('from', from);
+    setSearchParams(nextParams);
     // Reset data room state when switching tabs
     if (tab !== 'data-room') {
       setSelectedFolderId(null);
@@ -167,6 +170,12 @@ const DealWorkspace: React.FC = () => {
   };
 
   const handleBack = () => {
+    const from = searchParams.get('from');
+    if (from === 'data-room') {
+      navigate('/data-room');
+      return;
+    }
+
     const dest = (isAdmin() || isEditor()) ? '/deals' : '/investor-portal';
     navigate(dest);
   };
@@ -207,8 +216,9 @@ const DealWorkspace: React.FC = () => {
     return 'All Documents';
   }, [selectedFolderId, selectedCategoryId, folders, categories]);
 
+  const from = searchParams.get('from');
   const breadcrumbs = [
-    { label: 'Deals', path: '/deals' },
+    ...(from === 'data-room' ? [{ label: 'Data Room', path: '/data-room' }] : [{ label: 'Deals', path: '/deals' }]),
     { label: deal?.company_name || 'Deal' },
     ...(activeTab !== 'overview' ? [{ label: activeTab.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()) }] : [])
   ];

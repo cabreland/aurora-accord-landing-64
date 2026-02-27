@@ -26,22 +26,22 @@ export function BuySideDataRoomCard({ dataRoom }: BuySideDataRoomCardProps) {
 
   const handleManageAccess = (e: React.MouseEvent) => {
     e.stopPropagation();
-    navigate(`/deals/${dataRoom.id}?tab=team`);
+    navigate(`/deals/${dataRoom.id}?tab=team&from=data-room`);
   };
 
   const handleViewDataRoom = (e: React.MouseEvent) => {
     e.stopPropagation();
-    navigate(`/deals/${dataRoom.id}?tab=data-room`);
+    navigate(`/deals/${dataRoom.id}?tab=data-room&from=data-room`);
   };
 
   const handleViewActivity = (e: React.MouseEvent) => {
     e.stopPropagation();
-    navigate(`/deals/${dataRoom.id}?tab=activity`);
+    navigate(`/deals/${dataRoom.id}?tab=activity&from=data-room`);
   };
 
   return (
     <div 
-      onClick={() => navigate(`/deals/${dataRoom.id}?tab=data-room`)}
+      onClick={() => navigate(`/deals/${dataRoom.id}?tab=data-room&from=data-room`)}
       className="border border-border rounded-lg p-5 bg-card hover:shadow-lg transition-all cursor-pointer group"
     >
       {/* Header */}

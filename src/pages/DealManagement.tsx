@@ -131,9 +131,6 @@ const DealManagement: React.FC = () => {
                     New Deal
                   </Button>
                 )}
-                <Button variant="outline" size="icon">
-                  <MoreVertical className="w-4 h-4" />
-                </Button>
               </div>
             </div>
 

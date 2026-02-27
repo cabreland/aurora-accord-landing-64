@@ -50,9 +50,9 @@ export const ActiveDealsWidget = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('deals')
-        .select('id, company_name, current_stage, status, industry, priority')
+        .select('id, company_name, workflow_phase, status, industry, priority')
         .eq('is_test_data', false)
-        .or('status.eq.active,current_stage.not.in.(archived,closed)')
+        .or('status.eq.active,workflow_phase.not.in.(closed)')
         .order('updated_at', { ascending: false })
         .limit(10);
 
@@ -61,7 +61,7 @@ export const ActiveDealsWidget = () => {
       return (data || []).map((d): Deal => ({
         id: d.id,
         name: d.company_name,
-        stage: formatStageName(d.current_stage || d.status),
+        stage: formatStageName((d as any).workflow_phase || d.status),
         side: 'Sell', // Default to Sell side for now
         partner: d.industry || 'N/A',
         nextAction: d.priority === 'high' ? 'Urgent action needed' : 'Review pending',

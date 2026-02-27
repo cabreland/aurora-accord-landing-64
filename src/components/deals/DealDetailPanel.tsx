@@ -273,12 +273,14 @@ export const DealDetailPanel: React.FC<DealDetailPanelProps> = ({
                             {new Date(deal.updated_at).toLocaleDateString()}
                           </span>
                         </div>
-                        {(deal as any).current_stage && (
+                        {(((deal as any).workflow_phase || (deal as any).current_stage || (deal as any).deal_status) && (
                           <div className="flex justify-between">
                             <span className="text-sm text-muted-foreground">Stage</span>
-                            <span className="text-sm font-semibold text-foreground">{(deal as any).current_stage}</span>
+                            <span className="text-sm font-semibold text-foreground capitalize">
+                              {String((deal as any).workflow_phase || (deal as any).current_stage || (deal as any).deal_status).replace(/_/g, ' ')}
+                            </span>
                           </div>
-                        )}
+                        ))}
                       </CardContent>
                     </Card>
 
