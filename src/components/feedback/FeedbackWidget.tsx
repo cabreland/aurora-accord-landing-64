@@ -164,7 +164,7 @@ export const FeedbackWidget = () => {
             {/* Auto-captured route */}
             <div className="space-y-1.5">
               <Label className="text-muted-foreground text-xs">Current route</Label>
-              <code className="block text-xs bg-muted px-2 py-1.5 rounded font-mono truncate">{currentRoute}</code>
+              <code className="block text-xs bg-muted px-2 py-1.5 rounded font-mono truncate max-w-full overflow-hidden">{currentRoute}</code>
             </div>
           </div>
 
