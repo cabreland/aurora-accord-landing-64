@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
@@ -8,6 +8,7 @@ import {
   FileText,
   FileSpreadsheet,
   FileImage,
+  FileCode,
   File,
   Loader2,
   AlertCircle,
@@ -24,12 +25,15 @@ interface InlineDocumentViewerProps {
   onBack: () => void;
 }
 
-function getFileCategory(fileName: string, mimeType?: string | null): 'pdf' | 'office' | 'image' | 'other' {
+type FileCategory = 'pdf' | 'office' | 'image' | 'text' | 'other';
+
+function getFileCategory(fileName: string, mimeType?: string | null): FileCategory {
   const ext = fileName.split('.').pop()?.toLowerCase() || '';
   const mime = mimeType?.toLowerCase() || '';
   if (ext === 'pdf' || mime === 'application/pdf') return 'pdf';
   if (['xlsx', 'xls', 'docx', 'doc', 'pptx', 'ppt'].includes(ext)) return 'office';
   if (['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'].includes(ext) || mime.startsWith('image/')) return 'image';
+  if (['csv', 'json', 'txt', 'xml', 'md', 'log', 'yaml', 'yml', 'tsv'].includes(ext) || mime.startsWith('text/')) return 'text';
   return 'other';
 }
 
@@ -38,6 +42,7 @@ function FileTypeIcon({ fileName, mimeType, className = 'h-5 w-5' }: { fileName:
   if (cat === 'pdf') return <FileText className={className} />;
   if (cat === 'office') return <FileSpreadsheet className={className} />;
   if (cat === 'image') return <FileImage className={className} />;
+  if (cat === 'text') return <FileCode className={className} />;
   return <File className={className} />;
 }
 
@@ -54,20 +59,39 @@ const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
   rejected: { label: 'Rejected', className: 'bg-destructive/10 text-destructive border-destructive/20' },
 };
 
+/** Timeout (ms) to force-clear the loading spinner if onLoad never fires */
+const LOAD_TIMEOUT_MS = 4000;
+
 export const InlineDocumentViewer: React.FC<InlineDocumentViewerProps> = ({
   document,
   onBack,
 }) => {
   const [signedUrl, setSignedUrl] = useState<string | null>(null);
   const [blobUrl, setBlobUrl] = useState<string | null>(null);
+  const [textContent, setTextContent] = useState<string | null>(null);
   const [isLoadingUrl, setIsLoadingUrl] = useState(false);
   const [iframeLoaded, setIframeLoaded] = useState(false);
   const [urlError, setUrlError] = useState<string | null>(null);
   const [commentText, setCommentText] = useState('');
+  const loadTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Force-clear the spinner after a timeout so content isn't hidden forever
+  const startLoadTimeout = () => {
+    if (loadTimeoutRef.current) clearTimeout(loadTimeoutRef.current);
+    loadTimeoutRef.current = setTimeout(() => {
+      setIframeLoaded(true);
+    }, LOAD_TIMEOUT_MS);
+  };
+
+  const handleIframeLoaded = () => {
+    if (loadTimeoutRef.current) clearTimeout(loadTimeoutRef.current);
+    setIframeLoaded(true);
+  };
 
   useEffect(() => {
     setSignedUrl(null);
     setBlobUrl(null);
+    setTextContent(null);
     setIframeLoaded(false);
     setUrlError(null);
 
@@ -93,9 +117,11 @@ export const InlineDocumentViewer: React.FC<InlineDocumentViewerProps> = ({
         
         setSignedUrl(url);
 
-        // For PDFs, fetch as blob to bypass CSP iframe restrictions
         const cat = getFileCategory(document.file_name, document.mime_type);
-        if (cat === 'pdf' && url) {
+
+        // For PDFs and office docs, fetch as blob to avoid CSP / CORS issues
+        // with iframes and third-party viewer proxies
+        if ((cat === 'pdf' || cat === 'office') && url) {
           try {
             const response = await fetch(url);
             if (!response.ok) throw new Error('Fetch failed');
@@ -104,6 +130,20 @@ export const InlineDocumentViewer: React.FC<InlineDocumentViewerProps> = ({
             setBlobUrl(objectUrl);
           } catch (blobErr) {
             console.warn('Blob fetch failed, will try direct URL:', blobErr);
+          }
+        }
+
+        // For text files (CSV, JSON, TXT, etc.), fetch content as text
+        if (cat === 'text' && url) {
+          try {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error('Text fetch failed');
+            const text = await response.text();
+            // Limit to first 500KB to avoid memory issues with huge files
+            setTextContent(text.length > 500_000 ? text.slice(0, 500_000) + '\n\n… (truncated)' : text);
+          } catch (textErr) {
+            console.warn('Text fetch failed:', textErr);
+            setUrlError('Could not load text preview. Try downloading instead.');
           }
         }
       } catch (err: any) {
@@ -116,9 +156,10 @@ export const InlineDocumentViewer: React.FC<InlineDocumentViewerProps> = ({
 
     fetchAndPrepare();
 
-    // Cleanup blob URL on unmount
+    // Cleanup blob URL and timeout on unmount / re-render
     return () => {
       if (blobUrl) URL.revokeObjectURL(blobUrl);
+      if (loadTimeoutRef.current) clearTimeout(loadTimeoutRef.current);
     };
   }, [document.id, document.file_path, document.file_url]);
 
@@ -173,48 +214,76 @@ export const InlineDocumentViewer: React.FC<InlineDocumentViewerProps> = ({
 
     if (category === 'pdf') {
       const pdfSrc = blobUrl || signedUrl;
+      // Start the safety timeout when we first render the PDF
+      if (!iframeLoaded) startLoadTimeout();
       return (
         <div className="relative h-full">
           {!iframeLoaded && (
-            <div className="absolute inset-0 flex items-center justify-center bg-background">
+            <div className="absolute inset-0 flex items-center justify-center bg-background z-10">
               <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
             </div>
           )}
-          <object
-            data={pdfSrc}
-            type="application/pdf"
+          <iframe
+            src={pdfSrc}
             className="w-full h-full border-0"
             title={document.file_name}
-            onLoad={() => setIframeLoaded(true)}
-          >
-            <div className="flex flex-col items-center justify-center h-full gap-4 text-muted-foreground">
-              <FileText className="h-16 w-16 opacity-40" />
-              <p className="text-sm">PDF preview not supported in this browser</p>
-              <Button variant="outline" size="sm" onClick={handleDownload} disabled={!signedUrl}>
-                <Download className="h-4 w-4 mr-2" />
-                Download PDF
-              </Button>
-            </div>
-          </object>
+            onLoad={handleIframeLoaded}
+          />
+        </div>
+      );
+    }
+
+    if (category === 'text') {
+      if (textContent === null) {
+        return (
+          <div className="flex flex-col items-center justify-center h-full gap-3 text-muted-foreground">
+            <Loader2 className="h-8 w-8 animate-spin" />
+            <p className="text-sm">Loading text content...</p>
+          </div>
+        );
+      }
+      return (
+        <div className="h-full overflow-auto bg-muted/10 p-4">
+          <pre className="text-xs font-mono text-foreground whitespace-pre-wrap break-words leading-relaxed">
+            {textContent}
+          </pre>
         </div>
       );
     }
 
     if (category === 'office') {
-      const viewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(signedUrl)}&embedded=true`;
+      // If we got a blob URL, use Microsoft's Office Online viewer with the blob,
+      // otherwise fall back to Google Docs viewer (may not work with private URLs).
+      // Best approach: render the blob in an iframe directly — browsers can render
+      // xlsx/docx natively in some cases, and the blob bypasses CORS.
+      const officeSrc = blobUrl
+        ? blobUrl
+        : `https://docs.google.com/viewer?url=${encodeURIComponent(signedUrl)}&embedded=true`;
+
+      if (!iframeLoaded) startLoadTimeout();
       return (
         <div className="relative h-full">
           {!iframeLoaded && (
-            <div className="absolute inset-0 flex items-center justify-center bg-background">
+            <div className="absolute inset-0 flex items-center justify-center bg-background z-10">
               <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
             </div>
           )}
           <iframe
-            src={viewerUrl}
+            src={officeSrc}
             className="w-full h-full border-0"
             title={document.file_name}
-            onLoad={() => setIframeLoaded(true)}
+            onLoad={handleIframeLoaded}
           />
+          {/* If blob loaded but browser can't render the office format natively,
+              show a download prompt after the timeout clears the spinner */}
+          {iframeLoaded && blobUrl && (
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20">
+              <Button variant="outline" size="sm" onClick={handleDownload} className="shadow-md bg-background">
+                <Download className="h-4 w-4 mr-2" />
+                If preview is blank, download to view
+              </Button>
+            </div>
+          )}
         </div>
       );
     }

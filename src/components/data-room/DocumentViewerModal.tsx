@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -8,6 +8,7 @@ import {
   FileText, 
   FileSpreadsheet, 
   FileImage, 
+  FileCode,
   File,
   Loader2,
   AlertCircle
@@ -22,13 +23,16 @@ interface DocumentViewerModalProps {
   onOpenChange: (open: boolean) => void;
 }
 
-function getFileCategory(fileName: string, mimeType?: string | null): 'pdf' | 'office' | 'image' | 'other' {
+type FileCategory = 'pdf' | 'office' | 'image' | 'text' | 'other';
+
+function getFileCategory(fileName: string, mimeType?: string | null): FileCategory {
   const ext = fileName.split('.').pop()?.toLowerCase() || '';
   const mime = mimeType?.toLowerCase() || '';
 
   if (ext === 'pdf' || mime === 'application/pdf') return 'pdf';
   if (['xlsx', 'xls', 'docx', 'doc', 'pptx', 'ppt'].includes(ext)) return 'office';
   if (['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'].includes(ext) || mime.startsWith('image/')) return 'image';
+  if (['csv', 'json', 'txt', 'xml', 'md', 'log', 'yaml', 'yml', 'tsv'].includes(ext) || mime.startsWith('text/')) return 'text';
   return 'other';
 }
 
@@ -37,6 +41,7 @@ function FileTypeIcon({ fileName, mimeType, className = 'h-5 w-5' }: { fileName:
   if (cat === 'pdf') return <FileText className={className} />;
   if (cat === 'office') return <FileSpreadsheet className={className} />;
   if (cat === 'image') return <FileImage className={className} />;
+  if (cat === 'text') return <FileCode className={className} />;
   return <File className={className} />;
 }
 
@@ -53,19 +58,39 @@ const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
   rejected: { label: 'Rejected', className: 'bg-destructive/10 text-destructive border-destructive/20' },
 };
 
+/** Timeout (ms) to force-clear the loading spinner if onLoad never fires */
+const LOAD_TIMEOUT_MS = 4000;
+
 export const DocumentViewerModal: React.FC<DocumentViewerModalProps> = ({
   document,
   open,
   onOpenChange,
 }) => {
   const [signedUrl, setSignedUrl] = useState<string | null>(null);
+  const [blobUrl, setBlobUrl] = useState<string | null>(null);
+  const [textContent, setTextContent] = useState<string | null>(null);
   const [isLoadingUrl, setIsLoadingUrl] = useState(false);
   const [iframeLoaded, setIframeLoaded] = useState(false);
   const [urlError, setUrlError] = useState<string | null>(null);
+  const loadTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const startLoadTimeout = () => {
+    if (loadTimeoutRef.current) clearTimeout(loadTimeoutRef.current);
+    loadTimeoutRef.current = setTimeout(() => {
+      setIframeLoaded(true);
+    }, LOAD_TIMEOUT_MS);
+  };
+
+  const handleIframeLoaded = () => {
+    if (loadTimeoutRef.current) clearTimeout(loadTimeoutRef.current);
+    setIframeLoaded(true);
+  };
 
   useEffect(() => {
     if (!open || !document) {
       setSignedUrl(null);
+      setBlobUrl(null);
+      setTextContent(null);
       setIframeLoaded(false);
       setUrlError(null);
       return;
@@ -80,7 +105,34 @@ export const DocumentViewerModal: React.FC<DocumentViewerModalProps> = ({
           .createSignedUrl(document.file_path, 900); // 15-minute URL
 
         if (error) throw error;
-        setSignedUrl(data.signedUrl);
+        const url = data.signedUrl;
+        setSignedUrl(url);
+
+        const cat = getFileCategory(document.file_name, document.mime_type);
+
+        // For PDFs and office docs, fetch as blob to bypass CSP / CORS issues
+        if ((cat === 'pdf' || cat === 'office') && url) {
+          try {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error('Fetch failed');
+            const blob = await response.blob();
+            setBlobUrl(URL.createObjectURL(blob));
+          } catch (blobErr) {
+            console.warn('Blob fetch failed, will try direct URL:', blobErr);
+          }
+        }
+
+        // For text files, fetch as text
+        if (cat === 'text' && url) {
+          try {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error('Text fetch failed');
+            const text = await response.text();
+            setTextContent(text.length > 500_000 ? text.slice(0, 500_000) + '\n\n… (truncated)' : text);
+          } catch (textErr) {
+            console.warn('Text fetch failed:', textErr);
+          }
+        }
       } catch (err: any) {
         console.error('Failed to generate signed URL:', err);
         setUrlError('Could not load preview. The file may not be accessible.');
@@ -90,6 +142,11 @@ export const DocumentViewerModal: React.FC<DocumentViewerModalProps> = ({
     };
 
     fetchSignedUrl();
+
+    return () => {
+      if (blobUrl) URL.revokeObjectURL(blobUrl);
+      if (loadTimeoutRef.current) clearTimeout(loadTimeoutRef.current);
+    };
   }, [open, document]);
 
   const handleDownload = () => {
@@ -144,38 +201,70 @@ export const DocumentViewerModal: React.FC<DocumentViewerModalProps> = ({
     }
 
     if (category === 'pdf') {
+      const pdfSrc = blobUrl || signedUrl;
+      if (!iframeLoaded) startLoadTimeout();
       return (
         <div className="relative h-full">
           {!iframeLoaded && (
-            <div className="absolute inset-0 flex items-center justify-center bg-background">
+            <div className="absolute inset-0 flex items-center justify-center bg-background z-10">
               <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
             </div>
           )}
           <iframe
-            src={signedUrl}
+            src={pdfSrc}
             className="w-full h-full border-0"
             title={document.file_name}
-            onLoad={() => setIframeLoaded(true)}
+            onLoad={handleIframeLoaded}
           />
         </div>
       );
     }
 
+    if (category === 'text') {
+      if (textContent === null) {
+        return (
+          <div className="flex flex-col items-center justify-center h-full gap-3 text-muted-foreground">
+            <Loader2 className="h-8 w-8 animate-spin" />
+            <p className="text-sm">Loading text content...</p>
+          </div>
+        );
+      }
+      return (
+        <div className="h-full overflow-auto bg-muted/10 p-4">
+          <pre className="text-xs font-mono text-foreground whitespace-pre-wrap break-words leading-relaxed">
+            {textContent}
+          </pre>
+        </div>
+      );
+    }
+
     if (category === 'office') {
-      const viewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(signedUrl)}&embedded=true`;
+      const officeSrc = blobUrl
+        ? blobUrl
+        : `https://docs.google.com/viewer?url=${encodeURIComponent(signedUrl)}&embedded=true`;
+
+      if (!iframeLoaded) startLoadTimeout();
       return (
         <div className="relative h-full">
           {!iframeLoaded && (
-            <div className="absolute inset-0 flex items-center justify-center bg-background">
+            <div className="absolute inset-0 flex items-center justify-center bg-background z-10">
               <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
             </div>
           )}
           <iframe
-            src={viewerUrl}
+            src={officeSrc}
             className="w-full h-full border-0"
             title={document.file_name}
-            onLoad={() => setIframeLoaded(true)}
+            onLoad={handleIframeLoaded}
           />
+          {iframeLoaded && blobUrl && (
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20">
+              <Button variant="outline" size="sm" onClick={handleDownload} className="shadow-md bg-background">
+                <Download className="h-4 w-4 mr-2" />
+                If preview is blank, download to view
+              </Button>
+            </div>
+          )}
         </div>
       );
     }
@@ -209,7 +298,7 @@ export const DocumentViewerModal: React.FC<DocumentViewerModalProps> = ({
                 {document.file_name}
               </DialogTitle>
               <p className="text-xs text-muted-foreground capitalize">
-                {category === 'office' ? 'Office Document' : category.charAt(0).toUpperCase() + category.slice(1)}
+                {category === 'office' ? 'Office Document' : category === 'text' ? 'Text File' : category.charAt(0).toUpperCase() + category.slice(1)}
               </p>
             </div>
           </div>
