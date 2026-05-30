@@ -95,7 +95,7 @@ export const DealsRequiringActionWidget: React.FC<DealsRequiringActionWidgetProp
           {displayDeals.map((deal) => (
             <Link
               key={deal.id}
-              to={`/deal/${deal.id}`}
+              to={`/deals/${deal.id}`}
               className="block group"
             >
               <div className="p-3 rounded-lg border border-gray-100 bg-gray-50/50 hover:bg-gray-50 hover:border-gray-200 transition-all">

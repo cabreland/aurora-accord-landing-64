@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useParams } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { withAuth } from "@/utils/withAuth";
 import React, { Suspense, lazy } from "react";
@@ -72,6 +72,12 @@ const ProtectedFinancingTracker = withAuth('staff')(FinancingTracker);
 const ProtectedTasks = withAuth('staff')(Tasks);
 const ProtectedFeedbackReview = withAuth('admin')(FeedbackReview);
 
+/** Redirect legacy /deal/:id URLs to the canonical /deals/:id workspace */
+const LegacyDealRedirect = () => {
+  const { id } = useParams();
+  return <Navigate to={`/deals/${id}`} replace />;
+};
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -107,7 +113,8 @@ const AppContent = () => {
               <Route path="/deals/new" element={<ProtectedCreateDeal />} />
               <Route path="/deals/:dealId" element={<ProtectedDealWorkspace />} />
               {/* Legacy deal detail route — redirect to workspace */}
-              <Route path="/deal/:id" element={<Navigate to="/deals" replace />} />
+              {/* Legacy /deal/:id routes now redirect to correct /deals/:id workspace */}
+              <Route path="/deal/:id" element={<LegacyDealRedirect />} />
               <Route path="/documents" element={<ProtectedDocuments />} />
               <Route path="/users" element={<ProtectedUserManagement />} />
               <Route path="/settings" element={<ProtectedSettings />} />

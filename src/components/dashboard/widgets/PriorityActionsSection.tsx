@@ -153,7 +153,7 @@ export const PriorityActionsSection: React.FC<PriorityActionsSectionProps> = ({
               <div 
                 key={action.id}
                 className="px-6 py-4 hover:bg-blue-50/50 transition-colors cursor-pointer group"
-                onClick={() => navigate(`/deal/${action.dealId}`)}
+                onClick={() => navigate(`/deals/${action.dealId}`)}
               >
                 <div className="flex items-start gap-4">
                   {/* Company Icon */}
@@ -193,7 +193,7 @@ export const PriorityActionsSection: React.FC<PriorityActionsSectionProps> = ({
                     variant="outline"
                     onClick={(e) => {
                       e.stopPropagation();
-                      navigate(`/deal/${action.dealId}`);
+                      navigate(`/deals/${action.dealId}`);
                     }}
                     className="opacity-0 group-hover:opacity-100 transition-opacity text-xs"
                   >

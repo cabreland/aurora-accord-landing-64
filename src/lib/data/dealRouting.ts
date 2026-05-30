@@ -120,5 +120,5 @@ export const getDealDetailRoute = async (id: string): Promise<string> => {
   
   // Prefer deal ID if available, otherwise use company ID
   const routeId = info.dealId || info.companyId || id;
-  return `/deal/${routeId}`;
+  return `/deals/${routeId}`;
 };

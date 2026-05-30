@@ -96,7 +96,7 @@ export const ChatPane = ({
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => navigate(`/deal/${conversation.dealId}`)}
+                onClick={() => navigate(`/deals/${conversation.dealId}`)}
               >
                 View Deal
                 <ExternalLink className="ml-2 h-4 w-4" />

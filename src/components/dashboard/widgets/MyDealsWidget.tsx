@@ -148,7 +148,7 @@ const DealCard = ({ deal }: { deal: any }) => {
   const navigate = useNavigate();
   
   const handleClick = () => {
-    navigate(`/deal/${deal.id}`);
+    navigate(`/deals/${deal.id}`);
   };
 
   const unifiedDeal = {
@@ -197,7 +197,7 @@ const DealListItem = ({ deal }: { deal: any }) => (
       </div>
     </div>
     <Link 
-      to={`/deal/${deal.id}`}
+      to={`/deals/${deal.id}`}
       className="text-sm text-primary hover:text-primary/80 transition-colors"
     >
       View →

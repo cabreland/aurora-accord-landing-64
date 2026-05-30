@@ -61,7 +61,7 @@ const AdminDashboardLayout = ({ children, activeTab = 'dashboard', breadcrumbs }
       return location.pathname === '/dashboard';
     }
     if (path === '/deals') {
-      return location.pathname.startsWith('/deals') || location.pathname.startsWith('/deal/');
+      return location.pathname.startsWith('/deals');
     }
     if (path === '/documents') {
       return location.pathname === '/documents' || location.pathname.startsWith('/documents');

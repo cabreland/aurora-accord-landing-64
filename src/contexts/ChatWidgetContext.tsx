@@ -68,7 +68,7 @@ export const ChatWidgetProvider = ({ children }: { children: ReactNode }) => {
     }
     
     // Check for deal ID in URL
-    const dealMatch = location.pathname.match(/\/deal\/([a-f0-9-]+)/i);
+    const dealMatch = location.pathname.match(/\/deals\/([a-f0-9-]+)/i);
     if (dealMatch) {
       const dealId = dealMatch[1];
       console.log('[ChatWidget] Detected deal from URL:', dealId);

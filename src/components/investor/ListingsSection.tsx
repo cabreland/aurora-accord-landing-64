@@ -346,7 +346,7 @@ const ListingsSection = () => {
   } = useInvestorListings(userRole);
 
   const handleItemClick = (itemId: string) => {
-    navigate(`/deal/${itemId}`);
+    navigate(`/deals/${itemId}`);
   };
 
   if (error) {

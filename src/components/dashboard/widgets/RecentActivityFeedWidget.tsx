@@ -86,7 +86,7 @@ export const RecentActivityFeedWidget: React.FC<RecentActivityFeedWidgetProps> =
           {activities.slice(0, 8).map((activity) => (
             <Link
               key={activity.id}
-              to={`/deal/${activity.deal_id}`}
+              to={`/deals/${activity.deal_id}`}
               className="block group"
             >
               <div className="flex items-start gap-3 p-2 -mx-2 rounded-lg hover:bg-gray-50 transition-colors">

@@ -144,7 +144,7 @@ export const ActiveDealsWidget: React.FC<ActiveDealsWidgetProps> = ({
             {sortedDeals.slice(0, 8).map((deal, index) => (
               <div
                 key={deal.id}
-                onClick={() => navigate(`/deal/${deal.id}`)}
+                onClick={() => navigate(`/deals/${deal.id}`)}
                 className={`grid grid-cols-12 gap-4 px-4 py-4 items-center cursor-pointer transition-colors group ${
                   index % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'
                 } hover:bg-blue-50/50`}

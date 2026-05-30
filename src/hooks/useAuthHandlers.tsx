@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { validatePassword, sanitizeInput, sanitizeEmail, checkRateLimit, logSecurityEvent, getSafeErrorMessage } from '@/lib/security';
-import { getDashboardRoute, getFallbackDashboardRoute } from '@/lib/auth-utils';
+// getDashboardRoute/getFallbackDashboardRoute removed — OAuth now redirects to
+// /auth where onAuthStateChange routes based on actual user role.
 
 export const useAuthHandlers = () => {
   const [loading, setLoading] = useState(false);
@@ -21,30 +22,13 @@ export const useAuthHandlers = () => {
   };
 
   // Helper to get appropriate redirect URL based on current user or fallback
-  const getRedirectUrl = async (): Promise<string> => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('user_id', user.id)
-          .single();
-        
-        const route = profile?.role ? getDashboardRoute(profile.role) : getFallbackDashboardRoute();
-        return `${window.location.origin}${route}`;
-      }
-    } catch (error) {
-      console.error('Error getting redirect URL:', error);
-    }
-    
-    return `${window.location.origin}${getFallbackDashboardRoute()}`;
-  };
-
   const handleGoogleSignIn = async () => {
     setLoading(true);
     
-    const redirectTo = await getRedirectUrl();
+    // Redirect to /auth after OAuth — the Auth page's onAuthStateChange listener
+    // will detect the session and route the user based on their actual role.
+    // Don't try to determine the route here (no user exists yet before OAuth).
+    const redirectTo = `${window.location.origin}/auth`;
     
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',

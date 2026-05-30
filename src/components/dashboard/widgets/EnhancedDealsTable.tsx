@@ -174,7 +174,7 @@ export const EnhancedDealsTable: React.FC<EnhancedDealsTableProps> = ({
                         "hover:bg-blue-50/50 transition-colors cursor-pointer group",
                         index % 2 === 1 && "bg-gray-50/30"
                       )}
-                      onClick={() => navigate(`/deal/${deal.id}`)}
+                      onClick={() => navigate(`/deals/${deal.id}`)}
                     >
                       {/* Deal Info */}
                       <td className="px-6 py-4">
